@@ -90,7 +90,7 @@ Get Hadoop:
     export PATH=$JAVA_HOME/bin:$HADOOP_HOME/bin/:$HADOOP_HOME/sbin/:$PATH
 ```
 
-### Intellij uses/mods
+### Intellij project specials
 
 I add jar direcories `/EXAMPLE/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/common/`
 and `/EXAMPLE/hadoop-2.8.2-src/hadoop-common-project/hadoop-annotations/target/` to the project.
@@ -99,7 +99,7 @@ Build a jar artefact. Copy it to:
 `/EXAMPLE/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/common/lib/hadoopDxramfs.jar`
 
 
-### hdfs
+### hdfs and hbase
 
 start
 
