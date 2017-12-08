@@ -115,6 +115,3 @@ stop
 
     stop-hbase.sh
     stop-dfs.sh
-
-### hbase
-
