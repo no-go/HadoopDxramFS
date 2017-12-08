@@ -104,6 +104,7 @@ public class DxramFs extends AbstractFileSystem {
 
     @Override
     public BlockLocation[] getFileBlockLocations(Path f, long start, long len) throws AccessControlException, FileNotFoundException, UnresolvedLinkException, IOException {
+        if (start < 0 || len < 0) throw new AccessControlException("start block or length of block should not be negative");
         return new BlockLocation[0];
     }
 
