@@ -32,8 +32,20 @@ public class DxramFs extends AbstractFileSystem {
     }
 
     @Override
+    @Deprecated
     public FsServerDefaults getServerDefaults() throws IOException {
         return DxramConfigKeys.getServerDefaults();
+    }
+
+    @Override
+    public FsServerDefaults getServerDefaults(final Path f) throws IOException {
+        //InodeTree.ResolveResult<AbstractFileSystem> res;
+        //try {
+        //    res = fsState.resolve(getUriPath(f), true);
+        //} catch (FileNotFoundException fnfe) {
+            return DxramConfigKeys.getServerDefaults();
+        //}
+        //return res.targetFileSystem.getServerDefaults(res.remainingPath);
     }
 
     @Override
