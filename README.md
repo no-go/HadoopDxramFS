@@ -14,6 +14,11 @@ instead of HDFS.
 
 ## Notes (for me!)
 
+use hadoop fs CLI to access `dxram://namenode:9000` from core-site.xml
+
+    bin/hadoop fs -ls /user
+
+
 File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
 
 ```xml
