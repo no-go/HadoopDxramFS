@@ -164,11 +164,14 @@ public class DxramFileSystem extends FileSystem {
     }
 
     @Override
-    public FileStatus getFileStatus(Path p) throws IOException {
+    public FileStatus getFileStatus(Path p) throws FileNotFoundException, IOException {
         System.out.print("getFileStatus: " + p.toString() + "\n");
         //System.out.print("\n" + _toLocal(f) + "\n");
 
         File file = _toLocal(p);
+        if (file != null && !file.exists()) {
+            throw new FileNotFoundException("getFileStatus: " + p.toString() + " not exists");
+        }
         return _getFileStatus(file);
     }
 
