@@ -19,8 +19,6 @@ public class DxramFileSystem extends FileSystem {
     private URI _myUri;
     private Path _workingDir;
 
-    private String _debugLocalWDir;
-
     @Override
     public URI getUri() {
         return _myUri;
@@ -50,14 +48,8 @@ public class DxramFileSystem extends FileSystem {
         try {
             _myUri = new URI(SCHEME, authority, "/", null, null);
             System.out.printf("myUri: %s\n", _myUri.toString());
-            //_workingDir = this.getHomeDirectory();
-            _workingDir = ROOT_PATH;
+            _workingDir = this.getHomeDirectory();
             System.out.printf("working Dir: %s\n", _workingDir.toString());
-
-            _debugLocalWDir = _workingDir.toString().replace(
-                _myUri.toString(),
-                DEBUG_LOCAL
-            ) + ROOT_PATH;
 
         } catch (URISyntaxException e) {
             throw new IOException("URISyntax exception: " + theUri);
@@ -66,7 +58,7 @@ public class DxramFileSystem extends FileSystem {
 
         @Override
     public FSDataInputStream open(Path f, int bufferSize) throws IOException {
-        File file = new File(_toLocal(f));
+        File file = _toLocal(f);
 
         if (getFileStatus(f).isDirectory()) throw new IOException("is directory");
         InputStream ins = new FileInputStream(file.getPath());
@@ -80,7 +72,7 @@ public class DxramFileSystem extends FileSystem {
         int bufferSize, short replication, long blockSize,
         Progressable progress
     ) throws IOException {
-        File file = new File(_toLocal(f));
+        File file = _toLocal(f);
         if (file.exists()) throw new IOException("file still exists");
         if (getFileStatus(f).isDirectory()) {
             throw new IOException("existing directory");
@@ -99,8 +91,8 @@ public class DxramFileSystem extends FileSystem {
 
     @Override
     public boolean rename(Path src, Path dst) throws IOException {
-        File file = new File(_toLocal(src));
-        File file2 = new File(_toLocal(dst));
+        File file = _toLocal(src);
+        File file2 = _toLocal(dst);
 
         if (file2.exists()) {
             throw new java.io.IOException("destination file exists");
@@ -114,7 +106,7 @@ public class DxramFileSystem extends FileSystem {
 
     @Override
     public boolean delete(Path f, boolean recursive) throws IOException {
-        File file = new File(_toLocal(f));
+        File file = _toLocal(f);
         if (getFileStatus(f).isDirectory()) {
             if (recursive) {
                 _delete(file);
@@ -137,7 +129,6 @@ public class DxramFileSystem extends FileSystem {
     @Override
     public void setWorkingDirectory(Path new_dir) {
         _workingDir = new_dir;
-        _debugLocalWDir = DEBUG_LOCAL + new_dir.toString() + ROOT_PATH;
     }
 
     @Override
@@ -147,22 +138,23 @@ public class DxramFileSystem extends FileSystem {
 
     @Override
     public boolean mkdirs(Path f, FsPermission permission) throws IOException {
-        File file = new File(_toLocal(f));
-        return file.mkdirs();
+        String s = f.toString().replace(_myUri.toString(), DEBUG_LOCAL);
+        System.out.print("mkdirs: " + s + "\n");
+        return new File(s).mkdirs();
     }
 
     @Override
-    public FileStatus[] listStatus(Path f) throws FileNotFoundException, IOException {
-        System.out.print("\nlistStatus [] " + f.toString() + "\n");
+    public FileStatus[] listStatus(Path p) throws FileNotFoundException, IOException {
+        System.out.print("\nlistStatus [] " + p.toString() + "\n");
 
         ArrayList<FileStatus> statusArrayList = new ArrayList<>();
-        FileStatus fileStatus = getFileStatus(f);
+        FileStatus fileStatus = getFileStatus(p);
 
         if (!fileStatus.isDirectory()) {
             statusArrayList.add(fileStatus);
 
         } else {
-            File file = new File(_toLocal(f));
+            File file = _toLocal(p);
             for (File childFile : file.listFiles()) {
                 statusArrayList.add(_getFileStatus(childFile));
             }
@@ -173,17 +165,22 @@ public class DxramFileSystem extends FileSystem {
 
     @Override
     public FileStatus getFileStatus(Path p) throws IOException {
-        System.out.print("\n" + p.toString() + "\n");
+        System.out.print("getFileStatus: " + p.toString() + "\n");
         //System.out.print("\n" + _toLocal(f) + "\n");
 
-        File file = new File(_toLocal(p));
+        File file = _toLocal(p);
         return _getFileStatus(file);
     }
 
     public FileStatus _getFileStatus(File file) throws IOException {
         Path p = _fromLocal(file);
         long blocksize = getServerDefaults(p).getBlockSize();
-        return new FileStatus(file.length(), file.isDirectory(), 0, blocksize, 0L, 0L, (FsPermission)null, (String)null, (String)null, p);
+        return new FileStatus(
+            file.length(),
+            file.isDirectory(),
+            0, blocksize, 0L, 0L, (FsPermission)null, (String)null, (String)null,
+            p
+        );
     }
 
     private static void _delete(File file) throws IOException {
@@ -202,16 +199,20 @@ public class DxramFileSystem extends FileSystem {
         }
     }
 
-    private String _toLocal(Path p) {
+    private File _toLocal(Path p) {
         String s = p.toString().replace(_myUri.toString(), DEBUG_LOCAL);
+        System.out.print("toLocal: " + p.toString() + " -> "+ s + "\n");
         // String s2 = _workingDir.toString().replace(_myUri.toString(), DEBUG_LOCAL);
         // if (!s.contains(s2)) s = s2 + ROOT_PATH + s;
-        return s;
+        return new java.io.File(s);
     }
 
     private Path _fromLocal(File f) {
+        if (f.getAbsolutePath() == DEBUG_LOCAL) {
+            return ROOT_PATH;
+        }
         // fail return new Path(ROOT_PATH + f.getName());
-        return new Path(f.getAbsolutePath().replace(DEBUG_LOCAL, ROOT_PATH.toString()));
-        //return new Path(f.getPath().replace(DEBUG_LOCAL, _myUri.toString()));
+        //return new Path(f.getAbsolutePath().replace(DEBUG_LOCAL, ROOT_PATH.toString()));
+        return new Path(f.getAbsolutePath().replace(DEBUG_LOCAL, _myUri.toString()));
     }
 }
