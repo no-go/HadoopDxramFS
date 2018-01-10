@@ -59,6 +59,7 @@ public class DxramFileSystem extends FileSystem {
         @Override
     public FSDataInputStream open(Path f, int bufferSize) throws IOException {
         File file = _toLocal(f);
+            System.out.printf("open: %s\n", f.toString());
 
         if (getFileStatus(f).isDirectory()) throw new IOException("is directory");
         InputStream ins = new FileInputStream(file.getPath());

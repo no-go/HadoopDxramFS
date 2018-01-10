@@ -14,10 +14,29 @@ instead of HDFS.
 
 ## Notes (for me!)
 
-use hadoop fs CLI to access `dxram://namenode:9000` from core-site.xml
+use hadoop fs CLI to access `dxram://namenode:9000` from `core-site.xml`
 
+alpha works on /tmp/ folder and not in dxram!!!
+
+ok:
+
+    bin/hadoop fs -mkdir /user
+    bin/hadoop fs -mkdir /user/tux
     bin/hadoop fs -ls /user
+    cp example /tmp/user/tux/
+    bin/hadoop fs -rm -f /user/tux
+    bin/hadoop fs -rm -f /user/tux
+    -> /user/tux not exists!
 
+not working:
+
+    bin/hadoop fs -ls /
+    bin/hadoop fs -mkdir /user/tux/a/b/c/d
+    bin/hadoop fs -put example.txt /user/ex.txt
+    bin/hadoop fs -cat /user/example.txt
+    bin/hadoop fs -cp /user/example.txt /user/tux/ex.txt
+
+reading data or writing into files is still a big problem.
 
 File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
 
