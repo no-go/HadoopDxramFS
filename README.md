@@ -12,7 +12,9 @@ instead of HDFS.
 -   [Hadoop DXRAM Website](https://no-go.github.io/HadoopDxramFS/)
 -   [DX:RAM](https://dxram.io/)
 
-## Helpful links to development a Hadoop-like FS and test it
+## Helpful links ...
+
+... to develop a hadoop-like FS and test it
 
 -   [Spark&Hadoop Google Cloud Storage Connector](https://github.com/GoogleCloudPlatform/bigdata-interop/tree/master/gcs)
 -   [Filesystem Compatibility with Apache Hadoop](https://wiki.apache.org/hadoop/HCFS)
