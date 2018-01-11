@@ -14,7 +14,7 @@ public class DxramFileSystem extends FileSystem {
 
     private static final Path ROOT_PATH = new Path(Path.SEPARATOR);
     private static final String SCHEME = "dxram";
-    private static final String DEBUG_LOCAL = "/tmp/";
+    private static final String DEBUG_LOCAL = "/tmp/myfs/";
 
     private URI _myUri;
     private Path _workingDir;
@@ -138,23 +138,35 @@ public class DxramFileSystem extends FileSystem {
     }
 
     @Override
-    public boolean mkdirs(Path f, FsPermission permission) throws IOException {
+    public boolean mkdirs(Path f, FsPermission permission) throws FileAlreadyExistsException, IOException {
         String s = f.toString().replace(_myUri.toString(), DEBUG_LOCAL);
         System.out.print("mkdirs: " + s + "\n");
-        return new File(s).mkdirs();
+        File file = new File(s);
+        if (file.exists()) throw new FileAlreadyExistsException("mkdirs: " + s + " exists");
+        return file.mkdirs();
     }
 
     @Override
     public FileStatus[] listStatus(Path p) throws FileNotFoundException, IOException {
+
+        /**
+         * @todo hack: listStatus [] I get dxram://abook.localhost.fake:9000/tmp/myfs
+         *     and not listStatus [] dxram://abook.localhost.fake:9000/
+         */
+        String check = p.toString() + "/";
+        if (check.startsWith(_myUri.toString()) && check.endsWith(DEBUG_LOCAL)) {
+            p = new Path(_myUri);
+        }
+
         System.out.print("\nlistStatus [] " + p.toString() + "\n");
 
         ArrayList<FileStatus> statusArrayList = new ArrayList<>();
         FileStatus fileStatus = getFileStatus(p);
 
-        if (!fileStatus.isDirectory()) {
+        if (fileStatus.isFile()) {
             statusArrayList.add(fileStatus);
 
-        } else {
+        } else if (fileStatus.isDirectory()) {
             File file = _toLocal(p);
             for (File childFile : file.listFiles()) {
                 statusArrayList.add(_getFileStatus(childFile));
@@ -167,17 +179,15 @@ public class DxramFileSystem extends FileSystem {
     @Override
     public FileStatus getFileStatus(Path p) throws FileNotFoundException, IOException {
         System.out.print("getFileStatus: " + p.toString() + "\n");
-        //System.out.print("\n" + _toLocal(f) + "\n");
-
         File file = _toLocal(p);
-        if (file != null && !file.exists()) {
-            throw new FileNotFoundException("getFileStatus: " + p.toString() + " not exists");
-        }
         return _getFileStatus(file);
     }
 
-    public FileStatus _getFileStatus(File file) throws IOException {
+    public FileStatus _getFileStatus(File file) throws FileNotFoundException, IOException {
         Path p = _fromLocal(file);
+        if (!file.exists()) {
+            throw new FileNotFoundException("_getFileStatus: " + p.toString() + " not exists");
+        }
         long blocksize = getServerDefaults(p).getBlockSize();
         return new FileStatus(
             file.length(),
@@ -212,11 +222,14 @@ public class DxramFileSystem extends FileSystem {
     }
 
     private Path _fromLocal(File f) {
-        if (f.getAbsolutePath() == DEBUG_LOCAL) {
-            return ROOT_PATH;
+        Path p = new Path(f.getAbsolutePath().replace(DEBUG_LOCAL, _myUri.toString()));
+
+        System.out.print("fromLocal: " + f.getAbsolutePath() + " -> "+ p + "\n");
+
+        /// @todo hack, too!!
+        if ((f.getAbsolutePath()+"/").equals(DEBUG_LOCAL)) {
+            return new Path(_myUri);
         }
-        // fail return new Path(ROOT_PATH + f.getName());
-        //return new Path(f.getAbsolutePath().replace(DEBUG_LOCAL, ROOT_PATH.toString()));
-        return new Path(f.getAbsolutePath().replace(DEBUG_LOCAL, _myUri.toString()));
+        return p;
     }
 }

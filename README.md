@@ -36,15 +36,21 @@ ok:
     bin/hadoop fs -rm -f /user/tux
     -> /user/tux not exists!
 
-not working:
+working with hack (bad uri, path, localpath handling):
 
     bin/hadoop fs -ls /
+
+not working:
+
     bin/hadoop fs -mkdir /user/tux/a/b/c/d
     bin/hadoop fs -put example.txt /user/ex.txt
     bin/hadoop fs -cat /user/example.txt
     bin/hadoop fs -cp /user/example.txt /user/tux/ex.txt
 
 reading data or writing into files is still a big problem.
+
+todo: compare hdfs listings and behavior of the above commands - maybe add additional printf in the regular hdfs code.
+
 
 File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
 
