@@ -12,6 +12,12 @@ instead of HDFS.
 -   [Hadoop DXRAM Website](https://no-go.github.io/HadoopDxramFS/)
 -   [DX:RAM](https://dxram.io/)
 
+## Helpful links to development a Hadoop-like FS and test it
+
+-   [Spark&Hadoop Google Cloud Storage Connector](https://github.com/GoogleCloudPlatform/bigdata-interop/tree/master/gcs)
+-   [Filesystem Compatibility with Apache Hadoop](https://wiki.apache.org/hadoop/HCFS)
+-   [hadoop FS guide](https://hadoop.apache.org/docs/r2.4.1/hadoop-project-dist/hadoop-common/FileSystemShell.html)
+
 ## Notes (for me!)
 
 use hadoop fs CLI to access `dxram://namenode:9000` from `core-site.xml`
