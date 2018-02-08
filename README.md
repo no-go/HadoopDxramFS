@@ -42,7 +42,6 @@ working with hack (bad uri, path, localpath handling):
 
 not working:
 
-    bin/hadoop fs -mkdir /user/tux/a/b/c/d
     bin/hadoop fs -put example.txt /user/ex.txt
     bin/hadoop fs -cat /user/example.txt
     bin/hadoop fs -cp /user/example.txt /user/tux/ex.txt
