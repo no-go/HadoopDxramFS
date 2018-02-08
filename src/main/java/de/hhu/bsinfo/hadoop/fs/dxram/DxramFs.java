@@ -79,49 +79,49 @@ public class DxramFs extends AbstractFileSystem {
         FileNotFoundException,
         UnresolvedLinkException,
         IOException {
-        System.out.println(" mkdir " + dir.toString() + " with parent:" + java.lang.String.valueOf(createParent));
+//        System.out.println(" mkdir " + dir.toString() + " with parent:" + java.lang.String.valueOf(createParent));
         dxramFileSystem.mkdirs(dir, permission);
     }
 
     @Override
     public boolean delete(Path f, boolean recursive) throws AccessControlException, FileNotFoundException, UnresolvedLinkException, IOException {
-        System.out.println(" delete " + f.toString() + " recursive: "+ java.lang.String.valueOf(recursive));
+//        System.out.println(" delete " + f.toString() + " recursive: "+ java.lang.String.valueOf(recursive));
         return dxramFileSystem.delete(f, recursive);
     }
 
     @Override
     public FSDataInputStream open(Path f, int bufferSize) throws AccessControlException, FileNotFoundException, UnresolvedLinkException, IOException {
-        System.out.println(" open " + f.toString() + " bufferSize: " + java.lang.String.valueOf(bufferSize));
+//        System.out.println(" open " + f.toString() + " bufferSize: " + java.lang.String.valueOf(bufferSize));
         return dxramFileSystem.open(f, bufferSize);
     }
 
     @Override
     public boolean setReplication(Path f, short replication) throws AccessControlException, FileNotFoundException, UnresolvedLinkException, IOException {
-        System.out.println(" setReplication " + f.toString() + " replication: " + java.lang.String.valueOf(replication) );
+//        System.out.println(" setReplication " + f.toString() + " replication: " + java.lang.String.valueOf(replication) );
         return dxramFileSystem.setReplication(f, replication);
     }
 
     @Override
     public void renameInternal(Path src, Path dst) throws AccessControlException, FileAlreadyExistsException, FileNotFoundException, ParentNotDirectoryException, UnresolvedLinkException, IOException {
-        System.out.println(" renameInternal " + src.toString() + " -> " + dst.toString());
+//        System.out.println(" renameInternal " + src.toString() + " -> " + dst.toString());
         dxramFileSystem.rename(src, dst);
     }
 
     @Override
     public FileStatus getFileStatus(Path f) throws AccessControlException, FileNotFoundException, UnresolvedLinkException, IOException {
-        System.out.println(" getFileStatus " + f.toString());
+//        System.out.println(" getFileStatus " + f.toString());
         return dxramFileSystem.getFileStatus(f);
     }
 
     @Override
     public FsStatus getFsStatus() throws AccessControlException, FileNotFoundException, IOException {
-        System.out.println(" getFsStatus");
+//        System.out.println(" getFsStatus");
         return dxramFileSystem.getStatus();
     }
 
     @Override
     public FileStatus[] listStatus(Path f) throws AccessControlException, FileNotFoundException, UnresolvedLinkException, IOException {
-        System.out.println(" listStatus " + f.toString());
+//        System.out.println(" listStatus " + f.toString());
         return dxramFileSystem.listStatus(f);
     }
 

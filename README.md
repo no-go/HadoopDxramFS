@@ -35,6 +35,12 @@ ok:
     bin/hadoop fs -rm -f /user/tux
     bin/hadoop fs -rm -f /user/tux
     -> /user/tux not exists!
+    bin/hadoop fs -put example.txt /user/ex.txt
+    bin/hadoop fs -put example.* /user/
+    bin/hadoop fs -rm example.txt /user/
+    bin/hadoop fs -mv /user/example.txt abc.a
+    -> /user/tux/abc.a
+    bin/hadoop fs -mkdir -p /a/b/c
 
 working with hack (bad uri, path, localpath handling):
 
@@ -42,7 +48,6 @@ working with hack (bad uri, path, localpath handling):
 
 not working:
 
-    bin/hadoop fs -put example.txt /user/ex.txt
     bin/hadoop fs -cat /user/example.txt
     bin/hadoop fs -cp /user/example.txt /user/tux/ex.txt
 
