@@ -66,9 +66,14 @@ public class DxramFileSystem extends FileSystem {
         doLog(Thread.currentThread().getStackTrace()[1].getMethodName() + " " + f.toString());
 
         if (getFileStatus(f).isDirectory()) throw new IOException("is directory");
-        InputStream ins = new FileInputStream(file.getPath());
-        FSDataInputStream is = new FSDataInputStream(ins);
-        return is;
+        
+        byte[] data = new byte[(int) file.length()];
+        FileInputStream fis = new FileInputStream(file);
+        fis.read(data);
+        fis.close();
+        DxramInputStream dxins = new DxramInputStream(data);
+        FSDataInputStream dais = new FSDataInputStream(dxins);
+        return dais;
     }
 
     @Override

@@ -4,7 +4,7 @@ This DXRAM connector lets you run [Apache Hadoop](http://hadoop.apache.org)
 or [HBASE](https://hbase.apache.org/) jobs directly on data in [DXRAM](https://dxram.io/)
 instead of HDFS.
 
-**It is still in pre Alpha state!**
+**It is still in pre Alpha state!** and ist still woriking in a `/tmp/myfs/` folder instead of dxram!
 
 ## Links
 
@@ -19,6 +19,18 @@ instead of HDFS.
 -   [Spark&Hadoop Google Cloud Storage Connector](https://github.com/GoogleCloudPlatform/bigdata-interop/tree/master/gcs)
 -   [Filesystem Compatibility with Apache Hadoop](https://wiki.apache.org/hadoop/HCFS)
 -   [hadoop FS guide](https://hadoop.apache.org/docs/r2.4.1/hadoop-project-dist/hadoop-common/FileSystemShell.html)
+
+## Build
+
+    unzip HadoopDxramFS.zip
+    cd HadoopDxramFS
+    mvn clean
+    mvn package
+
+## Install
+
+-   Take a look at the `copyDxramJar.sh` linux shell script.
+-   Take a look at my notes about the `etc/hadoop/core-site.xml` file
 
 ## Notes (for me!)
 
@@ -41,19 +53,12 @@ ok:
     bin/hadoop fs -mv /user/example.txt abc.a
     -> /user/tux/abc.a
     bin/hadoop fs -mkdir -p /a/b/c
+    bin/hadoop fs -cat /user/example.txt
+    bin/hadoop fs -cp /user/example.txt /user/tux/ex.txt
 
 working with hack (bad uri, path, localpath handling):
 
     bin/hadoop fs -ls /
-
-not working:
-
-    bin/hadoop fs -cat /user/example.txt
-    bin/hadoop fs -cp /user/example.txt /user/tux/ex.txt
-
-reading data or writing into files is still a big problem.
-
-todo: compare hdfs listings and behavior of the above commands - maybe add additional printf in the regular hdfs code.
 
 
 File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
