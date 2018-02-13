@@ -119,26 +119,24 @@ public class DxramFileSystem extends FileSystem {
     }
 
     @Override
-    public boolean delete(Path f, boolean recursive) throws IOException {
-        doLog(Thread.currentThread().getStackTrace()[1].getMethodName());
+    public boolean delete(Path f, boolean recursive) throws FileNotFoundException, IOException {
+        doLog(Thread.currentThread().getStackTrace()[1].getMethodName() +": " + f.toString());
         File file = _toLocal(f);
+        
+        if (!file.exists())
+            throw new FileNotFoundException("delete: " + f.toString() + " not exists"); 
+        
         if (getFileStatus(f).isDirectory()) {
             if (recursive) {
                 _delete(file);
                 if (!file.exists()) return true;
             }
             return false;
-        }
-
-        if (getFileStatus(f).isDirectory() && recursive == false) {
-            return false;
-        }
-
-        if (file.exists() && getFileStatus(f).isFile() && recursive == false) {
+        } else {
             return file.delete();
         }
-
-        return false;
+        // should never been reached!
+        //return false;
     }
 
     @Override
@@ -217,7 +215,7 @@ public class DxramFileSystem extends FileSystem {
 			return fs.getFileStatus(p);
 		  }
 		}.resolve(this, absF);
-		*/
+        */
     }
 
     public FileStatus _getFileStatus(File file) throws FileNotFoundException, IOException {
@@ -236,7 +234,8 @@ public class DxramFileSystem extends FileSystem {
         );
     }
 
-    private static void _delete(File file) throws IOException {
+    private void _delete(File file) throws IOException {
+        doLog(Thread.currentThread().getStackTrace()[1].getMethodName() + " with " + file.toString());
         for (File childFile : file.listFiles()) {
             if (childFile.isDirectory()) {
                 _delete(childFile);
@@ -248,6 +247,7 @@ public class DxramFileSystem extends FileSystem {
         }
 
         if (!file.delete()) {
+            doLog(Thread.currentThread().getStackTrace()[1].getMethodName() + " local file.delete() failed: " + file.toString());
             throw new IOException();
         }
     }
