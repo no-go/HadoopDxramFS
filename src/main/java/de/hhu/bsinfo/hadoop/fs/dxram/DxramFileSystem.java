@@ -18,7 +18,11 @@ public class DxramFileSystem extends FileSystem {
 
     private URI _myUri;
     private Path _workingDir;
-
+    
+    private void doLog(String str) {
+        System.out.println("DxramFileSystem: " + str);
+    }
+    
     @Override
     public URI getUri() {
         return _myUri;
@@ -29,10 +33,39 @@ public class DxramFileSystem extends FileSystem {
         return SCHEME;
     }
 
-    private void doLog(String str) {
-        System.out.println("DxramFileSystem: " + str);
+    @Override
+    public void setWorkingDirectory(Path new_dir) {
+        doLog(Thread.currentThread().getStackTrace()[1].getMethodName());
+        _workingDir = new_dir;
     }
-    
+
+    @Override
+    public Path getWorkingDirectory() {
+        doLog(Thread.currentThread().getStackTrace()[1].getMethodName());
+        return _workingDir;
+    }
+
+    @Override
+    protected Path fixRelativePart(Path p) {
+        doLog(Thread.currentThread().getStackTrace()[1].getMethodName());
+        return super.fixRelativePart(p);
+    }
+
+    private File _toLocal(Path p) {
+        String s = p.toString().replace(_myUri.toString(), DEBUG_LOCAL);
+        return new java.io.File(s);
+    }
+
+    private Path _fromLocal(File f) {
+        Path p = new Path(f.getAbsolutePath().replace(DEBUG_LOCAL, _myUri.toString()));
+
+        /// @todo hack, too!!
+        if ((f.getAbsolutePath()+"/").equals(DEBUG_LOCAL)) {
+            return new Path(_myUri);
+        }
+        return p;
+    }
+
     /**
      * Called after a new FileSystem instance is constructed.
      * @param theUri a uri whose authority section names the host, port, etc. for
@@ -60,6 +93,8 @@ public class DxramFileSystem extends FileSystem {
         }
     }
 
+// ---------------------------------------------------------------------
+
         @Override
     public FSDataInputStream open(Path f, int bufferSize) throws IOException {
         File file = _toLocal(f);
@@ -73,6 +108,8 @@ public class DxramFileSystem extends FileSystem {
         fis.close();
         DxramInputStream dxins = new DxramInputStream(data);
         FSDataInputStream dais = new FSDataInputStream(dxins);
+
+        doLog("Huch! open() " + file.toString() + (file.exists() ? " still exists" : " not exists or deleted"));
         return dais;
     }
 
@@ -91,6 +128,7 @@ public class DxramFileSystem extends FileSystem {
         file.createNewFile();
         OutputStream out = new FileOutputStream(file);
         FSDataOutputStream outs = new FSDataOutputStream(out, (Statistics)null);
+        doLog("Huch! create() " + file.toString() + (file.exists() ? " still exists" : " not exists or deleted"));
         return outs;
     }
 
@@ -119,7 +157,18 @@ public class DxramFileSystem extends FileSystem {
     }
 
     @Override
+    public boolean mkdirs(Path f, FsPermission permission) throws FileAlreadyExistsException, IOException {
+        String s = f.toString().replace(_myUri.toString(), DEBUG_LOCAL);
+        doLog(Thread.currentThread().getStackTrace()[1].getMethodName() + " " + s);
+        File file = new File(s);
+        if (file.exists()) throw new FileAlreadyExistsException("mkdirs: " + s + " exists");
+        return file.mkdirs();
+    }
+
+
+    @Override
     public boolean delete(Path f, boolean recursive) throws FileNotFoundException, IOException {
+        boolean isDel;
         doLog(Thread.currentThread().getStackTrace()[1].getMethodName() +": " + f.toString());
         File file = _toLocal(f);
         
@@ -128,37 +177,32 @@ public class DxramFileSystem extends FileSystem {
         
         if (getFileStatus(f).isDirectory()) {
             if (recursive) {
-                _delete(file);
-                if (!file.exists()) return true;
+                isDel = delete(file);
+                if (isDel == true) return true;
             }
             return false;
         } else {
-            return file.delete();
+            isDel = delete(file);
+            if (isDel == true) {
+                return true;
+            } else {
+                new IOException();
+                return false;
+            }
+            
         }
-        // should never been reached!
-        //return false;
     }
 
-    @Override
-    public void setWorkingDirectory(Path new_dir) {
-        doLog(Thread.currentThread().getStackTrace()[1].getMethodName());
-        _workingDir = new_dir;
+    private boolean delete(File file) throws IOException {
+        doLog(Thread.currentThread().getStackTrace()[1].getMethodName() + " with " + file.toString());
+        for (File childFile : file.listFiles()) delete(childFile);
+        //return file.delete();
+        doLog("Huch! delete() " + file.toString() + (file.exists() ? " still exists" : " not exists or deleted"));
+        return true;
     }
 
-    @Override
-    public Path getWorkingDirectory() {
-        doLog(Thread.currentThread().getStackTrace()[1].getMethodName());
-        return _workingDir;
-    }
 
-    @Override
-    public boolean mkdirs(Path f, FsPermission permission) throws FileAlreadyExistsException, IOException {
-        String s = f.toString().replace(_myUri.toString(), DEBUG_LOCAL);
-        doLog(Thread.currentThread().getStackTrace()[1].getMethodName() + " " + s);
-        File file = new File(s);
-        if (file.exists()) throw new FileAlreadyExistsException("mkdirs: " + s + " exists");
-        return file.mkdirs();
-    }
+// ---------------------------------------------------------------------
 
     @Override
     public FileStatus[] listStatus(Path p) throws FileNotFoundException, IOException {
@@ -221,9 +265,7 @@ public class DxramFileSystem extends FileSystem {
     public FileStatus _getFileStatus(File file) throws FileNotFoundException, IOException {
         Path p = _fromLocal(file);
         if (!file.exists()) {
-
             throw new FileNotFoundException("_getFileStatus: " + p.toString() + " not exists");
-            //throw new IOException("_getFileStatus: " + p.toString() + " not exists");
         }
         long blocksize = getServerDefaults(p).getBlockSize();
         return new FileStatus(
@@ -232,52 +274,5 @@ public class DxramFileSystem extends FileSystem {
             0, blocksize, 0L, 0L, (FsPermission)null, (String)null, (String)null,
             p
         );
-    }
-
-    private void _delete(File file) throws IOException {
-        doLog(Thread.currentThread().getStackTrace()[1].getMethodName() + " with " + file.toString());
-        for (File childFile : file.listFiles()) {
-            if (childFile.isDirectory()) {
-                _delete(childFile);
-            } else {
-                if (!childFile.delete()) {
-                    throw new IOException();
-                }
-            }
-        }
-
-        if (!file.delete()) {
-            doLog(Thread.currentThread().getStackTrace()[1].getMethodName() + " local file.delete() failed: " + file.toString());
-            throw new IOException();
-        }
-    }
-
-
-    @Override
-    protected Path fixRelativePart(Path p) {
-        doLog(Thread.currentThread().getStackTrace()[1].getMethodName());
-        return super.fixRelativePart(p);
-    }
-
-
-
-    private File _toLocal(Path p) {
-        String s = p.toString().replace(_myUri.toString(), DEBUG_LOCAL);
-        //System.out.print("toLocal: " + p.toString() + " -> "+ s + "\n");
-        
-        // String s2 = _workingDir.toString().replace(_myUri.toString(), DEBUG_LOCAL);
-        // if (!s.contains(s2)) s = s2 + ROOT_PATH + s;
-        return new java.io.File(s);
-    }
-
-    private Path _fromLocal(File f) {
-        Path p = new Path(f.getAbsolutePath().replace(DEBUG_LOCAL, _myUri.toString()));
-        //System.out.print("fromLocal: " + f.getAbsolutePath() + " -> "+ p + "\n");
-
-        /// @todo hack, too!!
-        if ((f.getAbsolutePath()+"/").equals(DEBUG_LOCAL)) {
-            return new Path(_myUri);
-        }
-        return p;
     }
 }
