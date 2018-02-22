@@ -10,7 +10,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class DxramFileSystem extends FileSystem {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(DxramFileSystem.class);
 
     private static final Path ROOT_PATH = new Path(Path.SEPARATOR);
     private static final String SCHEME = "dxram";
@@ -196,7 +201,7 @@ public class DxramFileSystem extends FileSystem {
     private boolean delete(File file) throws IOException {
         doLog(Thread.currentThread().getStackTrace()[1].getMethodName() + " with " + file.toString());
         for (File childFile : file.listFiles()) delete(childFile);
-        //return file.delete();
+        return file.delete();
         doLog("Huch! delete() " + file.toString() + (file.exists() ? " still exists" : " not exists or deleted"));
         return true;
     }
@@ -215,7 +220,8 @@ public class DxramFileSystem extends FileSystem {
         if (check.startsWith(_myUri.toString()) && check.endsWith(DEBUG_LOCAL)) {
             p = new Path(_myUri);
         }
-
+        
+        //LOG.debug(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})", p);
         doLog(Thread.currentThread().getStackTrace()[1].getMethodName() + " [] " + p.toString());
 
         ArrayList<FileStatus> statusArrayList = new ArrayList<>();
@@ -236,7 +242,7 @@ public class DxramFileSystem extends FileSystem {
 
     @Override
     public FileStatus getFileStatus(Path p) throws FileNotFoundException, IOException {
-        doLog(Thread.currentThread().getStackTrace()[1].getMethodName() + " " + p.toString());
+        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})", p);
         File file = _toLocal(p);
         return _getFileStatus(file);
         
