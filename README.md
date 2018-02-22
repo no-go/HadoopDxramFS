@@ -142,6 +142,31 @@ Get Hadoop:
     mvn package -Pdist -Pdoc -Psrc -Dtar -DskipTests
     or use " mvn package -Pdist -Pdoc -Psrc -Dtar -DskipTests -o " for offline
 
+Compile HDFS only:
+
+Backup your `etc/hadoop/*.xml` and `etc/hadoop/hadoop-env.sh` files !!! It may change.
+
+ -  edit `src/hadoop-hdfs-project/hadoop-hdfs-client/src/main/java/org/apache/hadoop/hdfs/DistributedFileSystem.java`
+ -  cd to `src/hadoop-hdfs-project/hadoop-hdfs-client/`
+ -  do `mvn clean`
+ -  cd to `src/`
+ -  do `mvn package -Pdist -Pdoc -Psrc -Dtar -DskipTests -o`
+ -  hope for a libprotoc 2.5.0 (sometimes a system upgrade makes it 3.x)
+ -  copy new jar files to the right place
+
+I have a bash script for the last point:
+
+    cp ${HADOOP_HOME}/../../../hadoop-hdfs-project/hadoop-hdfs/target/hadoop-hdfs-2.8.2.jar \
+      ${HADOOP_HOME}/share/hadoop/common/lib/
+    cp ${HADOOP_HOME}/../../../hadoop-hdfs-project/hadoop-hdfs-native-client/target/hadoop-hdfs-native-client-2.8.2.jar \
+      ${HADOOP_HOME}/share/hadoop/hdfs/
+    cp ${HADOOP_HOME}/../../../hadoop-hdfs-project/hadoop-hdfs-client/target/hadoop-hdfs-client-2.8.2.jar \
+      ${HADOOP_HOME}/share/hadoop/hdfs/lib/
+
+And finaly check the `etc/hadoop/` .xml and `hadoop-env.sh` file !!! It may change.
+
+For the pre-last point: goto `protobuf` folder (you got it with git clone) and redo a `make install`
+
 ### .bashrc
 
 ```bash
