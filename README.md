@@ -165,7 +165,8 @@ I have a bash script for the last point:
 
 And finaly check the `etc/hadoop/` .xml and `hadoop-env.sh` file !!! It may change.
 
-For the pre-last point: goto `protobuf` folder (you got it with git clone) and redo a `make install`
+For the pre-last point: goto `protobuf` folder (you got it with git clone) and redo a `make install`. If
+you got a new gcc version, `make clean` and `./configure` before `make install` is a good choice!
 
 ### .bashrc
 
