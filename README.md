@@ -128,7 +128,7 @@ You need an old protobuf version
     cd protobuf
     git checkout tags/v2.5.0
     unsure: ./autogen.sh
-    ./configure
+    ./configure --prefix=/usr
     make
     sudo make install
     sudo ldconfig
@@ -140,7 +140,15 @@ Get Hadoop:
     tar -xvf hadoop-*
     cd hadoop-2.8.2-src/
     mvn package -Pdist -Pdoc -Psrc -Dtar -DskipTests
-    or use " mvn package -Pdist -Pdoc -Psrc -Dtar -DskipTests -o " for offline
+
+or use for offline:
+
+    mvn package -Pdist -Pdoc -Psrc -Dtar -DskipTests -o
+
+you got an error and you fix a single line e.g. in the **hadoop-hdfs** project,
+restart maven on that place, where the error comes (and is fixed):
+
+    mvn package -Pdist -Pdoc -Psrc -Dtar -DskipTests -o  -rf :hadoop-hdfs
 
 Compile HDFS only:
 
