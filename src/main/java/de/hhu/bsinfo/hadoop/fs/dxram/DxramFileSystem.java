@@ -5,7 +5,10 @@ import org.apache.hadoop.fs.*;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.util.Progressable;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.io.*;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -116,10 +119,9 @@ public class DxramFileSystem extends FileSystem {
     }
 
     /**
-     * this method is buggy !!!
+     * this method was buggy !!!
      * MUST create parent directories according to the mkdir rules iff the path's parent 
      * directories are missing.
-     * -> but it did not !!
      */
     @Override
     public FSDataOutputStream create(
@@ -134,10 +136,19 @@ public class DxramFileSystem extends FileSystem {
             throw new IOException("existing directory");
         }
         if (file.exists()) throw new FileAlreadyExistsException("file still exists");
+        
+        // create path, if it not exists
+        String absolutePath = file.getAbsolutePath();
+        String filePath = absolutePath.substring(0, absolutePath.lastIndexOf(Path.SEPARATOR));
+        /// @todo null as permissions? same strangeness to 0 as file timestamp!
+        // Path() is a hadoop Path!
+        if (Files.notExists(Paths.get(filePath)))
+            mkdirs(new Path(filePath), null);
+        
         file.createNewFile();
         OutputStream out = new FileOutputStream(file);
         FSDataOutputStream outs = new FSDataOutputStream(out, (Statistics)null);
-        LOG.info("Huch! create() " + file.toString() + (file.exists() ? " still exists" : " not exists or deleted"));
+        //LOG.info("Huch! create() " + file.toString() + (file.exists() ? " still exists" : " not exists or deleted"));
         return outs;
     }
 
