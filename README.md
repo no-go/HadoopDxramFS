@@ -171,7 +171,7 @@ I have a bash script for the last point:
     cp ${HADOOP_HOME}/../../../hadoop-hdfs-project/hadoop-hdfs-client/target/hadoop-hdfs-client-2.8.2.jar \
       ${HADOOP_HOME}/share/hadoop/hdfs/lib/
 
-And finaly check the `etc/hadoop/` .xml and `hadoop-env.sh` file !!! It may change.
+And finaly check the `etc/hadoop/*.xml` and `hadoop-env.sh` file !!! It may change.
 
 For the pre-last point: goto `protobuf` folder (you got it with git clone) and redo a `make install`. If
 you got a new gcc version, `make clean` and `./configure` before `make install` is a good choice!
@@ -197,7 +197,7 @@ Build a jar artefact. Copy it to:
 
 ### hdfs and hbase
 
-start
+start:
 
     hdfs namenode -format
     start-dfs.sh
@@ -207,7 +207,10 @@ start
     kinit
     klist
 
-stop
+note: `hdfs dfs -mkdir /user` is equal to `bin/hadoop fs -mkdir /user` if
+hdfs is your defaultFS in `core-site.xml`
+
+stop:
 
     stop-hbase.sh
     stop-dfs.sh
