@@ -23,6 +23,7 @@
 
 # The java implementation to use.
 export JAVA_HOME=/usr
+#export log4j_logger_org_apache_hadoop=DEBUG
 export log4j_logger_org_apache_hadoop=INFO
 
 # The jsvc implementation to use. Jsvc is required to run secure datanodes

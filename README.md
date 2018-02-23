@@ -103,6 +103,8 @@ LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})", p);
 and set `export log4j_logger_org_apache_hadoop=INFO` to see your logs 
 while using `bin/hadoop fs -<command> ...` !
 
+**open issue:** using `LOG.debug()` and `export ...=DEBUG` did not work.
+
 ### hadoop example
 
     cd /EXAMPLE/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/
