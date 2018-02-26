@@ -56,8 +56,10 @@ public class DxramFileSystem extends FileSystem {
     }
 
     private File _toLocal(Path p) {
+        Path absF = fixRelativePart(p);
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})", p);
-        String s = p.toString().replace(_myUri.toString(), DEBUG_LOCAL);
+        LOG.info("  absF = {}", absF);
+        String s = absF.toString().replace(_myUri.toString(), DEBUG_LOCAL);
         return new java.io.File(s);
     }
 
