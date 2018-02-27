@@ -158,7 +158,7 @@ run this:
 
 The result is written to `/user/tux/outrand/part-m-00000` with "300MB":
 
-    hadoop fs -ls /user/tux/outrand/
+    bin/hadoop fs -ls /user/tux/outrand/
       Found 2 items
       -rw-rw-rw-   0          0 1970-01-01 01:00 /user/tux/outrand/_SUCCESS
       -rw-rw-rw-   0  307822548 1970-01-01 01:00 /user/tux/outrand/part-m-00000
@@ -167,7 +167,22 @@ The result is written to `/user/tux/outrand/part-m-00000` with "300MB":
 
     bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.8.2.jar wordcount outrand/part-m-00000 wcout
 
-java heapsize :-(
+java.lang.Exception: java.lang.OutOfMemoryError: Java heap space
+
+Modify the `etc/hadoop/mapred-site.xml` file:
+
+```xml
+...
+  <property>
+    <name>mapred.child.java.opts</name>
+    <value>-Xmx2048m</value>
+  </property>
+...
+```
+
+to set java options e.g. a bigger heapsize. Remove `/user/tux/wcout` before redo ;-D
+
+Maybe 300MB file is realy to big! Try 30 MB as input.
 
 ### Hbase example
 

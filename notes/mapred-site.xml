@@ -22,4 +22,8 @@
       <!-- value>1099511627776</value-->
       <value>300222000</value>
     </property>
+    <property>
+      <name>mapred.child.java.opts</name>
+      <value>-Xmx2048m</value>
+    </property>
 </configuration>
