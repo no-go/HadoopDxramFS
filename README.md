@@ -117,6 +117,58 @@ while using `bin/hadoop fs -<command> ...` !
 -   I got the right result
 -   JobRunner (is a part of yarn, but you do not have to start-yarn.sh) runs on local fs. hdfs on single node do it local, too.
 
+### MapReduce (MR) example RandomTextWriter
+
+To get a big (300MB) text file, there is a MR example *RandomTextWriter*. You need a
+config file `etc/hadoop/mapred-site.xml` to configure the 300222000 Byte output
+insteat of 1099511627776 Bytes (default):
+
+```xml
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+      <name>mapreduce.randomtextwriter.minwordskey</name>
+      <value>5</value>
+    </property>
+    <property>
+      <name>mapreduce.randomtextwriter.maxwordskey</name>
+      <value>10</value>
+    </property>
+    <property>
+      <name>mapreduce.randomtextwriter.minwordsvalue</name>
+      <value>20</value>
+    </property>
+    <property>
+      <name>mapreduce.randomtextwriter.maxwordsvalue</name>
+      <value>100</value>
+    </property>
+    <property>
+      <name>mapreduce.randomtextwriter.totalbytes</name>
+      <!-- value>1099511627776</value -->
+      <value>300222000</value>
+    </property>
+</configuration>
+```
+
+If you are the user *tux* and have a `/user/tux/` home dir in hdfs or dxramfs you can
+run this:
+
+    bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.8.2.jar randomtextwriter outrand
+
+The result is written to `/user/tux/outrand/part-m-00000` with "300MB":
+
+    hadoop fs -ls /user/tux/outrand/
+      Found 2 items
+      -rw-rw-rw-   0          0 1970-01-01 01:00 /user/tux/outrand/_SUCCESS
+      -rw-rw-rw-   0  307822548 1970-01-01 01:00 /user/tux/outrand/part-m-00000
+
+### MR wordcount
+
+    bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.8.2.jar wordcount outrand/part-m-00000 wcout
+
+java heapsize :-(
+
 ### Hbase example
 
 You need
