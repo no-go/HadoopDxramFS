@@ -220,13 +220,16 @@ public class DxramFileSystem extends FileSystem {
     }
 
     private boolean delete(File file) throws IOException {
-        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})",
-            file);
-
-        for (File childFile : file.listFiles()) delete(childFile);
+        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})", file);
+        boolean isDel = false;
+        boolean isFolder = file.isDirectory();
+        if (isFolder) {
+            for (File childFile : file.listFiles()) {
+                isDel = delete(childFile);
+                if (isDel == false) return false;
+            }
+        }
         return file.delete();
-        //doLog("Huch! delete() " + file.toString() + (file.exists() ? " still exists" : " not exists or deleted"));
-        //return true;
     }
 
 

@@ -110,20 +110,12 @@ while using `bin/hadoop fs -<command> ...` !
     cd /EXAMPLE/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/
     mkdir input
     cp etc/hadoop/*.xml input
-    bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.8.2.jar grep input output 'dfs[a-z.]+'
+    bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.8.2.jar grep input output 'dxram[a-z.]+'
 
-2018-02-23: this examples works partly on dxramfs (via /tmp/myfs/ folder, not dxram):
+2018-02-23: this examples works on dxramfs (via /tmp/myfs/ folder, not dxram):
 
 -   I got the right result
 -   JobRunner (is a part of yarn, but you do not have to start-yarn.sh) runs on local fs. hdfs on single node do it local, too.
--   I got a finally exception:
-
-    18/02/23 19:24:36 INFO dxram.DxramFileSystem: delete(grep-temp-1473800519, true)
-    18/02/23 19:24:36 INFO dxram.DxramFileSystem: _toLocal(grep-temp-1473800519)
-    java.io.FileNotFoundException: delete: grep-temp-1473800519 not exists
-
-maybe a problem with relative and absolute pathnames?
-
 
 ### Hbase example
 
