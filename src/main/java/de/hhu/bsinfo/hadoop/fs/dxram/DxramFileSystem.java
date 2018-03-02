@@ -120,11 +120,6 @@ public class DxramFileSystem extends FileSystem {
         return dais;
     }
 
-    /**
-     * this method was buggy !!!
-     * MUST create parent directories according to the mkdir rules iff the path's parent 
-     * directories are missing.
-     */
     @Override
     public FSDataOutputStream create(
         Path f, FsPermission permission, boolean overwrite,
@@ -146,6 +141,33 @@ public class DxramFileSystem extends FileSystem {
         // Path() is a hadoop Path!
         if (Files.notExists(Paths.get(filePath)))
             mkdirs(new Path(filePath), null);
+        
+        file.createNewFile();
+        OutputStream out = new FileOutputStream(file);
+        FSDataOutputStream outs = new FSDataOutputStream(out, (Statistics)null);
+        //LOG.info("Huch! create() " + file.toString() + (file.exists() ? " still exists" : " not exists or deleted"));
+        return outs;
+    }
+
+    @Override
+    public FSDataOutputStream createNonRecursive(
+        Path f, FsPermission permission, boolean overwrite,
+        int bufferSize, short replication, long blockSize,
+        Progressable progress
+    ) throws FileAlreadyExistsException, IOException {
+        File file = _toLocal(f);
+        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {}, {}, {}, {}, {}, {})",
+            f, permission, overwrite, bufferSize, replication, blockSize, progress);
+        if (file.exists() && getFileStatus(f).isDirectory()) {
+            throw new IOException("existing directory");
+        }
+        if (file.exists()) throw new FileAlreadyExistsException("file still exists");
+        
+        // create path, if it not exists
+        String absolutePath = file.getAbsolutePath();
+        String filePath = absolutePath.substring(0, absolutePath.lastIndexOf(Path.SEPARATOR));
+        // Path() is a hadoop Path!
+        if (Files.notExists(Paths.get(filePath))) throw new IOException("director(ies) do not exists");
         
         file.createNewFile();
         OutputStream out = new FileOutputStream(file);
