@@ -5,8 +5,6 @@ import org.apache.hadoop.fs.*;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.util.Progressable;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.io.*;
 
 import java.net.URI;
@@ -22,7 +20,6 @@ public class DxramFileSystem extends FileSystem {
 
     private static final Path ROOT_PATH = new Path(Path.SEPARATOR);
     private static final String SCHEME = "dxram";
-    private static final String DEBUG_LOCAL = "/tmp/myfs/";
 
     private URI _myUri;
     private Path _workingDir;
@@ -50,28 +47,10 @@ public class DxramFileSystem extends FileSystem {
     }
 
     @Override
-    protected Path fixRelativePart(Path p) {
+//    protected Path fixRelativePart(Path p) {
+    public Path fixRelativePart(Path p) {
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})", p);
         return super.fixRelativePart(p);
-    }
-
-    private File _toLocal(Path p) {
-        Path absF = fixRelativePart(p);
-        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})", p);
-        LOG.info("  absF = {}", absF);
-        String s = absF.toString().replace(_myUri.toString(), DEBUG_LOCAL);
-        return new java.io.File(s);
-    }
-
-    private Path _fromLocal(File f) {
-        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})", f);
-        Path p = new Path(f.getAbsolutePath().replace(DEBUG_LOCAL, _myUri.toString()));
-
-        /// @todo hack, too!!
-        if ((f.getAbsolutePath()+"/").equals(DEBUG_LOCAL)) {
-            return new Path(_myUri);
-        }
-        return p;
     }
 
     /**
@@ -100,82 +79,9 @@ public class DxramFileSystem extends FileSystem {
         }
     }
 
-// ---------------------------------------------------------------------
-
-        @Override
-    public FSDataInputStream open(Path f, int bufferSize) throws IOException {
-        File file = _toLocal(f);
-        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", f, bufferSize);
-
-        if (getFileStatus(f).isDirectory()) throw new IOException("is directory");
-        
-        byte[] data = new byte[(int) file.length()];
-        FileInputStream fis = new FileInputStream(file);
-        fis.read(data);
-        fis.close();
-        DxramInputStream dxins = new DxramInputStream(data);
-        FSDataInputStream dais = new FSDataInputStream(dxins);
-
-        LOG.info("Huch! open() " + file.toString() + (file.exists() ? " still exists" : " not exists or deleted"));
-        return dais;
-    }
-
-    @Override
-    public FSDataOutputStream create(
-        Path f, FsPermission permission, boolean overwrite,
-        int bufferSize, short replication, long blockSize,
-        Progressable progress
-    ) throws FileAlreadyExistsException, IOException {
-        File file = _toLocal(f);
-        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {}, {}, {}, {}, {}, {})",
-            f, permission, overwrite, bufferSize, replication, blockSize, progress);
-        if (file.exists() && getFileStatus(f).isDirectory()) {
-            throw new IOException("existing directory");
-        }
-        if (file.exists()) throw new FileAlreadyExistsException("file still exists");
-        
-        // create path, if it not exists
-        String absolutePath = file.getAbsolutePath();
-        String filePath = absolutePath.substring(0, absolutePath.lastIndexOf(Path.SEPARATOR));
-        /// @todo null as permissions? same strangeness to 0 as file timestamp!
-        // Path() is a hadoop Path!
-        if (Files.notExists(Paths.get(filePath)))
-            mkdirs(new Path(filePath), null);
-        
-        file.createNewFile();
-        OutputStream out = new FileOutputStream(file);
-        FSDataOutputStream outs = new FSDataOutputStream(out, (Statistics)null);
-        //LOG.info("Huch! create() " + file.toString() + (file.exists() ? " still exists" : " not exists or deleted"));
-        return outs;
-    }
-
-    @Override
-    public FSDataOutputStream createNonRecursive(
-        Path f, FsPermission permission, boolean overwrite,
-        int bufferSize, short replication, long blockSize,
-        Progressable progress
-    ) throws FileAlreadyExistsException, IOException {
-        File file = _toLocal(f);
-        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {}, {}, {}, {}, {}, {})",
-            f, permission, overwrite, bufferSize, replication, blockSize, progress);
-        if (file.exists() && getFileStatus(f).isDirectory()) {
-            throw new IOException("existing directory");
-        }
-        if (file.exists()) throw new FileAlreadyExistsException("file still exists");
-        
-        // create path, if it not exists
-        String absolutePath = file.getAbsolutePath();
-        String filePath = absolutePath.substring(0, absolutePath.lastIndexOf(Path.SEPARATOR));
-        // Path() is a hadoop Path!
-        if (Files.notExists(Paths.get(filePath))) throw new IOException("director(ies) do not exists");
-        
-        file.createNewFile();
-        OutputStream out = new FileOutputStream(file);
-        FSDataOutputStream outs = new FSDataOutputStream(out, (Statistics)null);
-        //LOG.info("Huch! create() " + file.toString() + (file.exists() ? " still exists" : " not exists or deleted"));
-        return outs;
-    }
-
+    /**
+     * this is a dummy
+     */
     @Override
     public FSDataOutputStream append(
         Path f, int bufferSize, Progressable progress
@@ -186,12 +92,25 @@ public class DxramFileSystem extends FileSystem {
     }
 
     @Override
-    public boolean rename(Path src, Path dst) throws IOException {
-        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})",
-            src, dst);
-        File file = _toLocal(src);
-        File file2 = _toLocal(dst);
+    public FSDataInputStream open(Path f, int bufferSize) throws IOException {
+        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", f, bufferSize);
+        Path absF = fixRelativePart(f);
+        long blocksize = getServerDefaults(absF).getBlockSize();
+        DxramFile dxfile = new DxramFile(absF, _myUri, blocksize);
+        return dxfile.open(bufferSize);
+    }
 
+    @Override
+    public boolean rename(Path src, Path dst) throws IOException {
+        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", src, dst);
+        
+        Path absF1 = fixRelativePart(src);
+        Path absF2 = fixRelativePart(dst);
+        long blocksize = getServerDefaults(absF1).getBlockSize();
+        long blocksize2 = getServerDefaults(absF2).getBlockSize();
+        DxramFile file = new DxramFile(absF1, _myUri, blocksize);
+        DxramFile file2 = new DxramFile(absF2, _myUri, blocksize2);
+        
         if (file2.exists()) {
             throw new java.io.IOException("destination file exists");
         }
@@ -203,34 +122,78 @@ public class DxramFileSystem extends FileSystem {
     }
 
     @Override
-    public boolean mkdirs(Path f, FsPermission permission) throws FileAlreadyExistsException, IOException {
-        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})",
-            f, permission);
-        String s = f.toString().replace(_myUri.toString(), DEBUG_LOCAL);
-        File file = new File(s);
-        if (file.exists()) throw new FileAlreadyExistsException("mkdirs: " + s + " exists");
-        return file.mkdirs();
+    public FSDataOutputStream create(
+        Path f, FsPermission permission, boolean overwrite,
+        int bufferSize, short replication, long blockSize,
+        Progressable progress
+    ) throws
+        FileAlreadyExistsException,
+        IOException 
+    {
+        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName() +
+            "({}, {}, {}, {}, {}, {}, {})",
+            f, permission, overwrite, bufferSize, replication, blockSize, progress);
+
+        Path absF = fixRelativePart(f);
+        DxramFile dxfile = new DxramFile(absF, _myUri, blockSize);
+        
+        return dxfile.create(bufferSize, replication, true);
     }
 
+    @Override
+    public FSDataOutputStream createNonRecursive(
+        Path f, FsPermission permission, boolean overwrite,
+        int bufferSize, short replication, long blockSize,
+        Progressable progress
+    ) throws FileAlreadyExistsException, IOException {
+        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName() +
+            "({}, {}, {}, {}, {}, {}, {})",
+            f, permission, overwrite, bufferSize, replication, blockSize, progress);
+
+        Path absF = fixRelativePart(f);
+        DxramFile dxfile = new DxramFile(absF, _myUri, blockSize);
+        
+        return dxfile.create(bufferSize, replication, false);
+    }
+
+    @Override
+    public boolean mkdirs(Path f, FsPermission permission) throws FileAlreadyExistsException, IOException {
+        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", f, permission);
+        Path absF = fixRelativePart(f);
+        long blocksize = getServerDefaults(absF).getBlockSize();
+        DxramFile dxfile = new DxramFile(absF, _myUri, blocksize);
+        if (dxfile.exists()) 
+            throw new FileAlreadyExistsException("mkdirs: " + dxfile.toString() + " exists");
+        return dxfile.mkdirs();
+    }
 
     @Override
     public boolean delete(Path f, boolean recursive) throws FileNotFoundException, IOException {
         boolean isDel;
-        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})",
-            f, recursive);
-        File file = _toLocal(f);
+        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", f, recursive);
+        Path absF = fixRelativePart(f);
+        long blocksize = getServerDefaults(absF).getBlockSize();
+        DxramFile dxfile = new DxramFile(absF, _myUri, blocksize);
         
-        if (!file.exists())
-            throw new FileNotFoundException("delete: " + f.toString() + " not exists"); 
-        
-        if (getFileStatus(f).isDirectory()) {
+        if (!dxfile.exists()) {
             if (recursive) {
-                isDel = delete(file);
+                /**
+                 * @todo right behavior? delete a not existing file recursive 
+                 * (it is a directory?) is not a problem, is it?
+                 */
+                return true;
+            }
+            throw new FileNotFoundException("delete: " + f.toString() + " not exists"); 
+        }
+        
+        if (dxfile.isDirectory()) {
+            if (recursive) {
+                isDel = delete(dxfile);
                 if (isDel == true) return true;
             }
             return false;
         } else {
-            isDel = delete(file);
+            isDel = delete(dxfile);
             if (isDel == true) {
                 return true;
             } else {
@@ -241,12 +204,12 @@ public class DxramFileSystem extends FileSystem {
         }
     }
 
-    private boolean delete(File file) throws IOException {
+    private boolean delete(DxramFile file) throws IOException {
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})", file);
         boolean isDel = false;
         boolean isFolder = file.isDirectory();
         if (isFolder) {
-            for (File childFile : file.listFiles()) {
+            for (DxramFile childFile : file.listFiles()) {
                 isDel = delete(childFile);
                 if (isDel == false) return false;
             }
@@ -254,34 +217,36 @@ public class DxramFileSystem extends FileSystem {
         return file.delete();
     }
 
-
-// ---------------------------------------------------------------------
-
     @Override
     public FileStatus[] listStatus(Path p) throws FileNotFoundException, IOException {
 
-        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})",
-            p);
+        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})", p);
 
         /**
          * @todo hack: listStatus [] I get dxram://abook.localhost.fake:9000/tmp/myfs
          *     and not listStatus [] dxram://abook.localhost.fake:9000/
          */
+        /*
         String check = p.toString() + "/";
         if (check.startsWith(_myUri.toString()) && check.endsWith(DEBUG_LOCAL)) {
             p = new Path(_myUri);
         }
+        */
         
         ArrayList<FileStatus> statusArrayList = new ArrayList<>();
-        FileStatus fileStatus = getFileStatus(p);
+        FileStatus fileStatus = getFileStatus(fixRelativePart(p));
 
         if (fileStatus.isFile()) {
             statusArrayList.add(fileStatus);
 
         } else if (fileStatus.isDirectory()) {
-            File file = _toLocal(p);
-            for (File childFile : file.listFiles()) {
-                statusArrayList.add(_getFileStatus(childFile));
+            DxramFile file = new DxramFile(
+                fileStatus.getPath(),
+                _myUri,
+                fileStatus.getBlockSize()
+            );
+            for (DxramFile childFile : file.listFiles()) {
+                statusArrayList.add(childFile.getFileStatus());
             }
         }
 
@@ -290,47 +255,16 @@ public class DxramFileSystem extends FileSystem {
 
     @Override
     public FileStatus getFileStatus(Path p) throws FileNotFoundException, IOException {
-        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})",
-            p);
-        File file = _toLocal(p);
-        return _getFileStatus(file);
+        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})", p);
         
-        /*
         Path absF = fixRelativePart(p);
-		return new FileSystemLinkResolver<FileStatus>() {
-		  @Override
-		  public FileStatus doCall(final Path p) throws IOException {
-			File file = _toLocal(p);
-			FileStatus fi = _getFileStatus(file);
-			if (fi != null) {
-			  return fi;
-			} else {
-			  throw new FileNotFoundException("File does not exist: " + p);
-			}
-		  }
-		  @Override
-		  public FileStatus next(final FileSystem fs, final Path p)
-			  throws IOException {
-			return fs.getFileStatus(p);
-		  }
-		}.resolve(this, absF);
-        */
-    }
-
-    public FileStatus _getFileStatus(File file) throws FileNotFoundException, IOException {
-        LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})",
-            file);
-
-        Path p = _fromLocal(file);
-        if (!file.exists()) {
+        long blocksize = getServerDefaults(absF).getBlockSize();
+        DxramFile dxfile = new DxramFile(absF, _myUri, blocksize);
+        
+        if (!dxfile.exists()) {
             throw new FileNotFoundException("_getFileStatus: " + p.toString() + " not exists");
         }
-        long blocksize = getServerDefaults(p).getBlockSize();
-        return new FileStatus(
-            file.length(),
-            file.isDirectory(),
-            0, blocksize, 0L, 0L, (FsPermission)null, (String)null, (String)null,
-            p
-        );
+        
+        return dxfile.getFileStatus();
     }
 }

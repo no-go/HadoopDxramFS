@@ -197,32 +197,25 @@ public class DxramFs extends DelegateToFileSystem {
         return dxramFileSystem.listStatus(f);
     }
 
-    // -----------------------------------------------------------
-
-
-
-
-
-
-
-    /**
-     * @todo: after implement a real distributed fs, we have to implement this !!!!
-     * -> but: where did the hadoop ekosystem handle this?!
-     */
     @Override
-    public BlockLocation[] getFileBlockLocations(Path f, long start, long len) throws AccessControlException, FileNotFoundException, UnresolvedLinkException, IOException {
-        if (start < 0 || len < 0) throw new AccessControlException("start block or length of block should not be negative");
-        return new BlockLocation[0];
+    public BlockLocation[] getFileBlockLocations(
+        Path f,
+        long start,
+        long len
+    ) throws
+        AccessControlException,
+        FileNotFoundException,
+        UnresolvedLinkException,
+        IOException 
+    {
+        Path abs = dxramFileSystem.fixRelativePart(f);
+        long blocksize = getServerDefaults(abs).getBlockSize();
+        return new DxramFile(abs, getUri(), blocksize).getFileBlockLocations(start, len);
     }
 
+    // -----------------------------------------------------------
 
-
-
-
-
-
-
-
+/*
     @Override
     public void setPermission(Path f, FsPermission permission) throws AccessControlException, FileNotFoundException, UnresolvedLinkException, IOException {
 
@@ -248,4 +241,6 @@ public class DxramFs extends DelegateToFileSystem {
     public void setVerifyChecksum(boolean verifyChecksum) throws AccessControlException, IOException {
 
     }
+*/
+
 }
