@@ -13,9 +13,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class DxramFile {
     /// @todo File OP
     public static final String DEBUG_LOCAL = "/tmp/myfs/";
+    
+    public static final Logger LOG = LoggerFactory.getLogger(DxramFile.class);
     
     private Path         _absPath;
     private URI          _uri;
@@ -25,19 +30,35 @@ public class DxramFile {
     private java.io.File _dummy;
     
     public DxramFile(Path absPath, URI uri, long blocksize) {
-        
-        /// @todo File OP (root dir hack :-S ) ? maybe unused !
-        if ((absPath + Path.SEPARATOR).equals(DEBUG_LOCAL)) {
-            _absPath = new Path(uri);
-        } else {
-            _absPath = absPath;
-        }
-        
         _uri       = uri;
         _blocksize = blocksize;
-        String s   = _absPath.toString().replace(_uri.toString(), DEBUG_LOCAL);
+         _absPath  = absPath;
+        
         /// @todo File OP
-        _dummy     = new java.io.File(s);
+        String s = hpath2lpath(_absPath);
+        _dummy   = new java.io.File(s);
+    }
+    
+    /** @todo File OP
+     *  dxram://localhost:9000/abc/de -> /tmp/myfs/abc/de
+     */
+    private String hpath2lpath(Path hpath) {
+        return hpath.toString().replace(_uri.toString(), DEBUG_LOCAL);
+    }
+    
+    /** @todo File OP
+     *  /tmp/myfs/abc/de -> dxram://localhost:9000/abc/de
+     */
+    private Path lpath2hpath(String lpath) {
+        Path p = new Path(lpath.replace(DEBUG_LOCAL, _uri.toString()));
+        /**
+         * @todo hack: bad   dxram://abook.localhost.fake:9000/tmp/myfs
+         *            good   dxram://abook.localhost.fake:9000/
+         */
+        if ((lpath + Path.SEPARATOR).equals(DEBUG_LOCAL)) {
+            p = new Path(_uri);
+        }
+        return p;
     }
     
     public boolean exists() {
@@ -75,16 +96,8 @@ public class DxramFile {
         
         /// @todo File OP
         for (File childFile : _dummy.listFiles()) {
-            Path p = new Path(childFile.getAbsolutePath().replace(
-                DEBUG_LOCAL, _uri.toString())
-            );
-            /**
-             * @todo hack: I get dxram://abook.localhost.fake:9000/tmp/myfs
-             *     and not       dxram://abook.localhost.fake:9000/
-             */
-            if ((childFile.getAbsolutePath() + Path.SEPARATOR).equals(DEBUG_LOCAL)) {
-                p = new Path(_uri);
-            }
+            Path p = lpath2hpath(childFile.getAbsolutePath());
+            
             /// @todo _blocksize is a dummy at this place, because local fs did not store it
             DxramFile dxfile = new DxramFile(p, _uri, _blocksize);
             
@@ -123,14 +136,15 @@ public class DxramFile {
         String absolutePath = _dummy.getAbsolutePath();
         String filePath = absolutePath.substring(0, absolutePath.lastIndexOf(Path.SEPARATOR));
         
+        //LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName() + "() filepath = {}",filePath);
+        
         /// @todo File OP
-        if (Files.notExists(Paths.get(filePath)) && recursive) {
-            // Path() is a hadoop Path!
-            Path absF = new Path(filePath);
+        if (Files.notExists(Paths.get(filePath))) {
+            Path absF = lpath2hpath(filePath);
             DxramFile dxfile = new DxramFile(absF, _uri, _blocksize);
             dxfile.mkdirs();
         } else {
-            throw new IOException("director(ies) do not exists");
+            if (recursive == false) throw new IOException("director(ies) do not exists");
         }
         
         /// @todo File OP

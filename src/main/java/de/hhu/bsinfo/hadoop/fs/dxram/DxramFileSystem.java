@@ -145,7 +145,10 @@ public class DxramFileSystem extends FileSystem {
         Path f, FsPermission permission, boolean overwrite,
         int bufferSize, short replication, long blockSize,
         Progressable progress
-    ) throws FileAlreadyExistsException, IOException {
+    ) throws 
+        FileAlreadyExistsException,
+        IOException
+    {
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName() +
             "({}, {}, {}, {}, {}, {}, {})",
             f, permission, overwrite, bufferSize, replication, blockSize, progress);
