@@ -1,6 +1,6 @@
 # Workaround
 
-Ziel diese Workaround ist, auf github einen eigenen *master* Branch
+Ziel dieses Workaround ist, auf github einen eigenen *master* Branch
 zu haben (`no-go/dxram.git`), in dem man seine Änderungen einpflegt. Man
 möchte aber auch da drin immer die Änderungen vom *master*
 Branch des `hhu-bsinfo/dxram.git` Repositories haben. Hierzu legt man
