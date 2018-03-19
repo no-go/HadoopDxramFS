@@ -104,7 +104,22 @@ Repository (hier: `no-go/dxram.git`) pushen:
 
     git push
 
-Wenn man will, kann man auch das *shared_master* nach github pushen:
+Gibt es nun ein `rejected` hat man (?) 2 Möglichkeiten:
+
+    git push -f
+
+oder
+
+    git pull
+
+und dann `git push`. Im ersten Fall wird jeder kleine locale Commit mit allen
+Änderungen an github geschickt. Im zweiten Fall (glaub ich?) kann man die
+Commits des rebase in einen commit zusammenziehen und diesen einen "dicken"
+Commit an github senden. Hier gibt es wohl auch einen interaktiven Modus und
+leider hab ich an der Stelle nur ein gefährliches Halbwissen.
+
+Ging alles glatt? Wenn man will, kann man auch das *shared_master* nach github
+pushen:
 
     git checkout shared_master
     git push --set-upstream origin shared_master
