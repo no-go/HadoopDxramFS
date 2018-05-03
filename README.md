@@ -288,6 +288,6 @@ stop:
 
 ### xoxoxo 2018-05-03
 
-java -cp target/hadoop-dxram-fs-1.0-SNAPSHOT.jar:../DXnetAPI_example/lib/log4j-core-2.7.jar:../DXnetAPI_example/lib/log4j-api-2.7.jar:../DXnetAPI_example/lib/gson-2.7.jar de.hhu.bsinfo.hadoop.dxnet.AServer src/main/resources/dxnet.json
+java -cp target/hadoop-dxram-fs-1.0-SNAPSHOT.jar:./lib/log4j-core-2.7.jar:./lib/log4j-api-2.7.jar:./lib/gson-2.7.jar de.hhu.bsinfo.hadoop.dxnet.AServer src/main/resources/dxnet.json
 
 todo: download libs with maven
