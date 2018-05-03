@@ -29,6 +29,22 @@ instead of HDFS.
     mvn clean
     mvn package
 
+### a DXNet/DXRAM Test
+
+Start the a example server:
+
+    mvn exec:java@peer
+
+in future: this will be a DXRAM peer, which shares DXRAM as a
+filesystem to a local hadoop node. The `DxramFs` Hadoop code will
+be a client to that local server.
+
+Start the a example client:
+
+    mvn exec:java@client
+
+in future: this will be integrated into the `DxramFs` Hadoop code.
+
 ## Install
 
 -   Take a look at the `copyDxramJar.sh` linux shell script.
@@ -282,12 +298,3 @@ stop:
     stop-hbase.sh
     stop-dfs.sh
 
-
-
-
-
-### xoxoxo 2018-05-03
-
-java -cp target/hadoop-dxram-fs-1.0-SNAPSHOT.jar:./lib/log4j-core-2.7.jar:./lib/log4j-api-2.7.jar:./lib/gson-2.7.jar de.hhu.bsinfo.hadoop.dxnet.AServer src/main/resources/dxnet.json
-
-todo: download libs with maven

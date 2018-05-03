@@ -8,6 +8,7 @@ import de.hhu.bsinfo.dxnet.DXNetConfig;
 import de.hhu.bsinfo.dxnet.DXNetNodeMap;
 import de.hhu.bsinfo.dxnet.MessageReceiver;
 import de.hhu.bsinfo.dxnet.core.Message;
+import de.hhu.bsinfo.dxnet.core.NetworkException;
 import de.hhu.bsinfo.dxutils.StorageUnitGsonSerializer;
 import de.hhu.bsinfo.dxutils.TimeUnitGsonSerializer;
 import de.hhu.bsinfo.dxutils.unit.StorageUnit;
@@ -17,15 +18,12 @@ import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class AServer {
-
-    private static int inCount = 0;
+public class DxramFsClient {
 
     public static void main(final String[] args) {
-        //System.out.println("Cwd: " + System.getProperty("user.dir"));
 
         DXNetConfig ms_conf = readConfig(args[0]);
-        DXNet ms_dxnet = setup(ms_conf, (short) 0, (short) 1);
+        DXNet ms_dxnet = setup(ms_conf, (short) 1, (short) 0);
 
         ms_dxnet.registerMessageType(
                 A100bMessage.MTYPE,
@@ -35,15 +33,18 @@ public class AServer {
         ms_dxnet.register(
                 A100bMessage.MTYPE,
                 A100bMessage.TAG,
-                new AServer.InHandler()
+                new DxramFsClient.InHandler()
         );
 
-        while (inCount < 1) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ignored) {
-                // nope.
-            }
+        A100bMessage msg = new A100bMessage(
+                (short) 0, // to server
+                new String("Hallo Welt")
+        );
+
+        try {
+            ms_dxnet.sendMessage(msg);
+        } catch (NetworkException e) {
+            e.printStackTrace();
         }
 
         ms_dxnet.close();
@@ -78,24 +79,24 @@ public class AServer {
         return conf;
     }
 
-    private static DXNet setup(DXNetConfig conf, short ownNodeId, short clientNodeId) {
+    private static DXNet setup(DXNetConfig conf, short ownNodeId, short serverNodeId) {
         conf.getCoreConfig().setOwnNodeId(ownNodeId);
 
         DXNetNodeMap nodeMap = new DXNetNodeMap(ownNodeId);
-        DXNetConfig.NodeEntry clientNode = conf.getNodeList().get(clientNodeId);
-        DXNetConfig.NodeEntry serverNode = conf.getNodeList().get(ownNodeId);
+        DXNetConfig.NodeEntry clientNode = conf.getNodeList().get(ownNodeId);
+        DXNetConfig.NodeEntry serverNode = conf.getNodeList().get(serverNodeId);
         nodeMap.addNode(
                 ownNodeId,
                 new InetSocketAddress(
-                        serverNode.getAddress().getIP(),
-                        serverNode.getAddress().getPort()
+                        clientNode.getAddress().getIP(),
+                        clientNode.getAddress().getPort()
                 )
         );
         nodeMap.addNode(
-                clientNodeId,
+                serverNodeId,
                 new InetSocketAddress(
-                        clientNode.getAddress().getIP(),
-                        clientNode.getAddress().getPort()
+                        serverNode.getAddress().getIP(),
+                        serverNode.getAddress().getPort()
                 )
         );
 
@@ -113,8 +114,6 @@ public class AServer {
         public void onIncomingMessage(Message p_message) {
             A100bMessage eMsg = (A100bMessage) p_message;
             System.out.println(eMsg.toString());
-            System.out.println(eMsg.getData());
-            inCount++;
         }
     }
 }

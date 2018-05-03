@@ -66,7 +66,7 @@
     <resources>
       <resource>
         <filtering>false</filtering>
-        <directory>${basedir}/jni</directory>
+        <directory>${project.basedir}/jni</directory>
         <includes>
           <include>libJNINativeThreadAffinity.so</include>
         </includes>
@@ -151,9 +151,26 @@
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>exec-maven-plugin</artifactId>
           <version>1.6.0</version>
-          <configuration>
-            <mainClass>de.hhu.bsinfo.hadoop.dxnet.AServer</mainClass>
-          </configuration>
+          <executions>
+              <execution>
+                  <id>peer</id>
+                  <configuration>
+                    <mainClass>de.hhu.bsinfo.hadoop.dxnet.DxramFsPeer</mainClass>
+                    <arguments>
+                      <argument>${project.build.outputDirectory}/dxnet.json</argument>
+                    </arguments>
+                  </configuration>          
+              </execution>
+              <execution>
+                  <id>client</id>
+                  <configuration>
+                    <mainClass>de.hhu.bsinfo.hadoop.dxnet.DxramFsClient</mainClass>
+                    <arguments>
+                      <argument>${project.build.outputDirectory}/dxnet.json</argument>
+                    </arguments>
+                  </configuration>          
+              </execution>
+          </executions>
         </plugin>
     </plugins>
   </build>
