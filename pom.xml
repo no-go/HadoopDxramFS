@@ -44,26 +44,21 @@
       <artifactId>logback-classic</artifactId>
       <version>${logback.version}</version>
     </dependency>
+    
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
       <version>${log4j2.version}</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/log4j-api-${log4j2.version}.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
       <version>${log4j2.version}</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/log4j-core-${log4j2.version}.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>${gson.version}</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/gson-${gson.version}.jar</systemPath>
     </dependency>
   </dependencies>
   
@@ -102,6 +97,55 @@
                 <source>${java.version}</source>
                 <target>${java.version}</target>
             </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-install-plugin</artifactId>
+            <version>2.5.2</version>
+            <executions>
+                <execution>
+                    <id>use the lib/ log4j2 api</id>
+                    <phase>initialize</phase>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                    <configuration>
+                      <groupId>org.apache.logging.log4j</groupId>
+                      <artifactId>log4j-api</artifactId>
+                      <version>${log4j2.version}</version>
+                      <file>${project.basedir}/lib/log4j-api-${log4j2.version}.jar</file>
+                      <packaging>jar</packaging>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>use the lib/ log4j2 core</id>
+                    <phase>initialize</phase>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                    <configuration>
+                      <groupId>org.apache.logging.log4j</groupId>
+                      <artifactId>log4j-core</artifactId>
+                      <version>${log4j2.version}</version>
+                      <file>${project.basedir}/lib/log4j-core-${log4j2.version}.jar</file>
+                      <packaging>jar</packaging>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>use the lib/ gson</id>
+                    <phase>initialize</phase>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                    <configuration>
+                      <groupId>com.google.code.gson</groupId>
+                      <artifactId>gson</artifactId>
+                      <version>${gson.version}</version>
+                      <file>${project.basedir}/lib/gson-${gson.version}.jar</file>
+                      <packaging>jar</packaging>
+                    </configuration>
+                </execution>
+            </executions>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
