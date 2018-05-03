@@ -64,7 +64,7 @@
     <resources>
       <resource>
         <filtering>false</filtering>
-        <directory>${basedir}/src/main/jni</directory>
+        <directory>${basedir}/jni</directory>
         <includes>
           <include>libJNINativeThreadAffinity.so</include>
         </includes>
@@ -95,6 +95,14 @@
                 <source>${java.version}</source>
                 <target>${java.version}</target>
             </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>1.6.0</version>
+          <configuration>
+            <mainClass>de.hhu.bsinfo.hadoop.dxnet.AServer</mainClass>
+          </configuration>
         </plugin>
     </plugins>
   </build>
