@@ -29,7 +29,12 @@ instead of HDFS.
     mvn clean
     mvn package
 
-### a DXNet/DXRAM Test
+## Schematic Sketch
+
+![Schematic Sketch](notes/Structure.png)
+
+
+## a DXNet/DXRAM Test
 
 Start the a example server:
 
