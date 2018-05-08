@@ -33,7 +33,6 @@ instead of HDFS.
 
 ![Schematic Sketch](notes/Structure.png)
 
-
 ## a DXNet/DXRAM Test
 
 Start the a example server:
@@ -52,10 +51,10 @@ in future: this will be integrated into the `DxramFs` Hadoop code.
 
 ## Install
 
--   Take a look at the `copyDxramJar.sh` linux shell script.
+-   Take a look at the `my-env.sh` linux shell script.
 -   Take a look at my notes about the `etc/hadoop/core-site.xml` file
 
-## Notes (for me!)
+# Notes (for me!)
 
 use hadoop fs CLI to access `dxram://namenode:9000` from `core-site.xml`
 
@@ -106,10 +105,15 @@ File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
         <name>fs.defaultFS</name>
         <value>dxram://namenode:9000</value>
     </property>
+    <property>
+        <name>dxnet.ConfigPath</name>
+        <value>/home/tux/big/HadoopDxramFS/target/classes/dxnet.json</value>
+    </property>
 </configuration>
 ```
 
-It is still a testing scenario.
+It is still a very private testing scenario. The `dxnet.ConfigPath`
+will be changed in the future.
 
 ### Logging
 

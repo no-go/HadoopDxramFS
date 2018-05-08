@@ -1,14 +1,32 @@
 package de.hhu.bsinfo.hadoop.fs.dxram;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import de.hhu.bsinfo.dxnet.DXNet;
+import de.hhu.bsinfo.dxnet.DXNetConfig;
+import de.hhu.bsinfo.dxnet.DXNetNodeMap;
+import de.hhu.bsinfo.dxnet.MessageReceiver;
+import de.hhu.bsinfo.dxnet.core.Message;
+import de.hhu.bsinfo.dxnet.core.NetworkException;
+import de.hhu.bsinfo.dxutils.StorageUnitGsonSerializer;
+import de.hhu.bsinfo.dxutils.TimeUnitGsonSerializer;
+import de.hhu.bsinfo.dxutils.unit.StorageUnit;
+import de.hhu.bsinfo.dxutils.unit.TimeUnit;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.util.Progressable;
 
+import de.hhu.bsinfo.hadoop.dxnet.A100bMessage;
+
 import java.io.*;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import org.slf4j.Logger;
@@ -23,6 +41,7 @@ public class DxramFileSystem extends FileSystem {
 
     private URI _myUri;
     private Path _workingDir;
+    private DXNet dxnet;
     
     @Override
     public URI getUri() {
@@ -66,6 +85,38 @@ public class DxramFileSystem extends FileSystem {
         setConf(conf);
 
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", theUri, conf);
+        LOG.info(
+                Thread.currentThread().getStackTrace()[1].getMethodName()+"({})",
+                theUri,
+                conf.get("dxnet.ConfigPath")
+        );
+        DXNetConfig ms_conf = readConfig(conf.get("dxnet.ConfigPath"));
+        dxnet = setup(ms_conf, (short) 1, (short) 0);
+
+        dxnet.registerMessageType(
+                A100bMessage.MTYPE,
+                A100bMessage.TAG,
+                A100bMessage.class
+        );
+        dxnet.register(
+                A100bMessage.MTYPE,
+                A100bMessage.TAG,
+                new DxramFileSystem.InHandler()
+        );
+
+        A100bMessage msg = new A100bMessage(
+                (short) 0, // to server
+                new String("Hallo Welt")
+        );
+
+        try {
+            dxnet.sendMessage(msg);
+        } catch (NetworkException e) {
+            e.printStackTrace();
+        }
+
+        dxnet.close();
+
 
         String authority = theUri.getAuthority();
         try {
@@ -269,5 +320,74 @@ public class DxramFileSystem extends FileSystem {
         }
         
         return dxfile.getFileStatus();
+    }
+
+    // -------------------------xxxxxxxxxxxxxxxxxxxx-----------------xxxxxxxxxxxxxxxx------------
+
+    private DXNetConfig readConfig(String filename) {
+        DXNetConfig conf = new DXNetConfig();
+
+        Gson gson = new GsonBuilder().
+                setPrettyPrinting().
+                excludeFieldsWithoutExposeAnnotation().
+                registerTypeAdapter(
+                        StorageUnit.class,
+                        new StorageUnitGsonSerializer()
+                ).registerTypeAdapter(
+                TimeUnit.class,
+                new TimeUnitGsonSerializer()
+        ).create();
+
+        try {
+            JsonElement element = gson.fromJson(
+                    new String(Files.readAllBytes(Paths.get(filename))),
+                    JsonElement.class
+            );
+            conf = gson.fromJson(element, DXNetConfig.class);
+        } catch (final Exception e) {
+            System.exit(-1);
+        }
+        if (!conf.verify()) System.exit(-2);
+
+        return conf;
+    }
+
+    private DXNet setup(DXNetConfig conf, short ownNodeId, short serverNodeId) {
+        conf.getCoreConfig().setOwnNodeId(ownNodeId);
+
+        DXNetNodeMap nodeMap = new DXNetNodeMap(ownNodeId);
+        DXNetConfig.NodeEntry clientNode = conf.getNodeList().get(ownNodeId);
+        DXNetConfig.NodeEntry serverNode = conf.getNodeList().get(serverNodeId);
+        nodeMap.addNode(
+                ownNodeId,
+                new InetSocketAddress(
+                        clientNode.getAddress().getIP(),
+                        clientNode.getAddress().getPort()
+                )
+        );
+        nodeMap.addNode(
+                serverNodeId,
+                new InetSocketAddress(
+                        serverNode.getAddress().getIP(),
+                        serverNode.getAddress().getPort()
+                )
+        );
+
+        return new DXNet(
+                conf.getCoreConfig(),
+                conf.getNIOConfig(),
+                conf.getIBConfig(),
+                conf.getLoopbackConfig(),
+                nodeMap
+        );
+    }
+
+    public class InHandler implements MessageReceiver {
+        @Override
+        public void onIncomingMessage(Message p_message) {
+            A100bMessage eMsg = (A100bMessage) p_message;
+            LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})", eMsg.getData());
+            //System.out.println(eMsg.toString());
+        }
     }
 }
