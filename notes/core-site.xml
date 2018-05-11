@@ -16,7 +16,11 @@
     <property>
         <name>fs.defaultFS</name>
         <!-- value>file:///</value -->
-        <!-- value>hdfs://abook.localhost.fake:9000</value -->
-        <value>dxram://abook.localhost.fake:9000</value>
+        <!-- value>hdfs://localhost:9000</value -->
+        <value>dxram://localhost:9000</value>
+    </property>
+    <property>
+        <name>dxnet.ConfigPath</name>
+        <value>/a-hadoop-accessable-local-path/dxnet.json</value>
     </property>
 </configuration>
