@@ -29,6 +29,14 @@ instead of HDFS.
     mvn clean
     mvn package
 
+### ... with git
+
+    git clone https://github.com/no-go/HadoopDxramFS
+    cd HadoopDxramFS
+    git submodule update --init --recursive
+    mvn clean
+    mvn package
+
 ## Schematic Sketch
 
 ![Schematic Sketch](notes/Structure.png)
@@ -103,11 +111,11 @@ File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
     </property>
     <property>
         <name>fs.defaultFS</name>
-        <value>dxram://namenode:9000</value>
+        <value>dxram://localhost:9000</value>
     </property>
     <property>
         <name>dxnet.ConfigPath</name>
-        <value>/home/tux/big/HadoopDxramFS/target/classes/dxnet.json</value>
+        <value>/a-hadoop-accessable-local-path/dxnet.json</value>
     </property>
 </configuration>
 ```
