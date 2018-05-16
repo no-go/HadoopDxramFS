@@ -1,4 +1,6 @@
 target/*
+src/main/java/de/hhu/bsinfo/dxnet/**/*
+dxram/**/*
 
 # Compiled class file
 *.class

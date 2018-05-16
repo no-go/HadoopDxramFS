@@ -9,8 +9,8 @@
   <version>1.0-SNAPSHOT</version>
   <name>hadoop-dxram-fs</name>
   <description>
-    This DXRAM connector lets you run Apache Hadoop or HBASE jobs directly
-    on data in DXRAM instead of HDFS.
+    This DXRAM connector lets you run Apache Hadoop MapReduce or HBASE jobs
+    directly on data in DXRAM instead of HDFS.
   </description>
   
   <properties>
@@ -341,16 +341,7 @@
                   <configuration>
                     <mainClass>de.hhu.bsinfo.hadoop.dxnet.DxramFsPeer</mainClass>
                     <arguments>
-                      <argument>${project.build.outputDirectory}/dxnet.json</argument>
-                    </arguments>
-                  </configuration>
-              </execution>
-              <execution>
-                  <id>client</id>
-                  <configuration>
-                    <mainClass>de.hhu.bsinfo.hadoop.dxnet.DxramFsClient</mainClass>
-                    <arguments>
-                      <argument>${project.build.outputDirectory}/dxnet.json</argument>
+                      <argument>${project.build.outputDirectory}/core-site.xml</argument>
                     </arguments>
                   </configuration>
               </execution>

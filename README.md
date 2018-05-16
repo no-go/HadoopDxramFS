@@ -53,12 +53,6 @@ in future: this will be a DXRAM peer, which shares DXRAM as a
 filesystem to a local hadoop node. The `DxramFs` Hadoop code will
 be a client to that local server.
 
-Start the a example client:
-
-    mvn exec:java@client
-
-in future: this will be integrated into the `DxramFs` Hadoop code.
-
 ## Install
 
 -   Take a look at the `my-env.sh` linux shell script.
@@ -107,17 +101,37 @@ File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
     <property>
         <name>fs.AbstractFileSystem.dxram.impl</name>
         <value>de.hhu.bsinfo.hadoop.fs.dxram.DxramFs</value>
-        <description>
-            The AbstractFileSystem for dxram
-        </description>
+        <description>The AbstractFileSystem for dxram</description>
     </property>
+    <property>
+        <name>dxnet.local.peer.id</name>
+        <value>0</value>
+    </property>
+    <property>
+        <name>dxnet.local.peer.port</name>
+        <value>65221</value>
+    </property>
+    <property>
+        <name>dxnet.local.peer.addr</name>
+        <value>127.0.0.1</value>
+    </property>
+
+    <property>
+        <name>dxnet.local.id</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>dxnet.local.port</name>
+        <value>65222</value>
+    </property>
+    <property>
+        <name>dxnet.local.addr</name>
+        <value>127.0.0.1</value>
+    </property>
+
     <property>
         <name>fs.defaultFS</name>
         <value>dxram://localhost:9000</value>
-    </property>
-    <property>
-        <name>dxnet.ConfigPath</name>
-        <value>/a-hadoop-accessable-local-path/dxnet.json</value>
     </property>
 </configuration>
 ```

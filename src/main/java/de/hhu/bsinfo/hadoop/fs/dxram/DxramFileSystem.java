@@ -88,10 +88,9 @@ public class DxramFileSystem extends FileSystem {
         LOG.info(
                 Thread.currentThread().getStackTrace()[1].getMethodName()+"({})",
                 theUri,
-                conf.get("dxnet.ConfigPath")
+                conf.get("dxnet.localconfig.ip")
         );
-        DXNetConfig ms_conf = readConfig(conf.get("dxnet.ConfigPath"));
-        dxnet = setup(ms_conf, (short) 1, (short) 0);
+        dxnet = setup();
 
         dxnet.registerMessageType(
                 A100bMessage.MTYPE,
@@ -324,54 +323,23 @@ public class DxramFileSystem extends FileSystem {
 
     // -------------------------xxxxxxxxxxxxxxxxxxxx-----------------xxxxxxxxxxxxxxxx------------
 
-    private DXNetConfig readConfig(String filename) {
+    private DXNet setup() {
         DXNetConfig conf = new DXNetConfig();
+        Configuration hadoopCoreConf = getConf();
+        short ownNodeId = Short.valueOf(hadoopCoreConf.get("dxnet.local.id"));
+        short peerNodeId = Short.valueOf(hadoopCoreConf.get("dxnet.local.peer.id"));
 
-        Gson gson = new GsonBuilder().
-                setPrettyPrinting().
-                excludeFieldsWithoutExposeAnnotation().
-                registerTypeAdapter(
-                        StorageUnit.class,
-                        new StorageUnitGsonSerializer()
-                ).registerTypeAdapter(
-                TimeUnit.class,
-                new TimeUnitGsonSerializer()
-        ).create();
-
-        try {
-            JsonElement element = gson.fromJson(
-                    new String(Files.readAllBytes(Paths.get(filename))),
-                    JsonElement.class
-            );
-            conf = gson.fromJson(element, DXNetConfig.class);
-        } catch (final Exception e) {
-            System.exit(-1);
-        }
-        if (!conf.verify()) System.exit(-2);
-
-        return conf;
-    }
-
-    private DXNet setup(DXNetConfig conf, short ownNodeId, short serverNodeId) {
         conf.getCoreConfig().setOwnNodeId(ownNodeId);
 
         DXNetNodeMap nodeMap = new DXNetNodeMap(ownNodeId);
-        DXNetConfig.NodeEntry clientNode = conf.getNodeList().get(ownNodeId);
-        DXNetConfig.NodeEntry serverNode = conf.getNodeList().get(serverNodeId);
-        nodeMap.addNode(
-                ownNodeId,
-                new InetSocketAddress(
-                        clientNode.getAddress().getIP(),
-                        clientNode.getAddress().getPort()
-                )
-        );
-        nodeMap.addNode(
-                serverNodeId,
-                new InetSocketAddress(
-                        serverNode.getAddress().getIP(),
-                        serverNode.getAddress().getPort()
-                )
-        );
+        nodeMap.addNode(ownNodeId, new InetSocketAddress(
+                hadoopCoreConf.get("dxnet.local.addr"),
+                Integer.valueOf(hadoopCoreConf.get("dxnet.local.port"))
+        ));
+        nodeMap.addNode(peerNodeId, new InetSocketAddress(
+                hadoopCoreConf.get("dxnet.local.peer.addr"),
+                Integer.valueOf(hadoopCoreConf.get("dxnet.local.peer.port"))
+        ));
 
         return new DXNet(
                 conf.getCoreConfig(),
