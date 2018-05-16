@@ -1,4 +1,4 @@
-package de.hhu.bsinfo.hadoop.dxnet;
+package de.hhu.bsinfo.hadoop.fs.dxnet;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

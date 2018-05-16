@@ -7,3 +7,4 @@
 [submodule "src/main/java/de/hhu/bsinfo/dxnet"]
 	path = src/main/java/de/hhu/bsinfo/dxnet
 	url = https://github.com/no-go/dxnet-src
+	branch = develop
