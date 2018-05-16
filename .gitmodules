@@ -6,4 +6,4 @@
 	url = https://github.com/hhu-bsinfo/dxutils-src
 [submodule "src/main/java/de/hhu/bsinfo/dxnet"]
 	path = src/main/java/de/hhu/bsinfo/dxnet
-	url = https://github.com/hhu-bsinfo/dxnet-src
+	url = https://github.com/no-go/dxnet-src
