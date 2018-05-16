@@ -1,3 +1,6 @@
 [submodule "dxram"]
 	path = dxram
 	url = https://github.com/hhu-bsinfo/dxram
+[submodule "dxutils"]
+	path = dxram/src/de/hhu/bsinfo/dxutils
+	url = https://github.com/hhu-bsinfo/dxutils-src
