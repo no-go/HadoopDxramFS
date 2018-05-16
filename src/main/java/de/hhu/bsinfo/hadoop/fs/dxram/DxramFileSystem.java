@@ -18,7 +18,7 @@ import org.apache.hadoop.fs.*;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.util.Progressable;
 
-import de.hhu.bsinfo.hadoop.dxnet.A100bMessage;
+import de.hhu.bsinfo.hadoop.fs.dxnet.A100bMessage;
 
 import java.io.*;
 
