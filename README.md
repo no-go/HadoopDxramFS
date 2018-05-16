@@ -33,8 +33,8 @@ instead of HDFS.
 
     git clone https://github.com/no-go/HadoopDxramFS
     cd HadoopDxramFS
-    git submodule update --init dxram
-    git submodule update --init dxutils
+    git submodule init
+    git submodule update
     mvn clean
     mvn package
 

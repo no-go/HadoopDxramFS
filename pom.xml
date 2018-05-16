@@ -116,7 +116,7 @@
   </dependencies>
   
   <build>
-    <!-- sourceDirectory>${project.basedir}/src</sourceDirectory -->
+    <!-- sourceDirectory>${project.basedir}/src/ma</sourceDirectory -->
     <resources>
       <resource>
         <filtering>false</filtering>
@@ -161,7 +161,8 @@
                     </goals>
                     <configuration>
                         <sources>
-                            <source>${project.basedir}/dxram</source>
+                            <source>${project.basedir}/src</source>
+                            <source>${project.basedir}/dxram/src</source>
                         </sources>
                     </configuration>
                 </execution>
