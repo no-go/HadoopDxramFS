@@ -29,7 +29,7 @@ echo startSuperpeer IP PORT... start a DXRAM superpeer
 echo "                          on IP PORT (e.g. 127.0.0.1 22221)"
 echo startDxPeer IP PORT ..... this will start the default peer applications of DXRAM
 echo startTerm HOST PORT ..... start a DXRAM TerminalClient and try to connect to 
-echo                           HOST:PORT of a peer application (PORT is not the
+echo "                          HOST:PORT of a peer application (PORT is not the"
 echo "                          DXRAM-Peer port! default is 22220)"
 
 installDxramfs() {
