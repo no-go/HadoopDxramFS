@@ -22,6 +22,7 @@
     
     <hadoop.two.version>2.8.2</hadoop.two.version>
     <slf4j.version>1.7.25</slf4j.version>
+    <slf4jlog.version>1.6.1</slf4jlog.version>
     <logback.version>1.0.13</logback.version>
     
     <log4j2.version>2.7</log4j2.version>
@@ -56,9 +57,22 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+      <version>${slf4jlog.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
       <version>${slf4j.version}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.directory.studio</groupId>
+      <artifactId>org.slf4j.log4j12</artifactId>
+      <version>${slf4jlog.version}</version>
+    </dependency>
+
     <dependency> 
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
@@ -202,6 +216,20 @@
             <version>2.5.2</version>
             <executions>
                 <execution>
+                    <id>use the lib/ slf4j api</id>
+                    <phase>initialize</phase>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                    <configuration>
+                      <groupId>org.slf4j</groupId>
+                      <artifactId>slf4j-api</artifactId>
+                      <version>${slf4j.version}</version>
+                      <file>${project.basedir}/lib/slf4j-api-${slf4j.version}.jar</file>
+                      <packaging>jar</packaging>
+                    </configuration>
+                </execution>
+                <execution>
                     <id>use the lib/ log4j2 api</id>
                     <phase>initialize</phase>
                     <goals>
@@ -226,6 +254,20 @@
                       <artifactId>log4j-core</artifactId>
                       <version>${log4j2.version}</version>
                       <file>${project.basedir}/lib/log4j-core-${log4j2.version}.jar</file>
+                      <packaging>jar</packaging>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>use the lib/ logback-classic</id>
+                    <phase>initialize</phase>
+                    <goals>
+                        <goal>install-file</goal>
+                    </goals>
+                    <configuration>
+                      <groupId>ch.qos.logback</groupId>
+                      <artifactId>logback-classic</artifactId>
+                      <version>${logback.version}</version>
+                      <file>${project.basedir}/lib/logback-classic-${logback.version}.jar</file>
                       <packaging>jar</packaging>
                     </configuration>
                 </execution>
@@ -324,7 +366,7 @@
                       <groupId>dxutils.perf-timer</groupId>
                       <artifactId>perf-timer</artifactId>
                       <version>${perftimer.version}</version>
-                      <file>${project.basedir}/lib/dxutils/perf-timer/perf-timer/${perftimer.version}/perf-timer-${perftimer.version}.jar</file>
+                      <file>${project.basedir}/lib/perf-timer-${perftimer.version}.jar</file>
                       <packaging>jar</packaging>
                     </configuration>
                 </execution>
@@ -338,10 +380,35 @@
           <executions>
               <execution>
                   <id>peer</id>
+                  <goals>
+                    <goal>java</goal>
+                  </goals>
                   <configuration>
                     <mainClass>de.hhu.bsinfo.hadoop.dxnet.DxramFsPeer</mainClass>
                     <arguments>
                       <argument>${project.build.outputDirectory}/core-site.xml</argument>
+                    </arguments>
+                  </configuration>
+              </execution>
+              <execution>
+                  <id>superpeer</id>
+                  <goals>
+                    <goal>exec</goal>
+                  </goals>
+                  <configuration>
+                    <executable>java</executable>
+                    <arguments>
+                        <argument>-XX:+UseMembar</argument>
+                        <argument>-Dlog4j.configurationFile=${project.build.outputDirectory}/log4j.xml</argument>
+                        <argument>-Ddxram.config=${project.build.outputDirectory}/dxram.json</argument>
+                        <argument>-Ddxram.m_config.m_engineConfig.m_address.m_ip=127.0.0.1</argument>
+                        <argument>-Ddxram.m_config.m_engineConfig.m_address.m_port=22221</argument>
+                        <argument>-Ddxram.m_config.m_engineConfig.m_role=Superpeer</argument>
+                        <argument>-Ddxram.m_config.m_componentConfigs[NetworkComponentConfig].m_core.m_device=Ethernet</argument>
+                        <argument>-Ddxram.m_config.m_componentConfigs[NetworkComponentConfig].m_core.m_numMessageHandlerThreads=2</argument>
+                        <argument>-classpath</argument>
+                        <classpath />
+                        <argument>de.hhu.bsinfo.dxram.DXRAM</argument>
                     </arguments>
                   </configuration>
               </execution>
