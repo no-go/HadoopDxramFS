@@ -20,16 +20,22 @@ alias cdsrc="cd ${HADOOPSRC}"
 echo cdxfs............... cd ${HDXRAMFS_SRC}
 alias cdxfs="cd ${HDXRAMFS_SRC}"
 
-echo mvn clean........... clean up hadoopDxramFs package
-echo mvn package......... creates hadoopDxramFs package
-echo mvn exec:java@peer.. start the local DxramFsPeer application
-echo installDxramfs...... copies hadoopDxramFs JARs, libs, JNI to Hadoop
-echo updateHDFS.......... overwrites important HDFS jar files in hdfs/lib/ with new ones
+echo mvn clean................ clean up hadoopDxramFs package
+echo mvn package.............. creates hadoopDxramFs package
+echo mvn exec:java@peer....... start the local DxramFsPeer application
+echo installDxramfs........... copies hadoopDxramFs JARs, libs, JNI to Hadoop
+echo updateHDFS............... overwrites important HDFS jar files in hdfs/lib/ with new ones
+echo startSuperpeer IP PORT... start a DXRAM superpeer
+echo "                          on IP PORT (e.g. 127.0.0.1 22221)"
+echo startDxPeer IP PORT ..... this will start the default peer applications of DXRAM
+echo startTerm HOST PORT ..... start a DXRAM TerminalClient and try to connect to 
+echo                           HOST:PORT of a peer application (PORT is not the
+echo "                          DXRAM-Peer port! default is 22220)"
 
 installDxramfs() {
     cp -f ${HDXRAMFS_SRC}/target/hadoop-dxram-fs-*.jar \
         ${HADOOP_HOME}/share/hadoop/common/lib/hadoopDxramFs.jar
-    cp -f ${HDXRAMFS_SRC}/lib/log4j-*.jar \
+    cp -f ${HDXRAMFS_SRC}/lib/*.jar \
         ${HADOOP_HOME}/share/hadoop/common/lib/
     echo "unsure coping gson-2.7 JAR-file. version 2.2.4 is still installed in hadoop"
     cp -rf ${HDXRAMFS_SRC}/jni \
@@ -43,4 +49,37 @@ updateHDFS() {
        ${HADOOP_HOME}/share/hadoop/hdfs/
     cp ${HADOOPSRC}/hadoop-hdfs-project/hadoop-hdfs-client/target/hadoop-hdfs-client-${HVERS}.jar \
        ${HADOOP_HOME}/share/hadoop/hdfs/lib/
+}
+
+startSuperpeer() {
+    java -XX:+UseMembar \
+    -Dlog4j.configurationFile=${HDXRAMFS_SRC}/target/classes/log4j.xml \
+    -Ddxram.config=${HDXRAMFS_SRC}/target/classes/dxram.json \
+    -Ddxram.m_config.m_engineConfig.m_address.m_ip=${1} \
+    -Ddxram.m_config.m_engineConfig.m_address.m_port=${2} \
+    -Ddxram.m_config.m_engineConfig.m_role=Superpeer \
+    -Ddxram.m_config.m_componentConfigs[NetworkComponentConfig].m_core.m_device=Ethernet \
+    -Ddxram.m_config.m_componentConfigs[NetworkComponentConfig].m_core.m_numMessageHandlerThreads=2 \
+    -cp ${HDXRAMFS_SRC}/target/hadoop-dxram-fs-1.0-SNAPSHOT.jar:${HDXRAMFS_SRC}/lib/* \
+    de.hhu.bsinfo.dxram.DXRAM
+}
+
+startDxPeer() {
+    java -XX:+UseMembar \
+    -Dlog4j.configurationFile=${HDXRAMFS_SRC}/target/classes/log4j.xml \
+    -Ddxram.config=${HDXRAMFS_SRC}/target/classes/dxram.json \
+    -Ddxram.m_config.m_engineConfig.m_address.m_ip=${1} \
+    -Ddxram.m_config.m_engineConfig.m_address.m_port=${2} \
+    -Ddxram.m_config.m_engineConfig.m_role=Peer \
+    -Ddxram.m_config.m_componentConfigs[MemoryManagerComponentConfig].m_keyValueStoreSize.m_value=128 \
+    -Ddxram.m_config.m_componentConfigs[MemoryManagerComponentConfig].m_keyValueStoreSize.m_unit=mb \
+    -cp ${HDXRAMFS_SRC}/target/hadoop-dxram-fs-1.0-SNAPSHOT.jar:${HDXRAMFS_SRC}/lib/* \
+    de.hhu.bsinfo.dxram.DXRAM
+}
+
+startTerm() {
+    java -Dlog4j.configurationFile=${HDXRAMFS_SRC}/target/classes/log4j.xml \
+    -Ddxram.config=${HDXRAMFS_SRC}/target/classes/dxram.json \
+    -cp ${HDXRAMFS_SRC}/target/hadoop-dxram-fs-1.0-SNAPSHOT.jar:${HDXRAMFS_SRC}/lib/* \
+    de.hhu.bsinfo.dxterm.TerminalClient localhost 22220
 }
