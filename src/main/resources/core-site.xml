@@ -9,40 +9,40 @@
     <property>
         <name>fs.AbstractFileSystem.dxram.impl</name>
         <value>de.hhu.bsinfo.hadoop.fs.dxram.DxramFs</value>
-        <description>The AbstractFileSystem for dxram</description>
+        <description>
+            The AbstractFileSystem for dxram
+        </description>
     </property>
-
     <property>
-        <name>dxnet.local.peer.id</name>
+        <name>fs.defaultFS</name>
+		<!-- value>file:///tmp/tee/</value -->
+        <!-- value>hdfs://abook.localhost.fake:9000</value -->
+        <value>dxram://abook.localhost.fake:9000</value>
+    </property>
+    
+    <property>
+        <name>dxnet.local_peer_id</name>
         <value>0</value>
     </property>
     <property>
-        <name>dxnet.local.peer.port</name>
+        <name>dxnet.local_peer_port</name>
         <value>65221</value>
     </property>
     <property>
-        <name>dxnet.local.peer.addr</name>
+        <name>dxnet.local_peer_addr</name>
         <value>127.0.0.1</value>
     </property>
 
     <property>
-        <name>dxnet.local.id</name>
+        <name>dxnet.local_id</name>
         <value>1</value>
     </property>
     <property>
-        <name>dxnet.local.port</name>
+        <name>dxnet.local_port</name>
         <value>65222</value>
     </property>
     <property>
-        <name>dxnet.local.addr</name>
+        <name>dxnet.local_addr</name>
         <value>127.0.0.1</value>
     </property>
-
-    <property>
-        <name>fs.defaultFS</name>
-        <!-- value>file:///</value -->
-        <!-- value>hdfs://localhost:9000</value -->
-        <value>dxram://abook.localhost.fake:9000</value>
-    </property>
-
 </configuration>

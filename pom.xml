@@ -21,8 +21,8 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     
     <hadoop.two.version>2.8.2</hadoop.two.version>
-    <slf4j.version>1.7.25</slf4j.version>
-    <slf4jlog.version>1.6.1</slf4jlog.version>
+    <slf4j.version>1.7.10</slf4j.version>
+    <slf4jlog.version>1.7.10</slf4jlog.version>
     
     <log4j2.version>2.7</log4j2.version>
     <gson.version>2.7</gson.version>
@@ -31,7 +31,7 @@
     <jlinegit.version>2.14.6</jlinegit.version>
     <log4j.version>1.2.16</log4j.version>
     <suntools.version>1.5.0</suntools.version>
-    <zookeeper.version>3.4.10</zookeeper.version>
+    <zookeeper.version>3.4.6</zookeeper.version>
     <perftimer.version>1.0.0</perftimer.version>
   </properties>
 
@@ -61,8 +61,8 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.directory.studio</groupId>
-      <artifactId>org.slf4j.log4j12</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
       <version>${slf4jlog.version}</version>
     </dependency>
     

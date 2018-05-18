@@ -23,7 +23,7 @@ public class DxramFsPeer {
     private static int inCount = 0;
 
     public static void main(final String[] args) {
-        //System.out.println("Cwd: " + System.getProperty("user.dir"));
+        System.out.println("Cwd: " + System.getProperty("user.dir"));
 
         //DXNetConfig ms_conf = readConfig(args[0]);
         DXNet ms_dxnet = setup(args[0]);
@@ -85,20 +85,21 @@ public class DxramFsPeer {
         DXNetConfig conf = new DXNetConfig();
         Configuration hadoopCoreConf = new Configuration();
         hadoopCoreConf.addResource(filename);
-        short nodeId = Short.valueOf(hadoopCoreConf.get("dxnet.local.id"));
-        short peerNodeId = Short.valueOf(hadoopCoreConf.get("dxnet.local.peer.id"));
+        short nodeId = Short.valueOf(hadoopCoreConf.get("dxnet.local_id"));
+        short peerNodeId = Short.valueOf(hadoopCoreConf.get("dxnet.local_peer_id"));
 
         conf.getCoreConfig().setOwnNodeId(peerNodeId);
 
         DXNetNodeMap nodeMap = new DXNetNodeMap(peerNodeId);
         nodeMap.addNode(peerNodeId, new InetSocketAddress(
-                hadoopCoreConf.get("dxnet.local.peer.addr"),
-                Integer.valueOf(hadoopCoreConf.get("dxnet.local.peer.port"))
+                hadoopCoreConf.get("dxnet.local_peer_addr"),
+                Integer.valueOf(hadoopCoreConf.get("dxnet.local_peer_port"))
         ));
         nodeMap.addNode(nodeId, new InetSocketAddress(
-                hadoopCoreConf.get("dxnet.local.addr"),
-                Integer.valueOf(hadoopCoreConf.get("dxnet.local.port"))
+                hadoopCoreConf.get("dxnet.local_addr"),
+                Integer.valueOf(hadoopCoreConf.get("dxnet.local_port"))
         ));
+        System.out.println("my dxnet addr: " + hadoopCoreConf.get("dxnet.local_peer_addr"));
 
         return new DXNet(
                 conf.getCoreConfig(),
