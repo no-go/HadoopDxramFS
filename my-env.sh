@@ -22,12 +22,13 @@ alias cdxfs="cd ${HDXRAMFS_SRC}"
 
 echo mvn clean................ clean up hadoopDxramFs package
 echo mvn package.............. creates hadoopDxramFs package
-echo mvn exec:java@peer....... start the local DxramFsPeer application
+echo mvn exec:java@peer....... start the local DxramFsPeer application (temporary dxnet only)
 echo installDxramfs........... copies hadoopDxramFs JARs, libs, JNI to Hadoop
 echo updateHDFS............... overwrites important HDFS jar files in hdfs/lib/ with new ones
 echo startSuperpeer IP PORT... start a DXRAM superpeer
 echo "                          on IP PORT (e.g. 127.0.0.1 22221)"
 echo startDxPeer IP PORT ..... this will start the default peer applications of DXRAM
+echo "                          see dxnet.local_peer* in etc/hadoop/core-site.xml"
 echo startTerm HOST PORT ..... start a DXRAM TerminalClient and try to connect to 
 echo "                          HOST:PORT of a peer application (PORT is not the"
 echo "                          DXRAM-Peer port! default is 22220)"

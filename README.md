@@ -62,6 +62,12 @@ be a client to that local server.
 
 use hadoop fs CLI to access `dxram://namenode:9000` from `core-site.xml`
 
+## todo
+
+-   extract dxnet or dxram hostname/ip/port frome hadoop fs-scheme!
+
+## other stuff
+
 alpha works on /tmp/ folder and not in dxram!!!
 
 ok:

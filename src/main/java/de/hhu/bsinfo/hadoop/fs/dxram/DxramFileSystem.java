@@ -13,6 +13,7 @@ import de.hhu.bsinfo.dxutils.StorageUnitGsonSerializer;
 import de.hhu.bsinfo.dxutils.TimeUnitGsonSerializer;
 import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 import de.hhu.bsinfo.dxutils.unit.TimeUnit;
+import de.hhu.bsinfo.hadoop.fs.dxnet.DxramFsPeer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.fs.permission.FsPermission;
@@ -29,12 +30,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DxramFileSystem extends FileSystem {
-    
-    public static final Logger LOG = LoggerFactory.getLogger(DxramFileSystem.class);
+    public static final Logger LOG = LogManager.getLogger(DxramFileSystem.class.getName());
 
     private static final Path ROOT_PATH = new Path(Path.SEPARATOR);
     private static final String SCHEME = "dxram";
@@ -42,9 +42,6 @@ public class DxramFileSystem extends FileSystem {
     private URI _myUri;
     private Path _workingDir;
     private DXNet dxnet;
-
-    private short ownNodeId;
-    private short peerNodeId;
 
     @Override
     public URI getUri() {
@@ -86,11 +83,11 @@ public class DxramFileSystem extends FileSystem {
         throws IOException {
         super.initialize(theUri, conf);
         setConf(conf);
-        ownNodeId = Short.valueOf(conf.get("dxnet.local_id"));
-        peerNodeId = Short.valueOf(conf.get("dxnet.local_peer_id"));
 
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", theUri, conf);
-        dxnet = setup();
+        dxnet = DxramFsPeer.setup(getConf(), DxramFsPeer.NODEID_dxnet_Client);
+
+        LOG.info("try to send something to dxnet Peer 0");
 
         dxnet.registerMessageType(
                 A100bMessage.MTYPE,
@@ -103,10 +100,8 @@ public class DxramFileSystem extends FileSystem {
                 new DxramFileSystem.InHandler()
         );
 
-
-        LOG.info("try to send something to " + Short.toString(peerNodeId));
         A100bMessage msg = new A100bMessage(
-                peerNodeId, // to server
+                DxramFsPeer.NODEID_dxnet_peer,
                 new String("Hallo Welt")
         );
 
@@ -324,31 +319,6 @@ public class DxramFileSystem extends FileSystem {
     }
 
     // -------------------------xxxxxxxxxxxxxxxxxxxx-----------------xxxxxxxxxxxxxxxx------------
-
-    private DXNet setup() {
-        DXNetConfig conf = new DXNetConfig();
-        Configuration hadoopCoreConf = getConf();
-
-        conf.getCoreConfig().setOwnNodeId(ownNodeId);
-
-        DXNetNodeMap nodeMap = new DXNetNodeMap(ownNodeId);
-        nodeMap.addNode(ownNodeId, new InetSocketAddress(
-                hadoopCoreConf.get("dxnet.local_addr"),
-                Integer.valueOf(hadoopCoreConf.get("dxnet.local_port"))
-        ));
-        nodeMap.addNode(peerNodeId, new InetSocketAddress(
-                hadoopCoreConf.get("dxnet.local_peer_addr"),
-                Integer.valueOf(hadoopCoreConf.get("dxnet.local_peer_port"))
-        ));
-
-        return new DXNet(
-                conf.getCoreConfig(),
-                conf.getNIOConfig(),
-                conf.getIBConfig(),
-                conf.getLoopbackConfig(),
-                nodeMap
-        );
-    }
 
     public class InHandler implements MessageReceiver {
         @Override

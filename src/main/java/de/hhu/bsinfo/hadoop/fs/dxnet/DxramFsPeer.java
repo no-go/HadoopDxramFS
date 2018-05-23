@@ -18,22 +18,30 @@ import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class DxramFsPeer {
+    public static final Logger LOG = LogManager.getLogger(DxramFsPeer.class.getName());
 
     private static int inCount = 0;
+
+    public static final short NODEID_dxnet_peer = 0;
+    public static final short NODEID_dxnet_Client = 1;
 
     public static void main(final String[] args) {
         System.out.println("Cwd: " + System.getProperty("user.dir"));
 
-        //DXNetConfig ms_conf = readConfig(args[0]);
-        DXNet ms_dxnet = setup(args[0]);
+        Configuration hadoopCoreConf = new Configuration();
+        hadoopCoreConf.addResource(args[0]);
+        DXNet dxnet = setup(hadoopCoreConf, NODEID_dxnet_peer);
 
-        ms_dxnet.registerMessageType(
+        dxnet.registerMessageType(
                 A100bMessage.MTYPE,
                 A100bMessage.TAG,
                 A100bMessage.class
         );
-        ms_dxnet.register(
+        dxnet.register(
                 A100bMessage.MTYPE,
                 A100bMessage.TAG,
                 new DxramFsPeer.InHandler()
@@ -47,11 +55,10 @@ public class DxramFsPeer {
             }
         }
 
-        ms_dxnet.close();
+        dxnet.close();
         System.exit(0);
     }
 
-    /*
     private static DXNetConfig readConfig(String filename) {
         DXNetConfig conf = new DXNetConfig();
 
@@ -79,27 +86,30 @@ public class DxramFsPeer {
 
         return conf;
     }
-    */
 
-    private static DXNet setup(String filename) {
-        DXNetConfig conf = new DXNetConfig();
-        Configuration hadoopCoreConf = new Configuration();
-        hadoopCoreConf.addResource(filename);
-        short nodeId = Short.valueOf(hadoopCoreConf.get("dxnet.local_id"));
-        short peerNodeId = Short.valueOf(hadoopCoreConf.get("dxnet.local_peer_id"));
+    public static DXNet setup(Configuration hadoopCoreConf, short ownNodeId) {
+        String dxnetConfigFilename = hadoopCoreConf.get("dxnet.ConfigPath");
+        DXNetConfig conf = readConfig(dxnetConfigFilename);
 
-        conf.getCoreConfig().setOwnNodeId(peerNodeId);
+        conf.getCoreConfig().setOwnNodeId(ownNodeId);
 
-        DXNetNodeMap nodeMap = new DXNetNodeMap(peerNodeId);
-        nodeMap.addNode(peerNodeId, new InetSocketAddress(
-                hadoopCoreConf.get("dxnet.local_peer_addr"),
-                Integer.valueOf(hadoopCoreConf.get("dxnet.local_peer_port"))
-        ));
-        nodeMap.addNode(nodeId, new InetSocketAddress(
-                hadoopCoreConf.get("dxnet.local_addr"),
-                Integer.valueOf(hadoopCoreConf.get("dxnet.local_port"))
-        ));
-        System.out.println("my dxnet addr: " + hadoopCoreConf.get("dxnet.local_peer_addr"));
+        DXNetNodeMap nodeMap = new DXNetNodeMap(ownNodeId);
+        DXNetConfig.NodeEntry peerNode = conf.getNodeList().get(NODEID_dxnet_peer);
+        DXNetConfig.NodeEntry clientNode = conf.getNodeList().get(NODEID_dxnet_Client);
+        nodeMap.addNode(
+                NODEID_dxnet_peer,
+                new InetSocketAddress(
+                        peerNode.getAddress().getIP(),
+                        peerNode.getAddress().getPort()
+                )
+        );
+        nodeMap.addNode(
+                NODEID_dxnet_Client,
+                new InetSocketAddress(
+                        clientNode.getAddress().getIP(),
+                        clientNode.getAddress().getPort()
+                )
+        );
 
         return new DXNet(
                 conf.getCoreConfig(),

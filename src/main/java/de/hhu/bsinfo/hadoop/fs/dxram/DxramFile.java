@@ -13,14 +13,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DxramFile {
     /// @todo File OP
     public static final String DEBUG_LOCAL = "/tmp/myfs/";
     
-    public static final Logger LOG = LoggerFactory.getLogger(DxramFile.class);
+    public static final Logger LOG = LogManager.getLogger(DxramFile.class.getName());
     
     private Path         _absPath;
     private URI          _uri;
