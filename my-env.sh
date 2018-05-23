@@ -54,9 +54,9 @@ updateHDFS() {
 }
 
 startDxramFsPeer() {
-    java -XX:+UseMembar \
+    java \
     -Dlog4j.configurationFile=${HDXRAMFS_SRC}/target/classes/log4j2.xml \
-    -cp ${HDXRAMFS_SRC}/target/hadoop-dxram-fs-1.0-SNAPSHOT.jar:${HDXRAMFS_SRC}/lib/* \
+    -cp ${HDXRAMFS_SRC}/target/hadoop-dxram-fs-0.07.jar:${HDXRAMFS_SRC}/lib/* \
     de.hhu.bsinfo.hadoop.fs.dxnet.DxramFsPeer ${HDXRAMFS_SRC}/target/classes/dxnet.json
 }
 
@@ -69,7 +69,7 @@ startSuperpeer() {
     -Ddxram.m_config.m_engineConfig.m_role=Superpeer \
     -Ddxram.m_config.m_componentConfigs[NetworkComponentConfig].m_core.m_device=Ethernet \
     -Ddxram.m_config.m_componentConfigs[NetworkComponentConfig].m_core.m_numMessageHandlerThreads=2 \
-    -cp ${HDXRAMFS_SRC}/target/hadoop-dxram-fs-1.0-SNAPSHOT.jar:${HDXRAMFS_SRC}/lib/* \
+    -cp ${HDXRAMFS_SRC}/target/hadoop-dxram-fs-0.07.jar:${HDXRAMFS_SRC}/lib/* \
     de.hhu.bsinfo.dxram.DXRAM
 }
 
@@ -82,7 +82,7 @@ startDxPeer() {
     -Ddxram.m_config.m_engineConfig.m_role=Peer \
     -Ddxram.m_config.m_componentConfigs[MemoryManagerComponentConfig].m_keyValueStoreSize.m_value=128 \
     -Ddxram.m_config.m_componentConfigs[MemoryManagerComponentConfig].m_keyValueStoreSize.m_unit=mb \
-    -cp ${HDXRAMFS_SRC}/target/hadoop-dxram-fs-1.0-SNAPSHOT.jar:${HDXRAMFS_SRC}/lib/* \
+    -cp ${HDXRAMFS_SRC}/target/hadoop-dxram-fs-0.07.jar:${HDXRAMFS_SRC}/lib/* \
     de.hhu.bsinfo.dxram.DXRAM
 }
 

@@ -33,9 +33,6 @@ instead of HDFS.
 
     git clone https://github.com/no-go/HadoopDxramFS
     cd HadoopDxramFS
-    git submodule sync
-    git submodule init
-    git submodule update --remote
     mvn clean
     mvn package
 
@@ -45,9 +42,13 @@ instead of HDFS.
 
 ## a DXNet/DXRAM Test
 
-Start the a example server:
+Start my Envorinment (and take a look into this bash file):
 
-    mvn exec:java@peer
+    . ./my-env.sh
+
+Start the local relay peer to connect the local hadoop node with dxramfs:
+
+    startDxramFsPeer
 
 in future: this will be a DXRAM peer, which shares DXRAM as a
 filesystem to a local hadoop node. The `DxramFs` Hadoop code will
@@ -94,6 +95,7 @@ working with hack (bad uri, path, localpath handling):
 
 
 File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
+is not actual ...
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
