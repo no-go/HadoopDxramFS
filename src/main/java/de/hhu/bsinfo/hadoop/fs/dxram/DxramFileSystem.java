@@ -18,7 +18,7 @@ import org.apache.hadoop.fs.*;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.util.Progressable;
 
-import de.hhu.bsinfo.hadoop.dxnet.A100bMessage;
+import de.hhu.bsinfo.hadoop.fs.dxnet.A100bMessage;
 
 import java.io.*;
 
@@ -85,11 +85,7 @@ public class DxramFileSystem extends FileSystem {
         setConf(conf);
 
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", theUri, conf);
-        LOG.info(
-                Thread.currentThread().getStackTrace()[1].getMethodName()+"({})",
-                theUri,
-                conf.get("dxnet.ConfigPath")
-        );
+        LOG.info(conf.get("dxnet.ConfigPath"));
         DXNetConfig ms_conf = readConfig(conf.get("dxnet.ConfigPath"));
         dxnet = setup(ms_conf, (short) 1, (short) 0);
 

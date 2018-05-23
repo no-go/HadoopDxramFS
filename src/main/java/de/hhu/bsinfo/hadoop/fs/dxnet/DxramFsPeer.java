@@ -1,4 +1,4 @@
-package de.hhu.bsinfo.hadoop.dxnet;
+package de.hhu.bsinfo.hadoop.fs.dxnet;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -22,7 +22,7 @@ public class DxramFsPeer {
     private static int inCount = 0;
 
     public static void main(final String[] args) {
-        //System.out.println("Cwd: " + System.getProperty("user.dir"));
+        System.out.println("Cwd: " + System.getProperty("user.dir"));
 
         DXNetConfig ms_conf = readConfig(args[0]);
         DXNet ms_dxnet = setup(ms_conf, (short) 0, (short) 1);
