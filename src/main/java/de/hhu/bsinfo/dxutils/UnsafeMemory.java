@@ -1,14 +1,11 @@
 /*
- * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
- * Department Operating Systems
+ * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -72,20 +69,6 @@ public final class UnsafeMemory {
      */
     public static void set(final long p_ptr, final long p_size, final byte p_value) {
         ms_unsafeHandler.getUnsafe().setMemory(p_ptr, p_size, p_value);
-    }
-
-    /**
-     * Read data from one native memory address to another native memory address.
-     *
-     * @param p_address1
-     *         Source address in memory.
-     * @param p_address2
-     *         Destination address in memory.
-     * @param p_length
-     *         Number of bytes to read from specified start.
-     */
-    public static void copyBytes(final long p_address1, final long p_address2, final int p_length) {
-        ms_unsafeHandler.getUnsafe().copyMemory(null, p_address1, null, p_address2, p_length);
     }
 
     /**

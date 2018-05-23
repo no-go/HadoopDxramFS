@@ -1,14 +1,11 @@
 /*
- * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
- * Department Operating Systems
+ * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -81,18 +78,4 @@ public abstract class AbstractMessageImporter implements Importer {
      *         the number of read bytes
      */
     abstract void setNumberOfReadBytes(int p_numberOfReadBytes);
-
-    /**
-     * Read data into a direct byte buffer (or any other native memory area).
-     *
-     * @param p_byteBufferAddress
-     *         Direct ByteBuffer to read into.
-     * @param p_offset
-     *         Offset to start in the ByteBuffer for reading into.
-     * @param p_length
-     *         Number of bytes to read.
-     * @return Number of bytes read.
-     */
-    public abstract int readBytes(final long p_byteBufferAddress, final int p_offset, final int p_length);
-
 }

@@ -1,14 +1,11 @@
 /*
- * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
- * Department Operating Systems
+ * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -31,8 +28,8 @@ import de.hhu.bsinfo.dxnet.core.IncomingBufferQueue;
 import de.hhu.bsinfo.dxnet.core.LocalMessageHeaderPool;
 import de.hhu.bsinfo.dxnet.core.MessageDirectory;
 import de.hhu.bsinfo.dxnet.core.RequestMap;
-import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
-import de.hhu.bsinfo.dxutils.stats.Time;
+import de.hhu.bsinfo.dxutils.stats.StatisticsOperation;
+import de.hhu.bsinfo.dxutils.stats.StatisticsRecorderManager;
 
 /**
  * Enables communication with a remote node over a socket channel. The socket channel's read stream is used to receive data and the write stream is for
@@ -43,13 +40,9 @@ import de.hhu.bsinfo.dxutils.stats.Time;
 class NIOPipeIn extends AbstractPipeIn {
     private static final Logger LOGGER = LogManager.getFormatterLogger(AbstractPipeIn.class.getSimpleName());
 
-    private static final Time SOP_READ = new Time(NIOPipeIn.class, "Read");
-    private static final Time SOP_WRITE_FLOW_CONTROL = new Time(NIOPipeIn.class, "WriteFC");
-
-    static {
-        StatisticsManager.get().registerOperation(NIOPipeIn.class, SOP_READ);
-        StatisticsManager.get().registerOperation(NIOPipeIn.class, SOP_WRITE_FLOW_CONTROL);
-    }
+    private static final String RECORDER = "DXNet-NIO";
+    private static final StatisticsOperation SOP_READ = StatisticsRecorderManager.getOperation(RECORDER, "Read");
+    private static final StatisticsOperation SOP_WRITE_FLOW_CONTROL = StatisticsRecorderManager.getOperation(RECORDER, "WriteFC");
 
     private SocketChannel m_incomingChannel;
     private final BufferPool m_bufferPool;
@@ -81,18 +74,12 @@ class NIOPipeIn extends AbstractPipeIn {
      *         the incoming buffer queue.
      * @param p_parentConnection
      *         the NIO connection this PipeIn belongs to.
-     * @param p_benchmarkMode
-     *         True to enable benchmark mode and record all RTT values to calculate percentile
      */
-    NIOPipeIn(final short p_ownNodeId, final short p_destinationNodeId,
-            final LocalMessageHeaderPool p_messageHeaderPool,
-            final AbstractFlowControl p_flowControl, final MessageDirectory p_messageDirectory,
-            final RequestMap p_requestMap,
-            final MessageHandlers p_messageHandlers, final BufferPool p_bufferPool,
-            final IncomingBufferQueue p_incomingBufferQueue,
-            final NIOConnection p_parentConnection, final boolean p_benchmarkMode) {
-        super(p_ownNodeId, p_destinationNodeId, p_messageHeaderPool, p_flowControl, p_messageDirectory, p_requestMap,
-                p_messageHandlers, p_benchmarkMode);
+    NIOPipeIn(final short p_ownNodeId, final short p_destinationNodeId, final LocalMessageHeaderPool p_messageHeaderPool,
+            final AbstractFlowControl p_flowControl, final MessageDirectory p_messageDirectory, final RequestMap p_requestMap,
+            final MessageHandlers p_messageHandlers, final BufferPool p_bufferPool, final IncomingBufferQueue p_incomingBufferQueue,
+            final NIOConnection p_parentConnection) {
+        super(p_ownNodeId, p_destinationNodeId, p_messageHeaderPool, p_flowControl, p_messageDirectory, p_requestMap, p_messageHandlers);
 
         m_incomingChannel = null;
         m_bufferPool = p_bufferPool;
@@ -149,7 +136,7 @@ class NIOPipeIn extends AbstractPipeIn {
         buffer = directBufferWrapper.getBuffer();
 
         // #ifdef STATISTICS
-        SOP_READ.start();
+        SOP_READ.enter();
         // #endif /* STATISTICS */
 
         while (true) {
@@ -163,18 +150,16 @@ class NIOPipeIn extends AbstractPipeIn {
                 buffer.flip();
 
                 // #if LOGGER >= TRACE
-                LOGGER.trace("Posting receive buffer (limit %d) to connection 0x%X", buffer.limit(),
-                        getDestinationNodeID());
+                LOGGER.trace("Posting receive buffer (limit %d) to connection 0x%X", buffer.limit(), getDestinationNodeID());
                 // #endif /* LOGGER >= TRACE */
 
-                m_incomingBufferQueue.pushBuffer(m_parentConnection, directBufferWrapper, 0,
-                        directBufferWrapper.getAddress(), buffer.remaining());
+                m_incomingBufferQueue.pushBuffer(m_parentConnection, directBufferWrapper, 0, directBufferWrapper.getAddress(), buffer.remaining());
 
                 break;
             }
         }
         // #ifdef STATISTICS
-        SOP_READ.stop();
+        SOP_READ.leave();
         // #endif /* STATISTICS */
 
         return ret;
@@ -187,7 +172,7 @@ class NIOPipeIn extends AbstractPipeIn {
         int bytes = 0;
 
         // #ifdef STATISTICS
-        SOP_WRITE_FLOW_CONTROL.start();
+        SOP_WRITE_FLOW_CONTROL.enter();
         // #endif /* STATISTICS */
 
         m_flowControlByte.rewind();
@@ -204,7 +189,7 @@ class NIOPipeIn extends AbstractPipeIn {
         }
 
         // #ifdef STATISTICS
-        SOP_WRITE_FLOW_CONTROL.stop();
+        SOP_WRITE_FLOW_CONTROL.leave();
         // #endif /* STATISTICS */
     }
 }

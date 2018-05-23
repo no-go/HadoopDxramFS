@@ -1,14 +1,11 @@
 /*
- * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
- * Department Operating Systems
+ * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -20,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.hhu.bsinfo.dxnet.core.AbstractFlowControl;
+import de.hhu.bsinfo.dxnet.core.NetworkException;
 
 /**
  * Flow control implementation for IB
@@ -45,17 +43,14 @@ class IBFlowControl extends AbstractFlowControl {
      * @param p_writeInterestManager
      *         Write interest manager instance
      */
-    IBFlowControl(final short p_destinationNodeId, final int p_flowControlWindowSize,
-            final float p_flowControlWindowThreshold, final IBWriteInterestManager p_writeInterestManager) {
+    IBFlowControl(final short p_destinationNodeId, final int p_flowControlWindowSize, final float p_flowControlWindowThreshold,
+            final IBWriteInterestManager p_writeInterestManager) {
         super(p_destinationNodeId, p_flowControlWindowSize, p_flowControlWindowThreshold);
         m_writeInterestManager = p_writeInterestManager;
     }
 
-    /**
-     * Get but don't remove flow control data before a confirmation is received.
-     *
-     * @return The number of flow control windows to confirm
-     */
+    // get but don't remove flow control data before not confirmed sent
+    // get the number of windows to confirm
     public byte getFlowControlData() {
         byte ret;
 
@@ -76,22 +71,11 @@ class IBFlowControl extends AbstractFlowControl {
         return (byte) (ret - m_fcDataPosted);
     }
 
-    /**
-     * Call, once flow control data is posted (but not confirmed to be sent, yet)
-     *
-     * @param p_fcData
-     *         Fc data posted
-     */
     public void flowControlDataSendPosted(final byte p_fcData) {
         m_fcDataPosted += p_fcData;
     }
 
-    /**
-     * Call, once a confirmation is received that the data was actually sent
-     *
-     * @param p_fcData
-     *         Amount of fc data that was confirmed
-     */
+    // confirm that fc data was confirmed posted/sent
     public void flowControlDataSendConfirmed(final byte p_fcData) {
         int bytesLeft;
 
@@ -113,7 +97,7 @@ class IBFlowControl extends AbstractFlowControl {
     }
 
     @Override
-    public void flowControlWrite() {
+    public void flowControlWrite() throws NetworkException {
         m_writeInterestManager.pushBackFcInterest(getDestinationNodeId());
     }
 

@@ -1,14 +1,11 @@
 /*
- * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
- * Department Operating Systems
+ * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -42,8 +39,8 @@ import de.hhu.bsinfo.dxnet.loopback.LoopbackConnectionManager;
 import de.hhu.bsinfo.dxnet.nio.NIOConfig;
 import de.hhu.bsinfo.dxnet.nio.NIOConnectionManager;
 import de.hhu.bsinfo.dxutils.NodeID;
-import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
-import de.hhu.bsinfo.dxutils.stats.TimePool;
+import de.hhu.bsinfo.dxutils.stats.StatisticsOperation;
+import de.hhu.bsinfo.dxutils.stats.StatisticsRecorderManager;
 
 /**
  * DXNet main class. The network subsystem supports different types of transport. Ethernet using Java NIO and InfiniBand using libibverbs through an
@@ -57,16 +54,10 @@ import de.hhu.bsinfo.dxutils.stats.TimePool;
  */
 public final class DXNet {
     private static final Logger LOGGER = LogManager.getFormatterLogger(DXNet.class.getSimpleName());
-
-    private static final TimePool SOP_SEND = new TimePool(DXNet.class, "Send");
-    private static final TimePool SOP_SEND_SYNC = new TimePool(DXNet.class, "SendSync");
-    private static final TimePool SOP_WAIT_RESPONSE = new TimePool(DXNet.class, "WaitResponse");
-
-    static {
-        StatisticsManager.get().registerOperation(DXNet.class, SOP_SEND);
-        StatisticsManager.get().registerOperation(DXNet.class, SOP_SEND_SYNC);
-        StatisticsManager.get().registerOperation(DXNet.class, SOP_WAIT_RESPONSE);
-    }
+    private static final String RECORDER = "DXNet";
+    private static final StatisticsOperation SOP_SEND = StatisticsRecorderManager.getOperation(RECORDER, "Send");
+    private static final StatisticsOperation SOP_SEND_SYNC = StatisticsRecorderManager.getOperation(RECORDER, "SendSync");
+    private static final StatisticsOperation SOP_WAIT_RESPONSE = StatisticsRecorderManager.getOperation(RECORDER, "WaitForResponse");
 
     private static final int MESSAGE_HEADER_POOL_SIZE = 1024 * 1024;
     private static final int OVERPROVISIONING_OFFSET = 25;
@@ -105,8 +96,7 @@ public final class DXNet {
      * @param p_nodeMap
      *         NodeMap implementation to lookup node ids
      */
-    public DXNet(final CoreConfig p_coreConfig, final NIOConfig p_nioConfig, final IBConfig p_ibConfig,
-            final LoopbackConfig p_loopbackConfig,
+    public DXNet(final CoreConfig p_coreConfig, final NIOConfig p_nioConfig, final IBConfig p_ibConfig, final LoopbackConfig p_loopbackConfig,
             final NodeMap p_nodeMap) {
         m_coreConfig = p_coreConfig;
         m_nioConfig = p_nioConfig;
@@ -125,14 +115,12 @@ public final class DXNet {
         }
 
         m_availableCores =
-                Runtime.getRuntime().availableProcessors() + OVERPROVISIONING_OFFSET -
-                        m_coreConfig.getNumMessageHandlerThreads() - 1 /*SendReceive thread*/ -
+                Runtime.getRuntime().availableProcessors() + OVERPROVISIONING_OFFSET - m_coreConfig.getNumMessageHandlerThreads() - 1 /*SendReceive thread*/ -
                         1 /*MessageCreationCoordinator*/;
         if (m_availableCores <= 0) {
             m_overprovisioning = true;
             // #if LOGGER >= INFO
-            LOGGER.info(
-                    "Overprovisioning detected (%d network threads on %d cores). Activating parking strategy for network threads.",
+            LOGGER.info("Overprovisioning detected (%d network threads on %d cores). Activating parking strategy for network threads.",
                     m_coreConfig.getNumMessageHandlerThreads() + 2, Runtime.getRuntime().availableProcessors());
             // #endif /* LOGGER >= INFO */
         }
@@ -140,8 +128,7 @@ public final class DXNet {
         MessageHeaderPool globalHeaderPool = new MessageHeaderPool(MESSAGE_HEADER_POOL_SIZE);
         // Local message header pool for message creation coordinator thread
         LocalMessageHeaderPool localHeaderPool = new LocalMessageHeaderPool(globalHeaderPool);
-        m_messageHandlers = new MessageHandlers(m_coreConfig.getNumMessageHandlerThreads(), m_overprovisioning,
-                m_messageReceivers, globalHeaderPool);
+        m_messageHandlers = new MessageHandlers(m_coreConfig.getNumMessageHandlerThreads(), m_overprovisioning, m_messageReceivers, globalHeaderPool);
 
         if ("Ethernet".equals(m_coreConfig.getDevice())) {
             m_messageDirectory = new MessageDirectory((int) m_nioConfig.getRequestTimeOut().getMs());
@@ -151,23 +138,20 @@ public final class DXNet {
             m_messageDirectory = new MessageDirectory((int) m_loopbackConfig.getRequestTimeOut().getMs());
         }
 
-        m_messageDirectory.register(Messages.DEFAULT_MESSAGES_TYPE, Messages.SUBTYPE_DEFAULT_MESSAGE,
-                DefaultMessage.class);
+        m_messageDirectory.register(Messages.DEFAULT_MESSAGES_TYPE, Messages.SUBTYPE_DEFAULT_MESSAGE, DefaultMessage.class);
 
         // #if LOGGER >= INFO
         LOGGER.info("Network: MessageCreationCoordinator");
         // #endif /* LOGGER >= INFO */
 
         if ("Ethernet".equals(m_coreConfig.getDevice())) {
-            m_messageCreationCoordinator = new MessageCreationCoordinator(2 * 2 * 1024,
-                    (int) m_nioConfig.getOugoingRingBufferSize().getBytes() * 8,
+            m_messageCreationCoordinator = new MessageCreationCoordinator(2 * 2 * 1024, (int) m_nioConfig.getOugoingRingBufferSize().getBytes() * 8,
                     m_overprovisioning);
         } else if ("Infiniband".equals(m_coreConfig.getDevice())) {
             m_messageCreationCoordinator = new MessageCreationCoordinator(m_ibConfig.getIbqMaxCapacityBufferCount(),
                     (int) m_ibConfig.getIbqMaxCapacitySize().getBytes(), m_overprovisioning);
         } else {
-            m_messageCreationCoordinator = new MessageCreationCoordinator(2 * 2 * 1024,
-                    (int) m_loopbackConfig.getOugoingRingBufferSize().getBytes() * 8,
+            m_messageCreationCoordinator = new MessageCreationCoordinator(2 * 2 * 1024, (int) m_loopbackConfig.getOugoingRingBufferSize().getBytes() * 8,
                     m_overprovisioning);
         }
 
@@ -187,21 +171,15 @@ public final class DXNet {
         }
 
         if ("Ethernet".equals(m_coreConfig.getDevice())) {
-            m_connectionManager = new NIOConnectionManager(m_coreConfig, m_nioConfig, p_nodeMap, m_messageDirectory,
-                    m_requestMap,
-                    m_messageCreationCoordinator.getIncomingBufferQueue(), localHeaderPool, m_messageHandlers,
-                    m_overprovisioning);
+            m_connectionManager = new NIOConnectionManager(m_coreConfig, m_nioConfig, p_nodeMap, m_messageDirectory, m_requestMap,
+                    m_messageCreationCoordinator.getIncomingBufferQueue(), localHeaderPool, m_messageHandlers, m_overprovisioning);
         } else if ("Infiniband".equals(m_coreConfig.getDevice())) {
-            m_connectionManager = new IBConnectionManager(m_coreConfig, m_ibConfig, p_nodeMap, m_messageDirectory,
-                    m_requestMap,
-                    m_messageCreationCoordinator.getIncomingBufferQueue(), localHeaderPool, m_messageHandlers,
-                    m_overprovisioning);
+            m_connectionManager = new IBConnectionManager(m_coreConfig, m_ibConfig, p_nodeMap, m_messageDirectory, m_requestMap,
+                    m_messageCreationCoordinator.getIncomingBufferQueue(), localHeaderPool, m_messageHandlers, m_overprovisioning);
             ((IBConnectionManager) m_connectionManager).init();
         } else {
-            m_connectionManager = new LoopbackConnectionManager(m_coreConfig, m_loopbackConfig, p_nodeMap,
-                    m_messageDirectory, m_requestMap,
-                    m_messageCreationCoordinator.getIncomingBufferQueue(), localHeaderPool, m_messageHandlers,
-                    m_overprovisioning);
+            m_connectionManager = new LoopbackConnectionManager(m_coreConfig, m_loopbackConfig, p_nodeMap, m_messageDirectory, m_requestMap,
+                    m_messageCreationCoordinator.getIncomingBufferQueue(), localHeaderPool, m_messageHandlers, m_overprovisioning);
         }
     }
 
@@ -250,24 +228,10 @@ public final class DXNet {
 
         // #if LOGGER >= WARN
         if (!ret) {
-            LOGGER.warn(
-                    "Registering network message %s for type %s and subtype %s failed, type and subtype already used",
-                    p_class.getSimpleName(), p_type,
+            LOGGER.warn("Registering network message %s for type %s and subtype %s failed, type and subtype already used", p_class.getSimpleName(), p_type,
                     p_subtype);
         }
         // #endif /* LOGGER >= WARN */
-    }
-
-    /**
-     * Registers a special receive message type
-     *
-     * @param p_type
-     *         the unique type
-     * @param p_subtype
-     *         the unique subtype
-     */
-    public void registerSpecialReceiveMessageType(final byte p_type, final byte p_subtype) {
-        m_messageHandlers.registerSpecialReceiveMessageType(p_type, p_subtype);
     }
 
     /**
@@ -325,8 +289,7 @@ public final class DXNet {
 
         try {
             if (m_connectionManager.getConnection(p_nodeID) == null) {
-                throw new NetworkException(
-                        "Connection to " + NodeID.toHexString(p_nodeID) + " could not be established");
+                throw new NetworkException("Connection to " + NodeID.toHexString(p_nodeID) + " could not be established");
             }
         } catch (final NetworkException e) {
             // #if LOGGER >= DEBUG
@@ -356,7 +319,7 @@ public final class DXNet {
         // #endif /* LOGGER == TRACE */
 
         // #ifdef STATISTICS
-        SOP_SEND.start();
+        SOP_SEND.enter();
         // #endif /* STATISTICS */
 
         if (!m_overprovisioning && m_sendThreads.incrementAndGet() > m_availableCores) {
@@ -367,8 +330,7 @@ public final class DXNet {
 
             // #if LOGGER >= INFO
             LOGGER.info("Overprovisioning detected (%d network threads and >= %d application threads on %d cores)." +
-                            "Activating parking strategy for network threads.", m_coreConfig.getNumMessageHandlerThreads() + 2,
-                    m_sendThreads.get(),
+                                "Activating parking strategy for network threads.", m_coreConfig.getNumMessageHandlerThreads() + 2, m_sendThreads.get(),
                     Runtime.getRuntime().availableProcessors());
             // #endif /* LOGGER >= INFO */
         }
@@ -396,9 +358,7 @@ public final class DXNet {
                         m_lastFailures.set(p_message.getDestination() & 0xFFFF, System.currentTimeMillis());
 
                         // #if LOGGER >= DEBUG
-                        LOGGER.debug(
-                                "Connection invalid. Ignoring connection excepts regarding 0x%X during the next second!",
-                                p_message.getDestination());
+                        LOGGER.debug("Connection invalid. Ignoring connection excepts regarding 0x%X during the next second!", p_message.getDestination());
                         // #endif /* LOGGER >= DEBUG */
                         throw new NetworkDestinationUnreachableException(p_message.getDestination());
                     }
@@ -416,7 +376,7 @@ public final class DXNet {
         }
 
         // #ifdef STATISTICS
-        SOP_SEND.stop();
+        SOP_SEND.leave();
         // #endif /* STATISTICS */
 
         // #if LOGGER == TRACE
@@ -436,14 +396,13 @@ public final class DXNet {
      * @throws NetworkException
      *         If sending the message failed or waiting for the response failed (timeout)
      */
-    public void sendSync(final Request p_request, final int p_timeout, final boolean p_waitForResponses)
-            throws NetworkException {
+    public void sendSync(final Request p_request, final int p_timeout, final boolean p_waitForResponses) throws NetworkException {
         // #if LOGGER == TRACE
         LOGGER.trace("Sending request (sync): %s", p_request);
         // #endif /* LOGGER == TRACE */
 
         // #ifdef STATISTICS
-        SOP_SEND_SYNC.start();
+        SOP_SEND_SYNC.enter();
         // #endif /* STATISTICS */
 
         try {
@@ -462,22 +421,22 @@ public final class DXNet {
         try {
             if (p_waitForResponses) {
                 // #ifdef STATISTICS
-                SOP_WAIT_RESPONSE.start();
+                SOP_WAIT_RESPONSE.enter();
                 // #endif /* STATISTICS */
 
                 p_request.waitForResponse(timeout);
 
                 // #ifdef STATISTICS
-                SOP_WAIT_RESPONSE.stop();
+                SOP_WAIT_RESPONSE.leave();
                 // #endif /* STATISTICS */
             }
         } catch (final NetworkResponseDelayedException e) {
             // #ifdef STATISTICS
-            SOP_WAIT_RESPONSE.stop();
+            SOP_WAIT_RESPONSE.leave();
             // #endif /* STATISTICS */
 
             // #ifdef STATISTICS
-            SOP_SEND_SYNC.stop();
+            SOP_SEND_SYNC.leave();
             // #endif /* STATISTICS */
 
             // #if LOGGER >= WARN
@@ -489,11 +448,11 @@ public final class DXNet {
             throw e;
         } catch (final NetworkResponseCancelledException e) {
             // #ifdef STATISTICS
-            SOP_WAIT_RESPONSE.stop();
+            SOP_WAIT_RESPONSE.leave();
             // #endif /* STATISTICS */
 
             // #ifdef STATISTICS
-            SOP_SEND_SYNC.stop();
+            SOP_SEND_SYNC.leave();
             // #endif /* STATISTICS */
 
             // #if LOGGER >= WARN
@@ -504,7 +463,7 @@ public final class DXNet {
         }
 
         // #ifdef STATISTICS
-        SOP_SEND_SYNC.stop();
+        SOP_SEND_SYNC.leave();
         // #endif /* STATISTICS */
     }
 

@@ -1,14 +1,11 @@
 /*
- * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
- * Department Operating Systems
+ * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -20,8 +17,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.hhu.bsinfo.dxutils.NodeID;
-import de.hhu.bsinfo.dxutils.stats.AbstractState;
-import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
 
 /**
  * Manager for write interests of all connections
@@ -34,8 +29,6 @@ class IBWriteInterestManager {
     private final IBWriteInterestQueue m_interestQueue;
     private final IBWriteInterest[] m_writeInterests;
 
-    private final StateStatistics m_stateStats;
-
     /**
      * Constructor
      */
@@ -46,15 +39,6 @@ class IBWriteInterestManager {
         for (int i = 0; i < m_writeInterests.length; i++) {
             m_writeInterests[i] = new IBWriteInterest((short) i);
         }
-
-        m_stateStats = new StateStatistics();
-
-        StatisticsManager.get().registerOperation(IBWriteInterestManager.class, m_stateStats);
-    }
-
-    @Override
-    protected void finalize() {
-        StatisticsManager.get().deregisterOperation(IBWriteInterestManager.class, m_stateStats);
     }
 
     /**
@@ -88,6 +72,8 @@ class IBWriteInterestManager {
             m_interestQueue.pushBack(p_nodeId);
         }
     }
+
+    // caller has to manually consume the interests of both data and fc
 
     /**
      * Get the next node in order which has at least one write interest available.
@@ -135,84 +121,5 @@ class IBWriteInterestManager {
         }
 
         return strBuilder.toString();
-    }
-
-    /**
-     * State statistics implementation for debugging
-     */
-    private class StateStatistics extends AbstractState {
-        /**
-         * Constructor
-         */
-        StateStatistics() {
-            super(IBWriteInterestManager.class, "State");
-        }
-
-        @Override
-        public String dataToString(final String p_indent, final boolean p_extended) {
-            StringBuilder builder = new StringBuilder();
-
-            // allow data races here to avoid performance penalties
-            int front = (m_interestQueue.m_front & 0x7FFFFFFF) % m_interestQueue.m_queue.length;
-            int back = (m_interestQueue.m_back.get() & 0x7FFFFFFF) % m_interestQueue.m_queue.length;
-
-            while (front != back) {
-                short nodeId = m_interestQueue.m_queue[front];
-                long interests = m_writeInterests[nodeId & 0xFFFF].m_interestsAvailable.get();
-                int dataInterests = (int) interests;
-                int fcInterests = (int) (interests >> 32);
-
-                builder.append(p_indent);
-                builder.append("nodeId ");
-                builder.append(NodeID.toHexStringShort(nodeId));
-                builder.append(";dataInterests ");
-                builder.append(dataInterests);
-                builder.append(";fcInterests ");
-                builder.append(fcInterests);
-
-                front = (front + 1) % m_interestQueue.m_queue.length;
-
-                if (front != back) {
-                    builder.append('\n');
-                }
-            }
-
-            return builder.toString();
-        }
-
-        @Override
-        public String generateCSVHeader(final char p_delim) {
-            return "nodeId" + p_delim + "dataInterests" + p_delim + "fcInterests";
-        }
-
-        @Override
-        public String toCSV(final char p_delim) {
-            StringBuilder builder = new StringBuilder();
-
-            // allow data races here to avoid performance penalties
-            int front = (m_interestQueue.m_front & 0x7FFFFFFF) % m_interestQueue.m_queue.length;
-            int back = (m_interestQueue.m_back.get() & 0x7FFFFFFF) % m_interestQueue.m_queue.length;
-
-            while (front != back) {
-                short nodeId = m_interestQueue.m_queue[front];
-                long interests = m_writeInterests[nodeId & 0xFFFF].m_interestsAvailable.get();
-                int dataInterests = (int) interests;
-                int fcInterests = (int) (interests >> 32);
-
-                builder.append(NodeID.toHexStringShort(nodeId));
-                builder.append(';');
-                builder.append(dataInterests);
-                builder.append(';');
-                builder.append(fcInterests);
-
-                front = (front + 1) % m_interestQueue.m_queue.length;
-
-                if (front != back) {
-                    builder.append('\n');
-                }
-            }
-
-            return builder.toString();
-        }
     }
 }

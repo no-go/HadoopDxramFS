@@ -1,14 +1,11 @@
 /*
- * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
- * Department Operating Systems
+ * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -61,25 +58,17 @@ class IBConnection extends AbstractConnection<IBPipeIn, IBPipeOut> {
      *         Message handlers instance
      * @param p_writeInterestManager
      *         Write interest manager instance
-     * @param p_benchmarkMode
-     *         True to enable benchmark mode and record all RTT values to calculate percentile
      */
-    IBConnection(final short p_ownNodeId, final short p_destinationNodeId, final long p_sendBufferNativeAddr,
-            final int p_outBufferSize, final int p_flowControlWindowSize, final float p_flowControlWindowThreshold,
-            final LocalMessageHeaderPool p_messageHeaderPool, final MessageDirectory p_messageDirectory,
-            final RequestMap p_requestMap, final AbstractExporterPool p_exporterPool,
-            final MessageHandlers p_messageHandlers, final IBWriteInterestManager p_writeInterestManager,
-            final boolean p_benchmarkMode) {
+    IBConnection(final short p_ownNodeId, final short p_destinationNodeId, final long p_sendBufferNativeAddr, final int p_outBufferSize,
+            final int p_flowControlWindowSize, final float p_flowControlWindowThreshold, final LocalMessageHeaderPool p_messageHeaderPool,
+            final MessageDirectory p_messageDirectory, final RequestMap p_requestMap, final AbstractExporterPool p_exporterPool,
+            final MessageHandlers p_messageHandlers, final IBWriteInterestManager p_writeInterestManager) {
         super(p_ownNodeId);
 
-        IBFlowControl flowControl = new IBFlowControl(p_destinationNodeId, p_flowControlWindowSize,
-                p_flowControlWindowThreshold, p_writeInterestManager);
-        IBOutgoingRingBuffer outgoingBuffer = new IBOutgoingRingBuffer(p_destinationNodeId, p_sendBufferNativeAddr,
-                p_outBufferSize, p_exporterPool);
-        IBPipeIn pipeIn = new IBPipeIn(p_ownNodeId, p_destinationNodeId, p_messageHeaderPool, flowControl,
-                p_messageDirectory, p_requestMap, p_messageHandlers, p_benchmarkMode);
-        IBPipeOut pipeOut = new IBPipeOut(p_ownNodeId, p_destinationNodeId, flowControl, outgoingBuffer,
-                p_writeInterestManager);
+        IBFlowControl flowControl = new IBFlowControl(p_destinationNodeId, p_flowControlWindowSize, p_flowControlWindowThreshold, p_writeInterestManager);
+        IBOutgoingRingBuffer outgoingBuffer = new IBOutgoingRingBuffer(p_sendBufferNativeAddr, p_outBufferSize, p_exporterPool);
+        IBPipeIn pipeIn = new IBPipeIn(p_ownNodeId, p_destinationNodeId, p_messageHeaderPool, flowControl, p_messageDirectory, p_requestMap, p_messageHandlers);
+        IBPipeOut pipeOut = new IBPipeOut(p_ownNodeId, p_destinationNodeId, flowControl, outgoingBuffer, p_writeInterestManager);
 
         setPipes(pipeIn, pipeOut);
 

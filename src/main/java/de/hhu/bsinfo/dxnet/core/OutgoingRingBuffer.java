@@ -1,14 +1,11 @@
 /*
- * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
- * Department Operating Systems
+ * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -21,13 +18,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 
-import de.hhu.bsinfo.dxutils.NodeID;
 import de.hhu.bsinfo.dxutils.UnsafeHandler;
-import de.hhu.bsinfo.dxutils.stats.AbstractState;
-import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
-import de.hhu.bsinfo.dxutils.stats.TimePool;
-import de.hhu.bsinfo.dxutils.stats.Value;
-import de.hhu.bsinfo.dxutils.stats.ValuePool;
+import de.hhu.bsinfo.dxutils.stats.StatisticsOperation;
+import de.hhu.bsinfo.dxutils.stats.StatisticsRecorderManager;
 
 /**
  * Lock-free ring buffer implementation for outgoing messages. The implementation allows many threads to
@@ -37,19 +30,22 @@ import de.hhu.bsinfo.dxutils.stats.ValuePool;
  * @author Kevin Beineke, kevin.beineke@hhu.de, 31.05.2016
  */
 public class OutgoingRingBuffer {
+    private static final String RECORDER = "DXNet-ORB";
+    private static final StatisticsOperation SOP_PUSH = StatisticsRecorderManager.getOperation(RECORDER, "Push");
+    private static final StatisticsOperation SOP_WAIT_FULL = StatisticsRecorderManager.getOperation(RECORDER, "WaitFull");
+    private static final StatisticsOperation SOP_BUFFER_POSTED = StatisticsRecorderManager.getOperation(RECORDER, "BufferPosted");
+    private static final StatisticsOperation SOP_SHIFT_BACK = StatisticsRecorderManager.getOperation(RECORDER, "ShiftBack");
+
     private static final int MAX_CONCURRENT_THREADS = 1000;
 
     // multiple producer, single consumer
-    private volatile int m_posBack;
+    protected volatile int m_posBack;
 
-    // Upper 32 bits: front position in m_uncommittedMessageSizes; lower 32 bits: current front producer pointer in
-    // ring buffer
+    // Upper 32 bits: front position in m_uncommittedMessageSizes; lower 32 bits: current front producer pointer in ring buffer
     protected final AtomicLong m_posFrontProducer;
-    // Upper 32 bits: back position in m_uncommittedMessageSizes; lower 32 bits: current front consumer pointer in
-    // ring buffer
+    // Upper 32 bits: back position in m_uncommittedMessageSizes; lower 32 bits: current front consumer pointer in ring buffer
     protected final AtomicLong m_posFrontConsumer;
-    // Also stores the back position in m_uncommittedMessageSizes because back position in m_posFrontConsumer is
-    // invalidated during committing
+    // Also stores the back position in m_uncommittedMessageSizes because back position in m_posFrontConsumer is invalidated during committing
     private final AtomicInteger m_posBackArray;
 
     private final AtomicBoolean m_largeMessageBeingWritten;
@@ -58,28 +54,15 @@ public class OutgoingRingBuffer {
     private long m_bufferAddr;
     protected int m_bufferSize;
 
-    protected final short m_nodeId;
-    private final AbstractExporterPool m_exporterPool;
-
-    // per ring buffer instance statistics
-    private final TimePool m_sopPush;
-    private final TimePool m_sopWaitFull;
-    private final ValuePool m_sopDataPosted;
-    private final Value m_sopDataSent;
-    private final StateStatistics m_stateStats;
+    private AbstractExporterPool m_exporterPool;
 
     /**
      * Creates an instance of OutgoingRingBuffer
      *
-     * @param p_nodeId
-     *         Node id of the connection (target node)
      * @param p_exporterPool
      *         Pool with exporters to use for serializing messages
      */
-    protected OutgoingRingBuffer(final short p_nodeId, final AbstractExporterPool p_exporterPool) {
-        m_nodeId = p_nodeId;
-        m_exporterPool = p_exporterPool;
-
+    protected OutgoingRingBuffer(final AbstractExporterPool p_exporterPool) {
         m_posBack = 0;
         m_posFrontProducer = new AtomicLong(0);
         m_posFrontConsumer = new AtomicLong(0);
@@ -90,26 +73,7 @@ public class OutgoingRingBuffer {
 
         m_uncommittedMessageSizes = new int[MAX_CONCURRENT_THREADS];
 
-        m_sopPush = new TimePool(OutgoingRingBuffer.class, "Push-" + NodeID.toHexStringShort(m_nodeId));
-        m_sopWaitFull = new TimePool(OutgoingRingBuffer.class, "WaitFull-" + NodeID.toHexStringShort(m_nodeId));
-        m_sopDataPosted = new ValuePool(OutgoingRingBuffer.class, "DataPosted-" + NodeID.toHexStringShort(m_nodeId));
-        m_sopDataSent = new Value(OutgoingRingBuffer.class, "DataSent-" + NodeID.toHexStringShort(m_nodeId));
-        m_stateStats = new StateStatistics();
-
-        StatisticsManager.get().registerOperation(OutgoingRingBuffer.class, m_sopPush);
-        StatisticsManager.get().registerOperation(OutgoingRingBuffer.class, m_sopWaitFull);
-        StatisticsManager.get().registerOperation(OutgoingRingBuffer.class, m_sopDataPosted);
-        StatisticsManager.get().registerOperation(OutgoingRingBuffer.class, m_sopDataSent);
-        StatisticsManager.get().registerOperation(OutgoingRingBuffer.class, m_stateStats);
-    }
-
-    @Override
-    protected void finalize() {
-        StatisticsManager.get().deregisterOperation(OutgoingRingBuffer.class, m_sopPush);
-        StatisticsManager.get().deregisterOperation(OutgoingRingBuffer.class, m_sopWaitFull);
-        StatisticsManager.get().deregisterOperation(OutgoingRingBuffer.class, m_sopDataPosted);
-        StatisticsManager.get().deregisterOperation(OutgoingRingBuffer.class, m_sopDataSent);
-        StatisticsManager.get().deregisterOperation(OutgoingRingBuffer.class, m_stateStats);
+        m_exporterPool = p_exporterPool;
     }
 
     /**
@@ -155,10 +119,14 @@ public class OutgoingRingBuffer {
      */
     public void shiftBack(final int p_writtenBytes) {
         // #ifdef STATISTICS
-        m_sopDataSent.add(p_writtenBytes);
+        SOP_SHIFT_BACK.enter(p_writtenBytes);
         // #endif /* STATISTICS */
 
         m_posBack = m_posBack + p_writtenBytes & 0x7FFFFFFF;
+
+        // #ifdef STATISTICS
+        SOP_SHIFT_BACK.leave();
+        // #endif /* STATISTICS */
     }
 
     /**
@@ -173,12 +141,11 @@ public class OutgoingRingBuffer {
      * @throws NetworkException
      *         if message could not be serialized
      */
-    void pushMessage(final Message p_message, final int p_messageSize, final AbstractPipeOut p_pipeOut)
-            throws NetworkException {
+    void pushMessage(final Message p_message, final int p_messageSize, final AbstractPipeOut p_pipeOut) throws NetworkException {
         long posFrontProducer;
 
         // #ifdef STATISTICS
-        m_sopPush.start();
+        SOP_PUSH.enter();
         // #endif /* STATISTICS */
 
         // #ifdef STATISTICS
@@ -194,12 +161,11 @@ public class OutgoingRingBuffer {
                 int posBack = m_posBack;
                 if ((posBack + m_bufferSize & 0x7FFFFFFF) > (posFrontProducer + p_messageSize & 0x7FFFFFFF) ||
                         /* 31-bit overflow in posBack but not posFront */
-                        (posBack + m_bufferSize & 0x7FFFFFFF) < posBack &&
-                                (posFrontProducer + p_messageSize & 0x7FFFFFFF) > posBack) {
+                        (posBack + m_bufferSize & 0x7FFFFFFF) < posBack && (posFrontProducer + p_messageSize & 0x7FFFFFFF) > posBack) {
 
                     // #ifdef STATISTICS
                     if (waited) {
-                        m_sopWaitFull.stop();
+                        SOP_WAIT_FULL.leave();
                     }
                     // #endif /* STATISTICS */
 
@@ -218,7 +184,7 @@ public class OutgoingRingBuffer {
                 } else {
                     // #ifdef STATISTICS
                     if (!waited) {
-                        m_sopWaitFull.stop();
+                        SOP_WAIT_FULL.enter();
                         waited = true;
                     }
                     // #endif /* STATISTICS */
@@ -247,16 +213,18 @@ public class OutgoingRingBuffer {
         }
 
         // #ifdef STATISTICS
-        m_sopPush.stop();
+        SOP_PUSH.leave();
         // #endif /* STATISTICS */
 
         // #ifdef STATISTICS
-        m_sopDataPosted.add(p_messageSize);
+        SOP_BUFFER_POSTED.enter();
         // #endif /* STATISTICS */
 
-        // FIXME: this should be moved to the if branch above because the serializeLargeMessage method calls this
-        // as well. needs to be tested and verified
         p_pipeOut.bufferPosted(p_messageSize);
+
+        // #ifdef STATISTICS
+        SOP_BUFFER_POSTED.leave();
+        // #endif /* STATISTICS */
     }
 
     /**
@@ -269,10 +237,8 @@ public class OutgoingRingBuffer {
      * @return the new front position in ring-buffer
      */
     private long enterSerializationArea(final long p_posFrontProducer, final int p_messageSize) {
-        long newPosFrontProducer =
-                p_posFrontProducer + p_messageSize & 0x7FFFFFFF; // Add message size -> new posFront for producers
-        newPosFrontProducer += ((p_posFrontProducer >> 32) + 1 & 0x7FFFFFFF) <<
-                32; // Increment pos -> new posFront in message size array
+        long newPosFrontProducer = p_posFrontProducer + p_messageSize & 0x7FFFFFFF; // Add message size -> new posFront for producers
+        newPosFrontProducer += ((p_posFrontProducer >> 32) + 1 & 0x7FFFFFFF) << 32; // Increment pos -> new posFront in message size array
         if (!m_posFrontProducer.compareAndSet(p_posFrontProducer, newPosFrontProducer)) {
             // Try again
             return -1;
@@ -290,8 +256,7 @@ public class OutgoingRingBuffer {
      * @param p_messageSize
      *         the message size
      */
-    private void leaveSerializationArea(final long p_posFrontProducer, final long p_newPosFrontProducer,
-            final int p_messageSize) {
+    private void leaveSerializationArea(final long p_posFrontProducer, final long p_newPosFrontProducer, final int p_messageSize) {
         /*while (!m_posFrontConsumer.compareAndSet(p_posFrontProducer, p_newPosFrontProducer)) {
             Thread.yield();
         }*/
@@ -303,8 +268,7 @@ public class OutgoingRingBuffer {
         while (true) {
             posBackArray = m_posBackArray.get();
             if (posFrontArray < (posBackArray + MAX_CONCURRENT_THREADS - 1 & 0x7FFFFFFF) ||
-                    /* overflow */(posBackArray + MAX_CONCURRENT_THREADS - 1 & 0x7FFFFFFF) < posBackArray &&
-                    posBackArray <= posFrontArray) {
+                    /* overflow */ (posBackArray + MAX_CONCURRENT_THREADS - 1 & 0x7FFFFFFF) < posBackArray && posBackArray <= posFrontArray) {
                 // The registered index is free -> start committing
                 break;
             }
@@ -320,8 +284,7 @@ public class OutgoingRingBuffer {
 
             // Increase posFrontConsumer for finished threads
             // At least one thread entered the serialization area after this thread.
-            // If that thread finished the serialization earlier this thread must increase the posFrontConsumer for it
-            // (and consecutive threads)
+            // If that thread finished the serialization earlier this thread must increase the posFrontConsumer for it (and consecutive threads)
             int currentSize;
             while (true) {
                 posFrontArray = posFrontArray + 1 & 0x7FFFFFFF;
@@ -338,8 +301,7 @@ public class OutgoingRingBuffer {
                     }
 
                     if (m_posFrontConsumer.get() != newPosFrontProducer) {
-                        // The following thread just finished serialization and increased posFrontConsumer -> nothing
-                        // to do for this thread
+                        // The following thread just finished serialization and increased posFrontConsumer -> nothing to do for this thread
                         break;
                     }
 
@@ -353,12 +315,9 @@ public class OutgoingRingBuffer {
                 }
 
                 long oldPosFrontProducer = newPosFrontProducer;
-                newPosFrontProducer = oldPosFrontProducer + currentSize &
-                        0x7FFFFFFF; // Add message size -> new posFront for producers
-                newPosFrontProducer += (long) (posFrontArray + 1 & 0x7FFFFFFF) <<
-                        32; // Increment pos -> new posFront in message size array
-                if (!m_posFrontConsumer.compareAndSet(oldPosFrontProducer,
-                        (newPosFrontProducer & 0x7FFFFFFF) + (-1L << 32))) {
+                newPosFrontProducer = oldPosFrontProducer + currentSize & 0x7FFFFFFF; // Add message size -> new posFront for producers
+                newPosFrontProducer += (long) (posFrontArray + 1 & 0x7FFFFFFF) << 32; // Increment pos -> new posFront in message size array
+                if (!m_posFrontConsumer.compareAndSet(oldPosFrontProducer, (newPosFrontProducer & 0x7FFFFFFF) + (-1L << 32))) {
                     // Another thread committed this serialization already -> nothing to do for this thread
                     break;
                 }
@@ -386,14 +345,11 @@ public class OutgoingRingBuffer {
      * @throws NetworkException
      *         if message could not be serialized
      */
-    private void serialize(final Message p_message, final int p_start, final int p_messageSize)
-            throws NetworkException {
+    private void serialize(final Message p_message, final int p_start, final int p_messageSize) throws NetworkException {
 
-        // Get exporter (default or overflow). Small messages are written at once, but might be split into two parts
-        // if ring buffer overflows during writing.
+        // Get exporter (default or overflow). Small messages are written at once, but might be split into two parts if ring buffer overflows during writing.
         MessageExporterCollection exporterCollection = m_exporterPool.getInstance();
-        AbstractMessageExporter exporter = exporterCollection.getMessageExporter(
-                p_messageSize > m_bufferSize - p_start);
+        AbstractMessageExporter exporter = exporterCollection.getMessageExporter(p_messageSize > m_bufferSize - p_start);
         exporter.setBuffer(m_bufferAddr, m_bufferSize);
         exporter.setPosition(p_start);
 
@@ -401,10 +357,8 @@ public class OutgoingRingBuffer {
 
         if (exporter.getNumberOfWrittenBytes() != p_messageSize) {
             throw new NetworkException(
-                    "Message size differs from calculated size. Exported " + exporter.getNumberOfWrittenBytes() +
-                            " bytes, expected " + p_messageSize +
-                            " bytes (including header). Check getPayloadLength method of message type " +
-                            p_message.getClass().getSimpleName());
+                    "Message size differs from calculated size. Exported " + exporter.getNumberOfWrittenBytes() + " bytes, expected " + p_messageSize +
+                            " bytes (including header). Check getPayloadLength method of message type " + p_message.getClass().getSimpleName());
         }
     }
 
@@ -420,8 +374,7 @@ public class OutgoingRingBuffer {
      * @throws NetworkException
      *         if message could not be serialized
      */
-    private void serializeLargeMessage(final Message p_message, final int p_messageSize,
-            final long p_oldPosFrontProducer, final AbstractPipeOut p_pipeOut)
+    private void serializeLargeMessage(final Message p_message, final int p_messageSize, final long p_oldPosFrontProducer, final AbstractPipeOut p_pipeOut)
             throws NetworkException {
         long posFrontConsumer = p_oldPosFrontProducer;
         int posBack = m_posBack;
@@ -451,8 +404,7 @@ public class OutgoingRingBuffer {
             try {
                 p_message.serialize(exporter, p_messageSize);
 
-                // Break if all bytes have been written. Cannot be here if not as ArrayIndexOutOfBoundsException would
-                // have been thrown.
+                // Break if all bytes have been written. Cannot be here if not as ArrayIndexOutOfBoundsException would have been thrown.
                 exporterCollection.deleteUnfinishedOperation();
             } catch (final ArrayIndexOutOfBoundsException ignore) {
             }
@@ -463,17 +415,20 @@ public class OutgoingRingBuffer {
 
             // Get new values
             posBack = m_posBack;
-            posFrontConsumer = (posFrontConsumer & 0xFFFFFFFF00000000L) +
-                    ((int) posFrontConsumer + allWrittenBytes - previouslyWrittenBytes & 0x7FFFFFFF);
+            posFrontConsumer = (posFrontConsumer & 0xFFFFFFFF00000000L) + ((int) posFrontConsumer + allWrittenBytes - previouslyWrittenBytes & 0x7FFFFFFF);
 
             // Reserve space for next write
             m_posFrontConsumer.set(posFrontConsumer);
 
             // #ifdef STATISTICS
-            m_sopDataPosted.add(allWrittenBytes - previouslyWrittenBytes);
+            SOP_BUFFER_POSTED.enter();
             // #endif /* STATISTICS */
 
             p_pipeOut.bufferPosted(allWrittenBytes - previouslyWrittenBytes);
+
+            // #ifdef STATISTICS
+            SOP_BUFFER_POSTED.leave();
+            // #endif /* STATISTICS */
 
             if (p_messageSize == allWrittenBytes) {
                 break;
@@ -507,38 +462,5 @@ public class OutgoingRingBuffer {
         }
 
         return (long) posFrontRelative << 32 | (long) posBackRelative;
-    }
-
-    /**
-     * State statistics implementation for debugging
-     */
-    private class StateStatistics extends AbstractState {
-        /**
-         * Constructor
-         */
-        StateStatistics() {
-            super(OutgoingRingBuffer.class, "State-" + NodeID.toHexStringShort(m_nodeId));
-        }
-
-        @Override
-        public String dataToString(final String p_indent, final boolean p_extended) {
-            return p_indent + "m_nodeId " + NodeID.toHexStringShort(m_nodeId) + ";m_bufferAddr " +
-                    Long.toHexString(m_bufferAddr) + ";m_bufferSize " + m_bufferSize + ";m_posBack " + m_posBack +
-                    ";m_posFrontProducer " + m_posFrontProducer.get() + ";m_posFrontConsumer " + m_posFrontConsumer +
-                    ";m_largeMessageBeingWritten " + m_largeMessageBeingWritten.get();
-        }
-
-        @Override
-        public String generateCSVHeader(final char p_delim) {
-            return "m_nodeId" + p_delim + "m_bufferAddr" + p_delim + "m_bufferSize" + p_delim + "m_posBack" + p_delim +
-                    "m_posFrontProducer" + p_delim + "m_posFrontConsumer" + p_delim + "m_largeMessageBeingWritten";
-        }
-
-        @Override
-        public String toCSV(final char p_delim) {
-            return NodeID.toHexStringShort(m_nodeId) + p_delim + Long.toHexString(m_bufferAddr) + p_delim +
-                    m_bufferSize + p_delim + m_posBack + p_delim + m_posFrontProducer.get() + p_delim +
-                    m_posFrontConsumer.get() + p_delim + m_largeMessageBeingWritten.get();
-        }
     }
 }

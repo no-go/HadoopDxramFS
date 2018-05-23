@@ -1,14 +1,11 @@
 /*
- * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
- * Department Operating Systems
+ * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -71,9 +68,6 @@ public class IBConfig {
     private int m_sharedRCQSize = m_srqSize;
 
     @Expose
-    private int m_maxSGEs = 2;
-
-    @Expose
     private boolean m_enableSignalHandler = false;
 
     @Expose
@@ -118,8 +112,7 @@ public class IBConfig {
     }
 
     /**
-     * Get the threshold determining when a flow control message is sent
-     * (receivedBytes > m_flowControlWindow * m_flowControlWindowThreshold)
+     * Get the threshold determining when a flow control message is sent (receivedBytes > m_flowControlWindow * m_flowControlWindowThreshold)
      */
     public float getFlowControlWindowThreshold() {
         return m_flowControlWindowThreshold;
@@ -172,14 +165,6 @@ public class IBConfig {
      */
     public int getSharedReceiveQueueSize() {
         return m_srqSize;
-    }
-
-    /**
-     * Get the max number of SGEs to use for a single WRQ (when receiving data). This also determines the max
-     * size to send to a remote (as a single chunk)
-     */
-    public int getMaxSGEs() {
-        return m_maxSGEs;
     }
 
     /**

@@ -1,14 +1,11 @@
 /*
- * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
- * Department Operating Systems
+ * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -29,7 +26,6 @@ import de.hhu.bsinfo.dxnet.ib.IBConfig;
 import de.hhu.bsinfo.dxnet.loopback.LoopbackConfig;
 import de.hhu.bsinfo.dxnet.nio.NIOConfig;
 import de.hhu.bsinfo.dxutils.unit.IPV4Unit;
-import de.hhu.bsinfo.dxutils.unit.TimeUnit;
 
 /**
  * Configuration object with settings for DXNet
@@ -44,12 +40,6 @@ public class DXNetConfig {
      */
     @Expose
     private String m_jniPath = "jni";
-
-    @Expose
-    private String m_perfTimerForceType = "auto";
-
-    @Expose
-    private TimeUnit m_statisticsManagerPrintInterval = new TimeUnit(0, TimeUnit.SEC);
 
     @Expose
     private ArrayList<NodeEntry> m_nodesConfig = new ArrayList<NodeEntry>() {
@@ -86,21 +76,6 @@ public class DXNetConfig {
      */
     public String getJNIPath() {
         return m_jniPath;
-    }
-
-    /**
-     * Get the type of timer to force (if desired). Valid force types are:
-     * rdtscp, rdtsc, nanotime. Everything else defaults to auto select
-     */
-    public String getPerfTimerForceType() {
-        return m_perfTimerForceType;
-    }
-
-    /**
-     * Get the interval for the statistics manager to print the current stats to stdout (0 to disable)
-     */
-    public TimeUnit getStatisticsManagerPrintInterval() {
-        return m_statisticsManagerPrintInterval;
     }
 
     /**
@@ -159,9 +134,9 @@ public class DXNetConfig {
             return false;
         }
 
-        if (m_nodesConfig.size() < 2 && !m_coreConfig.isDeviceLoopback()) {
+        if (m_nodesConfig.size() < 2) {
             // #if LOGGER >= ERROR
-            LOGGER.error("Less than two nodes found in nodes config. At least two nodes required (non loopback)");
+            LOGGER.error("Less than two nodes found in nodes config. At least two nodes required");
             // #endif /* LOGGER >= ERROR */
             return false;
         }

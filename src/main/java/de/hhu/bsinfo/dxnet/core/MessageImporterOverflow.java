@@ -1,14 +1,11 @@
 /*
- * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
- * Department Operating Systems
+ * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -288,29 +285,6 @@ class MessageImporterOverflow extends AbstractMessageImporter {
         }
 
         UnsafeMemory.readBytes(m_bufferAddress + m_currentPosition, p_array, p_offset, p_length);
-        m_currentPosition += p_length;
-
-        return p_length;
-    }
-
-    @Override
-    public int readBytes(final long p_byteBufferAddress, final int p_offset, final int p_length) {
-        if (m_currentPosition == m_bufferSize) {
-            m_unfinishedOperation.setIndex(m_currentPosition - m_startPosition);
-            throw m_exception;
-        }
-
-        if (m_currentPosition + p_length >= m_bufferSize) {
-            UnsafeMemory.copyBytes(m_bufferAddress + m_currentPosition, p_byteBufferAddress + p_offset, m_bufferSize - m_currentPosition);
-
-            // Do not store unfinished operation as partly de-serialized array will be passed anyway
-            m_unfinishedOperation.setIndex(m_currentPosition - m_startPosition);
-
-            m_currentPosition = m_bufferSize;
-            throw m_exception;
-        }
-
-        UnsafeMemory.copyBytes(m_bufferAddress + m_currentPosition, p_byteBufferAddress + p_offset, p_length);
         m_currentPosition += p_length;
 
         return p_length;

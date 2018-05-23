@@ -10,11 +10,11 @@ import de.hhu.bsinfo.dxutils.RandomUtils;
  *
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 14.12.2017
  */
-public final class IBWriteInterestManagerMain {
+public final class IbWriteInterestManagerMain {
     private static AtomicLong ms_dataInterests = new AtomicLong(0);
     private static AtomicLong ms_fcInterests = new AtomicLong(0);
 
-    private IBWriteInterestManagerMain() {
+    private IbWriteInterestManagerMain() {
 
     }
 

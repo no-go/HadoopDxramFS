@@ -1,14 +1,11 @@
 /*
- * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
- * Department Operating Systems
+ * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -28,9 +25,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.hhu.bsinfo.dxutils.UnsafeHandler;
-import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
-import de.hhu.bsinfo.dxutils.stats.Time;
-import de.hhu.bsinfo.dxutils.stats.TimePool;
+import de.hhu.bsinfo.dxutils.stats.StatisticsOperation;
+import de.hhu.bsinfo.dxutils.stats.StatisticsRecorderManager;
 
 /**
  * Interest queue based on an array and an ArrayList.
@@ -38,15 +34,11 @@ import de.hhu.bsinfo.dxutils.stats.TimePool;
  * @author Kevin Beineke, kevin.beineke@hhu.de, 18.12.2017
  */
 class InterestQueue {
+
     private static final Logger LOGGER = LogManager.getFormatterLogger(InterestQueue.class.getSimpleName());
-
-    private static final TimePool SOP_ADD = new TimePool(InterestQueue.class, "Add");
-    private static final Time SOP_PROCESS = new Time(InterestQueue.class, "Process");
-
-    static {
-        StatisticsManager.get().registerOperation(InterestQueue.class, SOP_ADD);
-        StatisticsManager.get().registerOperation(InterestQueue.class, SOP_PROCESS);
-    }
+    private static final String RECORDER = "DXNet-NIOInterestQueue";
+    private static final StatisticsOperation SOP_ADD = StatisticsRecorderManager.getOperation(RECORDER, "AddInterest");
+    private static final StatisticsOperation SOP_PROCESS = StatisticsRecorderManager.getOperation(RECORDER, "ProcessInterests");
 
     // Operations (0b1, 0b10, 0b100, 0b1000 reserved in SelectionKey)
     static final byte READ = 1;
@@ -87,7 +79,7 @@ class InterestQueue {
         short nodeID = p_connection.getDestinationNodeID();
 
         // #ifdef STATISTICS
-        SOP_ADD.start();
+        SOP_ADD.enter();
         // #endif /* STATISTICS */
 
         // Shortcut: if interest was already set (e.g. WRITE), we return immediately without locking (happens very often; once per message).
@@ -114,7 +106,7 @@ class InterestQueue {
         m_changeLock.unlock();
 
         // #ifdef STATISTICS
-        SOP_ADD.stop();
+        SOP_ADD.leave();
         // #endif /* STATISTICS */
 
         return ret;
@@ -130,15 +122,14 @@ class InterestQueue {
      * @param p_connectionTimeout
      *         the configured connection timeout.
      */
-    void processInterests(final Selector p_selector, final NIOConnectionManager p_connectionManager,
-            final int p_connectionTimeout) {
+    void processInterests(final Selector p_selector, final NIOConnectionManager p_connectionManager, final int p_connectionTimeout) {
         int interest;
         int entries;
         SelectionKey key;
         NIOConnection connection;
 
         // #ifdef STATISTICS
-        SOP_PROCESS.start();
+        SOP_PROCESS.enter();
         // #endif /* STATISTICS */
 
         m_changeLock.lock();
@@ -264,7 +255,7 @@ class InterestQueue {
         m_changeLock.unlock();
 
         // #ifdef STATISTICS
-        SOP_PROCESS.stop();
+        SOP_PROCESS.leave();
         // #endif /* STATISTICS */
     }
 }

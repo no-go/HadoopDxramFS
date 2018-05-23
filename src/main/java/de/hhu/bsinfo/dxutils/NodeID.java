@@ -1,14 +1,11 @@
 /*
- * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
- * Department Operating Systems
+ * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -36,32 +33,20 @@ public final class NodeID {
      * Convert a node id to a proper string representation in hex.
      *
      * @param p_nodeId
-     *         Node id to convert.
-     * @return Hex string of node id, example: 0x1111
+     *     Node id to convert.
+     * @return Hex string of node id, dxExample: 0x1111
      */
     public static String toHexString(final short p_nodeId) {
         int tmp = p_nodeId & 0xFFFF;
+        // return "0x" + Integer.toHexString(tmp).toUpperCase();
         return "0x" + String.format("%04x", tmp).toUpperCase();
-    }
-
-    /**
-     * Convert a node id to a proper string representation in hex.
-     * Same as toHexString but without the prefix 0x
-     *
-     * @param p_nodeId
-     *         Node id to convert.
-     * @return Hex string of node id, example: AA11
-     */
-    public static String toHexStringShort(final short p_nodeId) {
-        int tmp = p_nodeId & 0xFFFF;
-        return String.format("%04x", tmp).toUpperCase();
     }
 
     /**
      * Parse a hex string containing a node id.
      *
      * @param p_str
-     *         Hex string with node id, e.g. either 0x1234 or 1234
+     *     Hex string with node id, e.g. either 0x1234 or 1234
      * @return Parsed node id
      */
     public static short parse(final String p_str) {
@@ -78,7 +63,7 @@ public final class NodeID {
      * Method to convert a list of node IDs to a list of hex strings
      *
      * @param p_nodeIDs
-     *         Node IDs
+     *     Node IDs
      * @return String with list of node IDs in hex
      */
     public static String nodeIDArrayToString(final short[] p_nodeIDs) {
