@@ -22,9 +22,11 @@ alias cdxfs="cd ${HDXRAMFS_SRC}"
 
 echo mvn clean................ clean up hadoopDxramFs package
 echo mvn package.............. creates hadoopDxramFs package
-echo mvn exec:java@peer....... start the local DxramFsPeer application (temporary dxnet only)
 echo installDxramfs........... copies hadoopDxramFs JARs, libs, JNI to Hadoop
 echo updateHDFS............... overwrites important HDFS jar files in hdfs/lib/ with new ones
+echo startDxramFsPeer ........ start the local dxramfsPeer to relay between hadoop and DXRAM
+echo DXRAM tools
+echo ===========
 echo startSuperpeer IP PORT... start a DXRAM superpeer
 echo "                          on IP PORT (e.g. 127.0.0.1 22221)"
 echo startDxPeer IP PORT ..... this will start the default peer applications of DXRAM
@@ -38,7 +40,6 @@ installDxramfs() {
         ${HADOOP_HOME}/share/hadoop/common/lib/hadoopDxramFs.jar
     cp -f ${HDXRAMFS_SRC}/lib/*.jar \
         ${HADOOP_HOME}/share/hadoop/common/lib/
-    echo "unsure coping gson-2.7 JAR-file. version 2.2.4 is still installed in hadoop"
     cp -rf ${HDXRAMFS_SRC}/jni \
         ${HADOOP_HOME}/jni
 }
@@ -50,6 +51,13 @@ updateHDFS() {
        ${HADOOP_HOME}/share/hadoop/hdfs/
     cp ${HADOOPSRC}/hadoop-hdfs-project/hadoop-hdfs-client/target/hadoop-hdfs-client-${HVERS}.jar \
        ${HADOOP_HOME}/share/hadoop/hdfs/lib/
+}
+
+startDxramFsPeer() {
+    java -XX:+UseMembar \
+    -Dlog4j.configurationFile=${HDXRAMFS_SRC}/target/classes/log4j2.xml \
+    -cp ${HDXRAMFS_SRC}/target/hadoop-dxram-fs-1.0-SNAPSHOT.jar:${HDXRAMFS_SRC}/lib/* \
+    de.hhu.bsinfo.hadoop.fs.dxnet.DxramFsPeer ${HDXRAMFS_SRC}/target/classes/dxnet.json
 }
 
 startSuperpeer() {
