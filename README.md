@@ -95,7 +95,6 @@ working with hack (bad uri, path, localpath handling):
 
 
 File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
-is not actual ...
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -143,9 +142,6 @@ is not actual ...
     </property>
 </configuration>
 ```
-
-It is still a very private testing scenario. The `dxnet.ConfigPath`
-will be changed in the future.
 
 ### Logging
 

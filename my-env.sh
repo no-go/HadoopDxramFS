@@ -57,7 +57,7 @@ startDxramFsPeer() {
     java \
     -Dlog4j.configurationFile=${HDXRAMFS_SRC}/target/classes/log4j2.xml \
     -cp ${HDXRAMFS_SRC}/target/hadoop-dxram-fs-0.07.jar:${HDXRAMFS_SRC}/lib/* \
-    de.hhu.bsinfo.hadoop.fs.dxnet.DxramFsPeer ${HDXRAMFS_SRC}/target/classes/dxnet.json
+    de.hhu.bsinfo.hadoop.fs.dxnet.DxramFsPeer ${HDXRAMFS_SRC}/target/classes/core-site.xml
 }
 
 startSuperpeer() {

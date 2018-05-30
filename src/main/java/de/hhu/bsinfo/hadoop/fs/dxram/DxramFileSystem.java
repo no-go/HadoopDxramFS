@@ -85,9 +85,9 @@ public class DxramFileSystem extends FileSystem {
         setConf(conf);
 
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", theUri, conf);
-        dxnet = DxramFsPeer.setup(getConf(), DxramFsPeer.NODEID_dxnet_Client);
+        dxnet = DxramFsPeer.setup(getConf(), false);
 
-        LOG.info("try to send something to dxnet Peer 0");
+        LOG.info("try to send something to dxnet Peer");
 
         dxnet.registerMessageType(
                 A100bMessage.MTYPE,

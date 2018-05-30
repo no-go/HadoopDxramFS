@@ -21,7 +21,28 @@
     </property>
     
     <property>
-        <name>dxnet.ConfigPath</name>
-        <value>/home/tux/big/HadoopDxramFS/target/classes/dxnet.json</value>
+        <name>dxnet.local.peer.id</name>
+        <value>0</value>
+    </property>
+    <property>
+        <name>dxnet.local.peer.port</name>
+        <value>65221</value>
+    </property>
+    <property>
+        <name>dxnet.local.peer.addr</name>
+        <value>127.0.0.1</value>
+    </property>
+
+    <property>
+        <name>dxnet.local.id</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>dxnet.local.port</name>
+        <value>65222</value>
+    </property>
+    <property>
+        <name>dxnet.local.addr</name>
+        <value>127.0.0.1</value>
     </property>
 </configuration>
