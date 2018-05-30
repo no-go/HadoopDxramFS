@@ -1,0 +1,187 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>de.hhu.bsinfo.hadoop.fs.dxram</groupId>
+  <artifactId>hadoop-dxram-fs</artifactId>
+
+  <packaging>jar</packaging>
+  <version>0.07</version>
+  <name>hadoop-dxram-fs</name>
+  <description>
+    This DXRAM connector lets you run Apache Hadoop MapReduce or HBASE jobs
+    directly on data in DXRAM instead of HDFS.
+  </description>
+  
+  <properties>
+    <toolsjar>${java.home}/../lib/tools.jar</toolsjar>
+      
+    <java.version>1.8</java.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    
+    <hadoop.two.version>2.8.2</hadoop.two.version>
+    <slf4j.version>1.7.10</slf4j.version>
+    <slf4jlog.version>1.7.10</slf4jlog.version>
+    
+    <log4j2.version>2.7</log4j2.version>
+    <gson.version>2.2.4</gson.version>
+
+    <antcontrib.version>20020829</antcontrib.version>
+    <jlinegit.version>2.14.6</jlinegit.version>
+    <log4j.version>1.2.17</log4j.version>
+    <suntools.version>1.5.0</suntools.version>
+    <zookeeper.version>3.4.6</zookeeper.version>
+    <perftimer.version>1.0.0</perftimer.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+    <repository>
+      <id>local-maven-repo</id>
+      <url>file:///${basedir}/lib</url>
+    </repository>
+  </repositories>
+  
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-client</artifactId>
+      <version>${hadoop.two.version}</version>
+      <!-- scope>provided</scope -->
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>${slf4jlog.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>${log4j2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>${gson.version}</version>
+    </dependency>
+
+    <dependency>
+        <groupId>ant-contrib</groupId>
+        <artifactId>ant-contrib</artifactId>
+        <version>${antcontrib.version}</version> 
+    </dependency>
+    <dependency>
+      <groupId>jline</groupId>
+      <artifactId>jline</artifactId>
+      <version>${jlinegit.version}</version>
+    </dependency>
+   <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>com.sun</groupId>
+        <artifactId>tools</artifactId>
+        <version>${suntools.version}</version>
+        <scope>system</scope>
+        <systemPath>${toolsjar}</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.zookeeper</groupId>
+      <artifactId>zookeeper</artifactId>
+      <version>${zookeeper.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>dxutils.perf-timer</groupId>
+      <artifactId>perf-timer</artifactId>
+      <version>${perftimer.version}</version>
+    </dependency>
+  </dependencies>
+  
+  <build>
+    <!-- sourceDirectory>${project.basedir}/src/ma</sourceDirectory -->
+    <resources>
+      <resource>
+        <filtering>false</filtering>
+        <directory>${project.basedir}/jni</directory>
+        <includes>
+          <include>libJNIFileDirect.so</include>
+          <include>libJNIFileRaw.so</include>
+          <include>libJNINativeCRCGenerator.so</include>
+          <include>libJNINativeThreadAffinity.so</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>${project.basedir}/src/main/java</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </resource>
+      <resource>
+        <directory>${project.basedir}/src/main/resources</directory>
+        <includes>
+          <include>*</include>
+        </includes>
+      </resource>
+      <!-- resource>
+        <directory>${project.basedir}/dxram/config</directory>
+        <includes>
+            <include>*</include>
+        </includes>
+      </resource -->
+    </resources>
+    
+    <plugins>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>3.0.0</version>
+            <executions>
+                <execution>
+                    <phase>generate-sources</phase>
+                    <goals>
+                        <goal>add-source</goal>
+                    </goals>
+                    <configuration>
+                        <sources>
+                            <source>${project.basedir}/src</source>
+                            <!-- source>${project.basedir}/dxram/src</source -->
+                        </sources>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.5.1</version>
+            <configuration>
+                <compilerArgument>
+                    -proc:none
+                </compilerArgument>
+                <!-- annotationProcessors/ -->
+                <source>${java.version}</source>
+                <target>${java.version}</target>
+            </configuration>
+        </plugin>
+    </plugins>
+  </build>
+</project>

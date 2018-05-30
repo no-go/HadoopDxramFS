@@ -1,5 +1,11 @@
-.idea/**/*
-target/**/*
+DxramFs/.idea/**/*
+DxramFs/target/**/*
+DxramFs/out/**/*
+
+DxramFs-Peer/.idea/**/*
+DxramFs-Peer/target/**/*
+DxramFs-Peer/out/**/*
+
 #src/main/java/de/hhu/bsinfo/dxnet/**/*
 #dxram/**/*
 
@@ -29,5 +35,3 @@ hs_err_pid*
 ## File-based project format:
 *.iws
 
-# IntelliJ
-out/
