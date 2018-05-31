@@ -1,13 +1,10 @@
-DxramFs/.idea/**/*
-DxramFs/target/**/*
-DxramFs/out/**/*
+fs_project/src/de/hhu/bsinfo/dxramfs/connector/.idea/**/*
+fs_project/src/de/hhu/bsinfo/dxramfs/connector/target/**/*
+fs_project/src/de/hhu/bsinfo/dxramfs/connector/out/**/*
 
-DxramFs-Peer/.idea/**/*
-DxramFs-Peer/target/**/*
-DxramFs-Peer/out/**/*
-
-#src/main/java/de/hhu/bsinfo/dxnet/**/*
-#dxram/**/*
+fs_project/.idea/**/*
+fs_project/target/**/*
+fs_project/out/**/*
 
 # Compiled class file
 *.class
