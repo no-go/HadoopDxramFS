@@ -1,6 +1,6 @@
-package de.hhu.bsinfo.hadoop.fs.dxram;
+package de.hhu.bsinfo.dxramfs.connector;
 
-// Add hadoop-annotations-2.0.0-cdh4.0.1.jar to the classpath
+// Add dxramfs-annotations-2.0.0-cdh4.0.1.jar to the classpath
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;

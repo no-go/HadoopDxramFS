@@ -1,10 +1,17 @@
-package de.hhu.bsinfo.hadoop.fs.dxram;
+package de.hhu.bsinfo.dxramfs.connector;
 
+import de.hhu.bsinfo.dxnet.DXNet;
+import de.hhu.bsinfo.dxnet.MessageReceiver;
+import de.hhu.bsinfo.dxnet.core.Message;
+import de.hhu.bsinfo.dxramfs.Msg.A100bMessage;
+import de.hhu.bsinfo.dxramfs.Msg.DxramFsPeer;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.security.AccessControlException;
 import org.apache.hadoop.util.Progressable;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -14,6 +21,7 @@ import java.util.EnumSet;
 
 public class DxramFs extends DelegateToFileSystem {
     private DxramFileSystem dxramFileSystem;
+    public static final Logger LOG = LogManager.getLogger(DxramFs.class.getName());
 
     public DxramFs(
         URI uri, 
@@ -36,7 +44,7 @@ public class DxramFs extends DelegateToFileSystem {
         super(uri, fs, conf, fs.getScheme(), true);
         
         this.dxramFileSystem = fs;
-        dxramFileSystem.initialize(uri, conf);
+        this.dxramFileSystem.initialize(uri, conf);
     }
 
     @Override
@@ -208,9 +216,7 @@ public class DxramFs extends DelegateToFileSystem {
         UnresolvedLinkException,
         IOException 
     {
-        Path abs = dxramFileSystem.fixRelativePart(f);
-        long blocksize = getServerDefaults(abs).getBlockSize();
-        return new DxramFile(abs, getUri(), blocksize).getFileBlockLocations(start, len);
+        return dxramFileSystem.getFileBlockLocations(f, start, len);
     }
 
     // -----------------------------------------------------------

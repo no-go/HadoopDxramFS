@@ -1,26 +1,18 @@
-package de.hhu.bsinfo.hadoop.fs.dxnet;
+package de.hhu.bsinfo.dxramfs.Msg;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import de.hhu.bsinfo.dxnet.DXNet;
 import de.hhu.bsinfo.dxnet.DXNetConfig;
 import de.hhu.bsinfo.dxnet.DXNetNodeMap;
 import de.hhu.bsinfo.dxnet.MessageReceiver;
 import de.hhu.bsinfo.dxnet.core.Message;
-import de.hhu.bsinfo.dxutils.StorageUnitGsonSerializer;
-import de.hhu.bsinfo.dxutils.TimeUnitGsonSerializer;
-import de.hhu.bsinfo.dxutils.unit.StorageUnit;
-import de.hhu.bsinfo.dxutils.unit.TimeUnit;
 import org.apache.hadoop.conf.Configuration;
 
 import java.net.InetSocketAddress;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/// @todo this will be obsolte - we integrate it in dxram
 public class DxramFsPeer {
     public static final Logger LOG = LogManager.getLogger(DxramFsPeer.class.getName());
 
@@ -47,7 +39,7 @@ public class DxramFsPeer {
                 new DxramFsPeer.InHandler()
         );
 
-        while (inCount < 1) {
+        while (inCount < 1000) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException ignored) {
@@ -101,7 +93,7 @@ public class DxramFsPeer {
         public void onIncomingMessage(Message p_message) {
             A100bMessage eMsg = (A100bMessage) p_message;
             System.out.println(eMsg.toString());
-            System.out.println(eMsg.getData());
+            System.out.println(Integer.toString(inCount) + ": " + eMsg.getData());
             inCount++;
         }
     }

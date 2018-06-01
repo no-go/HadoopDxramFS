@@ -1,33 +1,21 @@
-package de.hhu.bsinfo.hadoop.fs.dxram;
+package de.hhu.bsinfo.dxramfs.connector;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import de.hhu.bsinfo.dxnet.DXNet;
-import de.hhu.bsinfo.dxnet.DXNetConfig;
-import de.hhu.bsinfo.dxnet.DXNetNodeMap;
 import de.hhu.bsinfo.dxnet.MessageReceiver;
 import de.hhu.bsinfo.dxnet.core.Message;
 import de.hhu.bsinfo.dxnet.core.NetworkException;
-import de.hhu.bsinfo.dxutils.StorageUnitGsonSerializer;
-import de.hhu.bsinfo.dxutils.TimeUnitGsonSerializer;
-import de.hhu.bsinfo.dxutils.unit.StorageUnit;
-import de.hhu.bsinfo.dxutils.unit.TimeUnit;
-import de.hhu.bsinfo.hadoop.fs.dxnet.DxramFsPeer;
+import de.hhu.bsinfo.dxramfs.Msg.A100bMessage;
+import de.hhu.bsinfo.dxramfs.Msg.DxramFsPeer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.fs.permission.FsPermission;
+import org.apache.hadoop.security.AccessControlException;
 import org.apache.hadoop.util.Progressable;
-
-import de.hhu.bsinfo.hadoop.fs.dxnet.A100bMessage;
 
 import java.io.*;
 
-import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
@@ -41,7 +29,7 @@ public class DxramFileSystem extends FileSystem {
 
     private URI _myUri;
     private Path _workingDir;
-    private DXNet dxnet;
+    private DXNet _dxn;
 
     @Override
     public URI getUri() {
@@ -72,6 +60,23 @@ public class DxramFileSystem extends FileSystem {
         return super.fixRelativePart(p);
     }
 
+    private DXNet connect(Configuration conf) {
+        DXNet dxnet = DxramFsPeer.setup(conf, false);
+
+        /// @todo brauchbare message typen!
+        dxnet.registerMessageType(
+                A100bMessage.MTYPE,
+                A100bMessage.TAG,
+                A100bMessage.class
+        );
+        dxnet.register(
+                A100bMessage.MTYPE,
+                A100bMessage.TAG,
+                new DxramFileSystem.InHandler()
+        );
+        return dxnet;
+    }
+
     /**
      * Called after a new FileSystem instance is constructed.
      * @param theUri a uri whose authority section names the host, port, etc. for
@@ -83,38 +88,9 @@ public class DxramFileSystem extends FileSystem {
         throws IOException {
         super.initialize(theUri, conf);
         setConf(conf);
-
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", theUri, conf);
-        dxnet = DxramFsPeer.setup(getConf(), false);
-
-        LOG.info("try to send something to dxnet Peer");
-
-        dxnet.registerMessageType(
-                A100bMessage.MTYPE,
-                A100bMessage.TAG,
-                A100bMessage.class
-        );
-        dxnet.register(
-                A100bMessage.MTYPE,
-                A100bMessage.TAG,
-                new DxramFileSystem.InHandler()
-        );
-
-        A100bMessage msg = new A100bMessage(
-                DxramFsPeer.NODEID_dxnet_peer,
-                new String("Hallo Welt")
-        );
-
-        try {
-            dxnet.sendMessage(msg);
-        } catch (NetworkException e) {
-            e.printStackTrace();
-        }
-
-        dxnet.close();
-
-
         String authority = theUri.getAuthority();
+        _dxn = connect(conf);
         try {
             _myUri = new URI(SCHEME, authority, "/", null, null);
             LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+" myuri: {}", _myUri);
@@ -143,7 +119,7 @@ public class DxramFileSystem extends FileSystem {
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", f, bufferSize);
         Path absF = fixRelativePart(f);
         long blocksize = getServerDefaults(absF).getBlockSize();
-        DxramFile dxfile = new DxramFile(absF, _myUri, blocksize);
+        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri, blocksize);
         return dxfile.open(bufferSize);
     }
 
@@ -155,8 +131,9 @@ public class DxramFileSystem extends FileSystem {
         Path absF2 = fixRelativePart(dst);
         long blocksize = getServerDefaults(absF1).getBlockSize();
         long blocksize2 = getServerDefaults(absF2).getBlockSize();
-        DxramFile file = new DxramFile(absF1, _myUri, blocksize);
-        DxramFile file2 = new DxramFile(absF2, _myUri, blocksize2);
+
+        DxramFile file = new DxramFile(_dxn, absF1, _myUri, blocksize);
+        DxramFile file2 = new DxramFile(_dxn, absF2, _myUri, blocksize2);
         
         if (file2.exists()) {
             throw new java.io.IOException("destination file exists");
@@ -182,7 +159,7 @@ public class DxramFileSystem extends FileSystem {
             f, permission, overwrite, bufferSize, replication, blockSize, progress);
 
         Path absF = fixRelativePart(f);
-        DxramFile dxfile = new DxramFile(absF, _myUri, blockSize);
+        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri, blockSize);
         
         return dxfile.create(bufferSize, replication, true);
     }
@@ -201,7 +178,7 @@ public class DxramFileSystem extends FileSystem {
             f, permission, overwrite, bufferSize, replication, blockSize, progress);
 
         Path absF = fixRelativePart(f);
-        DxramFile dxfile = new DxramFile(absF, _myUri, blockSize);
+        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri, blockSize);
         
         return dxfile.create(bufferSize, replication, false);
     }
@@ -211,7 +188,7 @@ public class DxramFileSystem extends FileSystem {
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", f, permission);
         Path absF = fixRelativePart(f);
         long blocksize = getServerDefaults(absF).getBlockSize();
-        DxramFile dxfile = new DxramFile(absF, _myUri, blocksize);
+        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri, blocksize);
         if (dxfile.exists()) 
             throw new FileAlreadyExistsException("mkdirs: " + dxfile.toString() + " exists");
         return dxfile.mkdirs();
@@ -223,7 +200,7 @@ public class DxramFileSystem extends FileSystem {
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", f, recursive);
         Path absF = fixRelativePart(f);
         long blocksize = getServerDefaults(absF).getBlockSize();
-        DxramFile dxfile = new DxramFile(absF, _myUri, blocksize);
+        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri, blocksize);
         
         if (!dxfile.exists()) {
             if (recursive) {
@@ -273,8 +250,8 @@ public class DxramFileSystem extends FileSystem {
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})", p);
 
         /**
-         * @todo hack: listStatus [] I get dxram://abook.localhost.fake:9000/tmp/myfs
-         *     and not listStatus [] dxram://abook.localhost.fake:9000/
+         * @todo hack: listStatus [] I get connector://abook.localhost.fake:9000/tmp/myfs
+         *     and not listStatus [] connector://abook.localhost.fake:9000/
          */
         /*
         String check = p.toString() + "/";
@@ -291,9 +268,10 @@ public class DxramFileSystem extends FileSystem {
 
         } else if (fileStatus.isDirectory()) {
             DxramFile file = new DxramFile(
-                fileStatus.getPath(),
-                _myUri,
-                fileStatus.getBlockSize()
+                    _dxn,
+                    fileStatus.getPath(),
+                    _myUri,
+                    fileStatus.getBlockSize()
             );
             for (DxramFile childFile : file.listFiles()) {
                 statusArrayList.add(childFile.getFileStatus());
@@ -309,13 +287,29 @@ public class DxramFileSystem extends FileSystem {
         
         Path absF = fixRelativePart(p);
         long blocksize = getServerDefaults(absF).getBlockSize();
-        DxramFile dxfile = new DxramFile(absF, _myUri, blocksize);
+        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri, blocksize);
         
         if (!dxfile.exists()) {
             throw new FileNotFoundException("_getFileStatus: " + p.toString() + " not exists");
         }
         
         return dxfile.getFileStatus();
+    }
+
+    @Override
+    public BlockLocation[] getFileBlockLocations(
+            Path f,
+            long start,
+            long len
+    ) throws
+            AccessControlException,
+            FileNotFoundException,
+            UnresolvedLinkException,
+            IOException
+    {
+        Path abs = fixRelativePart(f);
+        long blocksize = getServerDefaults(abs).getBlockSize();
+        return new DxramFile(_dxn, abs, getUri(), blocksize).getFileBlockLocations(start, len);
     }
 
     // -------------------------xxxxxxxxxxxxxxxxxxxx-----------------xxxxxxxxxxxxxxxx------------
@@ -325,7 +319,8 @@ public class DxramFileSystem extends FileSystem {
         public void onIncomingMessage(Message p_message) {
             A100bMessage eMsg = (A100bMessage) p_message;
             LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})", eMsg.getData());
-            //System.out.println(eMsg.toString());
+            LOG.info(eMsg.toString());
         }
     }
+
 }

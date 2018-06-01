@@ -40,6 +40,31 @@ instead of HDFS.
 
 ![Schematic Sketch](notes/Structure.png)
 
+To reduce confusion, here are some simple keywords to communicate over
+different project parts:
+
+### DxramFs
+
+-   the **hadoop part**
+-   it is a **client**
+-   it **requests** Filedata
+-   it is a **connector** to a DXRAM Peer
+-   it **uses DXNet** to connect to a DXRAM Peer/Application
+
+### DxramFs-Peer
+
+-   the **DXRAM part**
+-   it is a **server**
+-   it serves Filedata
+-   it **handles DXNet Messages** with DXRAM
+-   it is a **DXRAM Application** running on **a Peer**
+
+### Node vs. Peer
+
+Hadoop splits **processes** and lets calculate them **with blockdata on nodes** .
+
+DXRAM splits **Memory requests** and get/set their data **as chunks on peers**.
+
 ## a DXNet/DXRAM Test
 
 Start my Envorinment (and take a look into this bash file):
@@ -102,14 +127,23 @@ File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
 <configuration>
     <property>
         <name>fs.dxram.impl</name>
-        <value>de.hhu.bsinfo.hadoop.fs.dxram.DxramFileSystem</value>
+        <value>de.hhu.bsinfo.dxramfs.connector.DxramFileSystem</value>
         <description>The FileSystem for dxram.</description>
     </property>
     <property>
         <name>fs.AbstractFileSystem.dxram.impl</name>
-        <value>de.hhu.bsinfo.hadoop.fs.dxram.DxramFs</value>
-        <description>The AbstractFileSystem for dxram</description>
+        <value>de.hhu.bsinfo.dxramfs.connector.DxramFs</value>
+        <description>
+            The AbstractFileSystem for dxram
+        </description>
     </property>
+    <property>
+        <name>fs.defaultFS</name>
+        <!-- value>file:///tmp/tee/</value -->
+        <!-- value>hdfs://localhost:9000</value -->
+        <value>dxram://localhost:9000</value>
+    </property>
+    
     <property>
         <name>dxnet.local.peer.id</name>
         <value>0</value>
@@ -136,10 +170,6 @@ File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
         <value>127.0.0.1</value>
     </property>
 
-    <property>
-        <name>fs.defaultFS</name>
-        <value>dxram://localhost:9000</value>
-    </property>
 </configuration>
 ```
 

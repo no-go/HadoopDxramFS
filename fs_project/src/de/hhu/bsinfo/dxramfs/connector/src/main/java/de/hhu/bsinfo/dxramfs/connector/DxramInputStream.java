@@ -1,8 +1,7 @@
-package de.hhu.bsinfo.hadoop.fs.dxram;
+package de.hhu.bsinfo.dxramfs.connector;
 
 import java.io.*;
 
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.PositionedReadable;
 import org.apache.hadoop.fs.Seekable;
 

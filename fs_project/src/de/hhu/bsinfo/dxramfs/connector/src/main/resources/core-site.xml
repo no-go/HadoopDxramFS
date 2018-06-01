@@ -3,12 +3,12 @@
 <configuration>
     <property>
         <name>fs.dxram.impl</name>
-        <value>de.hhu.bsinfo.hadoop.fs.dxram.DxramFileSystem</value>
+        <value>de.hhu.bsinfo.dxramfs.connector.DxramFileSystem</value>
         <description>The FileSystem for dxram.</description>
     </property>
     <property>
         <name>fs.AbstractFileSystem.dxram.impl</name>
-        <value>de.hhu.bsinfo.hadoop.fs.dxram.DxramFs</value>
+        <value>de.hhu.bsinfo.dxramfs.connector.DxramFs</value>
         <description>
             The AbstractFileSystem for dxram
         </description>

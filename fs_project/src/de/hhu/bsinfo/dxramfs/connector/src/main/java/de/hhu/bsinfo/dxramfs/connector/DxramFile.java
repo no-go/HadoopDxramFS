@@ -1,5 +1,9 @@
-package de.hhu.bsinfo.hadoop.fs.dxram;
+package de.hhu.bsinfo.dxramfs.connector;
 
+import de.hhu.bsinfo.dxnet.DXNet;
+import de.hhu.bsinfo.dxnet.core.NetworkException;
+import de.hhu.bsinfo.dxramfs.Msg.A100bMessage;
+import de.hhu.bsinfo.dxramfs.Msg.DxramFsPeer;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.security.AccessControlException;
 import org.apache.hadoop.fs.permission.FsPermission;
@@ -10,7 +14,6 @@ import java.nio.file.Paths;
 import java.io.*;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
@@ -22,17 +25,34 @@ public class DxramFile {
     
     public static final Logger LOG = LogManager.getLogger(DxramFile.class.getName());
     
-    private Path         _absPath;
-    private URI          _uri;
-    private long         _blocksize;
+    private Path        _absPath;
+    private URI         _uri;
+    private long        _blocksize;
+    private DXNet       _dxnet;
     
     /// @todo File OP
     private java.io.File _dummy;
-    
-    public DxramFile(Path absPath, URI uri, long blocksize) {
+
+    private boolean send(String str) {
+        A100bMessage msg = new A100bMessage(
+                DxramFsPeer.NODEID_dxnet_peer,
+                str
+        );
+
+        try {
+            _dxnet.sendMessage(msg);
+            return true;
+        } catch (NetworkException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public DxramFile(DXNet dxnet, Path absPath, URI uri, long blocksize) {
+        _dxnet     = dxnet;
         _uri       = uri;
         _blocksize = blocksize;
-         _absPath  = absPath;
+        _absPath   = absPath;
         
         /// @todo File OP
         String s = hpath2lpath(_absPath);
@@ -40,20 +60,20 @@ public class DxramFile {
     }
     
     /** @todo File OP
-     *  dxram://localhost:9000/abc/de -> /tmp/myfs/abc/de
+     *  connector://localhost:9000/abc/de -> /tmp/myfs/abc/de
      */
     private String hpath2lpath(Path hpath) {
         return hpath.toString().replace(_uri.toString(), DEBUG_LOCAL);
     }
     
     /** @todo File OP
-     *  /tmp/myfs/abc/de -> dxram://localhost:9000/abc/de
+     *  /tmp/myfs/abc/de -> connector://localhost:9000/abc/de
      */
     private Path lpath2hpath(String lpath) {
         Path p = new Path(lpath.replace(DEBUG_LOCAL, _uri.toString()));
         /**
-         * @todo hack: bad   dxram://abook.localhost.fake:9000/tmp/myfs
-         *            good   dxram://abook.localhost.fake:9000/
+         * @todo hack: bad   connector://abook.localhost.fake:9000/tmp/myfs
+         *            good   connector://abook.localhost.fake:9000/
          */
         if ((lpath + Path.SEPARATOR).equals(DEBUG_LOCAL)) {
             p = new Path(_uri);
@@ -63,43 +83,50 @@ public class DxramFile {
     
     public boolean exists() {
         /// @todo File OP
+        send("exists() " + _dummy.getName());
         return _dummy.exists();
     }
     
     public boolean isDirectory() {
         /// @todo File OP
+        send("isDir() " + _dummy.getName());
         return _dummy.isDirectory();
     }
     
     public long length() {
         /// @todo File OP
+        send("length() " + _dummy.getName());
         return _dummy.length();
     }
 
     public boolean delete() throws IOException {
         /// @todo File OP
+        send("delete() " + _dummy.getName());
         return _dummy.delete();
     }
     
     public boolean renameTo(DxramFile dest) {
         /// @todo File OP
+        send("rename() " + _dummy.getName() + " ->" + dest._dummy.getName());
         return _dummy.renameTo(dest._dummy);
     }
 
     public boolean mkdirs() throws IOException {
         /// @todo File OP
+        send("mkdirs() " + _dummy.getName());
         return _dummy.mkdirs();
     }
     
     public DxramFile[] listFiles() throws FileNotFoundException, IOException {
         ArrayList<DxramFile> fArrayList = new ArrayList<>();
-        
+        send("listFiles() " + _dummy.getName());
+
         /// @todo File OP
         for (File childFile : _dummy.listFiles()) {
             Path p = lpath2hpath(childFile.getAbsolutePath());
             
             /// @todo _blocksize is a dummy at this place, because local fs did not store it
-            DxramFile dxfile = new DxramFile(p, _uri, _blocksize);
+            DxramFile dxfile = new DxramFile(_dxnet, p, _uri, _blocksize);
             
             fArrayList.add(dxfile);
         }
@@ -107,6 +134,8 @@ public class DxramFile {
     }
     
     public FileStatus getFileStatus() {
+        send("getFileStatus() " + _dummy.getName());
+
         return new FileStatus(
             this.length(),
             this.isDirectory(),
@@ -133,21 +162,24 @@ public class DxramFile {
         if (this.exists()) throw new FileAlreadyExistsException("file still exists");
         
         /// @todo File OP
+        send("create: java io file.getAbsolutePath() " + _dummy.getName());
         String absolutePath = _dummy.getAbsolutePath();
         String filePath = absolutePath.substring(0, absolutePath.lastIndexOf(Path.SEPARATOR));
         
         //LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName() + "() filepath = {}",filePath);
         
         /// @todo File OP
+        send("create: java io Files.notExists(Paths.get(filePath))) " + filePath);
         if (Files.notExists(Paths.get(filePath))) {
             Path absF = lpath2hpath(filePath);
-            DxramFile dxfile = new DxramFile(absF, _uri, _blocksize);
+            DxramFile dxfile = new DxramFile(_dxnet, absF, _uri, _blocksize);
             dxfile.mkdirs();
         } else {
             if (recursive == false) throw new IOException("director(ies) do not exists");
         }
         
         /// @todo File OP
+        send("create: java io file.createNewFile() " + _dummy.getName());
         _dummy.createNewFile();
         OutputStream out = new FileOutputStream(_dummy);
         FSDataOutputStream outs = new FSDataOutputStream(out, (Statistics)null);
@@ -159,6 +191,7 @@ public class DxramFile {
         byte[] data = new byte[(int) this.length()];
         
         /// @todo File OP
+        send("open: java io FileInputStream() " + _dummy.getName());
         FileInputStream fis = new FileInputStream(_dummy);
         fis.read(data);
         fis.close();
@@ -188,8 +221,10 @@ public class DxramFile {
         
         /**
          * @todo: after implement a real distributed fs, we have to implement this !!!!
-         * -> but: where did the hadoop ekosystem handle this?!
+         * -> but: where did the dxramfs ekosystem handle this?!
          */
+        send("getFileBlockLocations() " + _dummy.getName());
+
         return new BlockLocation[0];
     }
 

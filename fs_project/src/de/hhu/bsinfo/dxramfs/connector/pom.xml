@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>de.hhu.bsinfo.hadoop.fs.dxram</groupId>
+  <groupId>de.hhu.bsinfo.dxramfs.connector</groupId>
   <artifactId>hadoop-dxram-fs</artifactId>
 
   <packaging>jar</packaging>
@@ -142,7 +142,7 @@
         </includes>
       </resource>
       <!-- resource>
-        <directory>${project.basedir}/dxram/config</directory>
+        <directory>${project.basedir}/connector/config</directory>
         <includes>
             <include>*</include>
         </includes>
@@ -163,7 +163,7 @@
                     <configuration>
                         <sources>
                             <source>${project.basedir}/src</source>
-                            <!-- source>${project.basedir}/dxram/src</source -->
+                            <!-- source>${project.basedir}/connector/src</source -->
                         </sources>
                     </configuration>
                 </execution>

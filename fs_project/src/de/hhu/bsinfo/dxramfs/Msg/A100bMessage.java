@@ -1,4 +1,4 @@
-package de.hhu.bsinfo.hadoop.fs.dxnet;
+package de.hhu.bsinfo.dxramfs.Msg;
 
 import de.hhu.bsinfo.dxnet.core.AbstractMessageExporter;
 import de.hhu.bsinfo.dxnet.core.AbstractMessageImporter;

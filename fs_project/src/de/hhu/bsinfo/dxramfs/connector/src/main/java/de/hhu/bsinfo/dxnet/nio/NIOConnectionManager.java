@@ -69,9 +69,9 @@ public class NIOConnectionManager extends AbstractConnectionManager {
      * Creates a NIO connection manager.
      *
      * @param p_coreConfig
-     *         all dxnet core configuration values.
+     *         all Msg core configuration values.
      * @param p_nioConfig
-     *         all dxnet nio configuration values.
+     *         all Msg nio configuration values.
      * @param p_nodeMap
      *         the node map.
      * @param p_messageDirectory
