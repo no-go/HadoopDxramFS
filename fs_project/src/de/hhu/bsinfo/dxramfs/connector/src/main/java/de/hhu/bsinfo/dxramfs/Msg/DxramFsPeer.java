@@ -61,8 +61,13 @@ public class DxramFsPeer {
         NODEID_dxnet_peer = Short.valueOf(hadoopCoreConf.get("dxnet.local.peer.id"));
         if (iAmPeer) nodeId = NODEID_dxnet_peer;
 
+        System.out.println("get conf done");
+
         conf.getCoreConfig().setOwnNodeId(nodeId);
+        System.out.println("set own node id done");
+
         nodeMap = new DXNetNodeMap(nodeId);
+        System.out.println("nodemap done");
 
         nodeMap.addNode(
                 Short.valueOf(hadoopCoreConf.get("dxnet.local.peer.id")),

@@ -35,7 +35,7 @@ public class DxramFile {
 
     private boolean send(String str) {
         A100bMessage msg = new A100bMessage(
-                DxramFsPeer.NODEID_dxnet_peer,
+                DxramFileSystem.NODEID_dxnet_Peer,
                 str
         );
 

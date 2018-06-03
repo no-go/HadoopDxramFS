@@ -1,6 +1,8 @@
 package de.hhu.bsinfo.dxramfs.connector;
 
 import de.hhu.bsinfo.dxnet.DXNet;
+import de.hhu.bsinfo.dxnet.DXNetConfig;
+import de.hhu.bsinfo.dxnet.DXNetNodeMap;
 import de.hhu.bsinfo.dxnet.MessageReceiver;
 import de.hhu.bsinfo.dxnet.core.Message;
 import de.hhu.bsinfo.dxnet.core.NetworkException;
@@ -14,6 +16,7 @@ import org.apache.hadoop.util.Progressable;
 
 import java.io.*;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -30,6 +33,8 @@ public class DxramFileSystem extends FileSystem {
     private URI _myUri;
     private Path _workingDir;
     private DXNet _dxn;
+    public static short NODEID_dxnet_Client = 1;
+    public static short NODEID_dxnet_Peer = 0;
 
     @Override
     public URI getUri() {
@@ -60,8 +65,47 @@ public class DxramFileSystem extends FileSystem {
         return super.fixRelativePart(p);
     }
 
-    private DXNet connect(Configuration conf) {
-        DXNet dxnet = DxramFsPeer.setup(conf, false);
+    private DXNet connect() {
+        DXNetConfig conf = new DXNetConfig();
+        DXNetNodeMap nodeMap = null;
+
+        int nodeId = Integer.valueOf(getConf().get("dxnet.local.id"));
+        System.out.println("get dxnet.local.id done");
+        NODEID_dxnet_Client = (short) nodeId;
+        nodeId = Integer.valueOf(getConf().get("dxnet.local.peer.id"));
+        NODEID_dxnet_Peer = (short) nodeId;
+        System.out.println("get dxnet.local.peer.id done");
+
+        System.out.println("get conf done");
+
+        conf.getCoreConfig().setOwnNodeId(NODEID_dxnet_Client);
+        System.out.println("set own node id done");
+
+        nodeMap = new DXNetNodeMap(NODEID_dxnet_Client);
+        System.out.println("nodemap done");
+
+        nodeMap.addNode(
+                NODEID_dxnet_Peer,
+                new InetSocketAddress(
+                        getConf().get("dxnet.local.peer.addr"),
+                        Integer.valueOf(getConf().get("dxnet.local.peer.port"))
+                )
+        );
+        nodeMap.addNode(
+                NODEID_dxnet_Client,
+                new InetSocketAddress(
+                        getConf().get("dxnet.local.addr"),
+                        Integer.valueOf(getConf().get("dxnet.local.port"))
+                )
+        );
+
+        DXNet dxnet = new DXNet(
+                conf.getCoreConfig(),
+                conf.getNIOConfig(),
+                conf.getIBConfig(),
+                conf.getLoopbackConfig(),
+                nodeMap
+        );
 
         /// @todo brauchbare message typen!
         dxnet.registerMessageType(
@@ -90,7 +134,7 @@ public class DxramFileSystem extends FileSystem {
         setConf(conf);
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", theUri, conf);
         String authority = theUri.getAuthority();
-        _dxn = connect(conf);
+        _dxn = connect();
         try {
             _myUri = new URI(SCHEME, authority, "/", null, null);
             LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+" myuri: {}", _myUri);
