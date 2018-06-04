@@ -7,13 +7,18 @@ import de.hhu.bsinfo.dxnet.core.Message;
 import de.hhu.bsinfo.dxram.DXRAM;
 import de.hhu.bsinfo.dxram.app.AbstractApplication;
 import de.hhu.bsinfo.dxram.boot.BootService;
+import de.hhu.bsinfo.dxram.chunk.ChunkService;
+import de.hhu.bsinfo.dxram.data.DataStructure;
+import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
 import de.hhu.bsinfo.dxram.engine.DXRAMVersion;
 import de.hhu.bsinfo.dxram.net.NetworkService;
 import de.hhu.bsinfo.dxramfs.Msg.A100bMessage;
-import de.hhu.bsinfo.dxterm.TerminalServerApplication;
 import de.hhu.bsinfo.dxutils.NodeID;
+import de.hhu.bsinfo.dxutils.serialization.Exporter;
+import de.hhu.bsinfo.dxutils.serialization.Importer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import de.hhu.bsinfo.dxram.data.ChunkID;
 
 public class DxramFsPeerApp extends AbstractApplication {
     @Expose
@@ -23,6 +28,12 @@ public class DxramFsPeerApp extends AbstractApplication {
 
     private static final Logger LOG = LogManager.getFormatterLogger(DxramFsPeerApp.class.getSimpleName());
     private static int inCount = 0;
+    private long ROOT_CID;
+    private BootService bootS;
+    private NetworkService networkS;
+    private ChunkService chunkS;
+    private NameserviceService nameS;
+    private RootFsNode ROOTN;
 
     @Override
     public DXRAMVersion getBuiltAgainstVersion() {
@@ -41,20 +52,35 @@ public class DxramFsPeerApp extends AbstractApplication {
 
     @Override
     public void main() {
-        BootService bootService = getService(BootService.class);
-        NetworkService m_network = getService(NetworkService.class);
+        bootS = getService(BootService.class);
+        networkS = getService(NetworkService.class);
+        chunkS = getService(ChunkService.class);
+        nameS = getService(NameserviceService.class);
 
-        System.out.println("Hello, I am application " + getApplicationName() + " on a peer and my node id is " + NodeID.toHexString(bootService.getNodeID()));
+        System.out.println(
+                " am application " + getApplicationName() + " on a peer" +
+                " and my node id is " + NodeID.toHexString(bootS.getNodeID())
+        );
         System.out.println("Configuration value m_val: " + m_val);
         System.out.println("Configuration value m_str: " + m_str);
 
-        m_network.registerMessageType(
+
+        ROOTN = new RootFsNode();
+        if(nameS.getChunkID("ROOT/", 10) == ChunkID.INVALID_ID){
+            ROOT_CID = chunkS.create(ROOTN.sizeofObject(), 1)[0];
+            nameS.register(ROOT_CID, "ROOT/");
+        }
+        ROOT_CID = nameS.getChunkID("ROOT/", 10);
+        ROOTN.setID(ROOT_CID);
+        chunkS.get(ROOTN);
+
+        networkS.registerMessageType(
                 A100bMessage.MTYPE,
                 A100bMessage.TAG,
                 A100bMessage.class
         );
 
-        m_network.registerReceiver(
+        networkS.registerReceiver(
                 A100bMessage.MTYPE,
                 A100bMessage.TAG,
                 new DxramFsPeerApp.InHandler()
@@ -79,9 +105,27 @@ public class DxramFsPeerApp extends AbstractApplication {
         @Override
         public void onIncomingMessage(Message p_message) {
             A100bMessage eMsg = (A100bMessage) p_message;
-            LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({})", eMsg.getData());
-            LOG.info(eMsg.toString());
+            System.out.println(eMsg.getData());
+            
             inCount++;
+        }
+    }
+
+    class RootFsNode extends DataStructure {
+
+        @Override
+        public void exportObject(Exporter p_exporter) {
+
+        }
+
+        @Override
+        public void importObject(Importer p_importer) {
+
+        }
+
+        @Override
+        public int sizeofObject() {
+            return 0;
         }
     }
 }
