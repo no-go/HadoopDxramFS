@@ -33,8 +33,8 @@ public class DxramFileSystem extends FileSystem {
     private URI _myUri;
     private Path _workingDir;
     private DXNet _dxn;
-    public static short NODEID_dxnet_Client = 1;
-    public static short NODEID_dxnet_Peer = 0;
+    public static short NODEID_dxnet_Client = 0;
+    public static short NODEID_dxnet_Peer = 1;
 
     @Override
     public URI getUri() {
@@ -69,10 +69,10 @@ public class DxramFileSystem extends FileSystem {
         DXNetConfig conf = new DXNetConfig();
         DXNetNodeMap nodeMap = null;
 
-        int nodeId = Integer.valueOf(getConf().get("dxnet.local.id"));
+        int nodeId = Integer.valueOf(getConf().get("dxnet_local_id"));
         System.out.println("get dxnet.local.id done");
         NODEID_dxnet_Client = (short) nodeId;
-        nodeId = Integer.valueOf(getConf().get("dxnet.local.peer.id"));
+        nodeId = Integer.valueOf(getConf().get("dxnet_local_peer_id"));
         NODEID_dxnet_Peer = (short) nodeId;
         System.out.println("get dxnet.local.peer.id done");
 
@@ -87,15 +87,15 @@ public class DxramFileSystem extends FileSystem {
         nodeMap.addNode(
                 NODEID_dxnet_Peer,
                 new InetSocketAddress(
-                        getConf().get("dxnet.local.peer.addr"),
-                        Integer.valueOf(getConf().get("dxnet.local.peer.port"))
+                        getConf().get("dxnet_local_peer_addr"),
+                        Integer.valueOf(getConf().get("dxnet_local_peer_port"))
                 )
         );
         nodeMap.addNode(
                 NODEID_dxnet_Client,
                 new InetSocketAddress(
-                        getConf().get("dxnet.local.addr"),
-                        Integer.valueOf(getConf().get("dxnet.local.port"))
+                        getConf().get("dxnet_local_addr"),
+                        Integer.valueOf(getConf().get("dxnet_local_port"))
                 )
         );
 

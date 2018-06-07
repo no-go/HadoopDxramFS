@@ -18,8 +18,8 @@ public class DxramFsPeer {
 
     private static int inCount = 0;
 
-    public static short NODEID_dxnet_peer = 0;
-    public static short NODEID_dxnet_Client = 1;
+    public static short NODEID_dxnet_peer = 1;
+    public static short NODEID_dxnet_Client = 0;
 
     public static void main(final String[] args) {
         System.out.println("Cwd: " + System.getProperty("user.dir"));
@@ -56,9 +56,9 @@ public class DxramFsPeer {
 
         DXNetNodeMap nodeMap = null;
 
-        short nodeId = Short.valueOf(hadoopCoreConf.get("dxnet.local.id"));
+        short nodeId = Short.valueOf(hadoopCoreConf.get("dxnet_local_id"));
         NODEID_dxnet_Client = nodeId;
-        NODEID_dxnet_peer = Short.valueOf(hadoopCoreConf.get("dxnet.local.peer.id"));
+        NODEID_dxnet_peer = Short.valueOf(hadoopCoreConf.get("dxnet_local_peer_id"));
         if (iAmPeer) nodeId = NODEID_dxnet_peer;
 
         System.out.println("get conf done");
@@ -70,17 +70,17 @@ public class DxramFsPeer {
         System.out.println("nodemap done");
 
         nodeMap.addNode(
-                Short.valueOf(hadoopCoreConf.get("dxnet.local.peer.id")),
+                Short.valueOf(hadoopCoreConf.get("dxnet_local_peer_id")),
                 new InetSocketAddress(
-                        hadoopCoreConf.get("dxnet.local.peer.addr"),
-                        Integer.valueOf(hadoopCoreConf.get("dxnet.local.peer.port"))
+                        hadoopCoreConf.get("dxnet_local_peer_addr"),
+                        Integer.valueOf(hadoopCoreConf.get("dxnet_local_peer_port"))
                 )
         );
         nodeMap.addNode(
-                Short.valueOf(hadoopCoreConf.get("dxnet.local.id")),
+                Short.valueOf(hadoopCoreConf.get("dxnet_local_id")),
                 new InetSocketAddress(
-                        hadoopCoreConf.get("dxnet.local.addr"),
-                        Integer.valueOf(hadoopCoreConf.get("dxnet.local.port"))
+                        hadoopCoreConf.get("dxnet_local_addr"),
+                        Integer.valueOf(hadoopCoreConf.get("dxnet_local_port"))
                 )
         );
 

@@ -145,28 +145,28 @@ File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
     </property>
     
     <property>
-        <name>dxnet.local.peer.id</name>
+        <name>dxnet_local_id</name>
         <value>0</value>
     </property>
     <property>
-        <name>dxnet.local.peer.port</name>
-        <value>65221</value>
+        <name>dxnet_local_port</name>
+        <value>65220</value>
     </property>
     <property>
-        <name>dxnet.local.peer.addr</name>
+        <name>dxnet_local_addr</name>
         <value>127.0.0.1</value>
     </property>
 
     <property>
-        <name>dxnet.local.id</name>
+        <name>dxnet_local_peer_id</name>
         <value>1</value>
     </property>
     <property>
-        <name>dxnet.local.port</name>
-        <value>65222</value>
+        <name>dxnet_local_peer_port</name>
+        <value>65221</value>
     </property>
     <property>
-        <name>dxnet.local.addr</name>
+        <name>dxnet_local_peer_addr</name>
         <value>127.0.0.1</value>
     </property>
 

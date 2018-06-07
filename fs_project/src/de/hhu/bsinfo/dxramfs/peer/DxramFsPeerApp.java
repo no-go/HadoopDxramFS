@@ -22,11 +22,23 @@ import de.hhu.bsinfo.dxram.data.ChunkID;
 
 public class DxramFsPeerApp extends AbstractApplication {
     @Expose
-    private int m_val = 5;
+    private int dxnet_local_id = 40; // dummy - you get it from config!
     @Expose
-    private String m_str = "test";
+    private String dxnet_local_addr = "127.0.0.1";
+    @Expose
+    private int dxnet_local_port = 6500; // dummy - you get it from config!
+    @Expose
+    private int dxnet_local_peer_id = 41; // dummy - you get it from config!
+    @Expose
+    private String dxnet_local_peer_addr = "127.0.0.1";
+    @Expose
+    private int dxnet_local_peer_port = 6501; // dummy - you get it from config!
+    @Expose
+    private String ROOT_Chunk = "root"; // dummy - you get it from config!
+
 
     private static final Logger LOG = LogManager.getFormatterLogger(DxramFsPeerApp.class.getSimpleName());
+
     private static int inCount = 0;
     private long ROOT_CID;
     private BootService bootS;
@@ -59,18 +71,25 @@ public class DxramFsPeerApp extends AbstractApplication {
 
         System.out.println(
                 " am application " + getApplicationName() + " on a peer" +
-                " and my node id is " + NodeID.toHexString(bootS.getNodeID())
+                " and my dxram node id is " + NodeID.toHexString(bootS.getNodeID())
         );
-        System.out.println("Configuration value m_val: " + m_val);
-        System.out.println("Configuration value m_str: " + m_str);
+        System.out.println("Where your Hadoop Node is:");
+        System.out.println("DXNET dxnet_local_id  : " + dxnet_local_id);
+        System.out.println("DXNET dxnet_local_port: " + dxnet_local_port);
+        System.out.println("DXNET dxnet_local_addr: " + dxnet_local_addr);
+
+        System.out.println("How Hadoop DxramFs has to connect me:");
+        System.out.println("DXNET dxnet_local_peer_id  : " + dxnet_local_peer_id);
+        System.out.println("DXNET dxnet_local_peer_port: " + dxnet_local_peer_port);
+        System.out.println("DXNET dxnet_local_peer_addr: " + dxnet_local_peer_addr);
 
 
         ROOTN = new RootFsNode();
-        if(nameS.getChunkID("ROOT/", 10) == ChunkID.INVALID_ID){
+        if(nameS.getChunkID(ROOT_Chunk, 10) == ChunkID.INVALID_ID){
             ROOT_CID = chunkS.create(ROOTN.sizeofObject(), 1)[0];
-            nameS.register(ROOT_CID, "ROOT/");
+            nameS.register(ROOT_CID, ROOT_Chunk);
         }
-        ROOT_CID = nameS.getChunkID("ROOT/", 10);
+        ROOT_CID = nameS.getChunkID(ROOT_Chunk, 10);
         ROOTN.setID(ROOT_CID);
         chunkS.get(ROOTN);
 
@@ -106,7 +125,7 @@ public class DxramFsPeerApp extends AbstractApplication {
         public void onIncomingMessage(Message p_message) {
             A100bMessage eMsg = (A100bMessage) p_message;
             System.out.println(eMsg.getData());
-            
+
             inCount++;
         }
     }
