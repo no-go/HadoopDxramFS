@@ -75,7 +75,7 @@ public class DXNetConfig {
     /**
      * Constructor
      */
-    DXNetConfig() {
+    public DXNetConfig() {
 
     }
 
@@ -117,7 +117,7 @@ public class DXNetConfig {
      *
      * @return Configuration
      */
-    CoreConfig getCoreConfig() {
+    public CoreConfig getCoreConfig() {
         return m_coreConfig;
     }
 
@@ -126,7 +126,7 @@ public class DXNetConfig {
      *
      * @return Configuration
      */
-    NIOConfig getNIOConfig() {
+    public NIOConfig getNIOConfig() {
         return m_nioConfig;
     }
 
@@ -135,7 +135,7 @@ public class DXNetConfig {
      *
      * @return Configuration
      */
-    IBConfig getIBConfig() {
+    public IBConfig getIBConfig() {
         return m_ibConfig;
     }
 
@@ -144,7 +144,7 @@ public class DXNetConfig {
      *
      * @return Configuration
      */
-    LoopbackConfig getLoopbackConfig() {
+    public LoopbackConfig getLoopbackConfig() {
         return m_loopbackConfig;
     }
 

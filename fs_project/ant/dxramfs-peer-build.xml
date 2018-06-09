@@ -57,7 +57,7 @@
 
         <javac srcdir="${source_dir}" destdir="${build_proj_dir}/classes/${buildtype}" includeantruntime="false"
                debug="${debugOn}" optimize="${optimizeOn}" target="1.8" encoding="UTF-8">
-            <include name="de/hhu/bsinfo/dxramfs/Msg/**/*.java"/>
+            <include name="de/hhu/bsinfo/dxramfs/core/**/*.java"/>
             <include name="de/hhu/bsinfo/dxramfs/peer/**/*.java"/>
             <classpath>
                 <file file="${build_proj_dir}/${name_dxram}.jar"></file>
