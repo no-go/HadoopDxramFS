@@ -2,174 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b35e3018-4dc9-41ce-b45f-9bb2bcc5facf" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/ant/dxramfs-peer-build.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../fs_project/ant/dxramfs-peer-build.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/app/DxramFsPeerApp.conf" beforeDir="false" afterPath="$PROJECT_DIR$/../fs_project/app/DxramFsPeerApp.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/app/dxramfs-peer.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../fs_project/app/dxramfs-peer.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/build/dxram/app/dxramfs-peer.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../fs_project/build/dxram/app/dxramfs-peer.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxnet/DXNetConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxnet/DXNetConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxnet/DXNetNodeMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxnet/DXNetNodeMap.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/hadoop-dxram-fs.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/jni/harddriveaccess/JNIFileDirect.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/jni/harddriveaccess/JNIFileDirect.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/jni/harddriveaccess/JNIFileRaw.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/jni/harddriveaccess/JNIFileRaw.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/jni/harddriveaccess/JNIFileRawStructures.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/jni/libJNIFileDirect.so" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/jni/libJNIFileRaw.so" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/jni/libJNINativeCRCGenerator.so" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/jni/libJNINativeThreadAffinity.so" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/jni/nativecrcgen/JNINativeCRCGenerator.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/jni/nativethreadaffinity/JNINativeThreadAffinity.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/jni/nativethreadaffinity/libJNINativeThreadAffinity.so" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/lib/ant-contrib-20020829.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/lib/commons-collections-3.2.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/lib/commons-logging-1.1.3.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/lib/dxutils/perf-timer/perf-timer/1.0.0/perf-timer-1.0.0.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/lib/gson-2.2.4.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/lib/guava-16.0.1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/lib/hadoop-common-2.8.2.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/lib/jline-2.14.6.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/lib/log4j-1.2.17.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/lib/log4j-api-2.7.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/lib/log4j-core-2.7.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/lib/perf-timer-1.0.0.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/lib/slf4j-api-1.7.10.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/lib/slf4j-log4j12-1.7.10.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/lib/zookeeper-3.4.6.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/my-env.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/ConnectionManagerListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/DXNet.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/DXNetConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/DXNetNodeMap.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/DefaultMessageHandlerPool.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/ExclusiveMessageHandler.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/MessageHandler.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/MessageHandlers.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/MessageHeaderStore.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/MessageReceiver.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/MessageReceiverStore.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/NetworkDestinationUnreachableException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/NetworkResponseCancelledException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/NetworkResponseDelayedException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/NodeMap.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/AbstractConnection.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/AbstractConnectionManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/AbstractExporterPool.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/AbstractFlowControl.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/AbstractMessageExporter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/AbstractMessageImporter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/AbstractPipeIn.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/AbstractPipeOut.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/BufferPool.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/CoreConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/DynamicExporterPool.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/IncomingBufferQueue.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/LargeMessageExporter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/LocalMessageHeaderPool.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/Message.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/MessageCreationCoordinator.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/MessageDirectory.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/MessageExporterCollection.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/MessageExporterDefault.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/MessageExporterOverflow.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/MessageHeader.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/MessageHeaderPool.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/MessageImporterCollection.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/MessageImporterDefault.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/MessageImporterOverflow.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/MessageImporterUnderOverflow.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/MessageImporterUnderflow.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/NetworkException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/NetworkRuntimeException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/OutgoingRingBuffer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/Request.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/RequestMap.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/Response.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/StaticExporterPool.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/UnfinishedImExporterOperation.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/messages/DefaultMessage.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/core/messages/Messages.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/ib/IBConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/ib/IBConnection.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/ib/IBConnectionManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/ib/IBFlowControl.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/ib/IBOutgoingRingBuffer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/ib/IBPipeIn.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/ib/IBPipeOut.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/ib/IBSendWorkParameterPool.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/ib/IBWriteInterest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/ib/IBWriteInterestManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/ib/IBWriteInterestQueue.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/ib/IbWriteInterestManagerMain.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/ib/MsgrcJNIBinding.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/loopback/LoopbackConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/loopback/LoopbackConnection.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/loopback/LoopbackConnectionManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/loopback/LoopbackFlowControl.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/loopback/LoopbackOutgoingRingBuffer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/loopback/LoopbackPipeIn.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/loopback/LoopbackPipeOut.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/loopback/LoopbackSendThread.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/nio/InterestQueue.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/nio/NIOConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/nio/NIOConnection.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/nio/NIOConnectionManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/nio/NIOFlowControl.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/nio/NIOOutgoingRingBuffer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/nio/NIOPipeIn.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/nio/NIOPipeOut.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxnet/nio/NIOSelector.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxramfs/connector/DxramConfigKeys.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxramfs/connector/DxramFile.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxramfs/connector/DxramFileSystem.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxramfs/connector/DxramFs.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxramfs/connector/DxramInputStream.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxramfs/core/A100bMessage.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxramfs/core/DxramFsPeer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/BloomFilter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/ByteBufferHelper.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/CRC16.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/Cache.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/ManifestHelper.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/NodeID.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/OSValidator.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/RandomUtils.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/StorageUnitGsonSerializer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/StringUtils.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/TimeUnitGsonSerializer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/UnsafeHandler.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/UnsafeMemory.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/eval/EvaluationTable.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/eval/EvaluationTables.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/eval/Stopwatch.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/jni/JNIFileDirect.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/jni/JNIFileRaw.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/jni/JNINativeCRCGenerator.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/jni/JNINativeMemory.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/jni/JNIThreadAffinity.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/serialization/ByteBufferImExporter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/serialization/CompactNumber.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/serialization/Exportable.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/serialization/Exporter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/serialization/Importable.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/serialization/Importer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/serialization/ObjectSize.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/serialization/ObjectSizeUtil.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/serialization/RandomAccessFileImExporter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/stats/PrintStatistics.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/stats/Statistics.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/stats/StatisticsOperation.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/stats/StatisticsRecorder.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/stats/StatisticsRecorderManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/unit/IPV4Unit.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/unit/StorageUnit.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/java/de/hhu/bsinfo/dxutils/unit/TimeUnit.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/resources/core-site.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/connector/src/main/resources/log4j2.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/core/A100bMessage.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/peer/DxramFsPeerApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/../fs_project/src/de/hhu/bsinfo/dxramfs/peer/DxramFsPeerApp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/hhu/bsinfo/dxramfs/connector/DxramConfigKeys.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/hhu/bsinfo/dxramfs/connector/DxramConfigKeys.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/hhu/bsinfo/dxramfs/core/A100bMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/hhu/bsinfo/dxramfs/core/A100bMessage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/core-site.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/core-site.xml" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -180,7 +15,26 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
+    <leaf>
+      <file leaf-file-name="DxramConfigKeys.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/de/hhu/bsinfo/dxramfs/connector/DxramConfigKeys.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="160">
+              <caret line="19" column="51" selection-start-line="19" selection-start-column="51" selection-end-line="19" selection-end-column="51" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="core-site.xml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/resources/core-site.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="194">
+              <caret line="24" column="15" selection-start-line="24" selection-start-column="15" selection-end-line="24" selection-end-column="15" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -200,9 +54,7 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/main/java/de/hhu/bsinfo/dxramfs/connector/DxramConfigKeys.java" />
         <option value="$PROJECT_DIR$/src/main/java/de/hhu/bsinfo/dxramfs/connector/DxramFs.java" />
-        <option value="$PROJECT_DIR$/src/main/resources/core-site.xml" />
         <option value="$PROJECT_DIR$/src/main/java/de/hhu/bsinfo/dxramfs/Msg/DxramFsPeer.java" />
         <option value="$PROJECT_DIR$/src/main/java/de/hhu/bsinfo/dxramfs/Msg/LocalConfig.java" />
         <option value="$PROJECT_DIR$/src/main/java/de/hhu/bsinfo/dxramfs/Msg/Config.java" />
@@ -212,6 +64,8 @@
         <option value="$PROJECT_DIR$/src/main/java/de/hhu/bsinfo/dxramfs/core/NodePeerConfig.java" />
         <option value="$PROJECT_DIR$/src/main/java/de/hhu/bsinfo/dxramfs/core/DxnetInit.java" />
         <option value="$PROJECT_DIR$/src/main/java/de/hhu/bsinfo/dxramfs/connector/DxramFileSystem.java" />
+        <option value="$PROJECT_DIR$/src/main/java/de/hhu/bsinfo/dxramfs/connector/DxramConfigKeys.java" />
+        <option value="$PROJECT_DIR$/src/main/resources/core-site.xml" />
       </list>
     </option>
   </component>
@@ -227,23 +81,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope">
-        <subPane subId="Project Files">
-          <expand>
-            <path>
-              <item name="Root" type="cbb8eebc:String" user="Root" />
-              <item name="connector" type="cbb8eebc:String" user="connector" />
-            </path>
-            <path>
-              <item name="Root" type="cbb8eebc:String" user="Root" />
-              <item name="connector" type="cbb8eebc:String" user="connector" />
-              <item name="src/main" type="cbb8eebc:String" user="src/main" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
-      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -306,11 +143,35 @@
               <item name="dxramfs" type="462c0819:PsiDirectoryNode" />
               <item name="core" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="hadoop-dxram-fs" type="b2602c69:ProjectViewProjectNode" />
+              <item name="connector" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="resources" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
       <pane id="AndroidView" />
+      <pane id="Scope">
+        <subPane subId="Project Files">
+          <expand>
+            <path>
+              <item name="Root" type="cbb8eebc:String" user="Root" />
+              <item name="connector" type="cbb8eebc:String" user="connector" />
+            </path>
+            <path>
+              <item name="Root" type="cbb8eebc:String" user="Root" />
+              <item name="connector" type="cbb8eebc:String" user="connector" />
+              <item name="src/main" type="cbb8eebc:String" user="src/main" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -398,6 +259,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="129" y="34" width="1622" height="1018" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -406,18 +268,18 @@
       <window_info anchor="right" id="Capture Analysis" order="6" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" weight="0.32919955" />
       <window_info anchor="right" id="Maven Projects" order="4" />
-      <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Version Control" order="9" />
+      <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.23371647" />
       <window_info id="Capture Tool" order="2" />
       <window_info id="Designer" order="2" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.34207162" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.3471867" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info id="UI Designer" order="4" />
       <window_info anchor="right" id="Theme Preview" order="6" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info id="Favorites" order="3" side_tool="true" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
@@ -664,13 +526,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/hhu/bsinfo/dxramfs/connector/DxramConfigKeys.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="99">
-          <caret line="26" column="68" selection-start-line="26" selection-start-column="68" selection-end-line="26" selection-end-column="68" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/target/classes/core-site.xml">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -678,13 +533,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="231">
           <caret line="22" column="17" selection-start-line="22" selection-start-column="17" selection-end-line="22" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/resources/core-site.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="756">
-          <caret line="36" column="35" selection-start-line="36" selection-start-column="35" selection-end-line="36" selection-end-column="35" />
         </state>
       </provider>
     </entry>
@@ -734,6 +582,20 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="576">
           <caret line="62" column="23" selection-start-line="62" selection-start-column="23" selection-end-line="62" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/resources/core-site.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="194">
+          <caret line="24" column="15" selection-start-line="24" selection-start-column="15" selection-end-line="24" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/hhu/bsinfo/dxramfs/connector/DxramConfigKeys.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="160">
+          <caret line="19" column="51" selection-start-line="19" selection-start-column="51" selection-end-line="19" selection-end-column="51" />
         </state>
       </provider>
     </entry>

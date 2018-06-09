@@ -33,8 +33,11 @@ public class DxramFsPeerApp extends AbstractApplication {
     private String dxnet_local_peer_addr = "127.0.0.1";
     @Expose
     private int dxnet_local_peer_port = 6501; // dummy - you get it from config!
+
     @Expose
     private String ROOT_Chunk = "root"; // dummy - you get it from config!
+    @Expose
+    private int file_blocksize = 8*1024*1024; // dummy - you get it from config!
 
 
     private static final Logger LOG = LogManager.getFormatterLogger(DxramFsPeerApp.class.getSimpleName());
