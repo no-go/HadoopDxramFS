@@ -149,7 +149,12 @@ File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
         <!-- blocksize is a chunksize (dxram: jan 2018 max was 8MB) -->
         <value>8388608</value>
     </property>
-       
+    
+    <property>
+        <name>dxram.blockinfo_ids_each_fsnode</name>
+        <value>100</value>
+    </property>
+    
     <property>
         <name>dxnet_local_id</name>
         <value>0</value>

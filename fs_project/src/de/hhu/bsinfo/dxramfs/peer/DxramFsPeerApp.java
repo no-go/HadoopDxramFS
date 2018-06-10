@@ -10,6 +10,7 @@ import de.hhu.bsinfo.dxram.data.DataStructure;
 import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
 import de.hhu.bsinfo.dxram.engine.DXRAMVersion;
 import de.hhu.bsinfo.dxramfs.core.DxnetInit;
+import de.hhu.bsinfo.dxramfs.core.DxramFsConfig;
 import de.hhu.bsinfo.dxramfs.core.NodePeerConfig;
 import de.hhu.bsinfo.dxutils.NodeID;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
@@ -24,20 +25,21 @@ public class DxramFsPeerApp extends AbstractApplication {
     @Expose
     private int dxnet_local_id = 40; // dummy - you get it from config!
     @Expose
-    private String dxnet_local_addr = "127.0.0.1";
+    private String dxnet_local_addr = "127.0.0.1"; // dummy - you get it from config!
     @Expose
     private int dxnet_local_port = 6500; // dummy - you get it from config!
     @Expose
     private int dxnet_local_peer_id = 41; // dummy - you get it from config!
     @Expose
-    private String dxnet_local_peer_addr = "127.0.0.1";
+    private String dxnet_local_peer_addr = "127.0.0.1"; // dummy - you get it from config!
     @Expose
     private int dxnet_local_peer_port = 6501; // dummy - you get it from config!
-
     @Expose
     private String ROOT_Chunk = "root"; // dummy - you get it from config!
     @Expose
     private int file_blocksize = 8*1024*1024; // dummy - you get it from config!
+    @Expose
+    private int blockinfo_ids_each_fsnode = 123; // dummy - you get it from config!
 
 
     private static final Logger LOG = LogManager.getFormatterLogger(DxramFsPeerApp.class.getSimpleName());
@@ -46,9 +48,12 @@ public class DxramFsPeerApp extends AbstractApplication {
     private BootService bootS;
     private ChunkService chunkS;
     private NameserviceService nameS;
+
     private RootFsNode ROOTN;
     private DxnetInit dxnetInit;
+
     public static NodePeerConfig nopeConfig;
+    public DxramFsConfig dxramFsConfig;
 
     @Override
     public DXRAMVersion getBuiltAgainstVersion() {
@@ -97,6 +102,9 @@ public class DxramFsPeerApp extends AbstractApplication {
         aPeer.addr = dxnet_local_peer_addr;
         aPeer.port = dxnet_local_peer_port;
         nopeConfig.dxPeers.add(aPeer);
+
+        dxramFsConfig.file_blocksize = file_blocksize;
+        dxramFsConfig.blockinfo_ids_each_fsnode = blockinfo_ids_each_fsnode;
 
         dxnetInit = new DxnetInit(nopeConfig, nopeConfig.dxPeers.get(0).nodeId);
 

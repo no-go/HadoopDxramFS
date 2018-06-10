@@ -53,7 +53,7 @@ public class DxramFs extends DelegateToFileSystem {
     ) throws
         IOException
     {
-        return DxramConfigKeys.getServerDefaults();
+        return ConfigKeys.getServerDefaults();
     }
 
     @Override
@@ -66,7 +66,7 @@ public class DxramFs extends DelegateToFileSystem {
         //try {
         //    res = fsState.resolve(getUriPath(f), true);
         //} catch (FileNotFoundException fnfe) {
-            return DxramConfigKeys.getServerDefaults();
+            return ConfigKeys.getServerDefaults();
         //}
         //return res.targetFileSystem.getServerDefaults(res.remainingPath);
     }

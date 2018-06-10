@@ -15,7 +15,8 @@ import java.io.IOException;
 
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
-public class DxramConfigKeys extends CommonConfigurationKeys {
+public class ConfigKeys extends CommonConfigurationKeys {
+    // you can (some of this are) overwrite THESE IMPORTANT DEFAULTS with etc/hadoop/core-site.xml
     public static final String BLOCK_SIZE_KEY = "dxram.file_blocksize";
     public static final long BLOCK_SIZE_DEFAULT = 8388608; // 8*1024*1024;
     public static final String  REPLICATION_KEY = "dxram.replication";

@@ -2,6 +2,7 @@ package de.hhu.bsinfo.dxramfs.connector;
 
 import de.hhu.bsinfo.dxnet.DXNet;
 import de.hhu.bsinfo.dxramfs.core.DxnetInit;
+import de.hhu.bsinfo.dxramfs.core.DxramFsConfig;
 import de.hhu.bsinfo.dxramfs.core.NodePeerConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
@@ -28,6 +29,7 @@ public class DxramFileSystem extends FileSystem {
     private Path _workingDir;
     private DXNet _dxn;
     public static NodePeerConfig nopeConfig;
+    public DxramFsConfig dxramFsConfig;
 
     @Override
     public URI getUri() {
@@ -88,6 +90,8 @@ public class DxramFileSystem extends FileSystem {
         throws IOException {
         super.initialize(theUri, conf);
         setConf(conf);
+        dxramFsConfig.file_blocksize = Integer.valueOf(conf.get("dxram.file_blocksize"));
+        dxramFsConfig.blockinfo_ids_each_fsnode = Integer.valueOf(conf.get("dxram.blockinfo_ids_each_fsnode"));
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", theUri, conf);
         String authority = theUri.getAuthority();
         _dxn = connect();
