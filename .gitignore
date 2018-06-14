@@ -1,6 +1,6 @@
-fs_project/src/de/hhu/bsinfo/dxramfs/connector/.idea/**/*
-fs_project/src/de/hhu/bsinfo/dxramfs/connector/target/**/*
-fs_project/src/de/hhu/bsinfo/dxramfs/connector/out/**/*
+connector/.idea/**/*
+connector/target/**/*
+connector/out/**/*
 
 fs_project/.idea/**/*
 fs_project/target/**/*
@@ -25,9 +25,6 @@ fs_project/out/**/*
 *.zip
 *.tar.gz
 *.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
 
 ## File-based project format:
 *.iws

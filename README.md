@@ -88,6 +88,20 @@ be a client to that local server.
 
 use hadoop fs CLI to access `dxram://namenode:9000` from `core-site.xml`
 
+
+## classes
+
+-   ROOT is a FsNodeChunk
+-   FsNodeChunk builds a tree with ID (dxram chunk id) and a 
+    referenceId (parent FsNodeChunk ID)
+-   FsNodeChunk stores data about a file or a folder
+-   FsNodeChunk has an array of blockinfoIds (if it is full, extID refer
+    to a FsNodeChunk with a new blockinfoIds array)
+-   blockinfoIds are dxram chunk ids to BlockinfoChunks
+-   BlockinfoChunk stores informations about a BlockChunk
+-   every BlockinfoChunk refer with storageId (a dxram chunk id) to a BlockChunk
+-   BlockChunk stores the bytes of a file
+
 ## todo
 
 -   extract dxnet or dxram hostname/ip/port frome hadoop fs-scheme!

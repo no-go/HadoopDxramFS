@@ -1,5 +1,18 @@
 package de.hhu.bsinfo.dxramfs.core;
 
+
+public class Blockinfo {
+    public long ID; // chunkid of that BlockinfoChunk
+    public long offset;  // @todo Offset of the block in the file (do I need this? Did I need it for append?)
+    public long length; // @todo home many byte did we need from this block?
+    public boolean corrupt; // @todo how does this happend?
+    public long storageId; // to the BlockChunk id, where the data exists (only 1 id because no replica)
+    /* we do not have replica like in the blocklocation class of hadoop */
+    public String host;
+    public String addr;
+    public int port;
+}
+
 /*from BlockLocation
 
 private String[] hosts; // Datanode hostnames
@@ -24,14 +37,3 @@ x link zu BlockinfoChunk des Replikats - nur 1 replikat (also keine replikation)
 - Speichertyp (sollte immer RAM sein, oder? Daher weglassen?)
 
 */
-public class BlockinfoChunk {
-    public long ID; // chunkid of that BlockinfoChunk
-    public long offset;  // @todo Offset of the block in the file (do I need this? Did I need it for append?)
-    public long length; // @todo home many byte did we need from this block?
-    public boolean corrupt; // @todo how does this happend?
-    public long storageId; // to the BlockChunk id, where the data exists (only 1 id because no replica)
-    /* we do not have replica like in the blocklocation class of hadoop */
-    public String host;
-    public String addr;
-    public int port;
-}
