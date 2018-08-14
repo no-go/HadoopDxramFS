@@ -16,6 +16,10 @@ public class A100bMessage extends Message {
     public static final byte TAG = 42;
     private byte[] data;
 
+    // @todo mutex oder so
+    public static boolean gotMsg;
+    public static A100bMessage msg;
+
     public A100bMessage() {
         super();
     }
@@ -27,6 +31,7 @@ public class A100bMessage extends Message {
 
     public A100bMessage(final short p_destination, final String p_data) {
         super(p_destination, A100bMessage.MTYPE, A100bMessage.TAG);
+        gotMsg = false;
         data = p_data.getBytes(StandardCharsets.UTF_8);
     }
 
@@ -58,13 +63,22 @@ public class A100bMessage extends Message {
 
         @Override
         public void onIncomingMessage(Message p_message) {
-            A100bMessage eMsg = (A100bMessage) p_message;
-            LOG.info(eMsg.getData());
+            msg = (A100bMessage) p_message;
+            LOG.info(msg.getData());
+            gotMsg = true;
             _counter++;
         }
 
         public int getCounter() {
             return _counter;
+        }
+
+        public Message lastMsg() {
+            return msg;
+        }
+
+        public boolean gotMsg() {
+            return gotMsg;
         }
     }
 }

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.mortbay.log.Log;
 
 public class DxramFile {
     /// @todo File OP
@@ -33,18 +34,29 @@ public class DxramFile {
     private java.io.File _dummy;
 
     private boolean send(String str) {
-        A100bMessage msg = new A100bMessage(
+        A100bMessage outmsg = new A100bMessage(
                 DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId,
                 str
         );
 
         try {
-            _dxnet.sendMessage(msg);
+            _dxnet.sendMessage(outmsg);
+            // @todo mutex oder so etwas? das ist hier kein gutes konzept fuer synchrone uebertragung!!!
+            while (outmsg.gotMsg == false) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ignored) {
+                    // nothing.
+                    // maybe handle response here !!
+                }
+            }
+            LOG.debug("got Response: " + outmsg.msg.getData());
             return true;
+
         } catch (NetworkException e) {
             e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     public DxramFile(DXNet dxnet, Path absPath, URI uri, long blocksize) {
