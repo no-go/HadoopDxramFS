@@ -37,7 +37,7 @@ public class DxramFs extends DelegateToFileSystem {
         IOException 
     {
         super(uri, fs, conf, fs.getScheme(), true);
-        
+
         this.dxramFileSystem = fs;
         this.dxramFileSystem.initialize(uri, conf);
     }
@@ -48,29 +48,11 @@ public class DxramFs extends DelegateToFileSystem {
     }
 
     @Override
-    @Deprecated
-    public FsServerDefaults getServerDefaults(
-    ) throws
-        IOException
-    {
+    public FsServerDefaults getServerDefaults(final Path f) throws IOException {
         return ConfigKeys.getServerDefaults();
     }
 
-    @Override
-    public FsServerDefaults getServerDefaults(
-        final Path f
-    ) throws
-        IOException
-    {
-        //InodeTree.ResolveResult<AbstractFileSystem> res;
-        //try {
-        //    res = fsState.resolve(getUriPath(f), true);
-        //} catch (FileNotFoundException fnfe) {
-            return ConfigKeys.getServerDefaults();
-        //}
-        //return res.targetFileSystem.getServerDefaults(res.remainingPath);
-    }
-
+/*
     @Override
     public FSDataOutputStream createInternal(
         Path f,
@@ -96,6 +78,7 @@ public class DxramFs extends DelegateToFileSystem {
             blockSize, progress
         );
     }
+*/
 
     @Override
     public void mkdir(
