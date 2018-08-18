@@ -19,6 +19,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mortbay.log.Log;
 
+import de.hhu.bsinfo.dxramfs.core.rpc.*;
+
 public class DxramFile {
     /// @todo File OP
     public static final String DEBUG_LOCAL = "/tmp/myfs/";
@@ -91,12 +93,37 @@ public class DxramFile {
         }
         return p;
     }
-    
+
+
+
+
+
+
+
+
+
+
     public boolean exists() {
         /// @todo File OP
-        send("exists() " + _dummy.getName());
+        Exists msg = new Exists(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, _dummy.getName());
+        //send("exists() " + _dummy.getName());
+        boolean res = msg.send(_dxnet);
+        LOG.debug("exists msg Response: " + msg.toString());
         return _dummy.exists();
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     public boolean isDirectory() {
         /// @todo File OP

@@ -10,6 +10,7 @@ import de.hhu.bsinfo.dxram.chunk.ChunkService;
 import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
 import de.hhu.bsinfo.dxram.engine.DXRAMVersion;
 import de.hhu.bsinfo.dxramfs.core.*;
+import de.hhu.bsinfo.dxramfs.core.rpc.Exists;
 import de.hhu.bsinfo.dxutils.NodeID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -128,7 +129,8 @@ public class DxramFsPeerApp extends AbstractApplication {
             chunkS.get(ROOTN);
         }
 
-        while (dxnetInit.inHandler.getCounter() < 1000) {
+//        while (dxnetInit.inHandler.getCounter() < 1000) {
+        while (true) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException ignored) {
@@ -137,7 +139,6 @@ public class DxramFsPeerApp extends AbstractApplication {
             }
 
             if (dxnetInit.inHandler.gotMsg()) {
-                // @todo nicht sicher, ob das die richtige stelle ist, um ein response zu machen
                 A100bMessage msg = (A100bMessage) dxnetInit.inHandler.lastMsg();
                 A100bMessage response = new A100bMessage(
                         (short) dxnet_local_id,
@@ -149,8 +150,28 @@ public class DxramFsPeerApp extends AbstractApplication {
                     e.printStackTrace();
                 }
             }
+
+            if (dxnetInit.inHandExists.gotResult()) {
+                Exists msg = (Exists) dxnetInit.inHandExists.Result();
+                // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
+                Exists response = new Exists(
+                        (short) dxnet_local_id,
+                        externalHandleExists(msg)
+                );
+                try {
+                    dxnetInit.getDxNet().sendMessage(response);
+                } catch (NetworkException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
+    }
+
+    private String externalHandleExists(Exists msg) {
+        String path = msg.getData();
+        // @todo fill with functionality !!
+        return "OK dude!";
     }
 
     @Override
