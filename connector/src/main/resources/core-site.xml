@@ -30,7 +30,12 @@
         <name>dxram.blockinfo_ids_each_fsnode</name>
         <value>100</value>
     </property>
-
+    
+    <property>
+        <name>dxram.max_pathlength_chars</name>
+        <value>500</value>
+    </property>
+    
     <property>
         <name>dxnet_local_peer_id</name>
         <value>1</value>

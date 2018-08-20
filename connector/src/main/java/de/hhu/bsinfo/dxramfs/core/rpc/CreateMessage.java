@@ -6,6 +6,7 @@ import de.hhu.bsinfo.dxnet.core.AbstractMessageExporter;
 import de.hhu.bsinfo.dxnet.core.AbstractMessageImporter;
 import de.hhu.bsinfo.dxnet.core.Message;
 import de.hhu.bsinfo.dxnet.core.NetworkException;
+import de.hhu.bsinfo.dxramfs.core.DxramFsConfig;
 import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,9 +14,6 @@ import org.apache.logging.log4j.Logger;
 import java.nio.charset.StandardCharsets;
 
 public class CreateMessage extends Message {
-
-    // @todo das muss in die config!!!
-    public static final int PATHLENGTH = 500;
 
     public static final Logger LOG = LogManager.getLogger(CreateMessage.class.getName());
     public static final byte MTYPE = 11;
@@ -56,7 +54,7 @@ public class CreateMessage extends Message {
 
     public CreateMessage(final short p_destination) {
         super(p_destination, CreateMessage.MTYPE, CreateMessage.TAG);
-        data = new byte[PATHLENGTH];
+        data = new byte[DxramFsConfig.max_pathlength_chars];
     }
 
     public CreateMessage(final short p_destination, final String p_data) {

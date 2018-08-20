@@ -6,24 +6,22 @@ import de.hhu.bsinfo.dxnet.core.AbstractMessageExporter;
 import de.hhu.bsinfo.dxnet.core.AbstractMessageImporter;
 import de.hhu.bsinfo.dxnet.core.Message;
 import de.hhu.bsinfo.dxnet.core.NetworkException;
+import de.hhu.bsinfo.dxramfs.core.DxramFsConfig;
 import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.charset.StandardCharsets;
 
-public class DxfsRenameTo extends Message {
+public class FileLengthMessage extends Message {
 
-    // @todo das muss in die config!!!
-    public static final int PATHLENGTH = 500;
-
-    public static final Logger LOG = LogManager.getLogger(Exists.class.getName());
-    public static final byte MTYPE = 10;
+    public static final Logger LOG = LogManager.getLogger(FileLengthMessage.class.getName());
+    public static final byte MTYPE = 14;
     public static final byte TAG = 42;
     private byte[] data;
 
     public static boolean gotResult;
-    public static Exists result;
+    public static FileLengthMessage result;
 
     public String getData() {
         return new String(data, StandardCharsets.UTF_8);
@@ -50,17 +48,17 @@ public class DxfsRenameTo extends Message {
 
     // ---------------------------------------------------------------
 
-    public Exists() {
+    public FileLengthMessage() {
         super();
     }
 
-    public Exists(final short p_destination) {
-        super(p_destination, Exists.MTYPE, Exists.TAG);
-        data = new byte[PATHLENGTH];
+    public FileLengthMessage(final short p_destination) {
+        super(p_destination, FileLengthMessage.MTYPE, FileLengthMessage.TAG);
+        data = new byte[DxramFsConfig.max_pathlength_chars];
     }
 
-    public Exists(final short p_destination, final String p_data) {
-        super(p_destination, Exists.MTYPE, Exists.TAG);
+    public FileLengthMessage(final short p_destination, final String p_data) {
+        super(p_destination, FileLengthMessage.MTYPE, FileLengthMessage.TAG);
         gotResult = false;
         data = p_data.getBytes(StandardCharsets.UTF_8);
     }
@@ -75,7 +73,7 @@ public class DxfsRenameTo extends Message {
      * @param dxnet
      * @return
      */
-    public boolean send(DXNet dxnet) {
+    public long send(DXNet dxnet) {
         try {
             dxnet.sendMessage(this);
             while (gotResult == false) {
@@ -88,13 +86,13 @@ public class DxfsRenameTo extends Message {
             }
             LOG.debug("got Response: " + result.getData());
             if (result.getData().startsWith("OK")) {
-                return true;
+                return Long.parseLong(result.getData().substring(2));
             } else {
-                return false;
+                return -1;
             }
         } catch (NetworkException e) {
             e.printStackTrace();
-            return false;
+            return -1;
         }
     }
 
@@ -103,7 +101,7 @@ public class DxfsRenameTo extends Message {
 
         @Override
         public void onIncomingMessage(Message p_message) {
-            result = (Exists) p_message;
+            result = (FileLengthMessage) p_message;
             LOG.info(result.getData());
             gotResult = true;
         }

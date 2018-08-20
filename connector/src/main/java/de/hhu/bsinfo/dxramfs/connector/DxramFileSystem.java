@@ -30,7 +30,6 @@ public class DxramFileSystem extends FileSystem {
     private Path _workingDir;
     private DXNet _dxn;
     public static NodePeerConfig nopeConfig;
-    public DxramFsConfig dxramFsConfig;
 
     @Override
     public URI getUri() {
@@ -69,7 +68,7 @@ public class DxramFileSystem extends FileSystem {
 
         nopeConfig.dxPeers = new ArrayList<>();
 
-        // @todo if you realy want to run many dxram/dxnet peers on local, you have to change this !!
+        // @todo if you realy want to run MANY dxram/dxnet peers on local, you have to change this !!
         NodePeerConfig.PeerConfig aPeer = new NodePeerConfig.PeerConfig();
         aPeer.nodeId = Short.valueOf(getConf().get("dxnet_local_peer_id"));
         aPeer.addr = getConf().get("dxnet_local_peer_addr");
@@ -91,8 +90,10 @@ public class DxramFileSystem extends FileSystem {
         throws IOException {
         super.initialize(theUri, conf);
         setConf(conf);
-        dxramFsConfig.file_blocksize = Integer.valueOf(conf.get("dxram.file_blocksize"));
-        dxramFsConfig.blockinfo_ids_each_fsnode = Integer.valueOf(conf.get("dxram.blockinfo_ids_each_fsnode"));
+        DxramFsConfig.file_blocksize = Integer.valueOf(conf.get("dxram.file_blocksize"));
+        DxramFsConfig.blockinfo_ids_each_fsnode = Integer.valueOf(conf.get("dxram.blockinfo_ids_each_fsnode"));
+        DxramFsConfig.max_pathlength_chars = Integer.valueOf(conf.get("dxram.max_pathlength_chars"));
+
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", theUri, conf);
         String authority = theUri.getAuthority();
         _dxn = connect();
@@ -125,7 +126,7 @@ public class DxramFileSystem extends FileSystem {
         Path absF = fixRelativePart(f);
         // hint: stop delegating here. we want to use dxramfs all the time!!
         //long blocksize = getServerDefaults(absF).getBlockSize();
-        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri, dxramFsConfig.file_blocksize);
+        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri);
         return dxfile.open(bufferSize);
     }
 
@@ -139,8 +140,8 @@ public class DxramFileSystem extends FileSystem {
         //long blocksize = getServerDefaults(absF1).getBlockSize();
         //long blocksize2 = getServerDefaults(absF2).getBlockSize();
 
-        DxramFile file = new DxramFile(_dxn, absF1, _myUri, dxramFsConfig.file_blocksize);
-        DxramFile file2 = new DxramFile(_dxn, absF2, _myUri, dxramFsConfig.file_blocksize);
+        DxramFile file = new DxramFile(_dxn, absF1, _myUri);
+        DxramFile file2 = new DxramFile(_dxn, absF2, _myUri);
         
         if (file2.exists()) {
             throw new java.io.IOException("destination file exists");
@@ -163,10 +164,10 @@ public class DxramFileSystem extends FileSystem {
     {
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName() +
             "({}, {}, {}, {}, {}, {}, {})",
-            f, permission, overwrite, bufferSize, replication, dxramFsConfig.file_blocksize, progress);
+            f, permission, overwrite, bufferSize, replication, DxramFsConfig.file_blocksize, progress);
 
         Path absF = fixRelativePart(f);
-        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri, dxramFsConfig.file_blocksize);
+        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri);
         
         return dxfile.create(bufferSize, replication, true);
     }
@@ -182,10 +183,10 @@ public class DxramFileSystem extends FileSystem {
     {
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName() +
             "({}, {}, {}, {}, {}, {}, {})",
-            f, permission, overwrite, bufferSize, replication, dxramFsConfig.file_blocksize, progress);
+            f, permission, overwrite, bufferSize, replication, DxramFsConfig.file_blocksize, progress);
 
         Path absF = fixRelativePart(f);
-        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri, dxramFsConfig.file_blocksize);
+        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri);
         
         return dxfile.create(bufferSize, replication, false);
     }
@@ -196,7 +197,7 @@ public class DxramFileSystem extends FileSystem {
         Path absF = fixRelativePart(f);
         // hint: stop delegating here. we want to use dxramfs all the time!!
         //long blocksize = getServerDefaults(absF).getBlockSize();
-        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri, dxramFsConfig.file_blocksize);
+        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri);
         if (dxfile.exists()) 
             throw new FileAlreadyExistsException("mkdirs: " + dxfile.toString() + " exists");
         return dxfile.mkdirs();
@@ -209,7 +210,7 @@ public class DxramFileSystem extends FileSystem {
         Path absF = fixRelativePart(f);
         // hint: stop delegating here. we want to use dxramfs all the time!!
         //long blocksize = getServerDefaults(absF).getBlockSize();
-        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri, dxramFsConfig.file_blocksize);
+        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri);
         
         if (!dxfile.exists()) {
             if (recursive) {
@@ -279,8 +280,7 @@ public class DxramFileSystem extends FileSystem {
             DxramFile file = new DxramFile(
                     _dxn,
                     fileStatus.getPath(),
-                    _myUri,
-                    fileStatus.getBlockSize()
+                    _myUri
             );
             for (DxramFile childFile : file.listFiles()) {
                 statusArrayList.add(childFile.getFileStatus());
@@ -297,7 +297,7 @@ public class DxramFileSystem extends FileSystem {
         Path absF = fixRelativePart(p);
         // hint: stop delegating here. we want to use dxramfs all the time!!
         //long blocksize = getServerDefaults(absF).getBlockSize();
-        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri, dxramFsConfig.file_blocksize);
+        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri);
         
         if (!dxfile.exists()) {
             throw new FileNotFoundException("_getFileStatus: " + p.toString() + " not exists");
@@ -320,6 +320,6 @@ public class DxramFileSystem extends FileSystem {
         Path abs = fixRelativePart(f);
         // hint: stop delegating here. we want to use dxramfs all the time!!
         //long blocksize = getServerDefaults(abs).getBlockSize();
-        return new DxramFile(_dxn, abs, getUri(), dxramFsConfig.file_blocksize).getFileBlockLocations(start, len);
+        return new DxramFile(_dxn, abs, getUri()).getFileBlockLocations(start, len);
     }
 }

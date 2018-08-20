@@ -6,24 +6,22 @@ import de.hhu.bsinfo.dxnet.core.AbstractMessageExporter;
 import de.hhu.bsinfo.dxnet.core.AbstractMessageImporter;
 import de.hhu.bsinfo.dxnet.core.Message;
 import de.hhu.bsinfo.dxnet.core.NetworkException;
+import de.hhu.bsinfo.dxramfs.core.DxramFsConfig;
 import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.charset.StandardCharsets;
 
-public class DxfsIsDirectory extends Message {
+public class OpenMessage extends Message {
 
-    // @todo das muss in die config!!!
-    public static final int PATHLENGTH = 500;
-
-    public static final Logger LOG = LogManager.getLogger(Exists.class.getName());
-    public static final byte MTYPE = 10;
+    public static final Logger LOG = LogManager.getLogger(OpenMessage.class.getName());
+    public static final byte MTYPE = 19;
     public static final byte TAG = 42;
     private byte[] data;
 
     public static boolean gotResult;
-    public static Exists result;
+    public static OpenMessage result;
 
     public String getData() {
         return new String(data, StandardCharsets.UTF_8);
@@ -50,17 +48,17 @@ public class DxfsIsDirectory extends Message {
 
     // ---------------------------------------------------------------
 
-    public Exists() {
+    public OpenMessage() {
         super();
     }
 
-    public Exists(final short p_destination) {
-        super(p_destination, Exists.MTYPE, Exists.TAG);
-        data = new byte[PATHLENGTH];
+    public OpenMessage(final short p_destination) {
+        super(p_destination, OpenMessage.MTYPE, OpenMessage.TAG);
+        data = new byte[DxramFsConfig.max_pathlength_chars];
     }
 
-    public Exists(final short p_destination, final String p_data) {
-        super(p_destination, Exists.MTYPE, Exists.TAG);
+    public OpenMessage(final short p_destination, final String p_data) {
+        super(p_destination, OpenMessage.MTYPE, OpenMessage.TAG);
         gotResult = false;
         data = p_data.getBytes(StandardCharsets.UTF_8);
     }
@@ -103,7 +101,7 @@ public class DxfsIsDirectory extends Message {
 
         @Override
         public void onIncomingMessage(Message p_message) {
-            result = (Exists) p_message;
+            result = (OpenMessage) p_message;
             LOG.info(result.getData());
             gotResult = true;
         }

@@ -32,11 +32,13 @@ public class DxramFsPeerApp extends AbstractApplication {
     @Expose
     private int dxnet_local_peer_port = 6501; // dummy - you get it from config!
     @Expose
-    private String ROOT_Chunk = "root"; // dummy - you get it from config!
+    private String ROOT_Chunk = "dummy"; // dummy - you get it from config!
     @Expose
     private int file_blocksize = 8*1024*1024; // dummy - you get it from config!
     @Expose
     private int blockinfo_ids_each_fsnode = 123; // dummy - you get it from config!
+    @Expose
+    private int max_pathlength_chars = 256; // dummy - you get it from config!
 
 
     private static final Logger LOG = LogManager.getFormatterLogger(DxramFsPeerApp.class.getSimpleName());
@@ -50,7 +52,6 @@ public class DxramFsPeerApp extends AbstractApplication {
     private DxnetInit dxnetInit;
 
     public static NodePeerConfig nopeConfig;
-    public DxramFsConfig dxramFsConfig;
 
     @Override
     public DXRAMVersion getBuiltAgainstVersion() {
@@ -100,8 +101,9 @@ public class DxramFsPeerApp extends AbstractApplication {
         aPeer.port = dxnet_local_peer_port;
         nopeConfig.dxPeers.add(aPeer);
 
-        dxramFsConfig.file_blocksize = file_blocksize;
-        dxramFsConfig.blockinfo_ids_each_fsnode = blockinfo_ids_each_fsnode;
+        DxramFsConfig.file_blocksize = file_blocksize;
+        DxramFsConfig.blockinfo_ids_each_fsnode = blockinfo_ids_each_fsnode;
+        DxramFsConfig.max_pathlength_chars = max_pathlength_chars;
 
         dxnetInit = new DxnetInit(nopeConfig, nopeConfig.dxPeers.get(0).nodeId);
 
@@ -151,8 +153,8 @@ public class DxramFsPeerApp extends AbstractApplication {
                 }
             }
 
-            if (dxnetInit.inHandExists.gotResult()) {
-                ExistsMessage msg = (ExistsMessage) dxnetInit.inHandExists.Result();
+            if (dxnetInit.emh.gotResult()) {
+                ExistsMessage msg = (ExistsMessage) dxnetInit.emh.Result();
                 // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
                 ExistsMessage response = new ExistsMessage(
                         (short) dxnet_local_id,
@@ -164,14 +166,54 @@ public class DxramFsPeerApp extends AbstractApplication {
                     e.printStackTrace();
                 }
             }
+
+            if (dxnetInit.idmh.gotResult()) {
+                IsDirectoryMessage msg = (IsDirectoryMessage) dxnetInit.idmh.Result();
+                // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
+                IsDirectoryMessage response = new IsDirectoryMessage(
+                        (short) dxnet_local_id,
+                        externalHandleIsDirectory(msg)
+                );
+                try {
+                    dxnetInit.getDxNet().sendMessage(response);
+                } catch (NetworkException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (dxnetInit.flmh.gotResult()) {
+                FileLengthMessage msg = (FileLengthMessage) dxnetInit.flmh.Result();
+                // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
+                FileLengthMessage response = new FileLengthMessage(
+                        (short) dxnet_local_id,
+                        externalHandleFileLength(msg)
+                );
+                try {
+                    dxnetInit.getDxNet().sendMessage(response);
+                } catch (NetworkException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
     }
 
-    private String externalHandleExists(Exists msg) {
+    private String externalHandleExists(ExistsMessage msg) {
         String path = msg.getData();
         // @todo fill with functionality !!
         return "OK dude!";
+    }
+
+    private String externalHandleIsDirectory(IsDirectoryMessage msg) {
+        String path = msg.getData();
+        // @todo fill with functionality !!
+        return "OK dir!";
+    }
+
+    private String externalHandleFileLength(FileLengthMessage msg) {
+        String path = msg.getData();
+        // @todo fill with functionality !!
+        return "OK4211";
     }
 
     @Override

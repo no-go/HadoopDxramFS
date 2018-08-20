@@ -6,24 +6,22 @@ import de.hhu.bsinfo.dxnet.core.AbstractMessageExporter;
 import de.hhu.bsinfo.dxnet.core.AbstractMessageImporter;
 import de.hhu.bsinfo.dxnet.core.Message;
 import de.hhu.bsinfo.dxnet.core.NetworkException;
+import de.hhu.bsinfo.dxramfs.core.DxramFsConfig;
 import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.charset.StandardCharsets;
 
-public class DxfsFileStatus extends Message {
+public class ListMessage extends Message {
 
-    // @todo das muss in die config!!!
-    public static final int PATHLENGTH = 500;
-
-    public static final Logger LOG = LogManager.getLogger(Exists.class.getName());
-    public static final byte MTYPE = 10;
+    public static final Logger LOG = LogManager.getLogger(ListMessage.class.getName());
+    public static final byte MTYPE = 17;
     public static final byte TAG = 42;
     private byte[] data;
 
     public static boolean gotResult;
-    public static Exists result;
+    public static ListMessage result;
 
     public String getData() {
         return new String(data, StandardCharsets.UTF_8);
@@ -50,17 +48,17 @@ public class DxfsFileStatus extends Message {
 
     // ---------------------------------------------------------------
 
-    public Exists() {
+    public ListMessage() {
         super();
     }
 
-    public Exists(final short p_destination) {
-        super(p_destination, Exists.MTYPE, Exists.TAG);
-        data = new byte[PATHLENGTH];
+    public ListMessage(final short p_destination) {
+        super(p_destination, ListMessage.MTYPE, ListMessage.TAG);
+        data = new byte[DxramFsConfig.max_pathlength_chars];
     }
 
-    public Exists(final short p_destination, final String p_data) {
-        super(p_destination, Exists.MTYPE, Exists.TAG);
+    public ListMessage(final short p_destination, final String p_data) {
+        super(p_destination, ListMessage.MTYPE, ListMessage.TAG);
         gotResult = false;
         data = p_data.getBytes(StandardCharsets.UTF_8);
     }
@@ -103,7 +101,7 @@ public class DxfsFileStatus extends Message {
 
         @Override
         public void onIncomingMessage(Message p_message) {
-            result = (Exists) p_message;
+            result = (ListMessage) p_message;
             LOG.info(result.getData());
             gotResult = true;
         }

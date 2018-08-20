@@ -3,6 +3,7 @@ package de.hhu.bsinfo.dxramfs.connector;
 import de.hhu.bsinfo.dxnet.DXNet;
 import de.hhu.bsinfo.dxnet.core.NetworkException;
 import de.hhu.bsinfo.dxramfs.core.A100bMessage;
+import de.hhu.bsinfo.dxramfs.core.DxramFsConfig;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.security.AccessControlException;
 import org.apache.hadoop.fs.permission.FsPermission;
@@ -61,10 +62,10 @@ public class DxramFile {
         }
     }
 
-    public DxramFile(DXNet dxnet, Path absPath, URI uri, long blocksize) {
+    public DxramFile(DXNet dxnet, Path absPath, URI uri) {
         _dxnet     = dxnet;
         _uri       = uri;
-        _blocksize = blocksize;
+        _blocksize = DxramFsConfig.file_blocksize;
         _absPath   = absPath;
         
         /// @todo File OP
@@ -104,38 +105,27 @@ public class DxramFile {
 
 
     public boolean exists() {
-        /// @todo File OP
         ExistsMessage msg = new ExistsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, _dummy.getName());
-        //send("exists() " + _dummy.getName());
         boolean res = msg.send(_dxnet);
-        LOG.debug("exists msg Response: " + msg.toString());
+        LOG.debug("exists msg Response", res);
         return _dummy.exists();
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-    
     public boolean isDirectory() {
-        /// @todo File OP
-        send("isDir() " + _dummy.getName());
+        IsDirectoryMessage msg = new IsDirectoryMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, _dummy.getName());
+        boolean res = msg.send(_dxnet);
+        LOG.debug("isdir msg Response", res);
         return _dummy.isDirectory();
     }
     
     public long length() {
-        /// @todo File OP
-        send("length() " + _dummy.getName());
+        FileLengthMessage msg = new FileLengthMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, _dummy.getName());
+        long res = msg.send(_dxnet);
+        LOG.debug("length msg Response", res);
         return _dummy.length();
     }
+
+
 
     public boolean delete() throws IOException {
         /// @todo File OP
@@ -164,7 +154,7 @@ public class DxramFile {
             Path p = lpath2hpath(childFile.getAbsolutePath());
             
             /// @todo _blocksize is a dummy at this place, because local fs did not store it
-            DxramFile dxfile = new DxramFile(_dxnet, p, _uri, _blocksize);
+            DxramFile dxfile = new DxramFile(_dxnet, p, _uri);
             
             fArrayList.add(dxfile);
         }
@@ -210,7 +200,7 @@ public class DxramFile {
         send("create: java io Files.notExists(Paths.get(filePath))) " + filePath);
         if (Files.notExists(Paths.get(filePath))) {
             Path absF = lpath2hpath(filePath);
-            DxramFile dxfile = new DxramFile(_dxnet, absF, _uri, _blocksize);
+            DxramFile dxfile = new DxramFile(_dxnet, absF, _uri);
             dxfile.mkdirs();
         } else {
             if (recursive == false) throw new IOException("director(ies) do not exists");
