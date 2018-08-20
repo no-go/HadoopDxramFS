@@ -105,7 +105,7 @@ public class DxramFile {
 
     public boolean exists() {
         /// @todo File OP
-        Exists msg = new Exists(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, _dummy.getName());
+        ExistsMessage msg = new ExistsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, _dummy.getName());
         //send("exists() " + _dummy.getName());
         boolean res = msg.send(_dxnet);
         LOG.debug("exists msg Response: " + msg.toString());

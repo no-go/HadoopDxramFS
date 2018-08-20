@@ -42,13 +42,13 @@ public class DxnetInit {
         );
 
         _dxNet.registerMessageType(A100bMessage.MTYPE, A100bMessage.TAG, A100bMessage.class);
-        _dxNet.registerMessageType(Exists.MTYPE, Exists.TAG, Exists.class);
+        _dxNet.registerMessageType(ExistsMessage.MTYPE, ExistsMessage.TAG, ExistsMessage.class);
 
         inHandler = new A100bMessage.InHandler();
-        inHandExists = new Exists.InHandler();
+        inHandExists = new ExistsMessage.InHandler();
 
         _dxNet.register(A100bMessage.MTYPE, A100bMessage.TAG, inHandler);
-        _dxNet.register(Exists.MTYPE, Exists.TAG, inHandExists);
+        _dxNet.register(ExistsMessage.MTYPE, ExistsMessage.TAG, inHandExists);
     }
 
     public DXNet getDxNet() {

@@ -10,7 +10,7 @@ import de.hhu.bsinfo.dxram.chunk.ChunkService;
 import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
 import de.hhu.bsinfo.dxram.engine.DXRAMVersion;
 import de.hhu.bsinfo.dxramfs.core.*;
-import de.hhu.bsinfo.dxramfs.core.rpc.Exists;
+import de.hhu.bsinfo.dxramfs.core.rpc.*;
 import de.hhu.bsinfo.dxutils.NodeID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -152,9 +152,9 @@ public class DxramFsPeerApp extends AbstractApplication {
             }
 
             if (dxnetInit.inHandExists.gotResult()) {
-                Exists msg = (Exists) dxnetInit.inHandExists.Result();
+                ExistsMessage msg = (ExistsMessage) dxnetInit.inHandExists.Result();
                 // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
-                Exists response = new Exists(
+                ExistsMessage response = new ExistsMessage(
                         (short) dxnet_local_id,
                         externalHandleExists(msg)
                 );

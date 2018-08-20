@@ -12,7 +12,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.nio.charset.StandardCharsets;
 
-public class Exists extends Message {
+public class DxfsRenameTo extends Message {
 
     // @todo das muss in die config!!!
     public static final int PATHLENGTH = 500;
