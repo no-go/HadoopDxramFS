@@ -18,32 +18,44 @@ public class FileLengthMessage extends Message {
     public static final Logger LOG = LogManager.getLogger(FileLengthMessage.class.getName());
     public static final byte MTYPE = 14;
     public static final byte TAG = 42;
-    private byte[] data;
+    private byte[] _data;
+    private long _length;
 
     public static boolean gotResult;
     public static FileLengthMessage result;
 
-    public String getData() {
-        return new String(data, StandardCharsets.UTF_8);
+    public String get_data() {
+        return new String(_data, StandardCharsets.UTF_8);
     }
+
+    public long get_length() {
+        return _length;
+    }
+
+    public void set_length(long _length) {
+        this._length = _length;
+    }
+
 
     @Override
     protected final int getPayloadLength() {
-        return ObjectSizeUtil.sizeofByteArray(data);
+        return Long.BYTES + ObjectSizeUtil.sizeofByteArray(_data);
     }
 
     @Override
     protected final void writePayload(
             final AbstractMessageExporter p_exporter
     ) {
-        p_exporter.writeByteArray(data);
+        p_exporter.writeLong(_length);
+        p_exporter.writeByteArray(_data);
     }
 
     @Override
     protected final void readPayload(
             final AbstractMessageImporter p_importer
     ) {
-        data = p_importer.readByteArray(data);
+        _length = p_importer.readLong(_length);
+        _data = p_importer.readByteArray(_data);
     }
 
     // ---------------------------------------------------------------
@@ -54,13 +66,15 @@ public class FileLengthMessage extends Message {
 
     public FileLengthMessage(final short p_destination) {
         super(p_destination, FileLengthMessage.MTYPE, FileLengthMessage.TAG);
-        data = new byte[DxramFsConfig.max_pathlength_chars];
+        _data = new byte[DxramFsConfig.max_pathlength_chars];
+        _length = -1;
     }
 
     public FileLengthMessage(final short p_destination, final String p_data) {
         super(p_destination, FileLengthMessage.MTYPE, FileLengthMessage.TAG);
         gotResult = false;
-        data = p_data.getBytes(StandardCharsets.UTF_8);
+        _data = p_data.getBytes(StandardCharsets.UTF_8);
+        _length = -1;
     }
 
     // ---------------------------------------------------------------
@@ -84,9 +98,9 @@ public class FileLengthMessage extends Message {
                     // maybe handle response here !!
                 }
             }
-            LOG.debug("got Response: " + result.getData());
-            if (result.getData().startsWith("OK")) {
-                return Long.parseLong(result.getData().substring(2));
+            LOG.debug("got Response: " + result.get_data());
+            if (result.get_data().startsWith("OK")) {
+                return result.get_length();
             } else {
                 return -1;
             }
@@ -102,7 +116,7 @@ public class FileLengthMessage extends Message {
         @Override
         public void onIncomingMessage(Message p_message) {
             result = (FileLengthMessage) p_message;
-            LOG.info(result.getData());
+            LOG.info(result.get_data());
             gotResult = true;
         }
 

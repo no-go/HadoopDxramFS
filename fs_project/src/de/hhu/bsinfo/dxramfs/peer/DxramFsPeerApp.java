@@ -184,10 +184,7 @@ public class DxramFsPeerApp extends AbstractApplication {
             if (dxnetInit.flmh.gotResult()) {
                 FileLengthMessage msg = (FileLengthMessage) dxnetInit.flmh.Result();
                 // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
-                FileLengthMessage response = new FileLengthMessage(
-                        (short) dxnet_local_id,
-                        externalHandleFileLength(msg)
-                );
+                FileLengthMessage response = externalHandleFileLength(msg);
                 try {
                     dxnetInit.getDxNet().sendMessage(response);
                 } catch (NetworkException e) {
@@ -210,10 +207,12 @@ public class DxramFsPeerApp extends AbstractApplication {
         return "OK dir!";
     }
 
-    private String externalHandleFileLength(FileLengthMessage msg) {
-        String path = msg.getData();
+    private FileLengthMessage externalHandleFileLength(FileLengthMessage msg) {
+        String path = msg.get_data();
         // @todo fill with functionality !!
-        return "OK4211";
+        FileLengthMessage response = new FileLengthMessage((short) dxnet_local_id, "OK");
+        response.set_length(42);
+        return response;
     }
 
     @Override
