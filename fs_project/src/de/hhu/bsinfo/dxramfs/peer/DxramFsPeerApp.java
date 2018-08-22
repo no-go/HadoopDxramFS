@@ -19,26 +19,29 @@ import de.hhu.bsinfo.dxram.data.ChunkID;
 import java.util.ArrayList;
 
 public class DxramFsPeerApp extends AbstractApplication {
+    // +++++++ these constants are dummyies! you get the values from config!
     @Expose
-    private int dxnet_local_id = 40; // dummy - you get it from config!
+    private int dxnet_local_id = 40;
     @Expose
-    private String dxnet_local_addr = "127.0.0.1"; // dummy - you get it from config!
+    private String dxnet_local_addr = "127.0.0.1";
     @Expose
-    private int dxnet_local_port = 6500; // dummy - you get it from config!
+    private int dxnet_local_port = 6500;
     @Expose
-    private int dxnet_local_peer_id = 41; // dummy - you get it from config!
+    private int dxnet_local_peer_id = 41;
     @Expose
-    private String dxnet_local_peer_addr = "127.0.0.1"; // dummy - you get it from config!
+    private String dxnet_local_peer_addr = "127.0.0.1";
     @Expose
-    private int dxnet_local_peer_port = 6501; // dummy - you get it from config!
+    private int dxnet_local_peer_port = 6501;
     @Expose
-    private String ROOT_Chunk = "dummy"; // dummy - you get it from config!
+    private String ROOT_Chunk = "dummy";
     @Expose
-    private int file_blocksize = 8*1024*1024; // dummy - you get it from config!
+    private int file_blocksize = 4*1024*1024;
     @Expose
-    private int blockinfo_ids_each_fsnode = 123; // dummy - you get it from config!
+    private int blockinfo_ids_each_fsnode = 123;
     @Expose
-    private int max_pathlength_chars = 256; // dummy - you get it from config!
+    private int max_pathlength_chars = 256;
+
+    // ++++++++ --------------------------
 
 
     private static final Logger LOG = LogManager.getFormatterLogger(DxramFsPeerApp.class.getSimpleName());

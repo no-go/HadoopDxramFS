@@ -160,8 +160,8 @@ File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
  
     <property>
         <name>dxram.file_blocksize</name>
-        <!-- blocksize is a chunksize (dxram: jan 2018 max was 8MB) -->
-        <value>8388608</value>
+        <!-- blocksize is smaller than chunksize (dxram: jan 2018 max was 8MB) -->
+        <value>4194304</value>
     </property>
     
     <property>

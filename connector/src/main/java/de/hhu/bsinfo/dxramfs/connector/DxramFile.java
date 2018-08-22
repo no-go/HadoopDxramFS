@@ -107,21 +107,21 @@ public class DxramFile {
     public boolean exists() {
         ExistsMessage msg = new ExistsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, _dummy.getName());
         boolean res = msg.send(_dxnet);
-        LOG.debug("exists msg Response", res);
+        LOG.debug("exists msg Response: " + String.valueOf(res));
         return _dummy.exists();
     }
 
     public boolean isDirectory() {
         IsDirectoryMessage msg = new IsDirectoryMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, _dummy.getName());
         boolean res = msg.send(_dxnet);
-        LOG.debug("isdir msg Response", res);
+        LOG.debug("isdir msg Response: " + String.valueOf(res));
         return _dummy.isDirectory();
     }
     
     public long length() {
         FileLengthMessage msg = new FileLengthMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, _dummy.getName());
         long res = msg.send(_dxnet);
-        LOG.debug("length msg Response", res);
+        LOG.debug("length msg Response: " + String.valueOf(res));
         return _dummy.length();
     }
 
