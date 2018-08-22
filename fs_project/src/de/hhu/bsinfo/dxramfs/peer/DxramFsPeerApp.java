@@ -116,16 +116,14 @@ public class DxramFsPeerApp extends AbstractApplication {
             ROOTN.get().name = "/";
             ROOT_CID = chunkS.create(ROOTN.sizeofObject(), 1)[0];
             nameS.register(ROOT_CID, ROOT_Chunk);
-
+            // maybe a new chunkid after register chunk with string in ROOT_Chunk
             ROOT_CID = nameS.getChunkID(ROOT_Chunk, 10);
             ROOTN.setID(ROOT_CID);
             chunkS.get(ROOTN);
-
-            // initial, if root does not exists
-            //ROOTN.get().fsNodeType = FsNodeType.FOLDER;
-            //ROOTN.get().name = "/";
-            ROOTN.get().referenceId = ROOT_CID;
             ROOTN.get().entriesSize = 0;
+            ROOTN.get().init();
+            ROOTN.get().referenceId = ROOT_CID;
+            chunkS.put(ROOTN);
 
         } else {
             ROOT_CID = nameS.getChunkID(ROOT_Chunk, 10);
@@ -144,12 +142,8 @@ public class DxramFsPeerApp extends AbstractApplication {
 
             if (dxnetInit.emh.gotResult()) {
                 ExistsMessage msg = (ExistsMessage) dxnetInit.emh.Result();
-                String[] pathparts = msg.getData().split("/");
-                LOG.debug(String.join(" , ", pathparts));
-                ExistsMessage response = new ExistsMessage(
-                        (short) dxnet_local_id,
-                        externalHandleExists(msg)
-                );
+                // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
+                ExistsMessage response = externalHandleExists(msg);
                 try {
                     dxnetInit.getDxNet().sendMessage(response);
                 } catch (NetworkException e) {
@@ -192,14 +186,90 @@ public class DxramFsPeerApp extends AbstractApplication {
                     e.printStackTrace();
                 }
             }
+
+            // todo: andere Message Handler beifügen - ggf array oder so machen?
         }
 
     }
 
-    private String externalHandleExists(ExistsMessage msg) {
-        String path = msg.getData();
+    // ------------------------------------------------------------------------------------------------
+
+    private String exists(String path) {
+        String back = "no";
+
+        String[] pathparts = path.split("/");
+        LOG.debug(String.join(" , ", pathparts));
+        chunkS.get(ROOTN);
+        if (path.length() == 0) {
+            back = "OK / exists";
+        } else if (ROOTN.get().entriesSize < 1) {
+            back = "no / empty";
+        } else {
+            if (pathparts.length == 1) {
+                back = "search in root...";
+                // @todo muss ich hier den root chunk jedesmal neu holen?! was übernimmt dxram an dieser stelle ?
+                for (int i=0 ; i<ROOTN.get().entriesSize; i++) {
+                    if (i < DxramFsConfig.blockinfo_ids_each_fsnode) {
+                        long entryChunkId = ROOTN.get().blockinfoIds[i];
+                        FsNodeChunk entryChunk = new FsNodeChunk(entryChunkId);
+                        chunkS.get(entryChunk);
+                        if (entryChunk.get().name.equals(pathparts[0])) {
+                            back = "OK";
+                            break;
+                        }
+                    } else {
+                        // @todo an die extID rann gehen !!
+                    }
+                }
+            } else {
+                // @todo iter through pathparts and their FSNode entries
+                back = "OK. " + String.valueOf(pathparts.length);
+            }
+        }
+        return back;
+    }
+
+    // ------------------------------------------------------------------------------------------------
+
+    private ExistsMessage externalHandleExists(ExistsMessage msg) {
+        ExistsMessage response = new ExistsMessage((short) dxnet_local_id, exists(msg.get_data()));
+        return response;
+    }
+
+    private MkDirsMessage externalHandleMkDirs(MkDirsMessage msg) {
+        String back = "fail";
+        String path = msg.get_data();
+        String[] pathparts = path.split("/");
+        LOG.debug(String.join(" , ", pathparts));
+        // EXISTS is tested by hadoop before !!! We do not have to test it here again (?)
+
+        if (pathparts.length == 1) {
+            // we have to add it to the root only
+
+            FsNodeChunk newdir = new FsNodeChunk();
+            newdir.get().fsNodeType = FsNodeType.FOLDER;
+            newdir.get().name = pathparts[0];
+            newdir.get().referenceId = ROOT_CID;
+            newdir.get().init();
+            newdir.get().entriesSize = 0;
+            long newdirCID = chunkS.create(newdir.sizeofObject(), 1)[0];
+            newdir.setID(newdirCID);
+            // @todo muss ich hier den root chunk jedesmal neu holen?! was übernimmt dxram an dieser stelle ?
+            chunkS.get(newdir, ROOTN);
+
+            ROOTN.get().blockinfoIds[ROOTN.get().entriesSize] = newdirCID;
+            ROOTN.get().entriesSize++;
+
+            // @todo error handling
+            chunkS.put(ROOTN, newdir);
+            back = "OK: " + String.valueOf(ROOTN.get().entriesSize);
+
+            // @todo handle more than blockinfo_ids_each_fsnode entries !!
+        }
+
         // @todo fill with functionality !!
-        return "OK dude!";
+        MkDirsMessage response = new MkDirsMessage((short) dxnet_local_id, back);
+        return response;
     }
 
     private String externalHandleIsDirectory(IsDirectoryMessage msg) {
@@ -213,13 +283,6 @@ public class DxramFsPeerApp extends AbstractApplication {
         // @todo fill with functionality !!
         FileLengthMessage response = new FileLengthMessage((short) dxnet_local_id, "OK");
         response.set_length(42);
-        return response;
-    }
-
-    private MkDirsMessage externalHandleMkDirs(MkDirsMessage msg) {
-        String path = msg.get_data();
-        // @todo fill with functionality !!
-        MkDirsMessage response = new MkDirsMessage((short) dxnet_local_id, "OK");
         return response;
     }
 
