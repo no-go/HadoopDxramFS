@@ -9,7 +9,6 @@ import java.net.InetSocketAddress;
 
 public class DxnetInit {
     private DXNet _dxNet;
-    public A100bMessage.InHandler inHandler;
 
     public BlockLocationsMessage.InHandler blmh;
     public CreateMessage.InHandler cmh;
@@ -50,10 +49,6 @@ public class DxnetInit {
                 conf.getLoopbackConfig(),
                 nodeMap
         );
-
-        _dxNet.registerMessageType(A100bMessage.MTYPE, A100bMessage.TAG, A100bMessage.class);
-        inHandler = new A100bMessage.InHandler();
-        _dxNet.register(A100bMessage.MTYPE, A100bMessage.TAG, inHandler);
 
         _dxNet.registerMessageType(BlockLocationsMessage.MTYPE, BlockLocationsMessage.TAG, BlockLocationsMessage.class);
         _dxNet.registerMessageType(CreateMessage.MTYPE, CreateMessage.TAG, CreateMessage.class);

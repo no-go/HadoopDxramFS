@@ -2,7 +2,6 @@ package de.hhu.bsinfo.dxramfs.connector;
 
 import de.hhu.bsinfo.dxnet.DXNet;
 import de.hhu.bsinfo.dxnet.core.NetworkException;
-import de.hhu.bsinfo.dxramfs.core.A100bMessage;
 import de.hhu.bsinfo.dxramfs.core.DxramFsConfig;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.security.AccessControlException;
@@ -18,7 +17,6 @@ import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.mortbay.log.Log;
 
 import de.hhu.bsinfo.dxramfs.core.rpc.*;
 
@@ -35,32 +33,6 @@ public class DxramFile {
     
     /// @todo File OP
     private java.io.File _dummy;
-
-    private boolean send(String str) {
-        A100bMessage outmsg = new A100bMessage(
-                DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId,
-                str
-        );
-
-        try {
-            _dxnet.sendMessage(outmsg);
-            // @todo mutex oder so etwas? das ist hier kein gutes konzept fuer synchrone uebertragung!!!
-            while (outmsg.gotMsg == false) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ignored) {
-                    // nothing.
-                    // maybe handle response here !!
-                }
-            }
-            LOG.debug("got Response: " + outmsg.msg.getData());
-            return true;
-
-        } catch (NetworkException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 
     public DxramFile(DXNet dxnet, Path absPath, URI uri) {
         _dxnet     = dxnet;
@@ -95,6 +67,9 @@ public class DxramFile {
         return p;
     }
 
+    public Path getPath() {
+        return _absPath;
+    }
 
 
 
@@ -125,29 +100,37 @@ public class DxramFile {
         return _dummy.length();
     }
 
+    public boolean mkdirs() throws IOException {
+        MkDirsMessage msg = new MkDirsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, _dummy.getName());
+        boolean res = msg.send(_dxnet);
+        LOG.debug("mkdirs msg Response: " + String.valueOf(res));
+        return _dummy.mkdirs();
+    }
+
+
+
+
+
+
+
+
 
 
     public boolean delete() throws IOException {
         /// @todo File OP
-        send("delete() " + _dummy.getName());
+        //send("delete() " + _dummy.getName());
         return _dummy.delete();
     }
     
     public boolean renameTo(DxramFile dest) {
         /// @todo File OP
-        send("rename() " + _dummy.getName() + " ->" + dest._dummy.getName());
+        //send("rename() " + _dummy.getName() + " ->" + dest._dummy.getName());
         return _dummy.renameTo(dest._dummy);
     }
 
-    public boolean mkdirs() throws IOException {
-        /// @todo File OP
-        send("mkdirs() " + _dummy.getName());
-        return _dummy.mkdirs();
-    }
-    
     public DxramFile[] listFiles() throws FileNotFoundException, IOException {
         ArrayList<DxramFile> fArrayList = new ArrayList<>();
-        send("listFiles() " + _dummy.getName());
+        //send("listFiles() " + _dummy.getName());
 
         /// @todo File OP
         for (File childFile : _dummy.listFiles()) {
@@ -162,7 +145,7 @@ public class DxramFile {
     }
     
     public FileStatus getFileStatus() {
-        send("getFileStatus() " + _dummy.getName());
+        //send("getFileStatus() " + _dummy.getName());
 
         return new FileStatus(
             this.length(),
@@ -171,11 +154,8 @@ public class DxramFile {
             getPath()
         );
     }
-    
-    public Path getPath() {
-        return _absPath;
-    }
-    
+
+    //-------------------------------------------------------------------------------------- create
     public FSDataOutputStream create(
         int bufferSize, 
         short replication,
@@ -190,14 +170,14 @@ public class DxramFile {
         if (this.exists()) throw new FileAlreadyExistsException("file still exists");
         
         /// @todo File OP
-        send("create: java io file.getAbsolutePath() " + _dummy.getName());
+        //send("create: java io file.getAbsolutePath() " + _dummy.getName());
         String absolutePath = _dummy.getAbsolutePath();
         String filePath = absolutePath.substring(0, absolutePath.lastIndexOf(Path.SEPARATOR));
         
         //LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName() + "() filepath = {}",filePath);
         
         /// @todo File OP
-        send("create: java io Files.notExists(Paths.get(filePath))) " + filePath);
+        //send("create: java io Files.notExists(Paths.get(filePath))) " + filePath);
         if (Files.notExists(Paths.get(filePath))) {
             Path absF = lpath2hpath(filePath);
             DxramFile dxfile = new DxramFile(_dxnet, absF, _uri);
@@ -207,19 +187,20 @@ public class DxramFile {
         }
         
         /// @todo File OP
-        send("create: java io file.createNewFile() " + _dummy.getName());
+        //send("create: java io file.createNewFile() " + _dummy.getName());
         _dummy.createNewFile();
         OutputStream out = new FileOutputStream(_dummy);
         FSDataOutputStream outs = new FSDataOutputStream(out, (Statistics)null);
         return outs;
     }
-    
+
+    //-------------------------------------------------------------------------------------- open
     public FSDataInputStream open(int bufferSize) throws IOException {
         if (this.isDirectory()) throw new IOException("is directory");
         byte[] data = new byte[(int) this.length()];
         
         /// @todo File OP
-        send("open: java io FileInputStream() " + _dummy.getName());
+        //send("open: java io FileInputStream() " + _dummy.getName());
         FileInputStream fis = new FileInputStream(_dummy);
         fis.read(data);
         fis.close();
@@ -251,7 +232,7 @@ public class DxramFile {
          * @todo: after implement a real distributed fs, we have to implement this !!!!
          * -> but: where did the dxramfs ekosystem handle this?!
          */
-        send("getFileBlockLocations() " + _dummy.getName());
+        //send("getFileBlockLocations() " + _dummy.getName());
 
         return new BlockLocation[0];
     }

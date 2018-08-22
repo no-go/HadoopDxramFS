@@ -43,7 +43,6 @@ public class DxramFsPeerApp extends AbstractApplication {
 
     // ++++++++ --------------------------
 
-
     private static final Logger LOG = LogManager.getFormatterLogger(DxramFsPeerApp.class.getSimpleName());
 
     private long ROOT_CID;
@@ -143,19 +142,6 @@ public class DxramFsPeerApp extends AbstractApplication {
 
             }
 
-            if (dxnetInit.inHandler.gotMsg()) {
-                A100bMessage msg = (A100bMessage) dxnetInit.inHandler.lastMsg();
-                A100bMessage response = new A100bMessage(
-                        (short) dxnet_local_id,
-                        "OK" + msg.getData().substring(0, 10)
-                );
-                try {
-                    dxnetInit.getDxNet().sendMessage(response);
-                } catch (NetworkException e) {
-                    e.printStackTrace();
-                }
-            }
-
             if (dxnetInit.emh.gotResult()) {
                 ExistsMessage msg = (ExistsMessage) dxnetInit.emh.Result();
                 // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
@@ -194,6 +180,17 @@ public class DxramFsPeerApp extends AbstractApplication {
                     e.printStackTrace();
                 }
             }
+
+            if (dxnetInit.mdmh.gotResult()) {
+                MkDirsMessage msg = (MkDirsMessage) dxnetInit.mdmh.Result();
+                // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
+                MkDirsMessage response = externalHandleMkDirs(msg);
+                try {
+                    dxnetInit.getDxNet().sendMessage(response);
+                } catch (NetworkException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
     }
@@ -215,6 +212,13 @@ public class DxramFsPeerApp extends AbstractApplication {
         // @todo fill with functionality !!
         FileLengthMessage response = new FileLengthMessage((short) dxnet_local_id, "OK");
         response.set_length(42);
+        return response;
+    }
+
+    private MkDirsMessage externalHandleMkDirs(MkDirsMessage msg) {
+        String path = msg.get_data();
+        // @todo fill with functionality !!
+        MkDirsMessage response = new MkDirsMessage((short) dxnet_local_id, "OK");
         return response;
     }
 

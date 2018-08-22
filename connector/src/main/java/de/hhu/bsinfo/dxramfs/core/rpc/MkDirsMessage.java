@@ -18,32 +18,32 @@ public class MkDirsMessage extends Message {
     public static final Logger LOG = LogManager.getLogger(MkDirsMessage.class.getName());
     public static final byte MTYPE = 18;
     public static final byte TAG = 42;
-    private byte[] data;
+    private byte[] _data;
 
     public static boolean gotResult;
     public static MkDirsMessage result;
 
-    public String getData() {
-        return new String(data, StandardCharsets.UTF_8);
+    public String get_data() {
+        return new String(_data, StandardCharsets.UTF_8);
     }
 
     @Override
     protected final int getPayloadLength() {
-        return ObjectSizeUtil.sizeofByteArray(data);
+        return ObjectSizeUtil.sizeofByteArray(_data);
     }
 
     @Override
     protected final void writePayload(
             final AbstractMessageExporter p_exporter
     ) {
-        p_exporter.writeByteArray(data);
+        p_exporter.writeByteArray(_data);
     }
 
     @Override
     protected final void readPayload(
             final AbstractMessageImporter p_importer
     ) {
-        data = p_importer.readByteArray(data);
+        _data = p_importer.readByteArray(_data);
     }
 
     // ---------------------------------------------------------------
@@ -54,13 +54,13 @@ public class MkDirsMessage extends Message {
 
     public MkDirsMessage(final short p_destination) {
         super(p_destination, MkDirsMessage.MTYPE, MkDirsMessage.TAG);
-        data = new byte[DxramFsConfig.max_pathlength_chars];
+        _data = new byte[DxramFsConfig.max_pathlength_chars];
     }
 
     public MkDirsMessage(final short p_destination, final String p_data) {
         super(p_destination, MkDirsMessage.MTYPE, MkDirsMessage.TAG);
         gotResult = false;
-        data = p_data.getBytes(StandardCharsets.UTF_8);
+        _data = p_data.getBytes(StandardCharsets.UTF_8);
     }
 
     // ---------------------------------------------------------------
@@ -84,8 +84,8 @@ public class MkDirsMessage extends Message {
                     // maybe handle response here !!
                 }
             }
-            LOG.debug("got Response: " + result.getData());
-            if (result.getData().startsWith("OK")) {
+            LOG.debug("got Response: " + result.get_data());
+            if (result.get_data().startsWith("OK")) {
                 return true;
             } else {
                 return false;
@@ -102,7 +102,7 @@ public class MkDirsMessage extends Message {
         @Override
         public void onIncomingMessage(Message p_message) {
             result = (MkDirsMessage) p_message;
-            LOG.info(result.getData());
+            LOG.info(result.get_data());
             gotResult = true;
         }
 
