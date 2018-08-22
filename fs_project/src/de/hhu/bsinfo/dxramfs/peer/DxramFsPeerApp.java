@@ -144,7 +144,8 @@ public class DxramFsPeerApp extends AbstractApplication {
 
             if (dxnetInit.emh.gotResult()) {
                 ExistsMessage msg = (ExistsMessage) dxnetInit.emh.Result();
-                // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
+                String[] pathparts = msg.getData().split("/");
+                LOG.debug(String.join(" , ", pathparts));
                 ExistsMessage response = new ExistsMessage(
                         (short) dxnet_local_id,
                         externalHandleExists(msg)

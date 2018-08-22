@@ -1,7 +1,6 @@
 package de.hhu.bsinfo.dxramfs.connector;
 
 import de.hhu.bsinfo.dxnet.DXNet;
-import de.hhu.bsinfo.dxnet.core.NetworkException;
 import de.hhu.bsinfo.dxramfs.core.DxramFsConfig;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.security.AccessControlException;
@@ -41,17 +40,24 @@ public class DxramFile {
         _absPath   = absPath;
         
         /// @todo File OP
-        String s = hpath2lpath(_absPath);
+        String s = hpath2lDEBUGpath(_absPath);
         _dummy   = new java.io.File(s);
     }
-    
+
     /** @todo File OP
      *  connector://localhost:9000/abc/de -> /tmp/myfs/abc/de
      */
-    private String hpath2lpath(Path hpath) {
+    private String hpath2lDEBUGpath(Path hpath) {
         return hpath.toString().replace(_uri.toString(), DEBUG_LOCAL);
     }
-    
+
+    /**
+     *  connector://localhost:9000/abc/de -> abc/de
+     */
+    private String hpath2path(Path hpath) {
+        return hpath.toString().replace(_uri.toString(), "");
+    }
+
     /** @todo File OP
      *  /tmp/myfs/abc/de -> connector://localhost:9000/abc/de
      */
@@ -80,28 +86,28 @@ public class DxramFile {
 
 
     public boolean exists() {
-        ExistsMessage msg = new ExistsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, _dummy.getName());
+        ExistsMessage msg = new ExistsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
         boolean res = msg.send(_dxnet);
         LOG.debug("exists msg Response: " + String.valueOf(res));
         return _dummy.exists();
     }
 
     public boolean isDirectory() {
-        IsDirectoryMessage msg = new IsDirectoryMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, _dummy.getName());
+        IsDirectoryMessage msg = new IsDirectoryMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
         boolean res = msg.send(_dxnet);
         LOG.debug("isdir msg Response: " + String.valueOf(res));
         return _dummy.isDirectory();
     }
     
     public long length() {
-        FileLengthMessage msg = new FileLengthMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, _dummy.getName());
+        FileLengthMessage msg = new FileLengthMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
         long res = msg.send(_dxnet);
         LOG.debug("length msg Response: " + String.valueOf(res));
         return _dummy.length();
     }
 
     public boolean mkdirs() throws IOException {
-        MkDirsMessage msg = new MkDirsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, _dummy.getName());
+        MkDirsMessage msg = new MkDirsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
         boolean res = msg.send(_dxnet);
         LOG.debug("mkdirs msg Response: " + String.valueOf(res));
         return _dummy.mkdirs();
