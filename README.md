@@ -36,9 +36,11 @@ instead of HDFS.
     mvn clean
     mvn package
 
-## Schematic Sketch
+## Sketches
 
 ![Schematic Sketch](notes/Structure.png)
+
+![DxramFS: between Chunks and Blocks](notes/FileSystem.png)
 
 To reduce confusion, here are some simple keywords to communicate over
 different project parts:
@@ -165,7 +167,7 @@ File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
     </property>
     
     <property>
-        <name>dxram.blockinfo_ids_each_fsnode</name>
+        <name>dxram.ref_ids_each_fsnode</name>
         <value>100</value>
     </property>
     

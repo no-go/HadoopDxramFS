@@ -37,7 +37,7 @@ public class DxramFsPeerApp extends AbstractApplication {
     @Expose
     private int file_blocksize = 4*1024*1024;
     @Expose
-    private int blockinfo_ids_each_fsnode = 123;
+    private int ref_ids_each_fsnode = 123;
     @Expose
     private int max_pathlength_chars = 256;
 
@@ -104,7 +104,7 @@ public class DxramFsPeerApp extends AbstractApplication {
         nopeConfig.dxPeers.add(aPeer);
 
         DxramFsConfig.file_blocksize = file_blocksize;
-        DxramFsConfig.blockinfo_ids_each_fsnode = blockinfo_ids_each_fsnode;
+        DxramFsConfig.ref_ids_each_fsnode = ref_ids_each_fsnode;
         DxramFsConfig.max_pathlength_chars = max_pathlength_chars;
 
         dxnetInit = new DxnetInit(nopeConfig, nopeConfig.dxPeers.get(0).nodeId);
@@ -112,7 +112,7 @@ public class DxramFsPeerApp extends AbstractApplication {
         ROOTN = new FsNodeChunk();
         if (nameS.getChunkID(ROOT_Chunk, 10) == ChunkID.INVALID_ID) {
             // initial, if root does not exists
-            ROOTN.get().fsNodeType = FsNodeType.FOLDER;
+            ROOTN.get().type = FsNodeType.FOLDER;
             ROOTN.get().name = "/";
             ROOT_CID = chunkS.create(ROOTN.sizeofObject(), 1)[0];
             nameS.register(ROOT_CID, ROOT_Chunk);
@@ -120,9 +120,9 @@ public class DxramFsPeerApp extends AbstractApplication {
             ROOT_CID = nameS.getChunkID(ROOT_Chunk, 10);
             ROOTN.setID(ROOT_CID);
             chunkS.get(ROOTN);
-            ROOTN.get().entriesSize = 0;
+            ROOTN.get().refSize = 0;
             ROOTN.get().init();
-            ROOTN.get().referenceId = ROOT_CID;
+            ROOTN.get().backId = ROOT_CID;
             chunkS.put(ROOTN);
 
         } else {
@@ -202,15 +202,15 @@ public class DxramFsPeerApp extends AbstractApplication {
         chunkS.get(ROOTN);
         if (path.length() == 0) {
             back = "OK / exists";
-        } else if (ROOTN.get().entriesSize < 1) {
+        } else if (ROOTN.get().refSize < 1) {
             back = "no / empty";
         } else {
             if (pathparts.length == 1) {
                 back = "search in root...";
                 // @todo muss ich hier den root chunk jedesmal neu holen?! was übernimmt dxram an dieser stelle ?
-                for (int i=0 ; i<ROOTN.get().entriesSize; i++) {
-                    if (i < DxramFsConfig.blockinfo_ids_each_fsnode) {
-                        long entryChunkId = ROOTN.get().blockinfoIds[i];
+                for (int i=0 ; i<ROOTN.get().refSize; i++) {
+                    if (i < DxramFsConfig.ref_ids_each_fsnode) {
+                        long entryChunkId = ROOTN.get().refIds[i];
                         FsNodeChunk entryChunk = new FsNodeChunk(entryChunkId);
                         chunkS.get(entryChunk);
                         if (entryChunk.get().name.equals(pathparts[0])) {
@@ -247,22 +247,22 @@ public class DxramFsPeerApp extends AbstractApplication {
             // we have to add it to the root only
 
             FsNodeChunk newdir = new FsNodeChunk();
-            newdir.get().fsNodeType = FsNodeType.FOLDER;
+            newdir.get().type = FsNodeType.FOLDER;
             newdir.get().name = pathparts[0];
-            newdir.get().referenceId = ROOT_CID;
+            newdir.get().backId = ROOT_CID;
             newdir.get().init();
-            newdir.get().entriesSize = 0;
+            newdir.get().refSize = 0;
             long newdirCID = chunkS.create(newdir.sizeofObject(), 1)[0];
             newdir.setID(newdirCID);
             // @todo muss ich hier den root chunk jedesmal neu holen?! was übernimmt dxram an dieser stelle ?
             chunkS.get(newdir, ROOTN);
 
-            ROOTN.get().blockinfoIds[ROOTN.get().entriesSize] = newdirCID;
-            ROOTN.get().entriesSize++;
+            ROOTN.get().refIds[ROOTN.get().refSize] = newdirCID;
+            ROOTN.get().refSize++;
 
             // @todo error handling
             chunkS.put(ROOTN, newdir);
-            back = "OK: " + String.valueOf(ROOTN.get().entriesSize);
+            back = "OK: " + String.valueOf(ROOTN.get().refSize);
 
             // @todo handle more than blockinfo_ids_each_fsnode entries !!
         }

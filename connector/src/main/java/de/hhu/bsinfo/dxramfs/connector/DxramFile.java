@@ -92,6 +92,14 @@ public class DxramFile {
         return _dummy.exists();
     }
 
+    public boolean mkdirs() throws IOException {
+        MkDirsMessage msg = new MkDirsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
+        boolean res = msg.send(_dxnet);
+        LOG.debug("mkdirs msg Response: " + String.valueOf(res));
+        return _dummy.mkdirs();
+    }
+
+
     public boolean isDirectory() {
         IsDirectoryMessage msg = new IsDirectoryMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
         boolean res = msg.send(_dxnet);
@@ -104,13 +112,6 @@ public class DxramFile {
         long res = msg.send(_dxnet);
         LOG.debug("length msg Response: " + String.valueOf(res));
         return _dummy.length();
-    }
-
-    public boolean mkdirs() throws IOException {
-        MkDirsMessage msg = new MkDirsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
-        boolean res = msg.send(_dxnet);
-        LOG.debug("mkdirs msg Response: " + String.valueOf(res));
-        return _dummy.mkdirs();
     }
 
 

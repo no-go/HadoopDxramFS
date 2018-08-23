@@ -27,7 +27,7 @@
     </property>
 
     <property>
-        <name>dxram.blockinfo_ids_each_fsnode</name>
+        <name>dxram.ref_ids_each_fsnode</name>
         <value>100</value>
     </property>
     

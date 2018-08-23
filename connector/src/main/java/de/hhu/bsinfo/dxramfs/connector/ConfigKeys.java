@@ -18,7 +18,7 @@ import java.io.IOException;
 public class ConfigKeys extends CommonConfigurationKeys {
     // you can (some of this are) overwrite THESE IMPORTANT DEFAULTS with etc/hadoop/core-site.xml
     public static final String BLOCK_SIZE_KEY = "dxram.file_blocksize";
-    public static final long BLOCK_SIZE_DEFAULT = 8388608; // 8*1024*1024;
+    public static final long BLOCK_SIZE_DEFAULT = 4194304; // 4*1024*1024;
     public static final String  REPLICATION_KEY = "dxram.replication";
     public static final short REPLICATION_DEFAULT = 1;
     public static final String STREAM_BUFFER_SIZE_KEY = "dxram.stream-buffer-size";

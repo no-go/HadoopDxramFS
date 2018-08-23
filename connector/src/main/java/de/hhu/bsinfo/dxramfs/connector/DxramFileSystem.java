@@ -91,7 +91,7 @@ public class DxramFileSystem extends FileSystem {
         super.initialize(theUri, conf);
         setConf(conf);
         DxramFsConfig.file_blocksize = Integer.valueOf(conf.get("dxram.file_blocksize"));
-        DxramFsConfig.blockinfo_ids_each_fsnode = Integer.valueOf(conf.get("dxram.blockinfo_ids_each_fsnode"));
+        DxramFsConfig.ref_ids_each_fsnode = Integer.valueOf(conf.get("dxram.ref_ids_each_fsnode"));
         DxramFsConfig.max_pathlength_chars = Integer.valueOf(conf.get("dxram.max_pathlength_chars"));
 
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", theUri, conf);

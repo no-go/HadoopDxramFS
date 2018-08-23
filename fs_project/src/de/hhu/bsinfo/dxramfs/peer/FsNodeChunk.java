@@ -37,38 +37,38 @@ public class FsNodeChunk extends DataStructure {
     @Override
     public void exportObject(final Exporter p_exporter) {
         p_exporter.writeLong(_fsNode.ID);
-        p_exporter.writeLong(_fsNode.referenceId);
+        p_exporter.writeLong(_fsNode.backId);
         p_exporter.writeString(_fsNode.name);
-        p_exporter.writeInt(_fsNode.fsNodeType);
+        p_exporter.writeInt(_fsNode.type);
         p_exporter.writeLong(_fsNode.size);
-        p_exporter.writeInt(_fsNode.entriesSize);
-        p_exporter.writeLongArray(_fsNode.blockinfoIds);
-        p_exporter.writeLong(_fsNode.extID);
+        p_exporter.writeInt(_fsNode.refSize);
+        p_exporter.writeLongArray(_fsNode.refIds);
+        p_exporter.writeLong(_fsNode.forwardId);
     }
 
     @Override
     public void importObject(final Importer p_importer) {
         _fsNode.ID = p_importer.readLong(_fsNode.ID);
-        _fsNode.referenceId = p_importer.readLong(_fsNode.referenceId);
+        _fsNode.backId = p_importer.readLong(_fsNode.backId);
         _fsNode.name = p_importer.readString(_fsNode.name);
         _fsNode.size = p_importer.readLong(_fsNode.size);
-        _fsNode.fsNodeType = p_importer.readInt(_fsNode.fsNodeType);
-        _fsNode.entriesSize = p_importer.readInt(_fsNode.entriesSize);
-        _fsNode.blockinfoIds = p_importer.readLongArray(_fsNode.blockinfoIds);
-        _fsNode.extID = p_importer.readLong(_fsNode.extID);
+        _fsNode.type = p_importer.readInt(_fsNode.type);
+        _fsNode.refSize = p_importer.readInt(_fsNode.refSize);
+        _fsNode.refIds = p_importer.readLongArray(_fsNode.refIds);
+        _fsNode.forwardId = p_importer.readLong(_fsNode.forwardId);
     }
 
     @Override
     public int sizeofObject() {
         int size = 0;
         size += Long.BYTES; // ID
-        size += Long.BYTES; // referenceId
+        size += Long.BYTES; // referenceId backId
         size += _fsNode.name.getBytes().length; // name
         size += Long.BYTES; // size
-        size += Integer.BYTES; // fsNodeType
+        size += Integer.BYTES; // fsNodeType type
         size += Integer.BYTES; // entriesSize
-        size += ObjectSizeUtil.sizeofLongArray(_fsNode.blockinfoIds);
-        size += Long.BYTES; // extID
+        size += ObjectSizeUtil.sizeofLongArray(_fsNode.refIds);
+        size += Long.BYTES; // extID forwardId
         return size;
     }
 }
