@@ -194,8 +194,31 @@ public class DxramFsPeerApp extends AbstractApplication {
 
     // ------------------------------------------------------------------------------------------------
 
+    /**
+     * Get the ChunkId of a FsNode with "name" in FsNode (a folder) or -1, if it not exists
+     * @param name
+     * @param nodeChunk
+     * @return
+     */
+    private long getIn(String name, FsNodeChunk nodeChunk) {
+        int refSize = nodeChunk.get().refSize;
+        for (int i=0; i<refSize; i++) {
+            if (i < DxramFsConfig.ref_ids_each_fsnode) {
+                long entryChunkId = nodeChunk.get().refIds[i];
+                FsNodeChunk entryChunk = new FsNodeChunk(entryChunkId);
+                chunkS.get(entryChunk);
+                if (entryChunk.get().name.equals(name)) {
+                    return entryChunkId;
+                }
+            } else {
+                // @todo an die forwardId rann gehen !!
+            }
+        }
+        return -1;
+    }
+
     private String exists(String path) {
-        String back = "no";
+        String back = "OK";
 
         String[] pathparts = path.split("/");
         LOG.debug(String.join(" , ", pathparts));
@@ -205,25 +228,12 @@ public class DxramFsPeerApp extends AbstractApplication {
         } else if (ROOTN.get().refSize < 1) {
             back = "no / empty";
         } else {
-            if (pathparts.length == 1) {
-                back = "search in root...";
-                // @todo muss ich hier den root chunk jedesmal neu holen?! was übernimmt dxram an dieser stelle ?
-                for (int i=0 ; i<ROOTN.get().refSize; i++) {
-                    if (i < DxramFsConfig.ref_ids_each_fsnode) {
-                        long entryChunkId = ROOTN.get().refIds[i];
-                        FsNodeChunk entryChunk = new FsNodeChunk(entryChunkId);
-                        chunkS.get(entryChunk);
-                        if (entryChunk.get().name.equals(pathparts[0])) {
-                            back = "OK";
-                            break;
-                        }
-                    } else {
-                        // @todo an die extID rann gehen !!
-                    }
-                }
-            } else {
-                // @todo iter through pathparts and their FSNode entries
-                back = "OK. " + String.valueOf(pathparts.length);
+            FsNodeChunk subNode = ROOTN; // @todo copy oder clone ??
+            for (int i=0; i < pathparts.length; i++) {
+                long subChunkId = getIn(pathparts[i], subNode);
+                if (subChunkId < 0) return "no";
+                subNode = new FsNodeChunk(subChunkId); // @todo wird hier ROOTN evtl überschrieben?
+                chunkS.get(subNode);
             }
         }
         return back;
