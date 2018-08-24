@@ -211,7 +211,7 @@ public class DxramFsPeerApp extends AbstractApplication {
                     return entryChunkId;
                 }
             } else {
-                // @todo an die forwardId rann gehen !!
+                // @todo an die forwardId rann gehen, wenn refSize = ref_ids_each_fsnode
             }
         }
         return -1;
@@ -246,38 +246,52 @@ public class DxramFsPeerApp extends AbstractApplication {
         return response;
     }
 
+
     private MkDirsMessage externalHandleMkDirs(MkDirsMessage msg) {
-        String back = "fail";
+        String back;
         String path = msg.get_data();
         String[] pathparts = path.split("/");
         LOG.debug(String.join(" , ", pathparts));
-        // EXISTS is tested by hadoop before !!! We do not have to test it here again (?)
 
-        if (pathparts.length == 1) {
-            // we have to add it to the root only
+        if (path.length() > 0) {
+            FsNodeChunk subNode = ROOTN;
+            long subChunkId = ROOT_CID;
+            for (int i = 0; i < pathparts.length -1; i++) {
+                subChunkId = getIn(pathparts[i], subNode);
+                if (subChunkId < 0) {
+                    // @todo: unsure, if we have to create the whole structure, because DxramFs-connector may do exists() and create() before
+                    return new MkDirsMessage((short) dxnet_local_id, "fail. upper folder not exists");
+                }
+                subNode = new FsNodeChunk(subChunkId);
+                chunkS.get(subNode);
+            }
+
+            // subNode should be the folder, where we have to create a new folder
 
             FsNodeChunk newdir = new FsNodeChunk();
             newdir.get().type = FsNodeType.FOLDER;
-            newdir.get().name = pathparts[0];
-            newdir.get().backId = ROOT_CID;
+            newdir.get().name = pathparts[pathparts.length -1];
+            newdir.get().backId = subChunkId;
             newdir.get().init();
             newdir.get().refSize = 0;
             long newdirCID = chunkS.create(newdir.sizeofObject(), 1)[0];
             newdir.setID(newdirCID);
-            // @todo muss ich hier den root chunk jedesmal neu holen?! was übernimmt dxram an dieser stelle ?
-            chunkS.get(newdir, ROOTN);
+            // @todo muss ich hier den chunk jedesmal neu holen?! was übernimmt dxram an dieser stelle ?
+            chunkS.get(newdir, subNode);
 
-            ROOTN.get().refIds[ROOTN.get().refSize] = newdirCID;
-            ROOTN.get().refSize++;
+            subNode.get().refIds[subNode.get().refSize] = newdirCID;
+            subNode.get().refSize++;
 
             // @todo error handling
-            chunkS.put(ROOTN, newdir);
-            back = "OK: " + String.valueOf(ROOTN.get().refSize);
+            chunkS.put(subNode, newdir);
+            back = "OK: " + String.valueOf(subNode.get().refSize);
 
-            // @todo handle more than blockinfo_ids_each_fsnode entries !!
+            // @todo handle more than ref_ids_each_fsnode entries !!
+
+        } else {
+            back = "fail. path empty";
         }
 
-        // @todo fill with functionality !!
         MkDirsMessage response = new MkDirsMessage((short) dxnet_local_id, back);
         return response;
     }

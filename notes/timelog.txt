@@ -1,0 +1,3184 @@
+Dieses Dokument soll eine Roadmap (ist-Zustand) darstellen, so dass am Ende
+niemand sagen kann: ,,Was hat er denn gemacht in der Zeit?'' - Evtl. gibt
+es ja bereits für eine Projektarbeit Vorlagen (?) aber vorerst ist das
+hier meine Basis.
+
+
+# Roadmap
+
+- HBASE + Hadoop installation localhost und einfache tests (2017-0-19)
+- Entscheidung: nur HBASE thrift interface, Hadoop + libfuse oder Hadoop FileSystem
+- Recherche andere Hadoop Filesystem Connectoren
+- einlesen in "FileSystem" von Hadoop
+- in Original hdfs logs einbauen und Test nochmal durchlaufen
+- Dummy Hadoop FS gebildet, was alles in /tmp/myfs ablegt
+- Dummy Hadoop FS: mapreduce tut, hbase test mit java code weiterhin fehlerhaft (wie in hdfs)
+- hbase java beispiel erstmal aufgeschoben
+- Theorie zu HBASE und HADOOP mit Code verifizieren, um ein brauchbares Abbild der nötigen Daten (Block, BlockLocation) in dxram zu ermöglichen
+- Projekt Konzept: maven und wie binde ich dxram, dxnet und hadoop ein?
+- dxnet als 1:1 connector zwischen hadoop-node und dxram-peer app
+- umgang mit config files und log4j
+- Definition und Implementierung der nötigen Filesystem Strukturen
+- dxnet mit RPC sync message Konzept
+- stückweise umbau des Dummy Hadoop FS (/tmp/myfs) in ein System, was RPC und dxram nutzt (seit 2018-08-21)
+
+...
+
+-------------------------------------------------------------------------------------
+
+# starten
+
+    hdfs namenode -format
+    start-dfs.sh
+    hdfs dfs -mkdir /user
+    hdfs dfs -mkdir /user/tux
+    start-hbase.sh
+    kinit
+    klist
+
+note: `hdfs dfs -mkdir /user` is equal to `bin/hadoop fs -mkdir /user` if
+hdfs is your default fs in `core-site.xml`
+
+# stoppen
+
+    stop-hbase.sh
+    stop-dfs.sh
+
+# Zeiten
+
+| ab            | Thema                                      |   Stunden |
+|:--------------|:-------------------------------------------|----------:|
+| 2017-10-19    | einlesen Zookeeper                         |         6 |
+| 2017-10-27    | einlesen Hadoop                            |         6 |
+| 2017-11-03    | Hadoop und fremde Filesysteme              |         6 |
+| 2017-11-10    | Kompile Hadoop, running HBASE              |      8,75 |
+| 2017-11-17    | HBASE Beispiel ans laufen bekommen (fail), |           |
+|               | Konzept hadoop start Skripte,              |           |
+|               | Konzept: Trennung HDFS von Hadoop          |      5,25 |
+| 2017-11-24    | nix                                        |         0 |
+| 2017-12-01    | Vortrag Chunks und Speichermng - sperren?  |      6,25 |
+| 2017-12-08    | xmas feier verpasst                        |      9:00 |
+| 2017-12-15    | detailvortrag DXRAM                        |     11,25 |
+| 2018-01-12    | was bisher geschah                         |     11,75 |
+| 2018-01-19    | verknüpfung HBASE und Hadoop Ekosys        |     15,50 |
+| 2018-01-26    | probleme losgelöst HDFS kompilieren,Folien |      3,25 |
+| 2018-02-02    | hdfs ohne hadoop mit print kompilieren,
+                  mit maven vertraut gemacht, put,mv,rm geht |      9,25 |
+| 2018-02-09    | ausfall (karneval?)                        |      7,75 | Umgang mit logs statt print, umgang mit maven
+| 2018-02-16    | BA präs um 10uhr (war nicht da)            |      8,50 | umgang mit fremd repos in maven
+| 2018-02-23    | neu im team: BA bzgl graph in DXRAM        |     18,75 | debugging, so dass mapreduce tu in fake
+| 2018-03-02    | Viele krank, 2paper bzgl. logs             |     11,75 | MapReduce tut in meinem Fake, aber HBASE nicht
+| 2018-03-09    | tutorial git und rebase mit DXram          |     10:00 | start, im Fake den lokalen File zugriff zu abstrahieren
+
+bis hier 155h
+
+
+
+| 2018-03-16    | überlegung zu eigener DXGraph Gruppe       |     15,50 | erste schritte nach Monaten mit DXRAM zu arbeiten, 
+                                                                           probleme deploy scripte localost
+| 2018-03-23    | klärung einiger Config, Start und entw.    |      3,25 | arbeiten auf localhost klappt, leider 3 Wochen Grippe
+                  Aspekte. Wie wäre Hadoop Prozess zum
+                  Data Peer migrierbar? Hadoop JobRunner
+                  von MapReduce/Yarn Erweiterbar auf
+                  DXRAMApplicationThread? Notwendig?
+                  Wie machen das andere?
+
+(2018-03-26 bis ca 2018-04-12 schwere Grippe)
+                                                                   1,25
+                                                                   
+???
+
+| 2018-04-20    | Folien DXRAM, Monitoring, DXGraph         |      9,25    | grippe, igfs als hdfs replacement idee
+| 2018-04-27    |                  ????
+
+
+
+ Besprechung am    Besprechung Thema                         Arbeitsstunden  Thema meiner Arbeit seit
+                                                             seit letzter    letzer Besprechung
+                                                              Besprechung
++---------------+-------------------------------------------+--------------+-----------------------
+| 2018-05-04    | Folien DXRAM IndexService                 |        9,75  | Umgang mit DXNet, Mini DXNet Anwendung
+|               |                                           |              | compilieren mit maven
++---------------+-------------------------------------------+--------------+-----------------------
+| 2018-05-10    | algemeine Problem Runde,                  |       11,25  | Umgang mit maven, dxnet als submodul,
+|               | in Zukunft App Templates für DXRAM        |              | einbau dxnet testmessage in hadoop code
+
+
+bis hier 205,25h
+
++---------------+-------------------------------------------+--------------+-----------------------
+|  2018-05-17   | Verpasst                                  |       19,75  | einbau von dxram in mein projekt als submodul
+|               |                                           |              | anpassung und abstimmung der lib/*.jar
+|               |                                           |              | Dateien (versionen)
+|               |                                           |              | von dxram und hadoop
+|               |                                           |              | anpassung und erweiterung eines deploy 
+|               |                                           |              | environments
++---------------+-------------------------------------------+--------------+-----------------------
+|  2018-05-25   | Ausgefallen                               |        5,75  | lösung von git repositories dxram,dxnet,dxutils
+|               |                                           |              | und maven execute/install, um besser diese
+|               |                                           |              | Projekte (libs, logging versionskonflikte)
+|               |                                           |              | mit hadoop 2.8.2 zusammen zu führen
++---------------+-------------------------------------------+--------------+-----------------------
+|  2018-06-01   | Diskussion/Ideen DXNet Messagetypen um    |        4,75  | weiter: splittung dxram,hadoop,dxnet
+|               | DXRAM von aussen zugreifbar zu machen.    |              | 
+|               | Abklärung mit Kevin bzgl. Chunksize und   |              | 
+|               | Logging                                   |              | 
++---------------+-------------------------------------------+--------------+-----------------------
+|  2018-06-08   | Gastvortrag bzgl. sql datasplittung       |       13,25  | anbindung dxram an dxnet, erste test bzgl. chunks
++---------------+-------------------------------------------+--------------+-----------------------
+|  2018-06-15   | Stand und Probleme besprochen             |        9,75  | Implementierung erster Datenstruckturen
+|               | mein problem aus einer NodeId eine        |              | um auf dxram und hadoop seite einheitliche
+|               | ipadresse und host+port zu machen, ist    |              | Klassen zu haben, die ein Dateisystem abbilden
+|               | Dxram bootstrap service geloest           |              | sollen.
++---------------+-------------------------------------------+--------------+-----------------------
+|  2018-06-22   | EthDXNet Vortrag                          |         1,5  | Überlegen, wie ich aus dem Async DXNet konzept ein
+|               |                                           |              | Sync konzept mache mit req-response Message typen
++---------------+-------------------------------------------+--------------+-----------------------
+|  2018-07-13   | Besprechung zu gradle umstellung          |         1    |
++---------------+-------------------------------------------+--------------+-----------------------
+|  2018-07-20   | Vortrag DXGraph                           |         1,5  |
++---------------+-------------------------------------------+--------------+-----------------------
+|  2018-08-17   |    - Fr                                   |         7,5  | Wiedereinarbeitung in code nach langer pause (excl. 17.8.)
++---------------+-------------------------------------------+--------------+-----------------------
+|  2018-08-21   |    - Di                                   |        8,75  | Erste RPC Messages und einbau eine Synchronen request-response logik (incl. 21.8.)
+
+
+
+
++---------------+-------------------------------------------+--------------+-----------------------
+|               |                                           |              | 
+
+
+|               |                                           |              | 
+-----------------------------------------------------------------------------------------------
+
+## notiz 2018-08-24
+
+12:45 - 14:00 Rekursion in exists() eingebaut. Noch nicht behandlung von mehr als 100 Einträgen (EXT) behandelt
+14:45 - 15:45 Zusammenfassung: "Roadmap" bisher, ablegen meiner Projektnotizen bei github. 
+              Rekursion in mkdirs() eingebaut
+              -> Noch ungetestet, Noch nicht behandlung von mehr als 100 Einträgen (EXT) behandelt
+
+
+
+
+## notiz 2018-08-23
+
+12:45 - 15:45   umbenennung diverser FSNode atttribute. Grafik erstellt, wie das system aufgebaut ist
+
+Frage: wird corrupt aktive von Hadoop und HBASE genutzt?
+
+
+## notiz 2018-08-22
+
+11:45 - 12:15   test Filesize. Wechsel zur blockgröße von 4MB, um einen Block komplett in einen 8MB (derzeit in meiner alten
+                dxram version das limit eines Chunks) speichern zu können.
+12:15 - 13:45   alte rpc test message entfernt. übertragung des ganzen pfades ohne dem hadoop "scheme" etc.
+15:00 - 18:30   first folders can be added to root folder. 
+                check for existing folders in root also implemented. 
+                FsNodeType is not a enum anymore, because xdram importer-exporter cannot handle it. 
+                the types are const int values in a FsNodeType class.
+
+                TODO: mkdirs,exists,isDirectory implemetieren auf tieferen FsNodes
+                AUCH: mehr als 100 entries je Ordner verarbeiten!!
+
+
+
+## notiz 2018-08-21
+
+22:00 - 22:45 file length Massage überarbeitet, um mehr als nur einen String zu übertragen (lng length) !!!
+
+0,75
+
+## notiz 2018-08-20
+
+13:00 - 14:00 abbildung weiterer rpc funktionen (vorerst ohne verarbeitungslogik)
+14:45 - 17:15 erste rpc dummys fertig und getestet.
+
+3,5
+
+## notiz 2018-08-18
+
+17:00 - 19:30 bau der ersten rpc message rpc.exists():
+
+RPC Konzept ist ersmal so:
+
+-   dxramfs-connector (hadoop) nutzt eine rpc Message Klasse, die dxnet() und send der message Klasse nutzt
+-   in dem send() wird auf ein response gewartet, dass im "inHandle" ankommt
+-   in dem send() wird passend auf die nachricht reagiert und ein für z.B. exists() passendes return geliefert.
+-   im dxramfs-peer wird das send() dieses Messagetyps nicht verwendet. in der
+    App wird in einer while-Endlosschleife nach allen "inHanler" abgefragt, ob die eine
+    nachricht (NEUE !? überdenken, ob dass korrekt verarbeitet wird!!!)
+    angekommen ist. Ist dies der Fall, wird diese Nachricht an eine externe Funktion der
+    App weitergeleitet und ein String als Response zurückgegeben und mit der selben rpc Message Klasse ein
+    Response gesendet.
+-> eine klare Request/Response Trennung findet nicht als Datentyp statt, sondern ist
+   in einer unterschiedlichen verarbeitungsart umgesetzt. Dies öffnet leider Tür und Tor
+   bei falsch oder fehlerhaft zugestellten nachrichten. Was ist z.B. wenn nicht dxnet
+   nur als localhost hadoopNode--dxramPeer 1:1 verbindung agiert?
+
+überhaupt ist mein Konzept seltsam: dxnet dazu zu nutzen, um nur auf localhost eine
+Verbindung zwischen Hadoop und DXram zu machen? Das mach nur sinn, wenn man später
+evtl. mehr vor hat und das ausbauen will.
+
+Aktuell ist die idee, jeder Hadoop Node, der Verarbeiten kann, bekommt ein DXRAMfs-Peer zur seite gestellt. Wenn der Sagt "Der Dateiblock liegt woanders", dann sagt es das dem Hadoop und das geht dann auf den Node, der entsprechend einen DXRAMfs-Peer als Partner hat, welcher die Daten trägt. Ich hoffe, das konzept geht so auf. Da ich ohne Replikate arbeite, sollte Hadoop so agieren. Datenmigration lässt sich bei Hadoop abstellen, so dass DXRAM die Herrschaft darüber hat.
+
+2,5
+
+## notiz 2018-08-17
+
+16:30 - 18:30 getserverdefaults.. geht nicht so, wie es sollte. überhaupt sieht der Code nicht gut aus..
+        delegtion und vererbung ist nicht gut und sinnig umgesetzt.
+
+2
+
+
+
+
+
+
+
+## notiz 2018-08-16
+
+13:00 - 13:45 überlegungen zu messagetypen und RPC umsetzung. Welche Befehle und Daten muss ich übertragen?
+
+todo: getFileBlockLocations() was bekommt das für Parameter und was wird in einer BlockLocation für zahlen hinterlegt? Bytes, MB, Blöcke?!
+
+14:45 - 16:15 Wieso wird in meinem Fake scheinbar nie Blocklocation abgefragt?? wo sind die blöcke hinterlegt? gibt es blockids?!
+
+todo: getServerDefaults(absF).getBlockSize(); in DxramFileSystem -> dass muss meine 8MB aus meiner config liefern
+
+2,25
+
+## notiz 2018-08-15
+
+17:00 - 19:00 Wiederholung, wie ich mir das mit den Blocks und Chunks gedacht habe. Als Grafik festgehalten.
+
+2
+
+## notiz 2018-08-14
+
+15:00 - 17:00 versuch, von einer message von hadoop zu dxram eine antwort an hadoop zurück zu senden
+             -> sync scheint zu klappen!
+
+2
+
+aktueller workaround:
+- zookeeper starten
+- mit meinem . ./my_env.sh hadoop bauen
+- /tmp/myfs/ ornder anlegen
+- mit intellij superpeer + peer starten
+- hadoop fs ...benutzen
+
+
+## notiz 2018-08-13
+
+13:30    Start mit wiederaufnahme meiner arbeit. Recherche HBASE, Hadoop 3.0, DXRAM und gradle
+         -> Idee: nach so langer pause kann es gut sein, wenn ich neuerungen der Projekte
+            bei mir direkt adoptiere
+- 14:30    -> neues DXRAM sieht gut aus. HBASE und Hadoop sollte ich weiter bei den bereits
+            getesteten versionen belassen. Speziell hbase doku sieht nicht so aus, als sollte
+            man über 2.0 gehen
+
+16:45 - 17:00 überblick, was ich an code vor hatte
+
+
+1,25
+
+
+--------------------------
+
+## notiz 2018-07-20
+
+10:00 - 11:30 Besprechung
+
+## notiz 2018-07-13
+
+10:00 - 11:00 Besprechung 
+
+## notiz 2018-06-22
+
+10:30 - 11:15 Besprechung
+
+
+## notiz 2018-06-15
+
+10:00 - 11:00 Besprechung
+
+12:00 - 12:30 ueberlegung, ob "DXNetMain implements MessageReceiver" nicht besser ist als
+            " extends AbstractApplication" und eine overwrite von des Receivers/handlers
+            praktischer waere. hinzu kommt das problem in dxnet, dass es async
+            ist und man auf eine anfrage im message handler nicht direkte eine
+            antwort senden kann. ebenso muss auf der hadoop - seite das response
+            abgewartet werden. Im Filesystem ist sync message system noetig.
+
+1,5
+
+## notiz 2018-06-14
+
+13:45 - 14:15 config+klassen testen, ob das so geht: OK
+14:15 - 14:30 beschreibung der filesystem struktur, um mir selbst implementierung begreiflicher
+              zu machen
+15:45 - 17:00 Erster BlockChunk auf meine Block-Struktur gematcht
+17:30 - 18:45 weitere Datenstrukturen auf seiten dxram fuers filesystem angelegt
+
+todo: create empty file or dir !!!
+
+2,75
+
+## notiz 2018-06-10
+
+14:45 - 17:45 erste klassen um filesystem in dxram abzulegen
+
+todo: root einbinden in die neue struktur
+todo: ueberlegen, was hadoop in Blocklocation braucht und wie ich das in
+      dxram rausfinde (auf welchen hadoop node liegt der chunk?)
+todo: Message typen
+todo: datenuebertragung
+
+3
+
+## notiz 2018-06-09
+
+10:00 - 12:45 umbau zu sauberen trennung dxnet dxram connector und FSPeer (fertig)
+20:30 - 20:45 file_blocksize configurierbar gemacht
+
+todo: datenuebertragung, filesystem struktur
+
+3
+
+## notiz 2018-06-08
+
+10:00 - 11:00 Besprechung
+
+1
+
+
+
+## notiz 2018-06-07
+
+13:15 - 14:15 umstellung, dass dxnet nicht mit "dxram" nodeid spricht, da
+    dxram nodeids dem hadoop-dxram-connector unbekannt wären. nutzung der
+    ids 0,1,ggf2... besser (0 = connector)
+
+1
+
+## notiz 2018-06-04
+
+16:45 - 18:00 erste schritte, mit chunks und datenstructuren. Erster
+      erfolg, etwas an Dxram zu senden.
+      dxram mag es nicht, wenn mein dxnet aber mit seinen ganzen fileops
+      durch ist. Der "knoten" geht verloren und App bricht ab(?)
+
+1,25
+
+## notiz 2018-06-03
+
+13:00 - 14:30 und ...
+
+Seltsam. Es hörte sich so simpel an, dass man in dxram ja einfach die
+nachrichten von dxnet empfangen könne. Aber wie soll ich in einer
+von "AbstractApplication" abgeleiteten Klasse  ein "registerMessageType"
+machen? dafür brauche ich "NetworkComponent.class", die ich mit
+einem "DXRAMComponentAccessor" holen könnte. Den "DXRAMComponentAccessor"
+kann ich aber nicht nutzen, weil diese "DXRAMEngine" in "AbstractApplication"
+als "private DXRAMEngine m_dxram;" - also mal wieder "private" hinterlegt
+ist. Wenn ich erlich bin, fühle ich mich immer etwas "veralbert",
+wenn man mir sagt, man könne "doch einfach" in dxram dies und das. Ja,
+ich möchte dafür aber nicht dxram komplett umprogrammieren :-(
+
+21:00 - 23:00 erste erfolge etwas aus dxramfs connector an eine dxram
+              application zu senden. Aber problem: die peerids sind ja
+              nicht "synchron"
+
+3,5
+
+## notiz 2018-06-02
+
+19:00 - 21:00 DXRAM wo sind vergleichbare message listener, wie sie bei
+  dxnet zu finden sind?
+
+2
+
+## notiz 2018-06-01
+
+10:00 - 11:15 Besprechung
+12:45 - 14:15 test dxnet message aus hadoop nach dxram - refactorierung der Msg Class
+21:00 - 21:30 jira ticket erleutern, da repo mit änderungswünschen weg sind
+21:30 - 23:45 refacorierung abgeschlossen. in jeder FileOP gibt es ein send() mit dxnet
+
+todo: dxnet "server" in dxram application einbauen
+
+
+5,5
+
+## notiz 2018-05-31
+
+14:00 - 15:00 Test der Splittung: OK
+17:00 - 19:00 zusammenführung in dxram bsinfo calls path (Splittung: peer/connect)
+19:00 - 19:30 dxram hallo welt -> soll meine neue (dxnet+dxram) DxramFS-Peer
+              application werden. Der Hadoop-DXRAMFS Connector wird nun
+              vom ant/build script ignoriert, da er ein eigenes PRojekt ist
+
+3,5
+
+## notiz 2018-05-30
+
+13:00 - 14:00 dxnet config überflüsssig machen und so testen
+14:00 - 14:15 splittung dxramfs (connector) / dxramfs peer
+
+1,25
+
+## notiz 2018-05-25
+
+oh 10:00 - 11:00 Besprechung ausgefallen
+
+## notiz 2018-05-23
+
+12:00 - 13:00 umstellung auf logging von hadoop (log4j 1.2 bzw. classic logging: slf4j-log4j12-1.7.10
+auf log4j2 ?)
+13:00 - 14:30 umstellung zurück auf dxnet.json datei, da nodeid,port,ip scheinbar für config nicht reichen
+15:15 - 17:15 testen, warum versand nicht mehr klappt
+17:15 - 18:30 rollback to old dxnet and dxutils version
+18:30 - 19:30 mehr bash scrpite, weniger maven
+
+4,25
+
+/usr/lib/jvm/default-runtime/bin/java -Dlog4j.configurationFile=./target/classes/log4j2.xml -javaagent:/home/tux/Dokumente/aur/idea-IC-173.4674.33/lib/idea_rt.jar=35723:/home/tux/Dokumente/aur/idea-IC-173.4674.33/bin -Dfile.encoding=UTF-8 -classpath /usr/lib/jvm/default-runtime/jre/lib/charsets.jar:/usr/lib/jvm/default-runtime/jre/lib/ext/cldrdata.jar:/usr/lib/jvm/default-runtime/jre/lib/ext/dnsns.jar:/usr/lib/jvm/default-runtime/jre/lib/ext/jaccess.jar:/usr/lib/jvm/default-runtime/jre/lib/ext/localedata.jar:/usr/lib/jvm/default-runtime/jre/lib/ext/nashorn.jar:/usr/lib/jvm/default-runtime/jre/lib/ext/sunec.jar:/usr/lib/jvm/default-runtime/jre/lib/ext/sunjce_provider.jar:/usr/lib/jvm/default-runtime/jre/lib/ext/sunpkcs11.jar:/usr/lib/jvm/default-runtime/jre/lib/ext/zipfs.jar:/usr/lib/jvm/default-runtime/jre/lib/jce.jar:/usr/lib/jvm/default-runtime/jre/lib/jsse.jar:/usr/lib/jvm/default-runtime/jre/lib/management-agent.jar:/usr/lib/jvm/default-runtime/jre/lib/resources.jar:/usr/lib/jvm/default-runtime/jre/lib/rt.jar:/home/tux/Dokumente/aur/idea-IC-173.4674.33/jre64/lib/tools.jar:/home/tux/big/HadoopDxramFS/target/classes:/home/tux/.m2/repository/org/apache/hadoop/hadoop-client/2.8.2/hadoop-client-2.8.2.jar:/home/tux/.m2/repository/org/apache/hadoop/hadoop-common/2.8.2/hadoop-common-2.8.2.jar:/home/tux/.m2/repository/com/google/guava/guava/11.0.2/guava-11.0.2.jar:/home/tux/.m2/repository/commons-cli/commons-cli/1.2/commons-cli-1.2.jar:/home/tux/.m2/repository/org/apache/commons/commons-math3/3.1.1/commons-math3-3.1.1.jar:/home/tux/.m2/repository/xmlenc/xmlenc/0.52/xmlenc-0.52.jar:/home/tux/.m2/repository/org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.jar:/home/tux/.m2/repository/org/apache/httpcomponents/httpcore/4.4.4/httpcore-4.4.4.jar:/home/tux/.m2/repository/commons-codec/commons-codec/1.4/commons-codec-1.4.jar:/home/tux/.m2/repository/commons-io/commons-io/2.4/commons-io-2.4.jar:/home/tux/.m2/repository/commons-net/commons-net/3.1/commons-net-3.1.jar:/home/tux/.m2/repository/commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar:/home/tux/.m2/repository/org/mortbay/jetty/jetty-sslengine/6.1.26/jetty-sslengine-6.1.26.jar:/home/tux/.m2/repository/javax/servlet/jsp/jsp-api/2.1/jsp-api-2.1.jar:/home/tux/.m2/repository/commons-logging/commons-logging/1.1.3/commons-logging-1.1.3.jar:/home/tux/.m2/repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar:/home/tux/.m2/repository/commons-configuration/commons-configuration/1.6/commons-configuration-1.6.jar:/home/tux/.m2/repository/commons-digester/commons-digester/1.8/commons-digester-1.8.jar:/home/tux/.m2/repository/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar:/home/tux/.m2/repository/commons-beanutils/commons-beanutils-core/1.8.0/commons-beanutils-core-1.8.0.jar:/home/tux/.m2/repository/org/codehaus/jackson/jackson-core-asl/1.9.13/jackson-core-asl-1.9.13.jar:/home/tux/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.9.13/jackson-mapper-asl-1.9.13.jar:/home/tux/.m2/repository/org/apache/avro/avro/1.7.4/avro-1.7.4.jar:/home/tux/.m2/repository/com/thoughtworks/paranamer/paranamer/2.3/paranamer-2.3.jar:/home/tux/.m2/repository/org/xerial/snappy/snappy-java/1.0.4.1/snappy-java-1.0.4.1.jar:/home/tux/.m2/repository/com/google/protobuf/protobuf-java/2.5.0/protobuf-java-2.5.0.jar:/home/tux/.m2/repository/org/apache/hadoop/hadoop-auth/2.8.2/hadoop-auth-2.8.2.jar:/home/tux/.m2/repository/com/nimbusds/nimbus-jose-jwt/3.9/nimbus-jose-jwt-3.9.jar:/home/tux/.m2/repository/net/jcip/jcip-annotations/1.0/jcip-annotations-1.0.jar:/home/tux/.m2/repository/net/minidev/json-smart/1.1.1/json-smart-1.1.1.jar:/home/tux/.m2/repository/org/apache/directory/server/apacheds-kerberos-codec/2.0.0-M15/apacheds-kerberos-codec-2.0.0-M15.jar:/home/tux/.m2/repository/org/apache/directory/server/apacheds-i18n/2.0.0-M15/apacheds-i18n-2.0.0-M15.jar:/home/tux/.m2/repository/org/apache/directory/api/api-asn1-api/1.0.0-M20/api-asn1-api-1.0.0-M20.jar:/home/tux/.m2/repository/org/apache/directory/api/api-util/1.0.0-M20/api-util-1.0.0-M20.jar:/home/tux/.m2/repository/org/apache/curator/curator-framework/2.7.1/curator-framework-2.7.1.jar:/home/tux/.m2/repository/org/apache/curator/curator-client/2.7.1/curator-client-2.7.1.jar:/home/tux/.m2/repository/org/apache/curator/curator-recipes/2.7.1/curator-recipes-2.7.1.jar:/home/tux/.m2/repository/com/google/code/findbugs/jsr305/3.0.0/jsr305-3.0.0.jar:/home/tux/.m2/repository/org/apache/htrace/htrace-core4/4.0.1-incubating/htrace-core4-4.0.1-incubating.jar:/home/tux/.m2/repository/org/apache/commons/commons-compress/1.4.1/commons-compress-1.4.1.jar:/home/tux/.m2/repository/org/tukaani/xz/1.0/xz-1.0.jar:/home/tux/.m2/repository/org/apache/hadoop/hadoop-hdfs-client/2.8.2/hadoop-hdfs-client-2.8.2.jar:/home/tux/.m2/repository/com/squareup/okhttp/okhttp/2.4.0/okhttp-2.4.0.jar:/home/tux/.m2/repository/com/squareup/okio/okio/1.4.0/okio-1.4.0.jar:/home/tux/.m2/repository/org/apache/hadoop/hadoop-mapreduce-client-app/2.8.2/hadoop-mapreduce-client-app-2.8.2.jar:/home/tux/.m2/repository/org/apache/hadoop/hadoop-mapreduce-client-common/2.8.2/hadoop-mapreduce-client-common-2.8.2.jar:/home/tux/.m2/repository/org/apache/hadoop/hadoop-yarn-client/2.8.2/hadoop-yarn-client-2.8.2.jar:/home/tux/.m2/repository/org/apache/hadoop/hadoop-yarn-server-common/2.8.2/hadoop-yarn-server-common-2.8.2.jar:/home/tux/.m2/repository/org/apache/hadoop/hadoop-mapreduce-client-shuffle/2.8.2/hadoop-mapreduce-client-shuffle-2.8.2.jar:/home/tux/.m2/repository/org/fusesource/leveldbjni/leveldbjni-all/1.8/leveldbjni-all-1.8.jar:/home/tux/.m2/repository/org/apache/hadoop/hadoop-yarn-api/2.8.2/hadoop-yarn-api-2.8.2.jar:/home/tux/.m2/repository/org/apache/hadoop/hadoop-mapreduce-client-core/2.8.2/hadoop-mapreduce-client-core-2.8.2.jar:/home/tux/.m2/repository/org/apache/hadoop/hadoop-yarn-common/2.8.2/hadoop-yarn-common-2.8.2.jar:/home/tux/.m2/repository/javax/xml/bind/jaxb-api/2.2.2/jaxb-api-2.2.2.jar:/home/tux/.m2/repository/javax/xml/stream/stax-api/1.0-2/stax-api-1.0-2.jar:/home/tux/.m2/repository/javax/activation/activation/1.1/activation-1.1.jar:/home/tux/.m2/repository/javax/servlet/servlet-api/2.5/servlet-api-2.5.jar:/home/tux/.m2/repository/org/mortbay/jetty/jetty-util/6.1.26/jetty-util-6.1.26.jar:/home/tux/.m2/repository/com/sun/jersey/jersey-core/1.9/jersey-core-1.9.jar:/home/tux/.m2/repository/com/sun/jersey/jersey-client/1.9/jersey-client-1.9.jar:/home/tux/.m2/repository/org/codehaus/jackson/jackson-jaxrs/1.9.13/jackson-jaxrs-1.9.13.jar:/home/tux/.m2/repository/org/codehaus/jackson/jackson-xc/1.9.13/jackson-xc-1.9.13.jar:/home/tux/.m2/repository/org/apache/hadoop/hadoop-mapreduce-client-jobclient/2.8.2/hadoop-mapreduce-client-jobclient-2.8.2.jar:/home/tux/.m2/repository/org/apache/hadoop/hadoop-annotations/2.8.2/hadoop-annotations-2.8.2.jar:/home/tux/.m2/repository/org/slf4j/slf4j-log4j12/1.7.10/slf4j-log4j12-1.7.10.jar:/home/tux/.m2/repository/org/apache/logging/log4j/log4j-api/2.7/log4j-api-2.7.jar:/home/tux/.m2/repository/org/apache/logging/log4j/log4j-core/2.7/log4j-core-2.7.jar:/home/tux/.m2/repository/com/google/code/gson/gson/2.2.4/gson-2.2.4.jar:/home/tux/.m2/repository/ant-contrib/ant-contrib/20020829/ant-contrib-20020829.jar:/home/tux/.m2/repository/jline/jline/2.14.6/jline-2.14.6.jar:/home/tux/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar:/usr/lib/jvm/default-runtime/lib/tools.jar:/home/tux/.m2/repository/org/apache/zookeeper/zookeeper/3.4.6/zookeeper-3.4.6.jar:/home/tux/.m2/repository/io/netty/netty/3.7.0.Final/netty-3.7.0.Final.jar:/home/tux/.m2/repository/dxutils/perf-timer/perf-timer/1.0.0/perf-timer-1.0.0.jar de.hhu.bsinfo.hadoop.fs.dxnet.DxramFsPeer ./target/classes/dxnet.json
+Cwd: /home/tux/big/HadoopDxramFS
+[18:46:20.760][main][INFO ][DefaultMessageHandlerPool] Network: DefaultMessageHandlerPool: Initialising 2 threads
+[18:46:20.808][main][INFO ][ExclusiveMessageHandler] Network: ExclusiveMessageHandler: Initialising thread
+[18:46:20.822][main][INFO ][DXNet] Network: MessageCreationCoordinator
+[18:46:20.874][main][INFO ][NIOConnectionManager] Starting NIOSelector...
+[18:46:21.213][main][WARN ][NIOSelector] Receive buffer could not be set properly. Check OS settings! Requested: 2097152, actual: 212992
+[18:48:38.274][Network-NIOSelector][DEBUG][NIOConnectionManager] Passive create new connection to 0x1
+[18:48:38.325][Network-NIOConnectionCreatorHelper][DEBUG][AbstractFlowControl] Flow control settings for node 0x1: window size 524288, threshold 0,800000
+A100bMessage[1, 0x0001, 0x0000]
+Hallo Welt
+[18:48:38.515][Network-NIOSelector][DEBUG][NIOSelector] Could not read from channel (0x1)!
+[18:48:38.529][main][INFO ][NIOConnectionManager] ConnectionCreationHelperThread close...
+[18:48:38.529][main][INFO ][NIOConnectionManager] NIOSelector close...
+[18:48:38.535][main][INFO ][NIOSelector] Closing ServerSocketChannel successful
+[18:48:38.537][main][INFO ][NIOSelector] Shutdown of Selector successful
+[18:48:38.537][main][INFO ][MessageCreationCoordinator] Message creator shutdown...
+[18:48:38.638][main][INFO ][DefaultMessageHandlerPool] Shutdown of MessageHandler 1 successful
+[18:48:38.638][main][INFO ][DefaultMessageHandlerPool] Shutdown of MessageHandler 2 successful
+[18:48:38.639][main][INFO ][ExclusiveMessageHandler] Shutdown of ExclusiveMessageHandler successful
+
+Process finished with exit code 0
+
+
+
+
+
+## notiz 2018-05-18
+
+oh 10:00 - 11:00 Besprechung verpasst
+12:15 - 12:30 jira eintrag
+12:30 - 13:45 debugging config access (access ok, but I have conflicts with different log systems/versions)
+
+1,5
+
+
+
+## notiz 2018-05-17
+
+15:45 - 19:30 testen config aus core-site.xml auslesen: klappt fast
+
+3,75
+
+    log4j:WARN Continuable parsing error 2 and column 30
+    log4j:WARN Document Root-Element "Configuration"muss mit DOCTYPE-Root "null" übereinstimmen.
+    log4j:WARN Continuable parsing error 2 and column 30
+    log4j:WARN Dokument ist ungültig. Keine Grammatik gefunden.
+    log4j:ERROR DOM element is - not a <log4j:configuration> element.
+    -> immerhin wird die klasse von hadoop verwendet und gefunden
+    
+    -> testen dxram sachen: scheint zu klappen. in my-env.sh ist starten
+    eines peers und superpeers eingebaut.
+
+
+java -XX:+UseMembar -Dlog4j.configurationFile=./classes/log4j.xml -Ddxram.config=./classes/dxram.json -Ddxram.m_config.m_engineConfig.m_address.m_ip=127.0.0.1 -Ddxram.m_config.m_engineConfig.m_address.m_port=22221 -Ddxram.m_config.m_engineConfig.m_role=Superpeer -Ddxram.m_config.m_componentConfigs[NetworkComponentConfig].m_core.m_device=Ethernet -Ddxram.m_config.m_componentConfigs[NetworkComponentConfig].m_core.m_numMessageHandlerThreads=2 -cp ./hadoop-dxram-fs-1.0-SNAPSHOT.jar:../lib/* de.hhu.bsinfo.dxram.DXRAM
+
+java -Dlog4j.configurationFile=./classes/log4j.xml -Ddxram.config=./classes/dxram.json -Ddxram.m_config.m_engineConfig.m_address.m_ip=127.0.0.1 -Ddxram.m_config.m_engineConfig.m_address.m_port=22222 -Ddxram.m_config.m_engineConfig.m_role=Peer -Ddxram.m_config.m_componentConfigs[MemoryManagerComponentConfig].m_keyValueStoreSize.m_value=128 -Ddxram.m_config.m_componentConfigs[MemoryManagerComponentConfig].m_keyValueStoreSize.m_unit=mb -cp ./hadoop-dxram-fs-1.0-SNAPSHOT.jar:../lib/* de.hhu.bsinfo.dxram.DXRAM
+
+java -Dlog4j.configurationFile=./classes/log4j.xml -Ddxram.config=./classes/dxram.json -cp ./hadoop-dxram-fs-1.0-SNAPSHOT.jar:../lib/* de.hhu.bsinfo.dxterm.TerminalClient localhost 22220
+
+## notiz 2018-05-16
+
+10:30 - 14:00 versuch, dxram in mein mvn projekt "hadoopdxramfs" einzubauen
+17:00 - 19:15 " (done)
+20:00 - 21:30 umbau code, um (wegen localhost) ohne config datei aus zu kommen
+        -> speicherung der dxnet sachen in hadoop config file!
+
+7,25
+
+todo:
+ - testen:
+    - config aus core-site.xml auslesen
+    - dxnet peer und dxramfs client: wird hallo world noch übertragen?
+    - dxram sachen aus meiner hadoop-dxramfs.jar datei testen!
+    
+ - vereinfachung nodemapping im dxnet code                (done)
+   -> config file unnötig?
+ - hinweise bzgl. dxnet und private stuff an DXNET leute  (done)
+ - mit maven dxram.jar erzeugen und in meinem projekt     (done)
+   nutzen (code und jar) 
+ - umgang mit "file" close() und dxnet.close() bei        (   )
+
+    -  FSDataInputStream
+    -  FSDataOutputStream
+ 
+ in DxramFile bzw. DxramInputStream sowie DxramFS         (   )
+ -> Vergleiche FTPFileSystem / InputStream
+
+
+## notiz 2018-05-11
+
+10:00 - 11:00 Besprechung
+12:00 - 16:00 dxnet.jar mit maven machen (?)
+16:30 - 18:00 den build testen, den ich von dxram mit mvn machte (ok!!)
+
+6,5h
+
+Wiederholung: Wie starte ich DXRAM ?
+-> jetzt mit meiner jar datei, die via maven gebildet wurde
+
+Start Zookeeper (big/start_zookeeper.sh)
+    #!/bin/bash
+    
+    DATADIRECOTRY="/home/tux/zookeeper/zooData";
+    if [ -d "$DATADIRECOTRY" ]; then
+        rm -r /home/tux/zookeeper/zooData/*;
+    fi
+    /home/tux/zookeeper/bin/zkEnv.sh
+    /home/tux/zookeeper/bin/zkServer.sh start
+    /home/tux/zookeeper/bin/zkCli.sh
+
+Exec Superpeer:
+
+    ~/big/DXRAMasMVNsubmodule/target
+    tux@abook.localhost.fake$
+
+    java -XX:+UseMembar -Dlog4j.configurationFile=./classes/log4j.xml -Ddxram.config=./dxram.json -Ddxram.m_config.m_engineConfig.m_address.m_ip=127.0.0.1 -Ddxram.m_config.m_engineConfig.m_address.m_port=22221 -Ddxram.m_config.m_engineConfig.m_role=Superpeer -Ddxram.m_config.m_componentConfigs[NetworkComponentConfig].m_core.m_device=Ethernet -Ddxram.m_config.m_componentConfigs[NetworkComponentConfig].m_core.m_numMessageHandlerThreads=2 -cp ./dxram-as-submodule-0.01.jar:../dxram/lib/* de.hhu.bsinfo.dxram.DXRAM
+
+Exec Peer:
+
+    ~/big/DXRAMasMVNsubmodule/target
+    tux@abook.localhost.fake$
+
+    java -Dlog4j.configurationFile=./classes/log4j.xml -Ddxram.config=./dxram.json -Ddxram.m_config.m_engineConfig.m_address.m_ip=127.0.0.1 -Ddxram.m_config.m_engineConfig.m_address.m_port=22222 -Ddxram.m_config.m_engineConfig.m_role=Peer -Ddxram.m_config.m_componentConfigs[MemoryManagerComponentConfig].m_keyValueStoreSize.m_value=128 -Ddxram.m_config.m_componentConfigs[MemoryManagerComponentConfig].m_keyValueStoreSize.m_unit=mb -cp ./dxram-as-submodule-0.01.jar:../dxram/lib/* de.hhu.bsinfo.dxram.DXRAM
+
+Exec Terminal client:
+
+    java -Dlog4j.configurationFile=./classes/log4j.xml -Ddxram.config=./dxram.json -cp ./dxram-as-submodule-0.01.jar:../dxram/lib/* de.hhu.bsinfo.dxterm.TerminalClient localhost 22220
+
+-> im prinzip schon, aber die Server-Application muss noch im peer autom. gesartet werden!!
+
+
+
+
+## notiz 2018-05-10
+
+19:30 - 21:45 versuch, dxram als submodul einzubauen &
+              mit dxram halloworld und Mailbox code vertraut werden
+
+2,25
+
+Hinweis geplanter Ablauf für Anwender:
+ -  dxram konfigurieren
+ -  dxram superpeers starten
+ -  dxram peers (Applications) starten -> mvn exec:java@peer
+ -  hadoop konfigurieren
+ -  hadoop nodes starten (?)
+ -  bin/hadoop fs -mkdirs /user/tux ... usw.
+ -  beispiel mapreduce anwendung starten
+    -> auch eine eigene code version statt die mitgelieferten
+       (wordcount, grep)
+ -  HBASE sachen ?!?
+
+todo:
+
+ - hinweise bzgl. dxnet und private stuff an DXNET leute  (   )
+ - mit maven dxram.jar erzeugen und in meinem projekt     (   )
+   nutzen (code und jar) 
+ - umgang mit "file" close() und dxnet.close() bei        (   )
+
+    -  FSDataInputStream
+    -  FSDataOutputStream
+ 
+ in DxramFile bzw. DxramInputStream sowie DxramFS         (   )
+ -> Vergleiche FTPFileSystem / InputStream
+
+## notiz 2018-05-08
+
+16:00 - 16:15 DXNet client code von jemand anderem ansehn
+16:15 - 18:30 DXNet Beispiel einbau in hadoop code, Test
+        - HadoopDxramFS mit Intellij IDEA geöffnet:
+           -> eigener projekt ordner
+           -> compile/laufen lassen nur über cli!!
+        - install angepasst (libs+jni kopieren)
+        - einlesen der Hadoop Config-Datei um pfad für dxnet.json Datei zu finden, klappt!
+18:30 - 18:45 environment script angepasst mit hinweis bzgl maven
+
+2,75
+
+## notiz 2018-05-04
+
+10:00 - 11:00 Besprechung
+13:00 - 13:15 stundenpflege
+13:15 - 14:45 clean up DXNet example to simple commit my changes
+15:15 - 17:45 Aufbau und Benennung der Komponenten (Schematic Sketch)
+
+6,25
+
+
+
+
+## notiz 2018-05-03
+
+16:15 - 18:15 DXNet client/server beispiel im cli zu fuss starten und erstellen
+        die .so muss im root/jni ordner sein
+        java -cp target/hadoop-dxram-fs-1.0-SNAPSHOT.jar:../DXnetAPI_example/lib/log4j-core-2.7.jar:../DXnetAPI_example/lib/log4j-api-2.7.jar:../DXnetAPI_example/lib/gson-2.7.jar de.hhu.bsinfo.hadoop.dxnet.AServer src/main/resources/dxnet.json
+
+18:15 - 19:00 maven: wie komme ich an die lib files? wie nutze ich mvn exec:java ?
+              erfolgreich!
+              cleint/server tut
+19:15 - 19:30 logo-update
+19:30 - 20:30 maven exec testen, klappt !!
+               mvn exec:java@peer
+               mvn exec:java@client
+
+4
+
+## notiz 2018-05-02
+
+11:00 - 13:00 versuche bare metal dxnet server
+15:45 - 16:45 klappt!
+18:00 - 19:15 code doku und Bereinigung DXNet Example
+19:15 - 19:45 Doku dieses Projektes in dieser Datei hier
+
+19:45 - 20:45 DXnet versuch in DXRAMfs ein zu bauen
+              Probleme: ant vs maven vs intelij
+              pom.xml scheint zu gehen
+              
+              todo: mit maven eigene jar files erzeugen für mein client/server beispiel! done
+
+
+5,75
+
+## notiz 2018-04-26
+
+16:00 - 17:30 erstelle erst ping pong RPC app, Farmer-many worker concept
+
+1,5
+
+## notiz 2018-04-25
+
+18:00 - 18:15 erstelle erst ping pong RPC app
+19:15 - 20:00 "
+
+1h
+
+## notiz 2018-04-24
+
+14:30 - 16:00 dxnet: mache example, werde warm damit, minimales intellij projekt
+
+1,5h
+
+## notiz 2018-04-23
+
+14:00 - 17:30 erste schritte DXNET
+
+3,5h
+
+igfs: Erlich gesagt, möchte ich mich ungern, nachdem ich mich in hadoop, 
+HBASE, hdfs und jetzt noch in dxram einarbeite, auch noch den code 
+eines 5. Systems anschauen. Da kommt doch am ende nix bei rum. Ich schau 
+mir nun DXNET an, um es zur Kommunikation zwischen dem von mir gebauten 
+Filesystem Rohbau im Hadoop-Ökosystem (als client/slave) und dem "richtigen" 
+DxramFs als Server/Master zu nutzen. Irgendwann muss ich halt auch mal 
+Code machen statt nur notizen, konzepte und Stundenlang die Funktionsweise 
+von Hadoop, HDFS und HBASE im Code zu verifizieren.
+
+Bugs in DXNet readme gefunden
+
+## notiz 2018-04-20
+
+10:00 - 11:45 Besprechung, Folien DXRAM, Monitoring, DXGraph
+
+1,75h
+
+
+
+
+
+## notiz 2018-04-19
+
+20:00 - 21:00 recherche igfs (apache hdfs in memory replacement)
+
+1,25 h
+
+## notiz am 2018-04-12
+
+15:45 - 16:00 notizen bzgl grippe :-(
+
+0,25 h
+
+## notiz am 2018-03-23
+
+10:00 - 11:15 Besprechung
+ -> deploy script erzeugt config mit max Ram size des nodes
+ -> oder in config/dxram.json
+ -> oder in MemoryManagerConfig Klasse
+ -> oder (neu) als Parameter beim starten von DXRAM
+ -> Es wird jede jar in app/* ausgeführt auf den peer beim starten von Super(?)peer/Peer
+ -> dxterm-client: ggf bug in "listnodes" befehl -> hier soll ich mal schauen
+
+13:30 - 13:45 das hier schreiben :-)
+ - 14:45 dxterm deployment script localhost fertig!
+ - 15:30 deploy script test, debugging
+
+3,25h
+
+## notiz am 2018-03-22
+
+14:00 - 15:15 deploy script dxterm auf localhost perfektionieren, vermutung dxterm geht nicht
+15:15 - 15:45 recherche, wie sich z.B. das halloWorld beispiel in DXram starten lässt.
+              -> finde nur dokus bzgl. intelij. ist alles darauf ausgelegt?
+              -> finde config von dxram, wo 1 super und 2 nodes auf localhost laufen
+pause
+17:00 - 19:15 import dxram to intellij, erste erfolge mit dxclient
+
+11,5h + 4h
+
+also peer und superpeer laufen, trotzdem:
+
+~/big/dxram
+tux@abook.localhost.fake$ ./dxterm-client localhost
+[ERROR] Failed to construct terminal; falling back to unsupported
+java.lang.NumberFormatException: For input string: "0x100"
+	at java.lang.NumberFormatException.forInputString(NumberFormatException.java:65)
+	at java.lang.Integer.parseInt(Integer.java:580)
+	at java.lang.Integer.valueOf(Integer.java:766)
+	at jline.internal.InfoCmp.parseInfoCmp(InfoCmp.java:59)
+	at jline.UnixTerminal.parseInfoCmp(UnixTerminal.java:242)
+	at jline.UnixTerminal.<init>(UnixTerminal.java:65)
+	at jline.UnixTerminal.<init>(UnixTerminal.java:50)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+	at java.lang.Class.newInstance(Class.java:442)
+	at jline.TerminalFactory.getFlavor(TerminalFactory.java:211)
+	at jline.TerminalFactory.create(TerminalFactory.java:102)
+	at jline.TerminalFactory.get(TerminalFactory.java:186)
+	at jline.TerminalFactory.get(TerminalFactory.java:192)
+	at jline.console.ConsoleReader.<init>(ConsoleReader.java:243)
+	at jline.console.ConsoleReader.<init>(ConsoleReader.java:235)
+	at jline.console.ConsoleReader.<init>(ConsoleReader.java:223)
+	at de.hhu.bsinfo.dxterm.TerminalClient.<init>(TerminalClient.java:66)
+	at de.hhu.bsinfo.dxterm.TerminalClient.main(TerminalClient.java:103)
+
+Connecting...
+Connected
+Type '?' or 'help' to print the help message
+$0/0xB1BD> nodelist
+Total available nodes (0):
+$0/0xB1BD> nodeinfo
+Node info 0xB1BD:
+	Role: peer
+	Address: /127.0.0.1:22222
+$0/0xB1BD> 
+
+--------------------------------------------------------------
+
+>>> DXRAM Node <<<
+DXRAMVersion 0.3.0
+Build type: debug
+Git commit: ddb92955
+Cwd: /home/tux/big/dxram
+NodeID: 0xC0C1
+Role: superpeer
+Address: /127.0.0.1:22221
+!---ooo---!
+[19:00:20.292][SuperpeerStabilizationThread for LookupComponent][INFO ][SuperpeerStabilizationThread] Superpeers:  '0xC0C1'
+[19:00:29.825][Network-NIOSelector][DEBUG][NIOConnectionManager] Passive create new connection to 0xB1BD
+[19:00:29.842][Network-NIOConnectionCreatorHelper][DEBUG][AbstractFlowControl] Flow control settings for node 0xB1BD: window size 524288, threshold 0.800000
+[19:00:30.042][Network: MessageHandler 2][DEBUG][AbstractConnectionManager] Active create connection to: 0xB1BD
+[19:00:30.062][Network: MessageHandler 2][WARN ][NIOPipeOut] Send buffer size could not be set properly. Check OS settings! Requested: 2097152, actual: 212992
+[19:00:30.087][Network: MessageHandler 2][DEBUG][AbstractConnectionManager] Connection created: 0xB1BD
+[19:00:30.296][SuperpeerStabilizationThread for LookupComponent][INFO ][SuperpeerStabilizationThread] Superpeers:  '0xC0C1'
+[19:00:30.296][SuperpeerStabilizationThread for LookupComponent][INFO ][SuperpeerStabilizationThread] Peers:  0xB1BD
+
+
+---------------------------------------------------
+
+[19:00:31.602][HelloWorld][INFO ][AbstractApplication] Starting 'HelloWorld'...
+Hello, I am application HelloWorld on a peer and my node id is 0xB1BD
+[19:00:31.603][HelloWorld][INFO ][AbstractApplication] 'HelloWorld' finished
+[19:00:31.638][TerminalServer][DEBUG][TerminalServer] Registering terminal command: tmpstatus
+[19:00:31.641][HelloWorldWithConfig][INFO ][AbstractApplication] Starting 'HelloWorldWithConfig'...
+Hello, I am application HelloWorldWithConfig on a peer and my node id is 0xB1BD
+Configuration value m_val: 5
+Configuration value m_str: test
+[19:00:31.641][HelloWorldWithConfig][INFO ][AbstractApplication] 'HelloWorldWithConfig' finished
+>>> DXRAM Node <<<
+DXRAMVersion 0.3.0
+Build type: debug
+Git commit: ddb92955
+Cwd: /home/tux/big/dxram
+NodeID: 0xB1BD
+Role: peer
+Address: /127.0.0.1:22222
+!---ooo---!
+[19:03:20.800][TerminalServer][DEBUG][TerminalServerApplication] Accepted connection: Socket[addr=/127.0.0.1,port=49566,localport=22220]
+[19:03:20.808][TerminalServer][INFO ][TerminalServerApplication] Created terminal client session: Socket[addr=/127.0.0.1,port=49566,localport=22220]
+[19:03:20.850][TerminalServer][DEBUG][TerminalServerApplication] Max session limit (1) reached, further sessions won't be accepted
+
+
+## notiz am 2018-03-20
+
+13:15 - 15:00 deploy terminal app bauen (teilerfolg - läuft nur verstekt im hintergrund)
+
+9,75h + 1,75h
+
+## notiz am 2018-03-19
+
+12:15 - 15:15 git changes ansehn, tipp einpflegen in dxram, doku rebase
+16:30 - 17:15 erneuter versuch auch localhost dxram laufen zu lassen
+17:15 - 19:15 dxterm testen ... debugging und dokumentieren
+
+4h + 5,75h 
+
+## kurzzeitnotizen am 2018-03-16
+
+10:15 - 11:15 Besprechung bzgl. treiber probleme mit 2 100GBit karten an einer vm,
+    und anderes. Überlegung DXGraph gruppe zu machen
+
+11:15 - 11:30 erkenntnis, dass es ein problem sein kann, die durch
+    Hadoop Mapreduce ausgelagerte Anwendung als DXramApplication laufen
+    zu lassen.
+      - 11:45 pflege diese Doku
+ - 12:15 Doku und test bzgl meiner Probleme
+ - 12:30 weitere versuche, dxram laufen zu lassen
+ - 14:15 bugreporting
+
+4h
+
+
+## kurzzeitnotizen am 2018-03-15
+
+15:00 - 18:15 mal wieder erste schritte in dxram, deploy skript (anders als VPP Übungen) und zookeeper.
+
+./cdepl.sh scripts/zookeeper.cdepl 1 local tux
+
+  -> startet zookeeper bei mir korrekt, erkennt aber nicht, ob es läuft und meldet error
+
+./cdepl.sh scripts/zookeeper_killall.cdepl 1 local tux
+
+  -> terminiert ohne Error, aber zookeeper läuft noch
+
+6:45 + 3:15 h
+
+### is zookeeper running?
+
+echo stat | nc <zookeeper ip> 2181
+echo mntr | nc <zookeeper ip> 2181
+echo isro  | nc <zookeeper ip> 2181
+
+echo stat | nc 127.0.0.1 2181
+Zookeeper version: 3.4.8--1, built on 02/06/2016 03:18 GMT
+Clients:
+ /127.0.0.1:46568[0](queued=0,recved=1,sent=0)
+
+Latency min/avg/max: 0/0/0
+Received: 1
+Sent: 0
+Connections: 1
+Outstanding: 0
+Zxid: 0x0
+Mode: standalone
+Node count: 4
+
+
+
+
+
+
+
+
+
+
+
+
+######################### Konzept Filesystem #####################################
+
+
+
+
+
+
+
+
+
+
+
+## kurzzeitnotizen am 2018-03-14
+
+13:45 - 15:30 Hadoop: wie werden operationen auf die Blocklocation verteilt?
+15:45 - 16:00 dxram fork von github, um mal erste schritte für Root-Ordner
+    zu gehen
+    
+todo: "Format" Befehl, um einen root-Ordner in DXRAM an zu legen und
+ggf vorher DXRAM starten.
+
+https://stackoverflow.com/questions/2831507/how-does-hadoop-perform-input-splits#2834521
+
+https://stackoverflow.com/questions/14291170/how-does-hadoop-process-records-split-across-block-boundaries
+
+InputFormat macht das wohl.
+Ich vermute, dass nicht nur die Splittung der Daten in Blöcke auf untersch. Nodes
+eine Rolle spielt, um die Verarbeitung auf zu teilen, sondern auch die Replikation.
+Sollte z.B. eine Textdatei in nur einen Block passen, könnten bei 3 Replikaten
+diese 3 parallel arbeiten, wenn auch an untersch. Stellen im Block.
+
+Was konkret macht die "InputFormat" Klasse? Welche infos Braucht diese vom Dateisystem?
+-> mapreduce client core: nutzt im Grunde "FileInputFormat.java" und holt
+sich von "FileStatus" des Files die "getBlockLocations()" (nach einem Cast auf "LocatedFileStatus"),
+falls es der Typ ist. Ansonsten wird getFileBlockLocations() des entsprechenden FileSystem()
+dieses path/jobs aufgerufen.
+
+-> das hosts-String array landet dann in "FileSplit.java", welches die Aufteilung
+ermöglicht
+
+## kurzzeitnotizen am 2018-03-13
+
+16:30 - 17:00 überlegung zum Hadoop verteilingskonzept. Wie arbeitet der Client Code
+        in HDFS?
+18:15 - 19:45 analyse zusammenhang fs. und dfs. mit FileSystemLinkResolver<> methode
+        durchsicht DFSClient, NameNode, DataNode und BlockPoolManager
+        -> was wäre, wenn ich nur den Dateizugriff das NameNode auf DXRAM umleite?
+
+4:45 + 2h
+-----------------------------------------------------------
+
+somit existieren folgende Konzepte:
+
+- DXRAMfs nur als lokales Dateisystem (nicht verteilt -> jeder HDFS NameNode nutzt das)
+- DXRAMfs als lokales Dateisystem (verteilt implementiert, Beispiel Code eines anderen
+   Projekts existert, aber Wegfall der "Ausführen, wo Daten sind" Hadoop Idee)
+- aktuell verfolgt: DXRAMfs wie HDFS, mit Nachbau der "Ausführen, wo Daten sind" Idee.
+   Statt NameNode und DataNode werden Strukturen von DXRAM genutzt.
+- HBASE Api mit DXRAM nachbauen (Hadoop, obwohl populär, wäre überflüssig)
+
+-----------------------------------------------------------
+
+## kurzzeitnotizen am 2018-03-12
+
+14:00 - 14:15 umbau test mit mapreduce (random word, wordcount, grep ungetestet) klappt
+14:15 - 14:45 überlegung abstaktion des FS in DXram
+        Idee:
+        - in /tmp/myfsB/ jede datei hat eine ID, die eine BlockID ist
+        - in /tmp/myfs/ quasi als Speicher für Dateinamen. In Datei stehen die BlockIDs
+        - BlockIDs entsprechen ChunkIDs
+        - Konzept: NodeID des Chunk wäre die Blocklocation
+        - Hadoop Blocksize ist die Chunksize
+        Später:
+        - Wie/wo werden die Daten bzgl. Dateiname, Größe, Pfad und Blöcke gespeichert?
+        - Frage: Kann man auch 32MB große Chunks in DXRAM gut anlegen? werden
+          die evtl auf mehrere Nodes verteilt (geht das überhaupt)?
+        - ggf. Speichern des Dateisystems auf Superpeer?
+        - Ausfallsicherheit bzw. Hadoop Verteilung/Sperren nachbauen
+
+15:15 - 16:45
+    recherche: Hadoop Class "BlockLocation" -> was muss da drin stehen?
+    ok: nur MapReduce scheint im ganzen Hadoop Ökosystem die topologiePaths
+      zu nutzen (?) -> Ist das Array leer, wird eine Fake-Topologie angelegt.
+      Topologie wäre String Array: "rack1/host1", "rack1/host2" ....
+16:45 - 17:00 Doku bzgl Erkenntnis, wie Blocklocation implementiert ist
+
+18:45 - 20:00 Wiederholung: dateisysteme. Was ist für mich gutes konzept, blöcke zu speichern:
+
+1 + 3:45 h
+
+Hadoop:
+    1) im Fokus stehen nicht viele kleine Dateien, sondern sehr sehr große Dateien.
+    2) Operationen werden auf großen Blöcken ausgeführt, nicht auf Dateien.
+    3) Es macht sinn, die Blöcke einer großen Datei auf Nodes zu streuen, um
+       parallel (?) in einer Datei zu arbeiten (primär lesen)
+
+-> HadoopDXramFS soll das nicht anders machen
+
+Nötige Datenstruckturen (Blockgröße ist bei mir statisch)
+
+ - Wurzel Ordner
+
+FileinfoChunk
+
+- id
+- Name
+- gehört zu Ordner (Baum)
+- ist Datei/Ordner/Extended
+- Größe (in bytes)
+- Anzahl Blöcke
+- BlockinfoChunks[100]
+- Link zu extended FileinfoChunk (die weiter BlockinfoChunk-Ids hat)
+
+BlockinfoChunk
+
+- id
+- replikat nummer (= storageId)
+- link zu BlockinfoChunk des Replikats
+- host (ergibt sich aus NodeId, die in ChunkId ist)
+- offset (von was ?)
+- Länge
+- corrupt
+- link zu Block = Blockid (= enspricht name bzw. Datanode IP:xferPort?)
+- KEINE Topologie info
+- Speichertyp (sollte immer RAM sein, oder? Daher weglassen?)
+
+Block
+
+- id (BlockId = ChunkId)
+- die Daten des Blocks
+
+
+Grober Aufbau:
+
+Hab mich mir dem Code von Hadoop und der Implementierung der Blocklocation auseinander gesetzt. Will im nächsten Schritt Files in Blöcke (gehen DXRAM Chunks mit 32MB Größe?) zerhacken.
+
+Zu einem Dateipfad (scheme://ip:port/path/file) kann man sich mit einer BlockstartID und Länge (über wie viele Blöcke man infos will) ein Array geben lassen, in der zu den Blöcken der Datei Infos stehen:
+- Länge Long (sollte eigentlich nicht je host anders sein, könnte aber)
+- offset Long (zu was? Dateianfang?)
+- corrupt Bool
+- infos zu Replikaten (und cached replica ????????)
+  - host des Replikats
+  - Speicherart: Ram, SSD, disk, archive
+    (eigentlich nur mit Info als boolean Wert, ob Moveable)
+  - topology Angaben: Wird in hadoop scheinbar nur in MapReduce genutzt,
+    und wäre je Replikat ein String wie z.B. "rackXY/host123"
+    -> ist optional, da MapReduce eine dummy topologie anlegt, wenn dieses String Array
+        der Replikate des Blocks leer ist
+    -> gut möglich, dass diese Angabe bzgl. der Topologie via XML-Datei
+       zentral gepflegt wird und dann durch die host-Angabe des Replikats
+       zusammengebaut werden muss
+
+  private String[] hosts; // Datanode hostnames
+  private String[] cachedHosts; // Datanode hostnames with a cached replica
+  private String[] names; // Datanode IP:xferPort for accessing the block
+  private String[] topologyPaths; // Full path name in network topology
+  private String[] storageIds; // Storage ID of each replica
+  private StorageType[] storageTypes; // Storage type of each replica
+  private long offset;  // Offset of the block in the file
+  private long length;
+  private boolean corrupt;
+
+-> default:
+
+ names="",
+ hosts="",
+ cachedHosts=null,
+ topologyPaths=null, (bzw. empty string Array)
+ offset=0,
+ length=0,
+ corrupt=false,
+ storageIds=null,
+ storageTypes=null
+
+
+Was ist StorageType ?
+
+enum StorageType {
+  RAM_DISK(true),
+  SSD(false),
+  DISK(false),
+  ARCHIVE(false);
+  StorageType(boolean isTransient);
+  public boolean isTransient();
+  public boolean supportTypeQuota() return !isTransient;
+  public boolean        isMovable() return !isTransient;
+...
+
+Warum Array mit topologyPaths? was steht da drin?
+
+getTopologyPaths()
+ -> nur in unit testes, in BlockStorageLocation (Deprecated)
+    und im MapReduce Client im "FileInputFormat.java"
+    -> Hier soll wohl die Position der Racks abgelegt sein,
+    um eine sinnvolle Replikation zu machen (?)
+
+  // NOTE: This code currently works only for one level of
+  // hierarchy (rack/host). However, it is relatively easy
+  // to extend this to support aggregation at different
+  // levels 
+
+
+
+## kurzzeitnotizen am 2018-03-09
+
+10-11 Besprechung 
+
+1h
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+################################ Ende DXRamFS entwicklung mit /tmp/myfs/ #################
+
+Bis hier:
+
+- MapReduce mitgelieferte HadoopBeispiele (jar, grep, count) klappen auf meinem Fake-Dateisystem
+- HBASE Beispiel noch nicht mit meinem Fake-Dateisystem ans laufen gebracht
+
+Ab hier:
+
+- überlegungen, wie ich dateisystem aufbauen muss
+- code analyse, wie Hadoop dateien in blöcke splittet und info zu deren lokalität speichert
+- code analyse,
+- erste schritte mit DXRAM und deploy-Scripten (ärger auf localhost, wo nie getestet wurde)
+- erste schritte mit DXNet, um später in Hadoop einen Client ein zu bauen. (2.5.2018)
+
+
+
+
+
+
+
+
+
+
+## kurzzeitnotizen am 2018-03-08
+
+18:30 - 19:30 anpassung pfad mit /tmp/myfs/
+
+1h
+
+## kurzzeitnotizen am 2018-03-07
+
+14:30 - 18:45 ignoriere HBASE probleme erstmal und abstrahiere
+         File-Zugriffe um Wrapper zu machen.
+         
+    todo:
+     - /tmp/myfs/ fehlt wohl noch in den Pfaden
+     - testen!!
+     - als java server laufen lassen statt im localen filesystem
+     - file, stream, block, seekable !?
+
+
+
+
+
+
+
+
+4:15h
+
+## kurzzeitnotizen am 2018-03-05
+
+15:15 - 18:00 recherche durch hbase logs, warum namespace file gelöscht wird und danach
+        drauf zuegriffen wird?!? -> hbase master initialisiert sich daher nicht
+
+        Code anpassung: eine datei, die recursive gelöscht werden soll und nicht
+        existiert: es wird nun KEINE Exception mehr geworfen!
+        
+        komme nicht weiter. Die zookeeper userlevel errors bekomme ich auch, wenn ich alles
+        auf file:/// umstelle, aber diese meldung bekomme ich da nicht (also da tut es):
+        
+
+todo: Die Unit-Tests von Hadoop ansehn und schauen, wie ich die einbinden kann.
+
+2:45h
+
+
+hbase distributed false -------------
+
+hbase(main):001:0> list
+TABLE                                                                                                                                
+ERROR: Can't get master address from ZooKeeper; znode data == null
+
+hbase distributed true -------------
+
+hbase shell
+2018-03-05 16:55:52,217 WARN  [main] util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/opt/hbase/lib/slf4j-log4j12-1.7.5.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/common/lib/slf4j-log4j12-1.7.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]
+2018-03-05 16:56:09,817 ERROR [main] zookeeper.RecoverableZooKeeper: ZooKeeper exists failed after 4 attempts
+2018-03-05 16:56:09,818 WARN  [main] zookeeper.ZKUtil: hconnection-0x37c366080x0, quorum=localhost:2181, baseZNode=/hbase Unable to set watcher on znode (/hbase/hbaseid)
+org.apache.zookeeper.KeeperException$ConnectionLossException: KeeperErrorCode = ConnectionLoss for /hbase/hbaseid
+	at org.apache.zookeeper.KeeperException.create(KeeperException.java:99)
+
+
+## kurzzeitnotizen am 2018-03-02
+
+10:00 - 11:15 besprechung
+11:45 - 12:30 analyse hbas loggs
+14:45 - 16:15 test in vm/debian: vermutlich geht "Jetty bound to port 16010" nicht. warum?
+      -> laut log läuft SelectChannelConnector() auf 36951 ?! Variiert!
+Ungelogen: hbase-1.4.0 und hadoop-2.8.2 und HadoopDxramFS runterladen und entpacken
+ -> debian9: maven, openjdk8, git? ...
+ -> mvn clean und package lädt für dxramfs nötiges runter, kompiliert
+ -> von hand jar datei kopieren nach hadoop
+ -> hadoop und hbase entsprechend anpassen
+ -> aktuelles fake dxramfs läuft dann (genau so schlecht/selbe fehler) auf debian9 wie unter arch/manjaro
+
+
+3,5h
+
+noch vor "hbase shell" steht als INFO:
+
+2018-03-01 18:57:06,804 INFO  [ProcessThread(sid:0 cport:-1):] server.PrepRequestProcessor: Got user-level KeeperException when processing sessionid:0x161e2b5d5650001 type:create cxid:0x7 zxid:0x143 txntype:-1 reqpath:n/a Error Path:/hbase/flush-table-proc/acquired Error:KeeperErrorCode = NodeExists for /hbase/flush-table-proc/acquired
+2018-03-01 18:57:06,812 INFO  [ProcessThread(sid:0 cport:-1):] server.PrepRequestProcessor: Got user-level KeeperException when processing sessionid:0x161e2b5d5650001 type:create cxid:0xa zxid:0x144 txntype:-1 reqpath:n/a Error Path:/hbase/online-snapshot/acquired Error:KeeperErrorCode = NodeExists for /hbase/online-snapshot/acquired
+
+2018-03-01 18:57:06,829 INFO  [abook:45837.activeMasterManager] procedure.ZKProcedureUtil: Clearing all procedure znodes: /hbase/flush-table-proc/acquired /hbase/flush-table-proc/reached /hbase/flush-table-proc/abort
+
+2018-03-01 18:57:06,822 INFO  [ProcessThread(sid:0 cport:-1):] server.PrepRequestProcessor: Got user-level KeeperException when processing sessionid:0x161e2b5d5650000 type:create cxid:0x2a zxid:0x145 txntype:-1 reqpath:n/a Error Path:/hbase/flush-table-proc/acquired Error:KeeperErrorCode = NodeExists for /hbase/flush-table-proc/acquired
+2018-03-01 18:57:06,837 INFO  [ProcessThread(sid:0 cport:-1):] server.PrepRequestProcessor: Got user-level KeeperException when processing sessionid:0x161e2b5d5650000 type:create cxid:0x30 zxid:0x146 txntype:-1 reqpath:n/a Error Path:/hbase/online-snapshot/acquired Error:KeeperErrorCode = NodeExists for /hbase/online-snapshot/acquired
+
+2018-03-01 18:57:06,840 INFO  [abook:45837.activeMasterManager] procedure.ZKProcedureUtil: Clearing all procedure znodes: /hbase/online-snapshot/acquired /hbase/online-snapshot/reached /hbase/online-snapshot/abort
+
+
+2018-03-01 18:57:07,184 INFO  [ProcessThread(sid:0 cport:-1):] server.PrepRequestProcessor: Got user-level KeeperException when processing sessionid:0x161e2b5d5650005 type:create cxid:0x1 zxid:0x149 txntype:-1 reqpath:n/a Error Path:/hbase/replication/rs Error:KeeperErrorCode = NodeExists for /hbase/replication/rs
+
+
+2018-03-01 18:57:13,908 INFO  [ProcedureExecutor-3] procedure.ServerCrashProcedure: Start processing crashed abook.localhost.fake,36639,1519924013150
+...
+2018-03-01 18:57:14,157 INFO  [ProcedureExecutor-3] procedure.ServerCrashProcedure: Finished processing of crashed abook.localhost.fake,32817,1519924233457
+
+bzw. 0,1,2 auch.
+
+2018-03-01 18:57:11,766 INFO  [abook:45837.activeMasterManager] zookeeper.MetaTableLocator: Setting hbase:meta region location in ZooKeeper as abook.localhost.fake,45359,1519924683074
+2018-03-01 18:57:11,776 INFO  [ProcessThread(sid:0 cport:-1):] server.PrepRequestProcessor: Got user-level KeeperException when processing sessionid:0x161e2b5d5650000 type:setData cxid:0x3e zxid:0x14b txntype:-1 reqpath:n/a Error Path:/hbase/meta-region-server Error:KeeperErrorCode = NoNode for /hbase/meta-region-server
+2018-03-01 18:57:11,841 INFO  [abook:45837.activeMasterManager] zookeeper.MetaTableLocator: Failed verification of hbase:meta,,1 at address=abook.localhost.fake,45359,1519924683074, exception=Verbindungsaufbau abgelehnt
+2018-03-01 18:57:11,841 INFO  [abook:45837.activeMasterManager] zookeeper.MetaTableLocator: Deleting hbase:meta region location in ZooKeeper
+2018-03-01 18:57:11,849 INFO  [abook:45837.activeMasterManager] master.AssignmentManager: Setting node as OFFLINED in ZooKeeper for region {ENCODED => 1588230740, NAME => 'hbase:meta,,1', STARTKEY => '', ENDKEY => ''}
+
+Todo:
+  Kann es sein, dass ich zookeeper auch erst cleanen sollte, da sonst die sachen vom hdfs test fälschlich übernommen werden?
+
+
+
+## kurzzeitnotizen am 2018-03-01
+
+12:00 - 14:30 test hbase auf debian (in vm)
+ -> hbase webgui tut nicht?!?
+
+15:00 - 17:00 Logogestaltung
+17:30 - 18:15 test hbase nicht in vm sondern archlinux/hdfs
+18:30 - 18:45 loganalyse
+18:45 - 19:15 createNonRecursive() machen, test hbase
+
+todo:
+
+- log von hbase gefunden: fehlersuche bzgl. verwendung mit dxramfs
+- hbase shell geht nicht. hbase crasht ggf. weil zookeeper crasht
+
+
+lol: https://issues.apache.org/jira/browse/HDFS-617
+
+createNonRecursive() ist ein create(), so wie ich es bis letzt woche implemetiert hatte,
+so wie es scheint.
+
+6h
+
+
+neuer fehler:
+
+2018-03-01 18:57:14,097 INFO  [RegionOpenAndInitThread-hbase:namespace-1] dxram.DxramFileSystem: create(dxram://abook.localhost.fake:9000/hbase/.tmp/data/hbase/namespace/73388808f594413933585f72eca08bbe/.regioninfo, rw-rw-rw-, true, 4096, 1, 33554432, null)
+2018-03-01 18:57:14,098 INFO  [RegionOpenAndInitThread-hbase:namespace-1] regionserver.HRegion: Closed hbase:namespace,,1519927033949.73388808f594413933585f72eca08bbe.
+2018-03-01 18:57:14,099 INFO  [ProcedureExecutor-2] dxram.DxramFileSystem: delete(dxram://abook.localhost.fake:9000/hbase/data/hbase/namespace, true)
+2018-03-01 18:57:14,100 INFO  [ProcedureExecutor-2] dxram.DxramFileSystem: fixRelativePart(dxram://abook.localhost.fake:9000/hbase/data/hbase/namespace)
+2018-03-01 18:57:14,100 INFO  [ProcedureExecutor-2] dxram.DxramFileSystem: _toLocal(dxram://abook.localhost.fake:9000/hbase/data/hbase/namespace)
+2018-03-01 18:57:14,100 INFO  [ProcedureExecutor-2] dxram.DxramFileSystem:   absF = dxram://abook.localhost.fake:9000/hbase/data/hbase/namespace
+2018-03-01 18:57:14,101 ERROR [ProcedureExecutor-2] procedure.CreateTableProcedure: Error trying to create table=hbase:namespace state=CREATE_TABLE_WRITE_FS_LAYOUT
+java.io.FileNotFoundException: delete: dxram://abook.localhost.fake:9000/hbase/data/hbase/namespace not exists
+	at de.hhu.bsinfo.hadoop.fs.dxram.DxramFileSystem.delete(DxramFileSystem.java:224)
+	at org.apache.hadoop.hbase.master.procedure.CreateTableProcedure.createFsLayout(CreateTableProcedure.java:393)
+    
+    
+
+
+2018-03-01 18:18:15,821 INFO  [RS_OPEN_META-abook:45359-0] wal.FSHLog: WAL configuration: blocksize=32 MB, rollsize=30.40 MB, prefix=abook.localhost.fake%2C45359%2C1519924683074.meta, suffix=.meta, logDir=dxram://abook.localhost.fake:9000/hbase/WALs/abook.localhost.fake,45359,1519924683074, archiveDir=dxram://abook.localhost.fake:9000/hbase/oldWALs
+2018-03-01 18:18:15,822 INFO  [RS_OPEN_META-abook:45359-0] dxram.DxramFileSystem: getFileStatus(dxram://abook.localhost.fake:9000/hbase/WALs/abook.localhost.fake,45359,1519924683074/abook.localhost.fake%2C45359%2C1519924683074.meta.1519924695822.meta)
+2018-03-01 18:18:15,822 INFO  [RS_OPEN_META-abook:45359-0] dxram.DxramFileSystem: fixRelativePart(dxram://abook.localhost.fake:9000/hbase/WALs/abook.localhost.fake,45359,1519924683074/abook.localhost.fake%2C45359%2C1519924683074.meta.1519924695822.meta)
+2018-03-01 18:18:15,822 INFO  [RS_OPEN_META-abook:45359-0] dxram.DxramFileSystem: _toLocal(dxram://abook.localhost.fake:9000/hbase/WALs/abook.localhost.fake,45359,1519924683074/abook.localhost.fake%2C45359%2C1519924683074.meta.1519924695822.meta)
+2018-03-01 18:18:15,822 INFO  [RS_OPEN_META-abook:45359-0] dxram.DxramFileSystem:   absF = dxram://abook.localhost.fake:9000/hbase/WALs/abook.localhost.fake,45359,1519924683074/abook.localhost.fake%2C45359%2C1519924683074.meta.1519924695822.meta
+2018-03-01 18:18:15,822 INFO  [RS_OPEN_META-abook:45359-0] dxram.DxramFileSystem: _getFileStatus(/tmp/myfs/hbase/WALs/abook.localhost.fake,45359,1519924683074/abook.localhost.fake%2C45359%2C1519924683074.meta.1519924695822.meta)
+2018-03-01 18:18:15,822 INFO  [RS_OPEN_META-abook:45359-0] dxram.DxramFileSystem: _fromLocal(/tmp/myfs/hbase/WALs/abook.localhost.fake,45359,1519924683074/abook.localhost.fake%2C45359%2C1519924683074.meta.1519924695822.meta)
+2018-03-01 18:18:15,830 ERROR [RS_OPEN_META-abook:45359-0] handler.OpenRegionHandler: Failed open of region=hbase:meta,,1.1588230740, starting to roll back the global memstore size.
+java.io.IOException: cannot get log writer
+	at org.apache.hadoop.hbase.wal.DefaultWALProvider.createWriter(DefaultWALProvider.java:389)
+	at org.apache.hadoop.hbase.regionserver.wal.FSHLog.createWriterInstance(FSHLog.java:738)
+	at org.apache.hadoop.hbase.regionserver.wal.FSHLog.rollWriter(FSHLog.java:703)
+	at org.apache.hadoop.hbase.regionserver.wal.FSHLog.rollWriter(FSHLog.java:610)
+	at org.apache.hadoop.hbase.regionserver.wal.FSHLog.<init>(FSHLog.java:537)
+	at org.apache.hadoop.hbase.wal.DefaultWALProvider.getWAL(DefaultWALProvider.java:129)
+	at org.apache.hadoop.hbase.wal.WALFactory.getMetaWAL(WALFactory.java:260)
+	at org.apache.hadoop.hbase.regionserver.HRegionServer.getWAL(HRegionServer.java:1882)
+	at org.apache.hadoop.hbase.regionserver.handler.OpenRegionHandler.openRegion(OpenRegionHandler.java:362)
+	at org.apache.hadoop.hbase.regionserver.handler.OpenRegionHandler.process(OpenRegionHandler.java:129)
+	at org.apache.hadoop.hbase.executor.EventHandler.run(EventHandler.java:129)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+Caused by: java.io.IOException: createNonRecursive unsupported for this filesystem class de.hhu.bsinfo.hadoop.fs.dxram.DxramFileSystem
+	at org.apache.hadoop.fs.FileSystem.createNonRecursive(FileSystem.java:1135)
+	at org.apache.hadoop.fs.FileSystem.createNonRecursive(FileSystem.java:1110)
+	at org.apache.hadoop.fs.FileSystem.createNonRecursive(FileSystem.java:1086)
+	at org.apache.hadoop.hbase.regionserver.wal.ProtobufLogWriter.init(ProtobufLogWriter.java:90)
+	at org.apache.hadoop.hbase.wal.DefaultWALProvider.createWriter(DefaultWALProvider.java:378)
+	... 13 more
+
+
+
+
+
+
+
+
+
+nützlich: jps (Java PS)
+
+https://www.itzgeek.com/how-tos/linux/ubuntu-how-tos/install-apache-hadoop-ubuntu-14-10-centos-7-single-node-cluster.html
+https://hbase.apache.org/book.html
+
+-> http://localhost:16010 hbase gui tut nicht!? warum?
+ggf apt install apache2 ??
+
+???????????????????
+
+is mapred und diese config eigentlich pflicht? hab es nur bei debain bzgl. hadoop gesehn:
+
+Edit mapred-site.xml
+
+$ cp $HADOOP_HOME/etc/hadoop/mapred-site.xml.template $HADOOP_HOME/etc/hadoop/mapred-site.xml
+
+<configuration>
+<property>
+<name>mapreduce.framework.name</name>
+<value>yarn</value>
+</property>
+</configuration>
+
+Edit yarn-site.xml
+
+<configuration>
+<property>
+<name>yarn.nodemanager.aux-services</name>
+<value>mapreduce_shuffle</value>
+</property>
+</configuration>
+
+????????????????????????????????
+
+
+## kurzzeitnotizen am 2018-02-28
+
+16:15 - 18:30 test hbase in debian 9 vm? nein! Test hbase manjaro linux
+
+ok, hbase nutzt dxramfs, aber:
+
+ERROR: org.apache.hadoop.hbase.PleaseHoldException: Master is initializing
+	at org.apache.hadoop.hbase.master.HMaster.checkInitialized(HMaster.java:2452)
+	at org.apache.hadoop.hbase.master.MasterRpcServices.getTableNames(MasterRpcServices.java:915)
+	at org.apache.hadoop.hbase.protobuf.generated.MasterProtos$MasterService$2.callBlockingMethod(MasterProtos.java:58517)
+	at org.apache.hadoop.hbase.ipc.RpcServer.call(RpcServer.java:2339)
+	at org.apache.hadoop.hbase.ipc.CallRunner.run(CallRunner.java:123)
+	at org.apache.hadoop.hbase.ipc.RpcExecutor$Handler.run(RpcExecutor.java:188)
+	at org.apache.hadoop.hbase.ipc.RpcExecutor$Handler.run(RpcExecutor.java:168)
+
+todo:
+  - ggf kinit tut nicht wie soll.
+  - Yarn notwendig? 
+  - regionserver oder master "bewusster" starten: auf reihenfolge achten und loggs!
+
+2:15h
+
+## kurzzeitnotizen am 2018-02-27
+
+13:15 - 14:15 log analyse: warum geht finales delete nicht?
+-> delete bug gefixed!
+
+16:00 - 17:45 test anderes map reduce mit größeren dateien (mehr blöcke)
+erfolgreich getestet:
+ - grep mit wordcount
+ - randomTextWriter mit 300MB Datei
+ - wordcount in 30MB Datei
+
+todo:
+-  fs -put in einen Ordner, den es noch nicht gibt: wie verhält sich hdfs in dem fall?
+      -> legt es ordner an?
+- HBASE Beispiele ans laufen bekommen
+- auf cluster arbeiten
+- mit wirklich großen dateien arbeiten
+- schauen, ob/wie getBlockLocation() aufgerufen wird
+- mit DXRAM blockspeicherung testen (Filestream?)
+
+2:45h
+
+## kurzzeitnotizen am 2018-02-26
+
+14:45 - 16:15 Suche problem relativ und abs pfade um MC ans laufen zu bekommen
+        und update einer hilfs-bash Datei
+
+todo: korrektur des Problems bzgl working directory wenn der realtive Pfad
+korrigiert wird:
+
+delete(grep-temp-1872001714, true)
+18/02/26 16:01:49 INFO dxram.DxramFileSystem: fixRelativePart(grep-temp-1872001714)
+18/02/26 16:01:49 INFO dxram.DxramFileSystem: getWorkingDirectory()
+18/02/26 16:01:49 INFO dxram.DxramFileSystem: _toLocal(grep-temp-1872001714)
+18/02/26 16:01:49 INFO dxram.DxramFileSystem:   absF = dxram://abook.localhost.fake:9000/user/tux/grep-temp-1872001714
+
+1:30 h
+
+## kurzzeitnotizen am 2018-02-23
+
+10:00 - 10:45 Besprechung, todo für mich: auf cluster arbeiten und in "Raum"
+10:45 - 11:45 Hadoop fix protobufc lib probleme, Doku der erkenntnisse
+              bzgl. bugs, maven, hadoop und protobuf/protoc
+
+13:30 - 14:00 analyse HDFS Logdaten
+15:15 - 16:00 " und probleme mit "Arbeitsplatz Rechner"
+17:00 - 18:15 mein fs auf Log umstallen statt print
+18:15 - 18:30 fehler gefunden!!! create() muss die fehlenden ordner anlegen, sollten
+       diese nicht existieren.
+18:30 - 19:45 fix create() path bug
+
+mapreduce example works, but:
+
+todo:
+    18/02/23 19:24:36 INFO dxram.DxramFileSystem: delete(grep-temp-1473800519, true)
+    18/02/23 19:24:36 INFO dxram.DxramFileSystem: _toLocal(grep-temp-1473800519)
+    java.io.FileNotFoundException: delete: grep-temp-1473800519 not exists
+
+-> problem mit realtiven und absoluten pfaden?
+
+todo:
+    umstellung INFO auf DEBUG tut nicht wie soll?!
+    https://stackoverflow.com/questions/27710430/how-to-change-log-level-of-userlogs-in-hadoop-2#27862971
+
+todo:
+    jobRunner von mapReduce auch in meinem Dateisystem arbeiten lassen (?)
+
+5:45h
+
+
+
+
+
+
+
+
+
+## kurzzeitnotizen am 2018-02-22
+
+12:15 - 14:00 test mit logging in java, umgang mit maven,
+              starten mit maven, nutzen von dependencies
+
+17:15 - 18:00 trick: export log4j_logger_org_apache_hadoop=INFO
+        in hadoop-env.sh. so gehts!
+
+22:30 - 23:30 hdfs komplett mit neuen logs versorgt, um zu sehn, wann was mit welchen parametern
+        geöffnet wird
+23:30 - 0:00 recompile libprotoc
+
+3h
+
+bug: wenn die datei bereits existiert und man nutzt put, dann wird ...
+     verhalten bitte nochmal auf korrektheit prüfen
+
+## kurzzeitnotizen am 2018-02-21
+
+21:45 - 22:45 LOG.debug() -> wo wird das hin geloggt? wie ist das
+      bei java bzw. hadoop nutzbar?
+
+1 h
+
+## kurzzeitnotizen am 2018-02-19
+
+13:30 - 14:15 DxramFs nicht "ext AbstractFileSystem" sondern "ext DelegateToFileSystem"
+         -> brachte nichts. mapreduce gleicher log
+14:15 - 15:00 vereinfachung code
+15:00 - 15:15 delete ist nun ein fake.
+15:15 - 15:45 füge wegen fake-delete mehr ausgaben bzgl dateiexistenz zu
+    open + create ebenfalls mehr ausgaben bzgl. dateiexistenz
+    -> schein grep-Ordner nicht löschen zu können. tmp/0/... unterordner
+       werden aber korrekt gelöscht
+    -> create? wird datei korrekt erzeugt?
+    -> ggf mal testen mit nur einer cpu
+    
+    Todo: genau schauen, ob MC in die angelegten ordner auch dateien anlegt
+    Todo: "Huch! create()" wird nicht erreicht! warum?
+    Todo: wieso findet er beim Löschen am enden den grep-Ordner nicht?
+          -> evtl. falsche fehlermeldung, weil ordner nicht leer ist oder
+          -> bricht forher ab, weil create() nicht fertig wurde
+    Todo: MC - wie lässt sich das finale aufräumen abschalten?
+
+2:15 h
+
+
+## kurzzeitnotizen am 2018-02-16
+
+13:00 - 14:30 alluxio hdfs anbindung ansehn
+15:45 - 16:30 anschauen OrangeFs Hadoop Code
+        FileContext statt FileSystem implementieren?
+        -> macht keiner!?
+     Todo: DxramFs nicht "ext AbstractFileSystem" sondern "ext DelegateToFileSystem"
+     Todo: Log einbauen/testen auch in hadoops FileContext!!
+     
+
+2:15 h
+
+- FileContext ist eine FileContext Factory()
+- FileContext nimmt Fs aus default, oder URI oder ein AbstractFileSystem Objekt,
+  um einen FileContext zu erstellen
+
+-> https://wiki.apache.org/hadoop/HCFS
+    The filesystem provides an implementation of the org.apache.hadoop.fs.FileSystem class 
+    (and in Hadoop v2, in implementation of the FileContext class}
+
+Diese obige Aussage bleibt rätselhaft, warum man ein FileContext implementieren
+sollte. Diese Klasse exisitert bereits und nutzt AbsFileSys. Vermutlich ist
+dieser Hinweis nur für die Leute da, die Hadoop Komplett vom HDFS code befreit haben
+oder von Hadoop 1 auf 2 upgraden wollen.
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+private static final Logger LOG = LoggerFactory.getLogger(AbstractFileSystem.class);
+
+LOG.debug("HdfsFileInputStream({}, {})", uri, stats);
+
+
+
+new AlluxioFileSystem()
+    super: DelegateToFileSystem(new alluxio.hadoop.FileSystem())
+new alluxio.hadoop.FileSystem()
+    super: alluxio.hadoop.AbstractFileSystem()
+???
+
+
+
+
+Einstiegspunkt: CustomFs()
+-> macht new CustomFileSystem() wo Implementierung drin ist
+-> teilt die Implementierung mit super() dem DelegateToFileSystem() mit
+-> CustomFileSystem() erweitert/überschreibt FileSystem()
+
+DelegateToFileSystem implementiert AbstractFileSystem !!!
+
+
+/** AbstractFileSystem
+ *
+ * This class provides an interface for implementors of a Hadoop file system
+ * (analogous to the VFS of Unix). Applications do not access this class; !!!!!!!!
+ * instead they access files across all file systems using {@link FileContext}.
+ * 
+ * Pathnames passed to AbstractFileSystem can be fully qualified URI that
+ * matches the "this" file system (ie same scheme and authority) 
+ * or a Slash-relative name that is assumed to be relative
+ * to the root of the "this" file system .
+ */
+
+Da is ne doku in "FileContext", welche "AbstractFileSystem" benutzt.
+Es scheint die operationen auf URI, Pfad usw. zur verfügung zu stellen,
+um grundlegende Dateioperationen zu ermöglichen.
+
+pdf bzgl. tests: auch wenn die beschriebenen Test erfolgreich sind,
+garantiert es nicht, dass MapReduce korrekt funktioniert!
+
+-> append() für MapReduce und HBase wichtig (?)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## kurzzeitnotizen am 2018-02-15
+
+15:30 - 16:00 weitere analyse des mapreduce beispiel. Test mit localem dateisystem statt
+    dxram oder hdfs. Einbau print in localfs
+17:00 - 18:15 blick auf die alluxio hadoop anbindung, die im grunde vergleichbar
+    sein sollte mit meiner lösung
+    RawLocalFileSystem mit print bestückt!
+    
+    https://github.com/Alluxio/alluxio/blob/master/core/client/hdfs/src/main/java/alluxio/hadoop/AlluxioFileSystem.java
+    
+    todo: DelegateToFileSystem verstehen!!!
+    
+    
+    LocalFs() erbt von ChecksumFs() und übergibt diesem mit new RawLocalFs() im Konstruktor.
+    RawLocalFs() erbt von DelegateToFileSystem() welches von AbstractFileSystem() erbt.
+    RawLocalFs() übergibt im Konstruktor seiner Elternklasse AbstractFileSystem() ein
+    new RawLocalFileSystem(), welches von FileSystem() erbt.
+    
+1:45
+
+## kurzzeitnotizen am 2018-02-13
+
+15:00 - 18:15 delete und getFilestatus rekursiv scheint nicht korrekt
+        den pfad zu ergänzen in der url (logging vom mapreduce beispiel)
+        -> korrigieren!
+        Der fehler scheint irgendwo anders liegen. mapreduce job
+        legt unter-ordner scheinbar nicht an bzw jobdateien?
+
+3:15 h
+
+Kann es sein, dass das hdfs aus
+  hdfs://abook.localhost.fake:9000/user/tux/output/_temporary/0/_temporary/attempt_local168864638_0002_m_000000_0
+mit fixRelativePart() das macht:
+  hdfs://abook.localhost.fake:9000/user/tux/output/_temporary/attempt_local168864638_0002_m_000000_0
+
+???
+
+dxram:
+-------
+
+DxramFileSystem: mkdirs /tmp/myfs
+
+/user/tux/grep-temp-1268133141/_temporary/0
+
+DxramFileSystem: getFileStatus dxram://abook.localhost.fake:9000/user/tux/grep-temp-1268133141/_temporary/0/_temporary/attempt_local408608154_0001_m_000001_0
+18/02/13 16:39:32 INFO mapred.LocalJobRunner: map
+18/02/13 16:39:32 INFO mapred.Task: Task 'attempt_local408608154_0001_m_000001_0' done.
+
+-> Datei grep-temp-1268133141/_temporary/0/job_local408608154_0001 wird wohl nicht angelegt ?
+
+create /tmp/myfs
+
+/user/tux/grep-temp-1268133141/_temporary/0/_temporary/attempt_local408608154_0001_r_000000_0/part-r-00000
+
+18/02/13 16:39:34 INFO mapred.LocalJobRunner: reduce task executor complete.
+DxramFileSystem: delete
+DxramFileSystem: getFileStatus dxram://abook.localhost.fake:9000/user/tux/grep-temp-1268133141/_temporary
+18/02/13 16:39:34 INFO Configuration.deprecation: io.bytes.per.checksum is deprecated. Instead, use dfs.bytes-per-checksum
+DxramFileSystem: _delete with /tmp/myfs
+
+/user/tux/grep-temp-1268133141/_temporary
+
+DxramFileSystem: _delete with /tmp/myfs/user/tux/grep-temp-1268133141/_temporary/0
+18/02/13 16:39:34 WARN mapred.LocalJobRunner: job_local408608154_0001 not exists!!!!!!!
+DxramFileSystem: delete
+java.io.FileNotFoundException: delete: grep-temp-1268133141 not exists
+
+
+hdfs:
+--------
+- hdfs://abook.localhost.fake:9000/user/tux/grep-temp-371371549
+- mapreduce.JobSubmitter: Submitting tokens for job: job_local1742987052_0001
+- output.FileOutputCommitter: FileOutputCommitter skip cleanup _temporary folders under output directory:false, ignore cleanup failures: false
+- mkdirs
+- 18/02/13 17:05:20 INFO mapred.LocalJobRunner: Starting task: attempt_local1742987052_0001_m_000000_0
+- 18/02/13 17:05:20 INFO mapred.MapTask: Processing split: hdfs://abook.localhost.fake:9000/user/hadoop-policy.xml:0+9683
+- open
+- getFileStatus hdfs://abook.localhost.fake:9000/user/tux/grep-temp-371371549/
+  _temporary/0/_temporary/attempt_local1742987052_0001_m_000000_0
+- open
+- getFileStatus hdfs://abook.localhost.fake:9000/user/tux/grep-temp-371371549/
+  _temporary/0/_temporary/attempt_local1742987052_0001_m_000001_0
+
+splittet wohl eine datei auf und lässt 2 cpus je eine hälfte arbeiten
+
+- werden immer mehr attempt_local1742987052_0001_m_00000  NUMMER  _0 dateien angelegt (immer 2, dann reduce job LocalJobRunner ?)
+- ne, doch ein dicker reduce schritt
+- create
+- create
+- Task:attempt_local1742987052_0001_r_000000_0 is done
+- getFileStatus hdfs://abook.localhost.fake:9000/user/tux/grep-temp-371371549/
+  _temporary/0/_temporary/attempt_local1742987052_0001_r_000000_0
+- getFileStatus hdfs://abook.localhost.fake:9000/user/tux/grep-temp-371371549/
+  _temporary/0/task_local1742987052_0001_r_000000
+  
+- getFileStatus hdfs://abook.localhost.fake:9000/user/tux/grep-temp-371371549
+- getFileStatus hdfs://abook.localhost.fake:9000/user/tux/grep-temp-371371549/part-r-00000
+- rename
+- delete
+- create
+- create
+- getFileStatus hdfs://abook.localhost.fake:9000/user/tux/output
+- getFileStatus hdfs://abook.localhost.fake:9000/user/tux/grep-temp-371371549
+- mkdirs
+- Starting task: attempt_local168864638_0002_m_000000_0
+- .... 
+
+nochmal das ganze mit dem anderen erzeugten jobs
+
+
+Sehe auf localhost YARN webseite mit dxram und hdfs den mapreduce job nicht.
+Hier, warum (normal):
+
+MapReduce 2.0 has two components – YARN that has cluster resource management capabilities and MapReduce.
+
+In MapReduce 2.0, the JobTracker is divided into three services:
+ResourceManager, a persistent YARN service that receives and runs applications on the cluster. A MapReduce job is an application. JobHistoryServer, to provide information about completed jobs Application Master, to manage each MapReduce job and is terminated when the job completes. Also, the TaskTracker has been replaced with the NodeManager, a YARN service that manages resources and deployment on a node. NodeManager is responsible for launching containers that could either be a map or reduce task.
+
+This new architecture breaks JobTracker model by allowing a new ResourceManager to manage resource usage across applications, with ApplicationMasters taking the responsibility of managing the execution of jobs. This change removes a bottleneck and lets Hadoop clusters scale up to larger configurations than 4000 nodes. This architecture also allows simultaneous execution of a variety of programming models such as graph processing, iterative processing, machine learning, and general cluster computing, including the traditional MapReduce.
+
+
+
+
+## kurzzeitnotizen am 2018-02-10
+
+13:15 - 15:45 cat implemetieren (bzw. read/open)
+        cat+cp GEHT !!
+15:45 - 16:00 teste mapreduce beispiel: klappt nicht
+        lese log: 20180210.txt
+        -> vergessen yarn zu starten!!
+        -> mit yarn: klappt auch nicht :-(
+        -> es werden grep-ordner angelegt, aber löschen oder zusammenführen oder füllen
+        stimmt was nicht
+
+2:45 h
+
+DxramFileSystem: getFileStatus grep-temp-135781110
+java.io.FileNotFoundException: _getFileStatus: /home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/grep-temp-135781110 not exists
+
+Vermutlich wird bei "getFileStatus grep-temp-135781110" nicht automatisch die
+Working Dir automatisch angehangen bzw. gesetzt
+
+
+
+
+https://stackoverflow.com/questions/21136402/how-do-i-know-which-filestream-supports-seek-in-java#21136472
+https://stackoverflow.com/questions/24910503/how-to-instantiate-fsdatainputstream-with-raw-inputstream
+
+
+INFO Configuration.deprecation: io.bytes.per.checksum is deprecated. Instead, use dfs.bytes-per-checksum
+
+It was added then, but not actually used until HDFS-631.... which you'll find in the old hadoop-hdfs tree as part of 0.21. So it was trapped in the project split... which is why it's mainly stuff outside of HDFS that is still using it. I have a hunch that HDFS-2000 was basically misguided(?): it was deprecated for HDFS's internal usage but needed in common for non-HDFS file systems to set.  So it's not REALLY deprecated in the classic sense.
+
+Definitely need better documentation here. :/ 
+
+-> liegt irgendwie an einem pig logger, der eingentlich für hadoop1 erstellt wurde
+und scheinbar mit hadoop2 ausgeliefert ist bzw. kompiliert
+
+
+mit dxram://
+------------
+
+Found 2 items
+-rw-rw-rw-   0       1366 1970-01-01 01:00 /user/README.txt
+drwxrwxrwx   -         40 1970-01-01 01:00 /user/tux
+
+ein "Found 0 items" gibt es nicht
+
+
+mit hdfs://
+-----------
+
+Found 2 items
+-rw-r--r--   1 tux supergroup       1366 2018-02-10 13:41 /user/README.txt
+drwxr-xr-x   - tux supergroup          0 2018-02-10 13:41 /user/tux
+
+ein "Found 0 items" gibt es nicht
+
+
+
+
+
+
+
+## kurzzeitnotizen am 2018-02-08
+
+13:30 - 15:00 analyse pom file des google cloud storeage, um mit mein dxram storage
+    ein maven projekt hin zu bekommen. ERFOLG !
+    
+15:00 - 16:00 Vergleich put methodenaufruf dxram und hdfs
+    muss ich ein FileSystemLinkResolver haben?! nutzen?
+16:00 - 18:00 put einer datei geht nun in meinem fs. ls ist noch komisch (ganzer dateipfad als name)
+    rm geht. put * mehere dateien geht
+
+4.5 h
+
+mit dxram://
+
+
+bin/hadoop fs -put README.txt /user/
+18/02/08 16:23:42 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+conf: Configuration: core-default.xml, core-site.xml, mapred-default.xml, mapred-site.xml, yarn-default.xml, yarn-site.xml, hdfs-default.xml, hdfs-site.xml
+theUri: dxram://abook.localhost.fake:9000
+myUri: dxram://abook.localhost.fake:9000/
+DxramFileSystem: getWorkingDirectory
+working Dir: dxram://abook.localhost.fake:9000/user/tux
+DxramFileSystem: fixRelativePart
+DxramFileSystem: getFileStatus dxram://abook.localhost.fake:9000/user
+DxramFileSystem: fixRelativePart
+18/02/08 16:23:42 INFO Configuration.deprecation: io.bytes.per.checksum is deprecated. Instead, use dfs.bytes-per-checksum
+DxramFileSystem: getWorkingDirectory
+DxramFileSystem: getFileStatus /user/README.txt
+DxramFileSystem: fixRelativePart
+DxramFileSystem: getWorkingDirectory
+DxramFileSystem: getFileStatus /user/README.txt._COPYING_
+DxramFileSystem: fixRelativePart
+DxramFileSystem: getWorkingDirectory
+DxramFileSystem: create /tmp/myfs/user/README.txt._COPYING_
+DxramFileSystem: getFileStatus dxram://abook.localhost.fake:9000/user/README.txt._COPYING_
+DxramFileSystem: fixRelativePart
+DxramFileSystem: getFileStatus dxram://abook.localhost.fake:9000/user/README.txt._COPYING_
+DxramFileSystem: fixRelativePart
+put: _getFileStatus: dxram://abook.localhost.fake:9000/user/README.txt._COPYING_ not exists
+
+
+
+mit hdfs://
+
+bin/hadoop fs -put README.txt /user/
+18/02/08 15:37:47 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+DistributedFileSystem: getHomeDirectory
+DistributedFileSystem: getWorkingDirectory
+DistributedFileSystem: fixRelativePart
+DistributedFileSystem: getFileStatus hdfs://abook.localhost.fake:9000/user
+DistributedFileSystem: fixRelativePart
+DistributedFileSystem: getPathName
+DistributedFileSystem: canonicalizeUri
+DistributedFileSystem: getDefaultPort
+DistributedFileSystem: canonicalizeUri
+DistributedFileSystem: getDefaultPort
+DistributedFileSystem: getWorkingDirectory
+DistributedFileSystem: getFileStatus /user/README.txt
+DistributedFileSystem: fixRelativePart
+DistributedFileSystem: getPathName
+DistributedFileSystem: getWorkingDirectory
+DistributedFileSystem: getFileStatus /user/README.txt._COPYING_
+DistributedFileSystem: fixRelativePart
+DistributedFileSystem: getPathName
+DistributedFileSystem: getWorkingDirectory
+DistributedFileSystem: getDefaultReplication
+DistributedFileSystem: getDefaultBlockSize
+DistributedFileSystem: create
+DistributedFileSystem: create
+DistributedFileSystem: fixRelativePart
+DistributedFileSystem: getPathName
+DistributedFileSystem: canonicalizeUri
+DistributedFileSystem: getDefaultPort
+DistributedFileSystem: canonicalizeUri
+DistributedFileSystem: getDefaultPort
+DistributedFileSystem: getFileStatus hdfs://abook.localhost.fake:9000/user/README.txt._COPYING_
+DistributedFileSystem: fixRelativePart
+DistributedFileSystem: getPathName
+DistributedFileSystem: canonicalizeUri
+DistributedFileSystem: getDefaultPort
+DistributedFileSystem: canonicalizeUri
+DistributedFileSystem: getDefaultPort
+DistributedFileSystem: rename
+DistributedFileSystem: fixRelativePart
+DistributedFileSystem: fixRelativePart
+DistributedFileSystem: getPathName
+DistributedFileSystem: canonicalizeUri
+DistributedFileSystem: getDefaultPort
+DistributedFileSystem: canonicalizeUri
+DistributedFileSystem: getDefaultPort
+DistributedFileSystem: getPathName
+DistributedFileSystem: canonicalizeUri
+DistributedFileSystem: getDefaultPort
+DistributedFileSystem: canonicalizeUri
+DistributedFileSystem: getDefaultPort
+DistributedFileSystem: close
+
+
+
+bin/hadoop fs -put README.txt /user/
+18/02/08 17:51:51 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+conf: Configuration: core-default.xml, core-site.xml, mapred-default.xml, mapred-site.xml, yarn-default.xml, yarn-site.xml, hdfs-default.xml, hdfs-site.xml
+theUri: dxram://abook.localhost.fake:9000
+myUri: dxram://abook.localhost.fake:9000/
+DxramFileSystem: getWorkingDirectory
+working Dir: dxram://abook.localhost.fake:9000/user/tux
+DxramFileSystem: fixRelativePart
+DxramFileSystem: getFileStatus dxram://abook.localhost.fake:9000/user
+18/02/08 17:51:52 INFO Configuration.deprecation: io.bytes.per.checksum is deprecated. Instead, use dfs.bytes-per-checksum
+DxramFileSystem: getWorkingDirectory
+DxramFileSystem: getFileStatus /user/README.txt
+DxramFileSystem: getWorkingDirectory
+DxramFileSystem: getFileStatus /user/README.txt._COPYING_
+DxramFileSystem: getWorkingDirectory
+DxramFileSystem: create /tmp/myfs/user/README.txt._COPYING_
+DxramFileSystem: getFileStatus dxram://abook.localhost.fake:9000/user/README.txt._COPYING_
+DxramFileSystem: rename
+~/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2
+tux@abook.localhost.fake$ ls /tmp/myfs/user/
+README.txt  tux
+~/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2
+tux@abook.localhost.fake$ bin/hadoop fs -ls /user/
+18/02/08 17:52:19 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+conf: Configuration: core-default.xml, core-site.xml, mapred-default.xml, mapred-site.xml, yarn-default.xml, yarn-site.xml, hdfs-default.xml, hdfs-site.xml
+theUri: dxram://abook.localhost.fake:9000
+myUri: dxram://abook.localhost.fake:9000/
+DxramFileSystem: getWorkingDirectory
+working Dir: dxram://abook.localhost.fake:9000/user/tux
+DxramFileSystem: fixRelativePart
+DxramFileSystem: getFileStatus dxram://abook.localhost.fake:9000/user
+18/02/08 17:52:19 INFO Configuration.deprecation: io.bytes.per.checksum is deprecated. Instead, use dfs.bytes-per-checksum
+DxramFileSystem: getWorkingDirectory
+DxramFileSystem: listStatus [] dxram://abook.localhost.fake:9000/user
+DxramFileSystem: getFileStatus dxram://abook.localhost.fake:9000/user
+DxramFileSystem: getWorkingDirectory
+DxramFileSystem: getWorkingDirectory
+Found 2 items
+-rw-rw-rw-   0       1366 1970-01-01 01:00 /user/README.txt
+drwxrwxrwx   -         40 1970-01-01 01:00 /user/tux
+
+
+
+## kurzzeitnotizen am 2018-02-07
+
+13:30 - 14:00 mapreduce mit print. Logdatei geschrieben.
+        todo: interpretation des logs, in code die stelle bzgl. der "auf welchem knoten ist der block" anpassen und austesten
+
+0.5 h
+
+## kurzzeitnotizen am 2018-02-06
+
+todo: hdfs nochmal ohne printf kompilieren und testen
+
+13:30 - 14:15 intellij kaputt geupdated :-(
+15:30 - 19:00 make protobuf 2.5.0 statt 3.x auch durch update zerschossen
+          hadoop braucht diese alte version!
+        - einlesen in maven, um nur hadoop-hdfs-client zu kompilieren
+        - versuche ohne intellij klar zu kommen
+        - printf klapp, put klappt, compile nur das mvn gecleante projekt klappt, copy der neuen jar dateien in nötige ordner klappt
+
+4:15
+
+## kurzzeitnotizen am 2018-01-27
+
+16:30 - 17:30 dxram logos in latex
+
+1h
+
+## kurzzeitnotizen am 2018-01-26
+
+9:15  - 10:15 treffen
+10:45 - 11:45 allgemeine latex vorlage
+15:15 - 15:30 schrumpfen der Vorlage
+
+2:15 h
+
+## kurzzeitnotizen am 2018-01-25
+
+15:30 - 16:45 finetuning latex
+17:00 - 18:30 hdfs selbst compilieren + testen
+18:30 - 18:45 Folien pflegen und Debugging (toSting auf NULL)
+pause
+20:45 - 22:45 rekompile und folien debugging
+
+5 h
+
+## kurzzeitnotizen am 2018-01-24
+
+16:00 - 19:00 Doku start, classes, config
+
+3 h
+
+## kurzzeitnotizen am 2018-01-19
+
+15:30 - 17:30 Folien template latex
+18:00 - 20:30 Folien template latex
+
+4,5 h
+
+## kurzzeitnotizen am 2018-01-19
+
+9:15 - 10:15 Besprechung
+ 1)  nicht einfach nur libfuse bzw. Filesystemimpl. aufgrund vorhersagbarer
+    Performanceeinbußen nachbauen und DXRAM "mountbar" machen.
+    VERMUTLICH nicht erkennbar, wo Block/Daten liegen und daher Prozedur
+    auf Daten nicht auf passenden Knoten delegierbar.
+ 2)  HBase nutzt die verteilte Kompression von Hadoop, um mit
+    hbase.io.Crompression in HFileContext einen EncodedDataBlock
+    zu erzeugen. EncodedDataBlock wird in den Hbase Klassen Cell, Tag und somit
+    auch in KeyValue und StoreFile (flush memstore to disks, nutzt HFileContext)
+    verwendet.
+ 3)  HBase nicht von hadoop Ekosystem sauber
+    trennbar, da vermutlich nicht nur HRegionServer,
+    regionserver.StoreFile und CoprocessorClassLoader
+    auf hadoop.fs.(FileSystem,FileStatus,Utils,Path) zugreifen
+ 4)  gegen HBase-Thrift-Api (=RPC) Implementieren: Hier wäre klare Trennung
+    möglich, aber speziell das Pendant zu Java Hbase-Coprocessor Routinen fehlt.
+    In einer Hbase Anwendung können Coprozessoren entwickelt werden,
+    die auf den Daten z.B. Filterung durchführen. Die Daten sind in
+    HBase auf Regionserver verteilt, welche dann "Coprozessoren" (auch via RPC)
+    ausführen. Ferner würde man sich von Hadoop und HBase ganz verabschieden
+    und provoziert Inkompatibilität zu bestehenden, komplexeren HBase
+    Aplikationen. Man müsse "Bigtable" statt "nur" HDFS mit DXRAM
+    nachimplementieren
+ 5)  Fürs nächste Mal: erstmal HBase zur Seite legen und nur
+    ein "Wordcount" Beispiel in Hadoop ausführen. Hierbei in die HDFS Klasse
+    viele "printf" einbauen, um zu sehen, was passiert. Ggf. betroffene
+    Methoden in einem DummyFileSystem nachbauen und testen.
+
+zu Punkt 1): Tachyon (https://www.alluxio.org/) ist eine Ramcloud und macht das
+so "billig". Die geben an, trotzdem 110x schneller zu sein, als HDFS.
+Die haben sogar HDFS nicht auf Festplatten, sondern in einer RAM-Disk laufen
+lassen.
+
+Zu Punkt 4): da Bigtable näher an einem Key-Value-Store ist als DXRAM
+an einem "Dateisystem": Was ist evtl. leichter zu implemetieren? Hier wäre
+max. Performance erreichbar aber dafür minimale Kompatibilität zu bestehnden
+Hadoop,HBase,Hive,Spark...Anwendungen. Auch Bloom-Filter, Batchprocessing
+(bzw. das alte MapReduce) und Kompression müssten nachgebaut werden und
+einem ehemaligen HBase Benutzer/Entwickler vergleichbar mit "Coprozessor" als
+Schnittstelle bereitgestellt werden.
+
+zu Punkt 5): Eine DummyFileSystem Klasse habe ich bereits in den letzten
+Wochen bauen und nutzen können, die eigentlich nur alles an /tmp/ weiterleitet.
+Dort hänge ich etwas, da die "hadoop fs" Komandozeilenbefehle zum Testen
+die methoden der FileSystem-Klasse "komisch" benutzen. Daher wollte ich eh
+in den bestehende HDFS Code "printf" einbauen, um die Verarbeitung nochvollziehen
+zu können.
+
+
+11:00 - 12:15 Zusammenfassung (s.o.)
+
+15:00 - 15:45 Mattermost test
+
+3h
+
+
+
+## kurzzeitnotizen am 2018-01-18
+
+14:30 - 16:15 Vergleich Hbase Klassen und Datenstruktur mit "Google-Big-Table"
+        Konzept. Kleines Update muss in Block des Dateisystems
+        abgelegt werden.
+        Auflistung der Ideen und Konzepte von Bigtable, NoSQL, Hbase, GFS
+
+16:15 - 18:00 Einlesen in das Thrift-Interface und deren Java Code,
+        Syntax hightlightning für thrift code und "präsentation" morgen
+
+18:00 - 19:30 suche nach Coprocessor, HFile und RegionServer zusammenhang
+
+5 h
+
+## kurzzeitnotizen am 2018-01-17
+
+22:45 - 00:15 Hbase Sources nach möglichen hdfs put/get anknüpfungspunkt
+              durchsuchen
+
+1,5 h
+
+## kurzzeitnotizen am 2018-01-12
+
+9:15-10:15 besprechung:
+
+    für nächste woche klären:
+     -   braucht hadoop zookeeper? nein
+     -   hadoop Filesystem Interface vorstellen
+     -   was Braucht HBASE wirklich vom Hadoop Ökosystem?
+
+10:30 - 12:30 recherche HBase, hadoop ökosystem, andere Ökosysteme
+              und deren umgehung von hdfs bzw hadoop?
+              -> tachyon !!!!
+
+14:30 - 15:00 gegenüberstellen: HBase mit dxram nachbauen oder ein
+        HDFS für Hadoop nachbauen?
+
+15:00 - 15:45 Spark anwendungen: Wie greifen die auf hdfs zu? durch hadoop
+15:45 - 16:45 HBASE: Schnittstelle existent, gegen die Entwickler
+              programmieren? jaein.
+              -> java Beispiele zeigen umfangreich verwendungen untersch.
+                 Klassen
+              -> fasst jedes Beispiel nutzt neben Conf/FS auch anderen hadoop Code
+              -> alle nicht-java-Beispiele nutzen hbase.thrift als
+                 Schnittstelle zu hbase!!!!!!
+              -> Es gibt viele APIs in HBase, die sich evtl alle mit einer
+                 Thrift-API abbilden/erzeugen lassen
+
+5,25 h
+
+
+
+
+## kurzzeitnotizen am 2018-01-11
+
+14:00 - 14:30 Notiz/Roadmap für Besprechung, was bei mir tut und
+        was meine nächsten schritte sind
+
+16:00 - 18:45 untersuchung, ob mkdirs wegen exceptions nicht tut (scheint anderer grund zu sein)
+        ls / scheint wegen local path, uri und "dxram path" nicht zu klappen. da ist
+        zur zeit noch ein hack deswegen drin :-(
+
+3:15 h
+
+## kurzzeitnotizen am 2018-01-10
+
+16:00 - 17:30 erste erfolge mit mkdir ordner an zu legen
+        ls / tut immer noch nicht (?)
+        automatisch unterordner mit anlegen tut noch nicht (?)
+        rm -r /user/tux (auch wenn tux ordner nicht leer) geht
+        erkennt, wenn datei nicht exisitert
+        rm auf eine datei geht
+        cat und put sowie cp tut noch nicht
+        Tipp:
+        bin/hadoop fs -help
+
+1:30 h
+
+## kurzzeitnotizen am 2018-01-09
+
+überlegung im ram statt dateisystem die Dateien ab zu legen. Brauche am
+ende eh sowas.
+
+16:15 - 18:30 probleme mit mkdir: da kommt immer "bin/hadoop fs -mkdir a"
+
+getFileStatus: dxram://abook.localhost.fake:9000/user/tux/a
+toLocal: dxram://abook.localhost.fake:9000/user/tux/a -> /tmp/user/tux/a
+18/01/09 18:21:09 INFO Configuration.deprecation: io.bytes.per.checksum is deprecated. Instead, use dfs.bytes-per-checksum
+mkdir: "a": Is not a directory
+
+fixed: vor dem anlegen wird filestatus aufgerufen und da muss eine spez.
+Exception geworfen werden
+
+2:15 h
+
+## kurzzeitnotizen am 2017-12-15
+
+10:45 - 11:45 erste tests mit cli und "hadoop fs" um zugriff zu testen
+            ok:   bin/hadoop fs -ls / file:///tmp/  ("file://" scheme + "/" root ordner)
+            ok:   bin/hadoop fs -ls / file:/tmp/    ("scheme" konzept wird übersprungen)
+            fail: bin/hadoop fs -ls / file://tmp/   (root ordner fehlt - darf nicht "tmp/" sein)
+
+15:15 - 18:30 erste erfolge /tmp/ zu listen
+
+4:15 h
+
+TODO: 
+- bei ls / soll nicht /tmp/tmp/ und sowas auftauchen
+- bei ls /a muss getestet werden, wie mit hadoop und dateien, die es nicht gibt
+  umgegangen wird
+  
+  
+
+~/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2
+tux@abook.localhost.fake$ bin/hadoop fs -ls /
+17/12/15 18:30:03 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+conf: Configuration: core-default.xml, core-site.xml, mapred-default.xml, mapred-site.xml, yarn-default.xml, yarn-site.xml, hdfs-default.xml, hdfs-site.xml
+theUri: dxram://abook.localhost.fake:9000
+myUri: dxram://abook.localhost.fake:9000/
+working Dir: dxram://abook.localhost.fake:9000/user/tux
+
+dxram://abook.localhost.fake:9000/
+17/12/15 18:30:03 INFO Configuration.deprecation: io.bytes.per.checksum is deprecated. Instead, use dfs.bytes-per-checksum
+
+listStatus [] dxram://abook.localhost.fake:9000/tmp
+
+dxram://abook.localhost.fake:9000/tmp
+Found 1 items
+-rw-rw-rw-   0          0 1970-01-01 01:00 /tmp/tmp
+~/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2
+tux@abook.localhost.fake$ bin/hadoop fs -ls /x
+17/12/15 18:30:23 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+conf: Configuration: core-default.xml, core-site.xml, mapred-default.xml, mapred-site.xml, yarn-default.xml, yarn-site.xml, hdfs-default.xml, hdfs-site.xml
+theUri: dxram://abook.localhost.fake:9000
+myUri: dxram://abook.localhost.fake:9000/
+working Dir: dxram://abook.localhost.fake:9000/user/tux
+
+dxram://abook.localhost.fake:9000/x
+17/12/15 18:30:24 INFO Configuration.deprecation: io.bytes.per.checksum is deprecated. Instead, use dfs.bytes-per-checksum
+-rw-rw-rw-   0          0 1970-01-01 01:00 /x
+
+
+
+
+
+
+bin/hadoop -fs ls /
+
+bin/hadoop fs -cp README.txt gaga.txt 
+
+
+
+vergleich hdfs (core-site.xml, hadoop-env.sh (JAVA_HOME), hdfs-site.xml anpassen):
+
+hdfs namenode -format
+    17/12/15 16:57:21 INFO namenode.NameNode: STARTUP_MSG: 
+    /************************************************************
+    STARTUP_MSG: Starting NameNode
+    STARTUP_MSG:   user = tux
+    STARTUP_MSG:   host = abook.localhost.fake/127.0.0.1
+    STARTUP_MSG:   args = [-format]
+    STARTUP_MSG:   version = 2.8.2
+    ...
+
+start-dfs.sh
+    17/12/15 16:57:30 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+    Starting namenodes on [abook.localhost.fake]
+    abook.localhost.fake: starting namenode, logging to /home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/logs/hadoop-tux-namenode-abook.localhost.fake.out
+    localhost: starting datanode, logging to /home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/logs/hadoop-tux-datanode-abook.localhost.fake.out
+    Starting secondary namenodes [0.0.0.0]
+    0.0.0.0: starting secondarynamenode, logging to /home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/logs/hadoop-tux-secondarynamenode-abook.localhost.fake.out
+    17/12/15 16:57:48 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+
+hdfs dfs -mkdir /user
+hdfs dfs -mkdir /user/tux
+
+bin/hadoop fs -ls / hdfs://abook.localhost.fake:9000
+    Found 1 items
+    drwxr-xr-x   - tux supergroup          0 2017-12-15 16:58 /user
+
+bin/hadoop fs -ls / dxram://abook.localhost.fake:9000
+    Found 1 items
+    drwxr-xr-x   - tux supergroup          0 2017-12-15 16:58 /user
+    -rw-rw-rw-   0                         0 1970-01-01 01:00 /user/tux/dxram:/abook.localhost.fake:9000/user/tux
+
+
+
+
+
+
+
+
+
+
+
+
+## kurzzeitnotizen am 2017-12-14
+
+17:30 - 22:15 versuch zugang zu lokales dateisystem zu realisieren
+
+4,75
+
+## kurzzeitnotizen am 2017-12-08
+
+16:00 - 16:30 test des gcs projekts: wie erzeugt man es?
+16:30 - 17:15 -> intellij projekt!
+              -> einbinden hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/common/
+              -> einbinden hadoop-2.8.2-src/hadoop-common-project/hadoop-annotations/target/
+              -> artefakt: hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/common/lib/hadoopDxramfs.jar
+
+17:15 - 18:15 github projekt einrichten
+18:15 - 19:30 recherche Warning:(35, 29) java: getServerDefaults() in
+              org.apache.hadoop.fs.AbstractFileSystem has been deprecated
+19:30 - 20:15 dokumentation für github
+
+4,25
+
+
+bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.8.2.jar grep input output 'dfs[a-z.]+'
+17/12/08 19:14:53 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+conf: Configuration: core-default.xml, core-site.xml, mapred-default.xml, mapred-site.xml, yarn-default.xml, yarn-site.xml, hdfs-default.xml, hdfs-site.xml
+theUri: dxram://abook.localhost.fake:9000
+
+17/12/08 19:14:53 INFO Configuration.deprecation: session.id is deprecated. Instead, use dfs.metrics.session-id
+17/12/08 19:14:53 INFO jvm.JvmMetrics: Initializing JVM Metrics with processName=JobTracker, sessionId=
+17/12/08 19:14:54 INFO mapreduce.JobSubmitter: Cleaning up the staging area file:/tmp/hadoop-tux/mapred/staging/tux1561895081/.staging/job_local1561895081_0001
+org.apache.hadoop.mapreduce.lib.input.InvalidInputException: Input path does not exist: dxram://abook.localhost.fake:9000/user/tux/input
+	at org.apache.hadoop.mapreduce.lib.input.FileInputFormat.singleThreadedListStatus(FileInputFormat.java:329)
+	at org.apache.hadoop.mapreduce.lib.input.FileInputFormat.listStatus(FileInputFormat.java:271)
+	at org.apache.hadoop.mapreduce.lib.input.FileInputFormat.getSplits(FileInputFormat.java:393)
+	at org.apache.hadoop.mapreduce.JobSubmitter.writeNewSplits(JobSubmitter.java:303)
+	at org.apache.hadoop.mapreduce.JobSubmitter.writeSplits(JobSubmitter.java:320)
+	at org.apache.hadoop.mapreduce.JobSubmitter.submitJobInternal(JobSubmitter.java:198)
+	at org.apache.hadoop.mapreduce.Job$11.run(Job.java:1341)
+	at org.apache.hadoop.mapreduce.Job$11.run(Job.java:1338)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at javax.security.auth.Subject.doAs(Subject.java:422)
+	at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1836)
+	at org.apache.hadoop.mapreduce.Job.submit(Job.java:1338)
+	at org.apache.hadoop.mapreduce.Job.waitForCompletion(Job.java:1359)
+	at org.apache.hadoop.examples.Grep.run(Grep.java:78)
+	at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:76)
+	at org.apache.hadoop.examples.Grep.main(Grep.java:103)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.apache.hadoop.util.ProgramDriver$ProgramDescription.invoke(ProgramDriver.java:71)
+	at org.apache.hadoop.util.ProgramDriver.run(ProgramDriver.java:144)
+	at org.apache.hadoop.examples.ExampleDriver.main(ExampleDriver.java:74)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.apache.hadoop.util.RunJar.run(RunJar.java:234)
+	at org.apache.hadoop.util.RunJar.main(RunJar.java:148)
+
+
+
+
+
+
+
+### so macht man hadoop:
+
+    cd /home/tux/big/hdo/hadoop-2.8.2-src/
+    mvn package -Pdist -Pdoc -Psrc -Dtar -DskipTests
+    mvn package -Pdist -Pdoc -Psrc -Dtar -DskipTests -o (offline)
+
+hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+    <configuration>
+        <property>
+            <name>fs.dxram.impl</name>
+            <value>de.hhu.bsinfo.hadoop.fs.dxram.DxramFileSystem</value>
+            <description>The FileSystem for dxram.</description>
+        </property>
+        <property>
+            <name>fs.AbstractFileSystem.dxram.impl</name>
+            <value>de.hhu.bsinfo.hadoop.fs.dxram.DxramFs</value>
+            <description>
+                The AbstractFileSystem for dxram
+            </description>
+        </property>
+        <property>
+            <name>fs.defaultFS</name>
+            <value>dxram://abook.localhost.fake:9000</value>
+        </property>
+    </configuration>
+
+
+  cd hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/
+  mkdir input
+  cp etc/hadoop/*.xml input
+  bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.8.2.jar grep input output 'dfs[a-z.]+'
+
+17/12/08 17:04:53 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+java.lang.NullPointerException
+	at org.apache.hadoop.fs.Path.<init>(Path.java:141)
+	at org.apache.hadoop.fs.Path.makeQualified(Path.java:535)
+	at org.apache.hadoop.fs.FileSystem.makeQualified(FileSystem.java:485)
+	at org.apache.hadoop.mapreduce.lib.input.FileInputFormat.setInputPaths(FileInputFormat.java:506)
+	at org.apache.hadoop.mapreduce.lib.input.FileInputFormat.setInputPaths(FileInputFormat.java:475)
+	at org.apache.hadoop.examples.Grep.run(Grep.java:66)
+	at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:76)
+	at org.apache.hadoop.examples.Grep.main(Grep.java:103)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.apache.hadoop.util.ProgramDriver$ProgramDescription.invoke(ProgramDriver.java:71)
+	at org.apache.hadoop.util.ProgramDriver.run(ProgramDriver.java:144)
+	at org.apache.hadoop.examples.ExampleDriver.main(ExampleDriver.java:74)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.apache.hadoop.util.RunJar.run(RunJar.java:234)
+	at org.apache.hadoop.util.RunJar.main(RunJar.java:148)
+
+-> er findet bereits fs.dxram passend zum scheme!!! (vorher gab fehlermeldung, er finde es nicht)
+
+### alt
+
+test des gcs projekts: wie erzeugt man es?
+
+-> ERROR !!!
+Probiere ohne tests
+mvn -P hadoop2 package -Dmaven.test.skip=true
+
+Auch ERROR !!!
+[ERROR] Failed to execute goal on project gcs-connector: Could not resolve dependencies for project com.google.cloud.bigdataoss:gcs-connector:jar:1.7.0-SNAPSHOT-hadoop2: Could not find artifact com.google.cloud.bigdataoss:gcsio:jar:tests:1.7.0-SNAPSHOT 
+
+probiere eigene pom mit meinem dxramFs code und maven (fail)
+
+-> namespace: de.hhu.bsinfo.hadoop.fs.dxram
+
+-> probiere intellij projekt mit einbinden von hadoop (16:40)
+
+
+## kurzzeitnotizen am 2017-12-07
+
+23:30 - 2:15 erster test rohbau eines filesystem für hadoop
+
+2,75
+
+todo:
+
+Building
+
+The Google Cloud Storage (GCS) connector is built with Maven 3 (as of 2017-10-25, version 3.5.0 has been tested). To build the connector for Hadoop 1, run the following commands from the main directory:
+
+mvn -P hadoop1 package
+
+To build the connector with support for Hadoop 2 & YARN, run the following commands from the main directory:
+
+cd gcs
+mvn -P hadoop2 package
+
+In both cases the GCS connector JAR can be found in gcs/target/.
+
+
+
+
+etc/hadoop/core-site.xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+        <name>fs.dxram.impl</name>
+        <value>de.hhu.bsinfo.hadoop.fs.dxram.DxramFileSystem</value>
+        <description>The FileSystem for dxram.</description>
+    </property>
+    <property>
+        <name>fs.AbstractFileSystem.dxram.impl</name>
+        <value>de.hhu.bsinfo.hadoop.fs.dxram.DxramFs</value>
+        <description>
+            The AbstractFileSystem for dxram
+        </description>
+    </property>
+    <property>
+        <name>fs.defaultFS</name>
+        <value>dxram://abook.localhost.fake:9000</value>
+    </property>
+</configuration>
+
+
+mkdir input
+cp etc/hadoop/*.xml input
+bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.8.2.jar grep input output 'dfs[a-z.]+'
+
+17/12/08 02:10:35 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+java.lang.RuntimeException: java.lang.ClassNotFoundException: Class org.apache.hadoop.fs.dxram.DxramFileSystem not found
+	at org.apache.hadoop.conf.Configuration.getClass(Configuration.java:2298)
+	at org.apache.hadoop.fs.FileSystem.getFileSystemClass(FileSystem.java:2793)
+	at org.apache.hadoop.fs.FileSystem.createFileSystem(FileSystem.java:2810)
+	at org.apache.hadoop.fs.FileSystem.access$200(FileSystem.java:100)
+	at org.apache.hadoop.fs.FileSystem$Cache.getInternal(FileSystem.java:2849)
+	at org.apache.hadoop.fs.FileSystem$Cache.get(FileSystem.java:2831)
+	at org.apache.hadoop.fs.FileSystem.get(FileSystem.java:389)
+	at org.apache.hadoop.fs.FileSystem.get(FileSystem.java:181)
+	at org.apache.hadoop.examples.Grep.run(Grep.java:97)
+	at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:76)
+	at org.apache.hadoop.examples.Grep.main(Grep.java:103)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.apache.hadoop.util.ProgramDriver$ProgramDescription.invoke(ProgramDriver.java:71)
+	at org.apache.hadoop.util.ProgramDriver.run(ProgramDriver.java:144)
+	at org.apache.hadoop.examples.ExampleDriver.main(ExampleDriver.java:74)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.apache.hadoop.util.RunJar.run(RunJar.java:234)
+	at org.apache.hadoop.util.RunJar.main(RunJar.java:148)
+Caused by: java.lang.ClassNotFoundException: Class org.apache.hadoop.fs.dxram.DxramFileSystem not found
+	at org.apache.hadoop.conf.Configuration.getClassByName(Configuration.java:2202)
+	at org.apache.hadoop.conf.Configuration.getClass(Configuration.java:2296)
+	... 23 more
+
+
+
+
+## kurzzeitnotizen am 2017-12-06
+
+14:15 - 16:00 copy von localFS als test für dxram - geht es so einfach?
+
+-> localFs ist dummes beispiel, besser mit copy von FTPfs machen und testen
+
+Recherche FileContext?
+LocalFs:    ChecksumFs                statt DelegateToFileSystem
+RawLocalFs: DelegateToFileSystem      statt FileSystem
+            Konstruktor -> new RawLocalFileSystem (ext FileSystem)
+
+16:15 - 17:00 weil code in hadoop nur erzwungen abwärtskompatibel ist, schaue ich mir
+              den google cloud storage adapter von hadoop an:
+              
+            https://github.com/GoogleCloudPlatform/bigdata-interop/tree/master/gcs/src/main/java/com/google/cloud/hadoop/fs/gcs
+
+            scheint neuer zu sein :-D und bessere vorlage als die komischen defaults von hadoop
+
+2,50 h
+
+## kurzzeitnotizen am 2017-12-01
+
+19:30 - 20:30 hadoop code grob verstanden, wie ein Filesystem am "scheme" erkannt wird und geladen werden kann
+-> dxram:/   -> ordner org/apache/hadoop/fs/dxram anlegen
+-> Klasse DxramFs wird Implementierung von "DelegateToFileSystem"
+   -> Konstruktor übergibt mit "new DxramFileSystem()" ein "FileSystem" (extends)
+
+Todo: FileContext verstehen -> wie mach ich das und warum (was) muss darin enthalten sein?
+
+
+1 h
+
+
+## kurzzeitnotizen am 2017-11-23
+
+13:15 - 14:45 hdfs start scripte prüfen - minimalversion suchen
+              -> problem hdfs von hadoop ab zu Grenzen.
+              -> was startet start-dfs.sh alles?
+                 -> start namenodes und datanodes
+              -> der hdfs befehl:
+                 hdfs fs -ls s3a://key:secret@my-bucket/
+              -> hdfs scheint andere Dateisysteme wie eine Art
+                 protokoll zu unterstützen ?
+            /home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/sbin/hadoop-daemon.sh
+            -> müssste da dann für dxram ein eintrag rein?
+14:45 - 15:00 Konzept trennung HDFS von Hadoop
+              -> wo müssen passende Daemon-Skripte her und wo
+                 setzt das dxramfs an? Wie es wird gestartet?
+
+1,75
+
+## konzept 2017-11-23
+
+ beispiele Testen:
+http://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html#Standalone_Operation
+
+ -> hadoop ist der befehl, um beispiele ans laufen zu bekommen. in dem fall
+    schein kein "start-xxx.sh" nötig zu sein.
+ -> hadoop "ökosystem" braucht selbst keine "Services" (außer evtl. Yarn)
+ -> hbase braucht:
+    -> kerberos
+    -> hadoop "binaries" als "hadoop ökosystem"
+    -> zookeeper
+
+Java libs/binaries des hadoop ökosystems brauchen nur eine config in der eine
+angabe eines speziellen dateisystems steht um passende java-Klasse auf zu rufen.
+-> diese Java-Klasse macht den "access" möglich - ob man dafür z.B. bei
+DX:RAM noch ein Service laufen lassen muss ... das ist meine Designentscheidung!
+(Vermutlich schon). 
+
+Idee:
+
+1) start-dxramfs.sh (Auch hier eine Config mit sowas wie namenode und datanodes?!)
+ -> wird auf allen nodes dxramfs-daemon.sh oder sowas starten
+2) start-hbase.sh
+3) -> start-hbaseexample.jar ?!?
+ -> hbase libs finden dxram:/ in config dateien (und gibt an hadoop weiter)
+ -> hadoop libs finden auch dxram:/ in config dateien
+ -> hadoop sucht sich passende Klasse zu verarbeitung heraus
+ -> in dieser Klasse wird dann auf den dxramfs-daemon.sh zugegriffen.
+
+## kurzzeitnotizen am 2017-11-17
+
+besprechung 75min
+
+10:30 - 12:00 vertiefung Kerberos und HBASE - running on localhost
+            -> kerberos tut (scheinbar), versuche nun java
+            hbase beispiel ans laufen zu bekommen (via console)
+13:45 - 17:15 build hodoop from marven and import to intellij
+            -> "build project" erzeugt total anderes ergebnis als
+                mvn clean
+                mvn package -Pdist -Pdoc -Psrc -Dtar -DskipTests
+            -> fehler mit Example1 kann daher kommen, dass ich HBASE
+            eingebungen hab, in dem auch alte hadoop.jar sachen
+            enthalten sind.
+3,5h
+
+zu testen:
+ - hbase stärker von eigenem hadoop zeug trennen
+ - hbase selber kompilieren?
+ - kinit nicht vergessen (?)
+
+
+## schrott
+
+
+2017-11-17 17:03:39,303 WARN  [main] util.NativeCodeLoader (NativeCodeLoader.java:<clinit>(62)) - Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2017-11-17 17:03:40,761 INFO  [main] zookeeper.RecoverableZooKeeper (RecoverableZooKeeper.java:<init>(120)) - Process identifier=hconnection-0x70b0b186 connecting to ZooKeeper ensemble=localhost:2181
+2017-11-17 17:03:40,797 INFO  [main] zookeeper.ZooKeeper (Environment.java:logEnv(100)) - Client environment:zookeeper.version=3.4.6-1569965, built on 02/20/2014 09:09 GMT
+2017-11-17 17:03:40,798 INFO  [main] zookeeper.ZooKeeper (Environment.java:logEnv(100)) - Client environment:host.name=abook.localhost.fake
+2017-11-17 17:03:40,798 INFO  [main] zookeeper.ZooKeeper (Environment.java:logEnv(100)) - Client environment:java.version=1.8.0_144
+2017-11-17 17:03:40,798 INFO  [main] zookeeper.ZooKeeper (Environment.java:logEnv(100)) - Client environment:java.vendor=Oracle Corporation
+2017-11-17 17:03:40,798 INFO  [main] zookeeper.ZooKeeper (Environment.java:logEnv(100)) - Client environment:java.home=/usr/lib/jvm/java-8-openjdk/jre
+2017-11-17 17:03:40,798 INFO  [main] zookeeper.ZooKeeper (Environment.java:logEnv(100)) - Client environment:java.class.path=/usr/lib/jvm/java-8-openjdk/jre/lib/charsets.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/ext/cldrdata.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/ext/dnsns.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/ext/jaccess.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/ext/localedata.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/ext/nashorn.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/ext/sunec.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/ext/sunjce_provider.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/ext/sunpkcs11.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/ext/zipfs.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/jce.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/jsse.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/management-agent.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/resources.jar:/usr/lib/jvm/java-8-openjdk/jre/lib/rt.jar:/home/tux/big/hbase_projects/Example1/out/production/Example1:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/httpfs:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/yarn/hadoop-yarn-api-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/yarn/hadoop-yarn-client-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/yarn/hadoop-yarn-common-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/yarn/hadoop-yarn-registry-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/yarn/hadoop-yarn-server-tests-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/yarn/hadoop-yarn-server-common-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/yarn/hadoop-yarn-server-web-proxy-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/yarn/hadoop-yarn-server-nodemanager-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/yarn/hadoop-yarn-server-resourcemanager-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/yarn/hadoop-yarn-server-sharedcachemanager-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/yarn/hadoop-yarn-applications-distributedshell-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/yarn/hadoop-yarn-server-timeline-pluginstorage-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/yarn/hadoop-yarn-server-applicationhistoryservice-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/yarn/hadoop-yarn-applications-unmanaged-am-launcher-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/common/hadoop-nfs-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/common/hadoop-common-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/common/hadoop-common-2.8.2-tests.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/hdfs/hadoop-hdfs-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/hdfs/hadoop-hdfs-nfs-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/hdfs/hadoop-hdfs-2.8.2-tests.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/hdfs/hadoop-hdfs-client-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/hdfs/hadoop-hdfs-client-2.8.2-tests.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/hdfs/hadoop-hdfs-native-client-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/hdfs/hadoop-hdfs-native-client-2.8.2-tests.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/mapreduce/hadoop-mapreduce-examples-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/mapreduce/hadoop-mapreduce-client-hs-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/mapreduce/hadoop-mapreduce-client-app-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/mapreduce/hadoop-mapreduce-client-core-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/mapreduce/hadoop-mapreduce-client-common-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/mapreduce/hadoop-mapreduce-client-shuffle-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/mapreduce/hadoop-mapreduce-client-hs-plugins-2.8.2.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-2.8.2-tests.jar:/opt/hbase/lib/jsp-api-2.1-6.1.14.jar:/opt/hbase/lib/hbase-procedure-1.3.1.jar:/opt/hbase/lib/xmlenc-0.52.jar:/opt/hbase/lib/apacheds-kerberos-codec-2.0.0-M15.jar:/opt/hbase/lib/httpcore-4.4.1.jar:/opt/hbase/lib/commons-httpclient-3.1.jar:/opt/hbase/lib/hbase-examples-1.3.1.jar:/opt/hbase/lib/commons-compress-1.4.1.jar:/opt/hbase/lib/xz-1.0.jar:/opt/hbase/lib/jaxb-api-2.2.2.jar:/opt/hbase/lib/commons-digester-1.8.jar:/opt/hbase/lib/findbugs-annotations-1.3.9-1.jar:/opt/hbase/lib/hbase-hadoop2-compat-1.3.1.jar:/opt/hbase/lib/metrics-core-2.2.0.jar:/opt/hbase/lib/spymemcached-2.11.6.jar:/opt/hbase/lib/jettison-1.3.3.jar:/opt/hbase/lib/commons-beanutils-core-1.8.0.jar:/opt/hbase/lib/commons-logging-1.2.jar:/opt/hbase/lib/jasper-compiler-5.5.23.jar:/opt/hbase/lib/snappy-java-1.0.4.1.jar:/opt/hbase/lib/asm-3.1.jar:/opt/hbase/lib/hbase-annotations-1.3.1-tests.jar:/opt/hbase/lib/apacheds-i18n-2.0.0-M15.jar:/opt/hbase/lib/jetty-6.1.26.jar:/opt/hbase/lib/commons-daemon-1.0.13.jar:/opt/hbase/lib/jetty-util-6.1.26.jar:/opt/hbase/lib/jsch-0.1.42.jar:/opt/hbase/lib/servlet-api-2.5.jar:/opt/hbase/lib/htrace-core-3.1.0-incubating.jar:/opt/hbase/lib/hbase-common-1.3.1.jar:/opt/hbase/lib/commons-net-3.1.jar:/opt/hbase/lib/zookeeper-3.4.6.jar:/opt/hbase/lib/slf4j-api-1.7.7.jar:/opt/hbase/lib/jersey-server-1.9.jar:/opt/hbase/lib/javax.inject-1.jar:/opt/hbase/lib/commons-el-1.0.jar:/opt/hbase/lib/commons-io-2.4.jar:/opt/hbase/lib/hbase-external-blockcache-1.3.1.jar:/opt/hbase/lib/jackson-jaxrs-1.9.13.jar:/opt/hbase/lib/jackson-mapper-asl-1.9.13.jar:/opt/hbase/lib/jamon-runtime-2.4.1.jar:/opt/hbase/lib/httpclient-4.2.5.jar:/opt/hbase/lib/libthrift-0.9.3.jar:/opt/hbase/lib/api-asn1-api-1.0.0-M20.jar:/opt/hbase/lib/guice-3.0.jar:/opt/hbase/lib/joni-2.1.2.jar:/opt/hbase/lib/commons-configuration-1.6.jar:/opt/hbase/lib/junit-4.12.jar:/opt/hbase/lib/paranamer-2.3.jar:/opt/hbase/lib/java-xmlbuilder-0.4.jar:/opt/hbase/lib/jackson-core-asl-1.9.13.jar:/opt/hbase/lib/hbase-protocol-1.3.1.jar:/opt/hbase/lib/hbase-hadoop-compat-1.3.1.jar:/opt/hbase/lib/protobuf-java-2.5.0.jar:/opt/hbase/lib/commons-codec-1.9.jar:/opt/hbase/lib/jets3t-0.9.0.jar:/opt/hbase/lib/jackson-xc-1.9.13.jar:/opt/hbase/lib/hbase-annotations-1.3.1.jar:/opt/hbase/lib/hbase-client-1.3.1.jar:/opt/hbase/lib/avro-1.7.4.jar:/opt/hbase/lib/hbase-rest-1.3.1.jar:/opt/hbase/lib/jruby-complete-1.6.8.jar:/opt/hbase/lib/jersey-core-1.9.jar:/opt/hbase/lib/commons-math-2.2.jar:/opt/hbase/lib/commons-lang-2.6.jar:/opt/hbase/lib/hbase-server-1.3.1-tests.jar:/opt/hbase/lib/jersey-guice-1.9.jar:/opt/hbase/lib/api-util-1.0.0-M20.jar:/opt/hbase/lib/hbase-thrift-1.3.1.jar:/opt/hbase/lib/commons-cli-1.2.jar:/opt/hbase/lib/slf4j-log4j12-1.7.5.jar:/opt/hbase/lib/netty-all-4.0.23.Final.jar:/opt/hbase/lib/jersey-json-1.9.jar:/opt/hbase/lib/hbase-it-1.3.1-tests.jar:/opt/hbase/lib/jsp-2.1-6.1.14.jar:/opt/hbase/lib/jaxb-impl-2.2.3-1.jar:/opt/hbase/lib/servlet-api-2.5-6.1.14.jar:/opt/hbase/lib/leveldbjni-all-1.8.jar:/opt/hbase/lib/guava-12.0.1.jar:/opt/hbase/lib/aopalliance-1.0.jar:/opt/hbase/lib/commons-collections-3.2.2.jar:/opt/hbase/lib/jersey-client-1.9.jar:/opt/hbase/lib/jcodings-1.0.8.jar:/opt/hbase/lib/jetty-sslengine-6.1.26.jar:/opt/hbase/lib/hbase-server-1.3.1.jar:/opt/hbase/lib/commons-math3-3.1.1.jar:/opt/hbase/lib/log4j-1.2.17.jar:/opt/hbase/lib/disruptor-3.3.0.jar:/opt/hbase/lib/guice-servlet-3.0.jar:/opt/hbase/lib/hbase-prefix-tree-1.3.1.jar:/opt/hbase/lib/activation-1.1.jar:/opt/hbase/lib/jasper-runtime-5.5.23.jar:/opt/hbase/lib/hbase-common-1.3.1-tests.jar:/opt/hbase/lib/commons-beanutils-1.7.0.jar:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-common-project/hadoop-auth/target/hadoop-auth-2.8.2.jar:/usr/share/intellijidea-ce/lib/idea_rt.jar
+2017-11-17 17:03:40,806 INFO  [main] zookeeper.ZooKeeper (Environment.java:logEnv(100)) - Client environment:java.library.path=/usr/share/intellijidea-ce/bin::/usr/java/packages/lib/amd64:/usr/lib64:/lib64:/lib:/usr/lib
+2017-11-17 17:03:40,806 INFO  [main] zookeeper.ZooKeeper (Environment.java:logEnv(100)) - Client environment:java.io.tmpdir=/tmp
+2017-11-17 17:03:40,806 INFO  [main] zookeeper.ZooKeeper (Environment.java:logEnv(100)) - Client environment:java.compiler=<NA>
+2017-11-17 17:03:40,806 INFO  [main] zookeeper.ZooKeeper (Environment.java:logEnv(100)) - Client environment:os.name=Linux
+2017-11-17 17:03:40,807 INFO  [main] zookeeper.ZooKeeper (Environment.java:logEnv(100)) - Client environment:os.arch=amd64
+2017-11-17 17:03:40,807 INFO  [main] zookeeper.ZooKeeper (Environment.java:logEnv(100)) - Client environment:os.version=4.14.0-0-MANJARO
+2017-11-17 17:03:40,807 INFO  [main] zookeeper.ZooKeeper (Environment.java:logEnv(100)) - Client environment:user.name=tux
+2017-11-17 17:03:40,807 INFO  [main] zookeeper.ZooKeeper (Environment.java:logEnv(100)) - Client environment:user.home=/home/tux
+2017-11-17 17:03:40,815 INFO  [main] zookeeper.ZooKeeper (Environment.java:logEnv(100)) - Client environment:user.dir=/home/tux/big/hbase_projects/Example1
+2017-11-17 17:03:40,820 INFO  [main] zookeeper.ZooKeeper (ZooKeeper.java:<init>(438)) - Initiating client connection, connectString=localhost:2181 sessionTimeout=90000 watcher=org.apache.hadoop.hbase.zookeeper.PendingWatcher@52aa2946
+2017-11-17 17:03:40,909 INFO  [main-SendThread(localhost:2181)] zookeeper.ClientCnxn (ClientCnxn.java:logStartConnect(975)) - Opening socket connection to server localhost/0:0:0:0:0:0:0:1:2181. Will not attempt to authenticate using SASL (unknown error)
+2017-11-17 17:03:40,936 INFO  [main-SendThread(localhost:2181)] zookeeper.ClientCnxn (ClientCnxn.java:primeConnection(852)) - Socket connection established to localhost/0:0:0:0:0:0:0:1:2181, initiating session
+2017-11-17 17:03:40,962 INFO  [main-SendThread(localhost:2181)] zookeeper.ClientCnxn (ClientCnxn.java:onConnected(1235)) - Session establishment complete on server localhost/0:0:0:0:0:0:0:1:2181, sessionid = 0x15fcaa723a90007, negotiated timeout = 90000
+2017-11-17 17:03:41,254 INFO  [main] client.ConnectionManager$HConnectionImplementation (ConnectionManager.java:closeZooKeeperWatcher(1712)) - Closing zookeeper sessionid=0x15fcaa723a90007
+Exception in thread "main" java.io.IOException: java.lang.reflect.InvocationTargetException
+	at org.apache.hadoop.hbase.client.ConnectionFactory.createConnection(ConnectionFactory.java:240)
+	at org.apache.hadoop.hbase.client.ConnectionFactory.createConnection(ConnectionFactory.java:218)
+	at org.apache.hadoop.hbase.client.ConnectionFactory.createConnection(ConnectionFactory.java:119)
+	at com.example.hbase.admin.Example1.createSchemaTables(Example1.java:34)
+	at com.example.hbase.admin.Example1.main(Example1.java:94)
+Caused by: java.lang.reflect.InvocationTargetException
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+	at org.apache.hadoop.hbase.client.ConnectionFactory.createConnection(ConnectionFactory.java:238)
+	... 4 more
+Caused by: java.lang.NoClassDefFoundError: org/apache/htrace/core/Tracer$Builder
+	at org.apache.hadoop.fs.FsTracer.get(FsTracer.java:42)
+	at org.apache.hadoop.fs.FileSystem.createFileSystem(FileSystem.java:2806)
+	at org.apache.hadoop.fs.FileSystem.access$200(FileSystem.java:100)
+	at org.apache.hadoop.fs.FileSystem$Cache.getInternal(FileSystem.java:2849)
+	at org.apache.hadoop.fs.FileSystem$Cache.get(FileSystem.java:2831)
+2017-11-17 17:03:41,258 INFO  [main-EventThread] zookeeper.ClientCnxn (ClientCnxn.java:run(512)) - EventThread shut down
+2017-11-17 17:03:41,259 INFO  [main] zookeeper.ZooKeeper (ZooKeeper.java:close(684)) - Session: 0x15fcaa723a90007 closed
+	at org.apache.hadoop.fs.FileSystem.get(FileSystem.java:389)
+	at org.apache.hadoop.fs.FileSystem.get(FileSystem.java:181)
+	at org.apache.hadoop.fs.FileSystem.get(FileSystem.java:373)
+	at org.apache.hadoop.fs.Path.getFileSystem(Path.java:356)
+	at org.apache.hadoop.hbase.util.DynamicClassLoader.initTempDir(DynamicClassLoader.java:120)
+	at org.apache.hadoop.hbase.util.DynamicClassLoader.<init>(DynamicClassLoader.java:98)
+	at org.apache.hadoop.hbase.protobuf.ProtobufUtil.<clinit>(ProtobufUtil.java:246)
+	at org.apache.hadoop.hbase.ClusterId.parseFrom(ClusterId.java:64)
+	at org.apache.hadoop.hbase.zookeeper.ZKClusterId.readClusterIdZNode(ZKClusterId.java:75)
+	at org.apache.hadoop.hbase.client.ZooKeeperRegistry.getClusterId(ZooKeeperRegistry.java:105)
+	at org.apache.hadoop.hbase.client.ConnectionManager$HConnectionImplementation.retrieveClusterId(ConnectionManager.java:907)
+	at org.apache.hadoop.hbase.client.ConnectionManager$HConnectionImplementation.<init>(ConnectionManager.java:691)
+	... 9 more
+Caused by: java.lang.ClassNotFoundException: org.apache.htrace.core.Tracer$Builder
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:335)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 26 more
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# build
+
+cd /home/tux/big/hdo/hadoop-2.8.2-src/
+mvn package -Pdist -Pdoc -Psrc -Dtar -DskipTests
+mvn (-U oder -o (offline)) ?!?
+mvn clean install -DskipTests
+
+https://stackoverflow.com/questions/3365553/how-to-build-a-jar-using-maven-ignoring-test-results#16690564
+
+
+
+## notiz
+
+
+https://wiki.archlinux.org/index.php/Kerberos
+
+
+cat /etc/hostname 
+abook.localhost.fake
+
+cat /etc/hosts
+127.0.0.1  abook.localhost.fake localhost
+::1        localhost ip6-localhost ip6-loopback
+ff02::1    ip6-allnodes
+ff02::2    ip6-allrouters
+
+
+cat /etc/hbase/hbase-site.xml 
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+  <property>
+    <name>hbase.cluster.distributed</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>hbase.rootdir</name>
+    <value>hdfs://abook.localhost.fake:9000/hbase</value>
+  </property>
+  <property>
+    <name>hbase.zookeeper.property.dataDir</name>
+    <value>/home/tux/big/zookeeper</value>
+  </property>
+</configuration>
+
+cat /home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml 
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://abook.localhost.fake:9000</value>
+    </property>
+</configuration>
+
+
+cat /home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/hdfs-site.xml 
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+        <name>dfs.replication</name>
+        <value>1</value>
+    </property>
+</configuration>
+
+cat /home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/hadoop-env.sh
+...
+#export JAVA_HOME=${JAVA_HOME}
+export JAVA_HOME=/usr
+
+
+
+
+cat /etc/krb5.conf 
+[libdefaults]
+    default_realm = LOCALHOST.FAKE
+[realms]
+    LOCALHOST.FAKE = {
+        admin_server = abook.localhost.fake
+        # use "kdc = ..." if the kerberos SRV records aren't in DNS (see Advanced section)
+        kdc = abook.localhost.fake
+        # This breaks krb4 compatibility but increases security
+        default_principal_flags = +preauth
+    }
+[domain_realm]
+    localhost.fake  = LOCALHOST.FAKE
+    .localhost.fake = LOCALHOST.FAKE
+[logging]
+    kdc          = SYSLOG:NOTICE
+    admin_server = SYSLOG:NOTICE
+    default      = SYSLOG:NOTICE
+
+
+
+
+[root@abook.localhost.fake:/etc]# kdb5_util -r LOCALHOST.FAKE create -s
+
+Loading random data
+Initializing database '/var/lib/krb5kdc/principal' for realm 'LOCALHOST.FAKE',
+master key name 'K/M@LOCALHOST.FAKE'
+You will be prompted for the database Master Password.
+It is important that you NOT FORGET this password.
+Enter KDC database master key: 
+Re-enter KDC database master key to verify: 
+
+[root@abook.localhost.fake:/etc]# systemctl enable krb5-kdc krb5-kadmind
+
+Created symlink /etc/systemd/system/multi-user.target.wants/krb5-kdc.service → /usr/lib/systemd/system/krb5-kdc.service.
+Created symlink /etc/systemd/system/multi-user.target.wants/krb5-kadmind.service → /usr/lib/systemd/system/krb5-kadmind.service.
+
+[root@abook.localhost.fake:/etc]# systemctl start krb5-kdc krb5-kadmind
+
+
+tux@abook.localhost.fake$ kinit
+kinit: Client 'tux@LOCALHOST.FAKE' not found in Kerberos database while getting initial credentials
+~/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2
+
+tux@abook.localhost.fake$ kadmin.local 
+Authenticating as principal tux/admin@LOCALHOST.FAKE with password.
+kadmin.local: Cannot open DB2 database '/var/lib/krb5kdc/principal': Keine Berechtigung while initializing kadmin.local interface
+~/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2
+
+tux@abook.localhost.fake$ su root
+Passwort: 
+
+[root@abook.localhost.fake:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2]# kadmin.local 
+Authenticating as principal tux/admin@LOCALHOST.FAKE with password.
+
+kadmin.local:  addprinc tux@LOCALHOST.FAKE
+WARNING: no policy specified for tux@LOCALHOST.FAKE; defaulting to no policy
+Enter password for principal "tux@LOCALHOST.FAKE": 
+Re-enter password for principal "tux@LOCALHOST.FAKE": 
+Principal "tux@LOCALHOST.FAKE" created.
+
+kadmin.local:  addprinc -randkey host/abook.localhost.fake
+WARNING: no policy specified for host/abook.localhost.fake@LOCALHOST.FAKE; defaulting to no policy
+Principal "host/abook.localhost.fake@LOCALHOST.FAKE" created.
+
+kadmin.local:  ktadd host/abook.localhost.fake
+Entry for principal host/abook.localhost.fake with kvno 2, encryption type aes256-cts-hmac-sha1-96 added to keytab FILE:/etc/krb5.keytab.
+Entry for principal host/abook.localhost.fake with kvno 2, encryption type aes128-cts-hmac-sha1-96 added to keytab FILE:/etc/krb5.keytab.
+
+kadmin.local:  quit
+[root@abook.localhost.fake:/home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2]# 
+
+
+
+### hbase+hadoop+example jar
+
+~/big/hbase_projects/Example1/out/production/Example1
+tux@abook.localhost.fake$ java -classpath /home/tux/big/hdo/hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/share/hadoop/common/hadoop-common-2.8.2.jar:/opt/hbase/lib/hbase-common-1.3.1.jar:. com/example/hbase/admin/Example1
+Error: A JNI error has occurred, please check your installation and try again
+Exception in thread "main" java.lang.NoClassDefFoundError: org/apache/hadoop/hbase/client/Admin
+	at java.lang.Class.getDeclaredMethods0(Native Method)
+	at java.lang.Class.privateGetDeclaredMethods(Class.java:2701)
+	at java.lang.Class.privateGetMethodRecursive(Class.java:3048)
+	at java.lang.Class.getMethod0(Class.java:3018)
+	at java.lang.Class.getMethod(Class.java:1784)
+	at sun.launcher.LauncherHelper.validateMainClass(LauncherHelper.java:544)
+	at sun.launcher.LauncherHelper.checkAndLoadMain(LauncherHelper.java:526)
+Caused by: java.lang.ClassNotFoundException: org.apache.hadoop.hbase.client.Admin
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:335)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 7 more
+
+
+
+
+
+
+
+
+
+
+## kurzzeitnotizen ab 2017-11-10
+
+besprechung 45min
+
+libfuse um hdfs auf lokales dateisystem ab zu bilden: das sei wohl nicht
+nötig! Die Anleitung bzgl. Hadoop ist wohl so zu verstehen, dass diese
+lokale Datei Ablage ein Aspekt der apache infrastruktur ist und wir
+ja das am ende in DX:RAM ablegen und nicht in Dateien. HDFS hat eine
+solche Logik nur wegen der nötigen Persistenz-Schicht.
+
+fr 10:15 - test hbase singelnode auf hdfs statt lokales dateisystem
+   10:30 - 12:45 installation und build hadoop von sources
+   13-14     kompilieren, einlesen in hbase beispiele
+   15-16:30  test hadoop selbstkompile, probleme hbase und hadoop ans laufen zu bekommen
+   
+do 15:30 - 18:30 hadoop und hbase versuch wieder ans laufen zu bekommen
+   -> klappt. HBASE Javabeispiel klappt nicht. Kerberos muss ich einrichten.
+
+hdfs namenode -format
+start-dfs.sh
+hdfs dfs -mkdir /user
+hdfs dfs -mkdir /user/tux
+start-hbase.sh
+webseite voll: http://localhost:50070/explorer.html#/hbase
+ :-D
+webseite läuft: http://localhost:16010/master-status
+ :-D
+hbase shell
+ ... dauert
+ ... https://hbase.apache.org/book.html#shell_exercises
+   
+probleme beispiel config.addResource(new Path(System.getenv("HADOOP_CONF_DIR"), "core-site.xml"));
+-> getenv() !!
+-> nutze nun festen pfad
+
+Exception in thread "main" java.lang.NoSuchMethodError: org.apache.hadoop.security.authentication.util.KerberosUtil.hasKerberosTicket
+
+https://stackoverflow.com/questions/44498989/nosuchmethoderror-exception-when-connecting-to-hbase
+   
+   wozu brauche ich Kerberos ?
+    kdestroy
+    klist
+tux@abook$ kinit -V
+Using default cache: /tmp/krb5cc_1000
+Using principal: tux@ATHENA.MIT.EDU
+kinit: Cannot contact any KDC for realm 'ATHENA.MIT.EDU' while getting initial credentials
+
+   https://wiki.archlinux.org/index.php/Kerberos
+   
+   ???
+   
+   
+   
+
+- hadoop mit packetquellen = maven: viele downloads!!!!
+
+
+https://hadoop.apache.org/docs/r2.8.2/api/org/apache/hadoop/fs/FileContext.html
+
+https://hadoop.apache.org/docs/r2.8.2/api/org/apache/hadoop/fs/FileSystem.html
+
+Aus der Inline-Code Doku:
+
+    An abstract base class for a fairly generic filesystem. It may be implemented
+    as a distributed filesystem, or as a "local" one that reflects the 
+    locally-connected disk. The local version exists for small Hadoop 
+    instances and for testing.
+
+Also: Eine version fürs lokale Dateisystem ist nicht zwingend, wie es scheint, da
+dort ja "or" steht und kein "and".
+
+hadoop erstellen:
+
+meine .bashrc
+
+    export JAVA_HOME=/usr
+    export PATH=$JAVA_HOME/bin:$PATH
+
+https://pravinchavan.wordpress.com/2013/04/14/building-apache-hadoop-from-source/
+
+    gunzip *
+    tar -xvf *
+    cd 
+
+https://hadoop.apache.org/docs/r2.4.1/hadoop-project-dist/hadoop-common/NativeLibraries.html
+
+native? erstmal nicht
+
+    cd hadoop-2.8.2-src
+    mvn package -Pdist -Pdoc -Psrc -Dtar -DskipTests
+
+
+    [WARNING] The requested profile "doc" could not be activated because it does not exist.
+    [ERROR] Failed to execute goal org.apache.hadoop:hadoop-maven-plugins:2.8.2:protoc (compile-protoc) on project hadoop-common: org.apache.maven.plugin.MojoExecutionException: protoc version is 'libprotoc 3.4.0', expected version is '2.5.0' -> [Help 1]
+    [ERROR] 
+    [ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+    [ERROR] Re-run Maven using the -X switch to enable full debug logging.
+    [ERROR] 
+    [ERROR] For more information about the errors and possible solutions, please read the following articles:
+    [ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
+    [ERROR] 
+    [ERROR] After correcting the problems, you can resume the build with the command
+    [ERROR]   mvn <goals> -rf :hadoop-common
+
+mist
+
+    git clone https://github.com/google/protobuf.git
+    cd protobuf
+    ./autogen.sh
+    ./configure
+    make
+    ^C
+
+....... nein! ist bereits über package manager installiert!!!
+brauchen aber alte version :-(
+
+    git checkout tags/v2.5.0
+    ./autogen.sh klappt nicht ... :-( ?
+    ./configure --prefix=/usr
+    make
+
+mit anderen Prefix, muss man clean machen:
+    
+    make clean
+    
+sonst bei make install:
+
+    libtool:   error: error: cannot install 'libprotoc.la' to a directory not ending in /usr/local/lib
+
+Prefix anpassen ist scheinbar nötig, da sonst hadoop diese alte lib nicht findet
+
+https://stackoverflow.com/questions/19556253/trunk-doesnt-compile-because-libprotoc-is-old-when-working-with-hadoop-under-ec
+
+mist (nur bei 2.4.1 und mit c++ das problem)
+
+    google/protobuf/compiler/command_line_interface.cc:913:78: Fehler: keine 
+    passende Funktion für Aufruf von »make_pair<std::__cxx11::string, std::__cxx11::string>(std::__cxx11::string&, std::__cxx11::string&)«
+           proto_path_.push_back(make_pair<string, string>(virtual_path, disk_path));
+                                                                                  ^
+    In file included from /usr/include/c++/7.2.0/bits/stl_algobase.h:64:0,
+                     from /usr/include/c++/7.2.0/bits/char_traits.h:39,
+                     from /usr/include/c++/7.2.0/string:40,
+                     from ./google/protobuf/stubs/common.h:41,
+                     from ./google/protobuf/compiler/command_line_interface.h:41,
+                     from google/protobuf/compiler/command_line_interface.cc:35:
+    /usr/include/c++/7.2.0/bits/stl_pair.h:519:5: Anmerkung: candidate: 
+    template<class _T1, class _T2> constexpr std::pair<typename std::__decay_and_strip<_Tp>::__type, 
+    typename std::__decay_and_strip<_T2>::__type> std::make_pair(_T1&&, _T2&&)
+         make_pair(_T1&& __x, _T2&& __y)
+         ^~~~~~~~~
+    /usr/include/c++/7.2.0/bits/stl_pair.h:519:5: Anmerkung:   
+    Herleitung/Ersetzung von Templateargument gescheitert:
+    google/protobuf/compiler/command_line_interface.cc:913:78: Anmerkung:  
+    »virtual_path« (Typ »std::__cxx11::string {aka std::__cxx11::basic_string<char>}«) kann 
+    nicht in den Typ »std::__cxx11::basic_string<char>&&« umgewandelt werden
+    proto_path_.push_back(make_pair<string, string>(virtual_path, disk_path));
+
+https://www.mail-archive.com/protobuf@googlegroups.com/msg08509.html
+
+    - proto_path_.push_back(make_pair<string, string>(virtual_path, disk_path));
+    + proto_path_.push_back(make_pair(virtual_path, disk_path));
+
+weiter gehts
+
+    su root
+    make install
+    ... libtool: warning: relinking 'libprotoc.la' ...
+    ldconfig
+
+reboot machen?
+
+    cd hadoop-2.8.2-src
+    mvn clean
+    mvn package -Pdist -Pdoc -Psrc -Dtar -DskipTests
+
+was soll das?
+
+    [WARNING] /home/tux/big/hdo/hadoop-2.8.2-src/hadoop-mapreduce-project/hadoop-mapreduce-client/hadoop-mapreduce-client-core/src/main/java/org/apache/hadoop/mapred/lib/TotalOrderPartitioner.java:67: warning: no @return
+    [WARNING] public static String getPartitionFile(JobConf job) {
+    [WARNING] ^
+    [WARNING] /home/tux/big/hdo/hadoop-2.8.2-src/hadoop-mapreduce-project/hadoop-mapreduce-client/hadoop-mapreduce-client-core/src/main/java/org/apache/hadoop/mapred/lib/aggregate/ValueAggregatorJob.java:111: warning: no description for @throws
+    [WARNING] * @throws IOException
+    [WARNING] ^
+    [WARNING] /home/tux/big/hdo/hadoop-2.8.2-src/hadoop-mapreduce-project/hadoop-mapreduce-client/hadoop-mapreduce-client-core/src/main/java/org/apache/hadoop/mapred/lib/aggregate/ValueAggregatorJob.java:195: warning: no description for @throws
+    [WARNING] * @throws IOException
+    [WARNING] ^
+
+viele viele maven downloads!
+
+
+
+
+
+
+
+
+
+
+
+
+# Meeting 2017-10-27
+
+## Festlegung: Hadoop
+
+Meine ursprüngliche Idee (seit 2016) war, das HDFS (Hadoop) einmal in golang
+oder mit c++ und Apache Thrift nach zu bauen. Java (so mein bisheriger Eindruck)
+erschien mir zu langsam. Ich dachte, da Hadoop populär ist, wäre ein schnelle
+c++ Implementierung eine feine Sache. Wie sich jedoch nun herausstellte,
+ist HDFS nur ein Teil vom *Projekt Hadoop*, welches im Grunde komplett in
+Java ,,lebt'' und daher eine Portierung/Nachbau des HDFS in eine andere Sprache
+ein fragliches Konzept ist.
+
+Um DX:RAM (Java) populärer zu machen, wäre eine Schnittstelle zu Hadoop
+interessant. Spezielle HBASE (NoSQL, Google BigTable), welches auf den HDFS
+aufbaut, wäre für BigData Anwendungen erwünscht. Vergleiche von DX:RAM
+mit HBASE, Spark oder Hive wären sehr interessant und wären mit einem
+Dateisystem, welches DX:RAM nutzt und zu Hadoop kompatibel ist, möglich.
+
+**Nachtrag**: Ein Vergleich von Anwendungen des Hadoop-Ökosystems (speziell) HBASE
+mit unterschiedlichen Dateisystemen gegenüber "HDFS via DX:RAM" wäre ein
+Mehrgewinn.
+
+# Meeting 2017-11-03
+
+## Abgrenzung
+
+- klare Abgenzung: Hadoop ist ein "Ökosystem" und nicht nur das HDFS
+- Eigentlich wollen wir nicht das ganze Ökosystem, sondern primär nur HBASE
+- HBASE nutzt HDFS um *Google Big Table* nach zu bilden
+- Hadoop kann man auch auf anderen Dateisystemen laufen lassen
+
+## Problem
+
+Nutzt man z.B. das lokale Dateisystem oder FTP anstelle von
+HDFS, geht das auf Kosten der Performance:
+
+[https://en.wikipedia.org/wiki/Apache_Hadoop#Other_file_systems](https://en.wikipedia.org/wiki/Apache_Hadoop#Other_file_systems)
+
+Laut Wikipedia wissen Teile des Hadoop Ökosystems wo die Daten im HDFS
+liegen und reduziert deswegen den Netzwerk-Traffic (Berechnungen werden
+auf den Knoten ausgeführt, wo die Daten sind).
+
+## Schwerpunkt
+
+Ziel ist es, primäre HBASE (bzw. Google Big Table) mit DX:RAM laufen lassen
+zu können. Hadoop oder HBASE soll nicht nachgebaut werden (müssen), da
+für beides eigentlich nur ein HDFS kompatibles Dateisystem existieren muss.
+
+Idee: bilde ein verteiltes Dateisystem mit DX:RAM als Speichermedium, welches
+sich wie HDFS verhält um alles von Hadoop (speziell HBASE) mit DX:RAM
+laufen zu lassen.
+
+# Meeting 2017-11-10
+
+## HBASE
+
+Recherche ergab, dass sich HBASE wie hadoop konfigurieren lässt: Also
+Angaben von Knoten und Pfadangaben im "file://" stiel.
+
+HBASE liefert auch ein eigenes Hadoop Ökosystem mit.
+
+**Nachtrag**: Nein. Geht man die ,,Erste Schritte'' Anleitung durch wird
+auf die Installation von hadoop hingewiesen, will man eine Singlenode
+HDFS testhalber betreiben.
+
+## Filesystem Compatibility with Apache Hadoop (HCFS)
+
+Hadoop liefert bereits Klassen zu anderen Dateisystemen wie z.B.
+
+hdfs
+:   das ursprüngliche FS
+swift
+:   OpenStack Object Store - Ein Cloudmassenspeicher
+s3 und s3n
+:   Amazon S3
+file
+:   das lokale Dateisystem
+ftp
+:   sehr altmodisch
+webhdfs
+:   HDFS REST API
+
+
+Ferner gibt es z.B. `fat32:` als JAR, was in Hadoop eingebaut werden kann.
+
+[https://wiki.apache.org/hadoop/HCFS](https://wiki.apache.org/hadoop/HCFS)
+
+Für eine reibungsloses einbinden eines anderen Dateisystems muss
+dieses 2 Voraussetzungen erfüllen:
+
+1.  Es muss sich wie ein natives, lokales Dateisystem verhalten
+2.  Es muss eine Implementierung von `org.apache.hadoop.fs.FileSystem` ...
+3.  ... sowie von `org.apache.hadoop.fs.FileContext` sein
+
+Der zweite Punkt gilt im Grunde nur, wenn man nicht auf
+das *primitive* `file:` aufbauen will. Ich gehe davon aus, dass das
+performance [Problem] durch den 2. (3.) Punkt nicht mehr gegeben ist. Dies
+könnte sich aber auch als falsche Vermutung herausstellen!
+
+Es ist die Frage, ob bestimmte Features wie z.B. **besondere** (?) Unterstützung
+diverser Dateiformate oder Entpacken und Kompression von Dateien durch
+HDFS oder (übergeordnet) Hadoop zur Verfügung gestellt werden.
+
+Ab 2013 hat man sich bei Hadoop gedanken dazu gemacht, wie man bessere Test
+für fremde Dateisysteme entwicklen kann und das nötige Verhalten in diesem
+Dokument (6 Seiten) festgehalten:
+
+[https://issues.apache.org/jira/secure/attachment/12572328/HadoopFilesystemContract.pdf](https://issues.apache.org/jira/secure/attachment/12572328/HadoopFilesystemContract.pdf)
+
+Darin wird sowohl des Verhalten in konkurierenden Situationen beschrieben,
+das Konsistenz-Model bei CRUD, der Umgang mit Netzwerk Problemen, die Limits
+und Vorraussetzungen des lokalen Dateisystems sowie das Verhalten der in
+Java zu implementierenden Methoden.
+
+Die `append()` Operation, welche (vermutlich) bei HBASE eine größere Rolle spielt,
+wird auch erwähnt - diese sei wohl nicht zwingend zu implementieren.
+
+
+
+
+# Nächste Schritte
+
+- zu implementierende Klassen von Hadoop ansehen, testen (locales dateisystem)
+- wie mache ich ein eigenes Dateisystem (fuse lib ?!)
+- lib fuse -> gibt es was Platformunabhängiges? Wie macht es HDFS unter Windows?
+- erste Schritte mit DX:RAM
+- Konzept: Vertiefung HDFS (ggf. primitiver nachbau mit c++, thrift, go, java)
+- Dateien in DX:RAM ablegen ?
+- Dateiverteilung/HDFS auf DX:RAM Knoten abbilden?
+
