@@ -1,6 +1,7 @@
 package de.hhu.bsinfo.dxramfs.peer;
 
 import de.hhu.bsinfo.dxram.data.DataStructure;
+import de.hhu.bsinfo.dxramfs.core.DxramFsConfig;
 import de.hhu.bsinfo.dxramfs.core.FsNode;
 import de.hhu.bsinfo.dxramfs.core.FsNodeType;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
@@ -68,6 +69,7 @@ public class FsNodeChunk extends DataStructure {
         size += Integer.BYTES; // fsNodeType type
         size += Integer.BYTES; // entriesSize
         size += ObjectSizeUtil.sizeofLongArray(_fsNode.refIds);
+//        size += Long.BYTES * DxramFsConfig.ref_ids_each_fsnode;
         size += Long.BYTES; // extID forwardId
         return size;
     }

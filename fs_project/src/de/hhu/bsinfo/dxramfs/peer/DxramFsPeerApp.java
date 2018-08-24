@@ -112,14 +112,14 @@ public class DxramFsPeerApp extends AbstractApplication {
         ROOTN = new FsNodeChunk();
         if (nameS.getChunkID(ROOT_Chunk, 10) == ChunkID.INVALID_ID) {
             // initial, if root does not exists
-            ROOTN.get().type = FsNodeType.FOLDER;
-            ROOTN.get().name = "/";
             ROOT_CID = chunkS.create(ROOTN.sizeofObject(), 1)[0];
             nameS.register(ROOT_CID, ROOT_Chunk);
             // maybe a new chunkid after register chunk with string in ROOT_Chunk
             ROOT_CID = nameS.getChunkID(ROOT_Chunk, 10);
             ROOTN.setID(ROOT_CID);
             chunkS.get(ROOTN);
+            ROOTN.get().type = FsNodeType.FOLDER;
+            ROOTN.get().name = "/";
             ROOTN.get().refSize = 0;
             ROOTN.get().init();
             ROOTN.get().backId = ROOT_CID;
@@ -231,12 +231,39 @@ public class DxramFsPeerApp extends AbstractApplication {
             FsNodeChunk subNode = ROOTN; // @todo copy oder clone ??
             for (int i=0; i < pathparts.length; i++) {
                 long subChunkId = getIn(pathparts[i], subNode);
-                if (subChunkId < 0) return "no";
+                if (subChunkId == -1) return "no";
                 subNode = new FsNodeChunk(subChunkId); // @todo wird hier ROOTN evtl überschrieben?
                 chunkS.get(subNode);
             }
         }
         return back;
+    }
+
+    private long mkDirIn(String name, FsNodeChunk parentNode) {
+        FsNodeChunk newdir = new FsNodeChunk();
+        LOG.debug("before create");
+        long newdirCID = chunkS.create(newdir.sizeofObject(), 1)[0];
+        newdir.setID(newdirCID);
+        // @todo muss ich hier den chunk jedesmal neu holen?! was übernimmt dxram an dieser stelle ?
+        LOG.debug("before get");
+        chunkS.get(newdir);
+        newdir.get().type = FsNodeType.FOLDER;
+        newdir.get().name = name;
+        newdir.get().backId = parentNode.get().ID;
+        newdir.get().init();
+        newdir.get().refSize = 0;
+        LOG.debug("before put");
+        chunkS.put(newdir);
+        LOG.debug("put " + newdir.get().name);
+
+        // @todo handle more than ref_ids_each_fsnode entries !!
+        int refSize = parentNode.get().refSize;
+        parentNode.get().refIds[refSize] = newdirCID;
+        parentNode.get().refSize++;
+
+        // @todo error handling
+        chunkS.put(parentNode);
+        return newdirCID;
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -256,38 +283,20 @@ public class DxramFsPeerApp extends AbstractApplication {
         if (path.length() > 0) {
             FsNodeChunk subNode = ROOTN;
             long subChunkId = ROOT_CID;
-            for (int i = 0; i < pathparts.length -1; i++) {
+            for (int i = 0; i < pathparts.length; i++) {
                 subChunkId = getIn(pathparts[i], subNode);
-                if (subChunkId < 0) {
-                    // @todo: unsure, if we have to create the whole structure, because DxramFs-connector may do exists() and create() before
-                    return new MkDirsMessage((short) dxnet_local_id, "fail. upper folder not exists");
+                if (subChunkId == -1) {
+                    // @todo: if we have to create the whole structure(?)
+                    //return new MkDirsMessage((short) dxnet_local_id, "fail. upper folder not exists");
+                    subChunkId = mkDirIn(pathparts[i], subNode);
                 }
                 subNode = new FsNodeChunk(subChunkId);
                 chunkS.get(subNode);
             }
 
             // subNode should be the folder, where we have to create a new folder
-
-            FsNodeChunk newdir = new FsNodeChunk();
-            newdir.get().type = FsNodeType.FOLDER;
-            newdir.get().name = pathparts[pathparts.length -1];
-            newdir.get().backId = subChunkId;
-            newdir.get().init();
-            newdir.get().refSize = 0;
-            long newdirCID = chunkS.create(newdir.sizeofObject(), 1)[0];
-            newdir.setID(newdirCID);
-            // @todo muss ich hier den chunk jedesmal neu holen?! was übernimmt dxram an dieser stelle ?
-            chunkS.get(newdir, subNode);
-
-            subNode.get().refIds[subNode.get().refSize] = newdirCID;
-            subNode.get().refSize++;
-
-            // @todo error handling
-            chunkS.put(subNode, newdir);
-            back = "OK: " + String.valueOf(subNode.get().refSize);
-
-            // @todo handle more than ref_ids_each_fsnode entries !!
-
+            //mkDirIn(pathparts[pathparts.length -1], subNode);
+            back = "OK " + String.valueOf(ROOTN.get().refSize);
         } else {
             back = "fail. path empty";
         }

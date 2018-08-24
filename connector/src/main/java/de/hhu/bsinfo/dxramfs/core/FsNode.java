@@ -57,6 +57,8 @@ public class FsNode {
     public FsNode() { }
 
     public void init() {
+        this.type = FsNodeType.FOLDER;
+        this.name = "-";
         this.refIds = new long[DxramFsConfig.ref_ids_each_fsnode];
     }
 }
