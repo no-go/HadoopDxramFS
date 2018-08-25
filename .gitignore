@@ -6,6 +6,10 @@ fs_project/.idea/**/*
 fs_project/target/**/*
 fs_project/out/**/*
 
+Hildeburh/xapp-dxramfs/build/**/*
+Hildeburh/xapp-dxramfs/.idea/**/*
+Hildeburh/xapp-dxramfs/.gradle/**/*
+
 # Compiled class file
 *.class
 

@@ -141,7 +141,11 @@ bis hier 205,25h
 +---------------+-------------------------------------------+--------------+-----------------------
 |  2018-08-17   |    - Fr                                   |         7,5  | Wiedereinarbeitung in code nach langer pause (excl. 17.8.)
 +---------------+-------------------------------------------+--------------+-----------------------
-|  2018-08-21   |    - Di                                   |        8,75  | Erste RPC Messages und einbau eine Synchronen request-response logik (incl. 21.8.)
+|               |                                           |              | Erste RPC Messages und einbau eine Synchronen request-response logik (incl. 21.8.)
+|  2018-08-24   |    - Fr                                   |       22,75  | Erste Versuche, Ordner in DXRAM zu speichern (incl. 24.8.)
++---------------+-------------------------------------------+--------------+-----------------------
+|               |                                           |              | 
+
 
 
 
@@ -153,6 +157,21 @@ bis hier 205,25h
 |               |                                           |              | 
 -----------------------------------------------------------------------------------------------
 
+
+## notiz 2018-08-25
+
+12:15 - 14:00   Testen des neuen dxram mit gradle, testen der speicherung von chunks um
+                rückschlüsse auf gestrige negative erfahrungen machen zu können.
+            
+            Anlegen des "Hildeburh/" ornders, wo ich stückweise den neuen Gradle
+            Projekt zweig von DXRAM nutzen will. Da ich immer Grendel (Monster aus Beowulf)
+            zu Gradle sage, habe ich Hildeburh, die Tochter des Königs aus der
+            Beowulf Sage als Name gewählt.
+
+
+
+
+
 ## notiz 2018-08-24
 
 12:45 - 14:00 Rekursion in exists() eingebaut. Noch nicht behandlung von mehr als 100 Einträgen (EXT) behandelt
@@ -160,6 +179,8 @@ bis hier 205,25h
               Rekursion in mkdirs() eingebaut
               -> Noch ungetestet, Noch nicht behandlung von mehr als 100 Einträgen (EXT) behandelt
 16:45 - 20:00 Test recursives ordner anlegen
+
+5,5
 
 Vermutung, dass das anlegen der CHunks nicht korrekt get. Alte Version nochmal testen!
 
@@ -199,14 +220,13 @@ Compiled method (c1)   60629 1505       3       de.hhu.bsinfo.dxutils.UnsafeMemo
 
 Process finished with exit code 134 (interrupted by signal 6: SIGABRT)
 
-
-
 ## notiz 2018-08-23
 
 12:45 - 15:45   umbenennung diverser FSNode atttribute. Grafik erstellt, wie das system aufgebaut ist
 
 Frage: wird corrupt aktive von Hadoop und HBASE genutzt?
 
+3
 
 ## notiz 2018-08-22
 
@@ -221,7 +241,7 @@ Frage: wird corrupt aktive von Hadoop und HBASE genutzt?
                 TODO: mkdirs,exists,isDirectory implemetieren auf tieferen FsNodes
                 AUCH: mehr als 100 entries je Ordner verarbeiten!!
 
-
+5,5
 
 ## notiz 2018-08-21
 
