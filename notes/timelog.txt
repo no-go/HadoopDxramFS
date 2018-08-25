@@ -175,7 +175,21 @@ bis hier 205,25h
                 kompliziert in der bedienung. Erstmal versuchen, zu fuss weiter zu
                 machen.
 17:00 - 18:00   erfolgreich dxapp mit modifiziertem dxnet erzeugt
-18:00 -         erneuter versuch, mit Chunks zu arbeiten
+18:00 - 18:45   erneuter versuch, mit Chunks zu arbeiten... Mein modifiziertes dxnet muss noch in
+                die neue version von dxram rein!
+
+Aktueller Entwicklungsdesktop:
+
+- dxapp in Hildeburh/ via texteditor entwickeln
+- Ein terminal offen zu Hildeburh/dxapp/, wo ich dann "./gradlew build" mache
+- Erzeugte jar datei nach "app/" (aktuelles build/dist/dxram/) inkl derer config kopieren
+- terminal mit 3 tabs offen: in einem läuft zookeeper (big/start_zookeeper)
+  - in den beiden anderen habe ich . ./my-env.sh gestartet und bin in
+    das aktuelle dxram verzeichnis gewechselt.
+  - mit newSuper und newPeer in den terminals wird bin/dxram entsprechend gestartet
+
+
+
 
 
 ## notiz 2018-08-24
