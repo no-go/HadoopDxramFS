@@ -168,8 +168,14 @@ bis hier 205,25h
             zu Gradle sage, habe ich Hildeburh, die Tochter des Königs aus der
             Beowulf Sage als Name gewählt.
 
-14:45 - test, umgang mit chunks
-
+14:45 - 15:45   test, umgang mit chunks... herausgefunden, dass dxnet immernoch alles 
+                private hat und meine änderungswünsche nicht übernommen wurden.
+15:45 - 17:00   Probieren, dxnet gradlemäßig zu bilden und in mein Projekt ein zu binden.
+                bintray.com getestet und nicht kapiert, was das soll und warum so
+                kompliziert in der bedienung. Erstmal versuchen, zu fuss weiter zu
+                machen.
+17:00 - 18:00   erfolgreich dxapp mit modifiziertem dxnet erzeugt
+18:00 -         erneuter versuch, mit Chunks zu arbeiten
 
 
 ## notiz 2018-08-24
