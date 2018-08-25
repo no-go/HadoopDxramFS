@@ -9,6 +9,7 @@ fs_project/out/**/*
 Hildeburh/xapp-dxramfs/build/**/*
 Hildeburh/xapp-dxramfs/.idea/**/*
 Hildeburh/xapp-dxramfs/.gradle/**/*
+Hildeburh/xapp-dxramfs/src/main/*.iml
 
 # Compiled class file
 *.class
