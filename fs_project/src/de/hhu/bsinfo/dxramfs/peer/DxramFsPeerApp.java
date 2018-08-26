@@ -139,6 +139,9 @@ public class DxramFsPeerApp extends AbstractApplication {
                 // @todo nicht sicher, ob das die richtige stelle ist, um ein response zu machen
 
             }
+            
+            // @todo: response should be sent to the original sender of the message
+            //  -> maybe to handle requests from other hadoop nodes in the future
 
             if (dxnetInit.emh.gotResult()) {
                 ExistsMessage msg = (ExistsMessage) dxnetInit.emh.Result();

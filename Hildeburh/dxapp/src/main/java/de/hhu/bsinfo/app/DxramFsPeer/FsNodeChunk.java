@@ -52,8 +52,8 @@ public class FsNodeChunk extends DataStructure {
         _fsNode.ID = p_importer.readLong(_fsNode.ID);
         _fsNode.backId = p_importer.readLong(_fsNode.backId);
         _fsNode.name = p_importer.readString(_fsNode.name);
-        _fsNode.size = p_importer.readLong(_fsNode.size);
         _fsNode.type = p_importer.readInt(_fsNode.type);
+        _fsNode.size = p_importer.readLong(_fsNode.size);
         _fsNode.refSize = p_importer.readInt(_fsNode.refSize);
         _fsNode.refIds = p_importer.readLongArray(_fsNode.refIds);
         _fsNode.forwardId = p_importer.readLong(_fsNode.forwardId);
@@ -65,8 +65,8 @@ public class FsNodeChunk extends DataStructure {
         size += Long.BYTES; // ID
         size += Long.BYTES; // referenceId backId
         size += _fsNode.name.getBytes().length; // name
-        size += Long.BYTES; // size
         size += Integer.BYTES; // fsNodeType type
+        size += Long.BYTES; // size
         size += Integer.BYTES; // entriesSize
         size += ObjectSizeUtil.sizeofLongArray(_fsNode.refIds);
 //        size += Long.BYTES * DxramFsConfig.ref_ids_each_fsnode;

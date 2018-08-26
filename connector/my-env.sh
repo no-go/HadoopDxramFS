@@ -57,11 +57,18 @@ updateHDFS() {
 
 
 newSuper() {
+    # dxram and not dxnet peer!
     DXRAM_OPTS="-Dlog4j.configurationFile=config/log4j2.xml -Ddxram.config=config/dxram.json -Ddxram.m_config.m_engineConfig.m_role=Superpeer -Ddxram.m_config.m_engineConfig.m_address.m_ip=127.0.0.1 -Ddxram.m_config.m_engineConfig.m_address.m_port=22221" ./bin/dxram
 }
 
 newPeer() {
-    DXRAM_OPTS="-Dlog4j.configurationFile=config/log4j2.xml -Ddxram.config=config/dxram.json -Ddxram.m_config.m_engineConfig.m_role=Peer -Ddxram.m_config.m_engineConfig.m_address.m_ip=127.0.0.1 -Ddxram.m_config.m_engineConfig.m_address.m_port=22222" ./bin/dxram
+    # dxram and not dxnet peer!
+    if (( $# != 2 )); then
+        echo "newPeer IPADDR PORT"
+        echo "PORT for example: 22222, 22223"
+        return
+    fi
+    DXRAM_OPTS="-Dlog4j.configurationFile=config/log4j2.xml -Ddxram.config=config/dxram.json -Ddxram.m_config.m_engineConfig.m_role=Peer -Ddxram.m_config.m_engineConfig.m_address.m_ip=${1} -Ddxram.m_config.m_engineConfig.m_address.m_port=${2}" ./bin/dxram
 }
 
 #------------------------------------------------------------------------------------

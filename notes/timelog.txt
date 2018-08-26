@@ -158,6 +158,75 @@ bis hier 205,25h
 -----------------------------------------------------------------------------------------------
 
 
+## notiz 2018-08-26
+
+14:00 - 14:45    erneut test umgang mit chunks. qqq/dxram und qqq/dxnet(angepasst) klappt
+                sehr gut. dxram beachtet "angepasstes" dxnet und nimmt dass anstelle des
+                standards!
+14:45 - 17:00   Teste 2 peers um chunkzugriff zu proben:
+                - peer1 zählt korrekt in 1er schritten bis 18
+                - startet peer2, zählt dieser in 2er Schritten ab 18
+                - die ergebnisse von peer1 und peer2 nach dem zählen werden
+                  leider nicht ge-synct
+
+Todo: analyse des loggs!!
+
+superPeer:
+
+[16:45:27.992][SuperpeerStabilizationThread for LookupComponent][INFO ][SuperpeerStabilizationThread] Superpeers:  '0xC0C1'
+[16:45:36.958][Network-NIOSelector][DEBUG][NIOConnectionManager] Passive create new connection to 0xB1BD
+[16:45:36.986][Network-NIOConnectionCreatorHelper][DEBUG][AbstractFlowControl] Flow control settings for node 0xB1BD: window size 524288, threshold 0.800000
+[16:45:37.060][Network: MessageHandler 2][DEBUG][AbstractConnectionManager] Active create connection to: 0xB1BD
+[16:45:37.061][Network: MessageHandler 2][WARN ][NIOPipeOut] Send buffer size could not be set properly. Check OS settings! Requested: 2097152, actual: 212992
+[16:45:37.080][Network: MessageHandler 2][DEBUG][AbstractConnectionManager] Connection created: 0xB1BD
+[16:45:37.829][EventExecutor-thread-1][INFO ][ZookeeperBootComponent] Node 0xB1BD with capabilities [STORAGE] joined
+[16:45:38.000][SuperpeerStabilizationThread for LookupComponent][INFO ][SuperpeerStabilizationThread] Superpeers:  '0xC0C1'
+[16:45:38.000][SuperpeerStabilizationThread for LookupComponent][INFO ][SuperpeerStabilizationThread] Peers:  0xB1BD
+[16:46:10.058][Network-NIOSelector][DEBUG][NIOConnectionManager] Passive create new connection to 0xFA35
+[16:46:10.065][Network-NIOConnectionCreatorHelper][DEBUG][AbstractFlowControl] Flow control settings for node 0xFA35: window size 524288, threshold 0.800000
+[16:46:10.090][Network: MessageHandler 2][DEBUG][AbstractConnectionManager] Active create connection to: 0xFA35
+[16:46:10.090][Network: MessageHandler 2][WARN ][NIOPipeOut] Send buffer size could not be set properly. Check OS settings! Requested: 2097152, actual: 212992
+[16:46:10.134][Network: MessageHandler 2][DEBUG][AbstractConnectionManager] Connection created: 0xFA35
+[16:46:10.135][SuperpeerStabilizationThread for LookupComponent][DEBUG][AbstractConnectionManager] Active create connection to: 0xFA35
+[16:46:10.135][SuperpeerStabilizationThread for LookupComponent][INFO ][SuperpeerStabilizationThread] Superpeers:  '0xC0C1'
+[16:46:10.135][SuperpeerStabilizationThread for LookupComponent][INFO ][SuperpeerStabilizationThread] Peers:  0xB1BD 0xFA35
+[16:46:11.179][EventExecutor-thread-1][INFO ][ZookeeperBootComponent] Node 0xFA35 with capabilities [STORAGE] joined
+
+peer1:
+
+[16:46:10.959][DxramFsApp][DEBUG][DxramFsApp] 14
+[16:46:11.219][EventExecutor-thread-1][INFO ][ZookeeperBootComponent] Node 0xFA35 with capabilities [STORAGE] joined
+[16:46:12.960][DxramFsApp][DEBUG][DxramFsApp] 15
+[16:46:14.961][DxramFsApp][DEBUG][DxramFsApp] 16
+[16:46:15.604][Network-NIOSelector][DEBUG][NIOConnectionManager] Passive create new connection to 0xFA35
+[16:46:15.609][Network-NIOConnectionCreatorHelper][DEBUG][AbstractFlowControl] Flow control settings for node 0xFA35: window size 524288, threshold 0.800000
+[16:46:15.667][Network: MessageHandler 1][DEBUG][AbstractConnectionManager] Active create connection to: 0xFA35
+[16:46:15.668][Network: MessageHandler 1][WARN ][NIOPipeOut] Send buffer size could not be set properly. Check OS settings! Requested: 2097152, actual: 212992
+[16:46:15.738][Network: MessageHandler 1][DEBUG][AbstractConnectionManager] Connection created: 0xFA35
+[16:46:16.968][DxramFsApp][DEBUG][DxramFsApp] 17
+[16:46:18.972][DxramFsApp][DEBUG][DxramFsApp] 18
+
+peer2:
+
+[16:46:15.521][DxramFsApp][DEBUG][AbstractConnectionManager] Active create connection to: 0xB1BD
+[16:46:15.542][DxramFsApp][DEBUG][AbstractFlowControl] Flow control settings for node 0xB1BD: window size 524288, threshold 0.800000
+[16:46:15.546][DxramFsApp][WARN ][NIOPipeOut] Send buffer size could not be set properly. Check OS settings! Requested: 2097152, actual: 212992
+[16:46:15.634][DxramFsApp][DEBUG][AbstractConnectionManager] Connection created: 0xB1BD
+[16:46:15.742][Network-NIOSelector][DEBUG][NIOConnectionManager] Passive create new connection to 0xB1BD
+[16:46:17.852][DxramFsApp][DEBUG][DxramFsApp] 18
+[16:46:17.872][DxramFsApp][DEBUG][DXNet] Sending data failed: Message size differs from calculated size. Exported 865 bytes, expected 864 bytes (including header). Check getPayloadLength method of message type PutRequest
+[16:46:20.235][DxramFsApp][DEBUG][Request] Response for request GetRequest[9, 0xB1BD] , delayed, latency 333.288216 ms
+[16:46:20.246][DxramFsApp][WARN ][DXNet] Sending sync, waiting for responses to GetRequest[9, 0xB1BD] failed, timeout: 333 ms
+[16:46:20.275][DxramFsApp][DEBUG][DxramFsApp] 20
+[16:46:20.345][EventExecutor-thread-1][DEBUG][FailureComponent] ResponseDelayedEvent triggered: 0xB1BD. Sending default message and return.
+[16:46:20.412][DxramFsApp][DEBUG][DXNet] Sending data failed: Message size differs from calculated size. Exported 865 bytes, expected 864 bytes (including header). Check getPayloadLength method of message type PutRequest
+[16:46:22.815][DxramFsApp][DEBUG][Request] Response for request GetRequest[14, 0xB1BD] , delayed, latency 336.264109 ms
+[16:46:22.832][DxramFsApp][WARN ][DXNet] Sending sync, waiting for responses to GetRequest[14, 0xB1BD] failed, timeout: 333 ms
+[16:46:22.835][EventExecutor-thread-1][DEBUG][FailureComponent] ResponseDelayedEvent triggered: 0xB1BD. Sending default message and return.
+[16:46:22.836][DxramFsApp][DEBUG][DxramFsApp] 22
+
+
+
 ## notiz 2018-08-25
 
 12:15 - 14:00   Testen des neuen dxram mit gradle, testen der speicherung von chunks um
