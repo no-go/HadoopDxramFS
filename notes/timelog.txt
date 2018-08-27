@@ -165,7 +165,15 @@ bis hier 205,25h
 
 13:45 - 14:00   Analyse logs
 14:45 - 16:00   Vermutung, dass "name" +1 byte mehr braucht, test. OK!
+17:30 - 19:30   Einbau der restlichen dxramFS rpc methoden in Hildeburh und test zusammen mit Hadoop
 
+Probleme gefunden: CHunks müssen beim create eine feste Größe haben, sonst knallt es sehr schnell
+
+todo: gradle version on dxnet in hadoop connector einbauen
+todo: dummy peer2 zum testen auch in hadoop einbauen (unklar, wozu ich den verwenden werde)
+todo: response soll an den ursprünglichen absender, nicht per default an dxnet peer1
+todo: statt chunkid == -1 sollte ich mit INVALID chunkid arbeiten
+todo: Dateiname als char array und nicht als string, um feste Chunkgröße zu haben
 
 Peers:
 0xB1BD   1

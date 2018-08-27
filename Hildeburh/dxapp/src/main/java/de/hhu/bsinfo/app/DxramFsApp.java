@@ -64,6 +64,17 @@ public class DxramFsApp extends AbstractApplication {
     public static NodePeerConfig nopeConfig;
     private NodePeerConfig.PeerConfig myNodePeerConfig;
     
+    private boolean doEndlessLoop = true;
+
+
+    @Override
+    public void signalShutdown() {
+        // no loops to interrupt or things to clean up ?
+        doEndlessLoop = false;
+        
+        // dxnet or dxram shutdown??
+    }
+    
     @Override
     public DXRAMVersion getBuiltAgainstVersion() {
         return BuildConfig.DXRAM_VERSION;
@@ -132,15 +143,15 @@ public class DxramFsApp extends AbstractApplication {
         DxramFsConfig.max_pathlength_chars = max_pathlength_chars;
         
         // local default: the first/only dxnet peer will be the rpc handling server
-        //myNodePeerConfig = aPeer;
-        //dxnetInit = new DxnetInit(nopeConfig, myNodePeerConfig.nodeId);
+        myNodePeerConfig = aPeer;
+        dxnetInit = new DxnetInit(nopeConfig, myNodePeerConfig.nodeId);
         
         ROOTN = new FsNodeChunk();
         if (nameS.getChunkID(ROOT_Chunk, 10) == ChunkID.INVALID_ID) {
             
             //for debug, testing, developing:
-            myNodePeerConfig = aPeer;
-            dxnetInit = new DxnetInit(nopeConfig, myNodePeerConfig.nodeId); // peer1
+            //myNodePeerConfig = aPeer;
+            //dxnetInit = new DxnetInit(nopeConfig, myNodePeerConfig.nodeId); // peer1
             
             // initial, if root does not exists
             ROOT_CID = chunkS.create(ROOTN.sizeofObject(), 1)[0];
@@ -149,41 +160,213 @@ public class DxramFsApp extends AbstractApplication {
             ROOT_CID = nameS.getChunkID(ROOT_Chunk, 10);
             ROOTN.setID(ROOT_CID);
             chunkS.get(ROOTN);
-            ROOTN.get().type = FsNodeType.FOLDER;
-            ROOTN.get().name = "hallo";
-            ROOTN.get().refSize = 0;
             ROOTN.get().init();
+            ROOTN.get().type = FsNodeType.FOLDER;
+            ROOTN.get().name = "/";
+            ROOTN.get().refSize = 0;
             ROOTN.get().backId = ROOT_CID;
-            
-            LOG.debug(String.valueOf(ROOTN.sizeofObject()));
             chunkS.put(ROOTN);
 
         } else {
             //for debug, testing, developing:
-            myNodePeerConfig = aPeer2;
-            dxnetInit = new DxnetInit(nopeConfig, myNodePeerConfig.nodeId); // peer2
+            //myNodePeerConfig = aPeer2;
+            //dxnetInit = new DxnetInit(nopeConfig, myNodePeerConfig.nodeId); // peer2
 
             ROOT_CID = nameS.getChunkID(ROOT_Chunk, 10);
             ROOTN.setID(ROOT_CID);
             chunkS.get(ROOTN);
         }
         
-        
-        while (true) {
+        while (doEndlessLoop) {
             try {
-                Thread.sleep(2000);
+                Thread.sleep(100);
             } catch (InterruptedException ignored) {
-                
+                // @todo nicht sicher, ob das die richtige stelle ist, um ein response zu machen
+
             }
-            chunkS.get(ROOTN);
-            LOG.debug(String.valueOf(ROOTN.get().refSize));
-            ROOTN.get().refSize += myNodePeerConfig.nodeId;
-            chunkS.put(ROOTN);
+            
+            // @todo: response should be sent to the original sender of the message
+            //  -> maybe to handle requests from other hadoop nodes in the future
+
+            if (dxnetInit.emh.gotResult()) {
+                ExistsMessage msg = (ExistsMessage) dxnetInit.emh.Result();
+                // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
+                ExistsMessage response = externalHandleExists(msg);
+                try {
+                    dxnetInit.getDxNet().sendMessage(response);
+                } catch (NetworkException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (dxnetInit.idmh.gotResult()) {
+                IsDirectoryMessage msg = (IsDirectoryMessage) dxnetInit.idmh.Result();
+                // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
+                IsDirectoryMessage response = new IsDirectoryMessage(
+                        (short) dxnet_local_id,
+                        externalHandleIsDirectory(msg)
+                );
+                try {
+                    dxnetInit.getDxNet().sendMessage(response);
+                } catch (NetworkException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (dxnetInit.flmh.gotResult()) {
+                FileLengthMessage msg = (FileLengthMessage) dxnetInit.flmh.Result();
+                // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
+                FileLengthMessage response = externalHandleFileLength(msg);
+                try {
+                    dxnetInit.getDxNet().sendMessage(response);
+                } catch (NetworkException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (dxnetInit.mdmh.gotResult()) {
+                MkDirsMessage msg = (MkDirsMessage) dxnetInit.mdmh.Result();
+                // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
+                MkDirsMessage response = externalHandleMkDirs(msg);
+                try {
+                    dxnetInit.getDxNet().sendMessage(response);
+                } catch (NetworkException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // todo: andere Message Handler beifügen - ggf array oder so machen?
+
+            //chunkS.get(ROOTN);
+            //LOG.debug(String.valueOf(ROOTN.get().refSize));
+            //ROOTN.get().refSize += myNodePeerConfig.nodeId;
+            //chunkS.put(ROOTN);
         }
     }
 
-    @Override
-    public void signalShutdown() {
-        // no loops to interrupt or things to clean up
+
+
+    // ------------------------------------------------------------------------------------------------
+
+    /**
+     * Get the ChunkId of a FsNode with "name" in FsNode (a folder) or -1, if it not exists
+     * @param name
+     * @param nodeChunk
+     * @return
+     */
+    private long getIn(String name, FsNodeChunk nodeChunk) {
+        int refSize = nodeChunk.get().refSize;
+        for (int i=0; i<refSize; i++) {
+            if (i < DxramFsConfig.ref_ids_each_fsnode) {
+                long entryChunkId = nodeChunk.get().refIds[i];
+                FsNodeChunk entryChunk = new FsNodeChunk(entryChunkId);
+                chunkS.get(entryChunk);
+                if (entryChunk.get().name.equals(name)) {
+                    return entryChunkId;
+                }
+            } else {
+                // @todo an die forwardId rann gehen, wenn refSize = ref_ids_each_fsnode
+            }
+        }
+        return -1;
     }
+
+    private String exists(String path) {
+        String back = "OK";
+
+        String[] pathparts = path.split("/");
+        LOG.debug(String.join(" , ", pathparts));
+        chunkS.get(ROOTN);
+        if (path.length() == 0) {
+            back = "OK / exists";
+        } else if (ROOTN.get().refSize < 1) {
+            back = "no / empty";
+        } else {
+            FsNodeChunk subNode = ROOTN; // @todo copy oder clone ??
+            for (int i=0; i < pathparts.length; i++) {
+                long subChunkId = getIn(pathparts[i], subNode);
+                if (subChunkId == -1) return "no";
+                subNode = new FsNodeChunk(subChunkId); // @todo wird hier ROOTN evtl überschrieben?
+                chunkS.get(subNode);
+            }
+        }
+        return back;
+    }
+
+    private long mkDirIn(String name, FsNodeChunk parentNode) {
+        FsNodeChunk newdir = new FsNodeChunk();
+        newdir.get().init();
+        newdir.get().name = name;
+        chunkS.create(newdir);
+        newdir.get().type = FsNodeType.FOLDER;
+        newdir.get().name = name;
+        newdir.get().backId = parentNode.getID();
+        newdir.get().refSize = 0;
+        LOG.debug("before put " + newdir.get().name);
+        chunkS.put(newdir);
+        LOG.debug("after put " + newdir.get().name);
+
+        // @todo handle more than ref_ids_each_fsnode entries !!
+        int refSize = parentNode.get().refSize;
+        parentNode.get().refIds[refSize] = newdir.getID();
+        parentNode.get().refSize++;
+
+        // @todo error handling
+        chunkS.put(parentNode);
+        return newdir.getID();
+    }
+
+    // ------------------------------------------------------------------------------------------------
+
+    private ExistsMessage externalHandleExists(ExistsMessage msg) {
+        ExistsMessage response = new ExistsMessage((short) dxnet_local_id, exists(msg.get_data()));
+        return response;
+    }
+
+
+    private MkDirsMessage externalHandleMkDirs(MkDirsMessage msg) {
+        String back;
+        String path = msg.get_data();
+        String[] pathparts = path.split("/");
+        LOG.debug(String.join(" , ", pathparts));
+
+        if (path.length() > 0) {
+            FsNodeChunk subNode = ROOTN;
+            long subChunkId = ROOT_CID;
+            for (int i = 0; i < pathparts.length; i++) {
+                subChunkId = getIn(pathparts[i], subNode);
+                if (subChunkId == -1) {
+                    // @todo: if we have to create the whole structure(?)
+                    //return new MkDirsMessage((short) dxnet_local_id, "fail. upper folder not exists");
+                    subChunkId = mkDirIn(pathparts[i], subNode);
+                }
+                subNode = new FsNodeChunk(subChunkId);
+                chunkS.get(subNode);
+            }
+
+            // subNode should be the folder, where we have to create a new folder
+            //mkDirIn(pathparts[pathparts.length -1], subNode);
+            back = "OK " + String.valueOf(ROOTN.get().refSize);
+        } else {
+            back = "fail. path empty";
+        }
+
+        MkDirsMessage response = new MkDirsMessage((short) dxnet_local_id, back);
+        return response;
+    }
+
+    private String externalHandleIsDirectory(IsDirectoryMessage msg) {
+        String path = msg.getData();
+        // @todo fill with functionality !!
+        return "OK dir!";
+    }
+
+    private FileLengthMessage externalHandleFileLength(FileLengthMessage msg) {
+        String path = msg.get_data();
+        // @todo fill with functionality !!
+        FileLengthMessage response = new FileLengthMessage((short) dxnet_local_id, "OK");
+        response.set_length(42);
+        return response;
+    }
+
 }
