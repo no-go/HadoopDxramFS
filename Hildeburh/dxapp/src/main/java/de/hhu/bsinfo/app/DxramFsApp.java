@@ -150,10 +150,12 @@ public class DxramFsApp extends AbstractApplication {
             ROOTN.setID(ROOT_CID);
             chunkS.get(ROOTN);
             ROOTN.get().type = FsNodeType.FOLDER;
-            ROOTN.get().name = "/";
+            ROOTN.get().name = "hallo";
             ROOTN.get().refSize = 0;
             ROOTN.get().init();
             ROOTN.get().backId = ROOT_CID;
+            
+            LOG.debug(String.valueOf(ROOTN.sizeofObject()));
             chunkS.put(ROOTN);
 
         } else {

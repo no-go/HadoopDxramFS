@@ -149,13 +149,41 @@ bis hier 205,25h
 
 
 
-
 +---------------+-------------------------------------------+--------------+-----------------------
 |               |                                           |              | 
 
 
 |               |                                           |              | 
 -----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+## notiz 2018-08-27
+
+13:45 - 14:00   Analyse logs
+14:45 - 16:00   Vermutung, dass "name" +1 byte mehr braucht, test. OK!
+
+
+Peers:
+0xB1BD   1
+0xFA35   2
+
+Peer1 verbindet sich auch mit Peer2 und umgekehert!
+
+DXNet: Sending data failed: 
+    Message size differs from calculated size. Exported 865 bytes, expected 864 bytes (including header). 
+    Check getPayloadLength method of message type PutRequest
+
+Request: Response for request GetRequest[9, 0xB1BD]
+    delayed, latency 333.288216 ms
+DXNet: Sending sync
+    waiting for responses to GetRequest[9, 0xB1BD] failed
+    timeout: 333 ms
+
+
 
 
 ## notiz 2018-08-26

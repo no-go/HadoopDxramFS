@@ -64,10 +64,11 @@ public class FsNodeChunk extends DataStructure {
         int size = 0;
         size += Long.BYTES; // ID
         size += Long.BYTES; // referenceId backId
-        size += _fsNode.name.getBytes().length; // name
+        size += ObjectSizeUtil.sizeofString(_fsNode.name);
+        //size += _fsNode.name.getBytes().length +1; // name @todo the +1 is a bit suspect
         size += Integer.BYTES; // fsNodeType type
         size += Long.BYTES; // size
-        size += Integer.BYTES; // entriesSize
+        size += Integer.BYTES; // refSize
         size += ObjectSizeUtil.sizeofLongArray(_fsNode.refIds);
 //        size += Long.BYTES * DxramFsConfig.ref_ids_each_fsnode;
         size += Long.BYTES; // extID forwardId
