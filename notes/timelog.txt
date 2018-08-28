@@ -159,7 +159,11 @@ bis hier 205,25h
 
 
 
+## notiz 2018-08-28
 
+15:15 - umbau in char Array statt String in Chunks. Beenden des "fs_project", wo ich mit intellij
+        das Projekt für dxram gebaut habe. Aktuell ist die "Hildeburh" sache mit den dxram und dxapp
+        sachen via gradle sehr gut. Hildeburh in dxram_part umgenannt
 
 ## notiz 2018-08-27
 

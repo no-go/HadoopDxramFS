@@ -168,14 +168,28 @@ File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
     
     <property>
         <name>dxram.ref_ids_each_fsnode</name>
-        <value>100</value>
+        <value>128</value>
     </property>
     
     <property>
         <name>dxram.max_pathlength_chars</name>
-        <value>500</value>
+        <value>512</value>
     </property>
-    
+
+    <property>
+        <name>dxram.max_filenamelength_chars</name>
+        <value>128</value>
+    </property>
+    <property>
+        <name>dxram.max_hostlength_chars</name>
+        <value>80</value>
+    </property>
+    <property>
+        <name>dxram.max_addrlength_chars</name>
+        <value>48</value>
+    </property>
+
+
     <property>
         <name>dxnet_local_id</name>
         <value>0</value>
@@ -188,7 +202,6 @@ File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
         <name>dxnet_local_addr</name>
         <value>127.0.0.1</value>
     </property>
-
     <property>
         <name>dxnet_local_peer_id</name>
         <value>1</value>
@@ -199,6 +212,18 @@ File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
     </property>
     <property>
         <name>dxnet_local_peer_addr</name>
+        <value>127.0.0.1</value>
+    </property>
+    <property>
+        <name>dxnet_local_peer2_id</name>
+        <value>2</value>
+    </property>
+    <property>
+        <name>dxnet_local_peer2_port</name>
+        <value>65222</value>
+    </property>
+    <property>
+        <name>dxnet_local_peer2_addr</name>
         <value>127.0.0.1</value>
     </property>
 

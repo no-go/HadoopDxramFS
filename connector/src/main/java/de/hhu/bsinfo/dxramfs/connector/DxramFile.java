@@ -1,7 +1,6 @@
 package de.hhu.bsinfo.dxramfs.connector;
 
 import de.hhu.bsinfo.dxnet.DXNet;
-import de.hhu.bsinfo.dxramfs.core.DxramFsConfig;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.security.AccessControlException;
 import org.apache.hadoop.fs.permission.FsPermission;
@@ -17,7 +16,8 @@ import java.util.ArrayList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import de.hhu.bsinfo.dxramfs.core.rpc.*;
+import de.hhu.bsinfo.app.dxramfscore.DxramFsConfig;
+import de.hhu.bsinfo.app.dxramfscore.rpc.*;
 
 public class DxramFile {
     /// @todo File OP

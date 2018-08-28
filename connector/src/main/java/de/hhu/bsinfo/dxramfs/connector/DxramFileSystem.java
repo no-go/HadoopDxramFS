@@ -1,14 +1,11 @@
 package de.hhu.bsinfo.dxramfs.connector;
 
 import de.hhu.bsinfo.dxnet.DXNet;
-import de.hhu.bsinfo.dxramfs.core.DxnetInit;
-import de.hhu.bsinfo.dxramfs.core.DxramFsConfig;
-import de.hhu.bsinfo.dxramfs.core.NodePeerConfig;
+import de.hhu.bsinfo.app.dxramfscore.*;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.security.AccessControlException;
-import org.apache.hadoop.util.DataChecksum;
 import org.apache.hadoop.util.Progressable;
 
 import java.io.*;
@@ -75,6 +72,12 @@ public class DxramFileSystem extends FileSystem {
         aPeer.port = Integer.valueOf(getConf().get("dxnet_local_peer_port"));
         nopeConfig.dxPeers.add(aPeer);
 
+        NodePeerConfig.PeerConfig aPeer2 = new NodePeerConfig.PeerConfig();
+        aPeer2.nodeId = Short.valueOf(getConf().get("dxnet_local_peer2_id"));
+        aPeer2.addr = getConf().get("dxnet_local_peer2_addr");
+        aPeer2.port = Integer.valueOf(getConf().get("dxnet_local_peer2_port"));
+        nopeConfig.dxPeers.add(aPeer2);
+
         DxnetInit dxini = new DxnetInit(nopeConfig, nopeConfig.nodeId);
         return dxini.getDxNet();
     }
@@ -93,6 +96,10 @@ public class DxramFileSystem extends FileSystem {
         DxramFsConfig.file_blocksize = Integer.valueOf(conf.get("dxram.file_blocksize"));
         DxramFsConfig.ref_ids_each_fsnode = Integer.valueOf(conf.get("dxram.ref_ids_each_fsnode"));
         DxramFsConfig.max_pathlength_chars = Integer.valueOf(conf.get("dxram.max_pathlength_chars"));
+
+        DxramFsConfig.max_filenamelength_chars = Integer.valueOf(conf.get("dxram.max_filenamelength_chars"));
+        DxramFsConfig.max_hostlength_chars = Integer.valueOf(conf.get("dxram.max_hostlength_chars"));
+        DxramFsConfig.max_addrlength_chars = Integer.valueOf(conf.get("dxram.max_addrlength_chars"));
 
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", theUri, conf);
         String authority = theUri.getAuthority();

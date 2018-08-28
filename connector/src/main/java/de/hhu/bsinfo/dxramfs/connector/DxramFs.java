@@ -3,7 +3,6 @@ package de.hhu.bsinfo.dxramfs.connector;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.security.AccessControlException;
-import org.apache.hadoop.util.Progressable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,7 +11,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.EnumSet;
 
 public class DxramFs extends DelegateToFileSystem {
     private DxramFileSystem dxramFileSystem;
