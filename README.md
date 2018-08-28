@@ -22,19 +22,25 @@ instead of HDFS.
 -   [Filesystem Compatibility with Apache Hadoop](https://wiki.apache.org/hadoop/HCFS)
 -   [hadoop FS guide](https://hadoop.apache.org/docs/r2.4.1/hadoop-project-dist/hadoop-common/FileSystemShell.html)
 
-## Build
+## Build jar file for hadoop and install
 
     unzip HadoopDxramFS.zip
-    cd HadoopDxramFS
+    cd HadoopDxramFS/connector
     mvn clean
     mvn package
+    cp -f target/hadoop-dxram-fs-*.jar /hadoop/common/lib/hadoopDxramFs.jar
+    cp -f lib/*.jar /hadoop/common/lib/
 
-### ... with git
+To configure the connector you have to modify `core-site.xml` of your hoadoop.
 
-    git clone https://github.com/no-go/HadoopDxramFS
-    cd HadoopDxramFS
-    mvn clean
-    mvn package
+## Build jar file for dxram and install
+
+    unzip HadoopDxramFS.zip
+    cd HadoopDxramFS/dxram_part
+    cp DxramFsApp.conf /dxram/dxapp/
+    cd dxapp
+    ./build.sh
+    cp build/libs/dxapp-dxramfs-1.0.jar /dxram/dxapp/
 
 ## Sketches
 
@@ -67,24 +73,11 @@ Hadoop splits **processes** and lets calculate them **with blockdata on nodes** 
 
 DXRAM splits **Memory requests** and get/set their data **as chunks on peers**.
 
-## a DXNet/DXRAM Test
+## Tools
 
 Start my Envorinment (and take a look into this bash file):
 
     . ./my-env.sh
-
-Start the local relay peer to connect the local hadoop node with dxramfs:
-
-    startDxramFsPeer
-
-in future: this will be a DXRAM peer, which shares DXRAM as a
-filesystem to a local hadoop node. The `DxramFs` Hadoop code will
-be a client to that local server.
-
-## Install
-
--   Take a look at the `my-env.sh` linux shell script.
--   Take a look at my notes about the `etc/hadoop/core-site.xml` file
 
 # Notes (for me!)
 
@@ -134,6 +127,7 @@ working with hack (bad uri, path, localpath handling):
 
     bin/hadoop fs -ls /
 
+### core-site.xml
 
 File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
 
