@@ -152,7 +152,7 @@ bis hier 205,25h
 |               |                                           |              | Erste RPC Messages und einbau eine Synchronen request-response logik (incl. 21.8.)
 |  2018-08-24   |    - Fr                                   |       22,75  | Erste Versuche, Ordner in DXRAM zu speichern (incl. 24.8.)
 +---------------+-------------------------------------------+--------------+-----------------------
-|  2018-08-29   |    - Do (inkl)                            |       19,25  | Erfolgreiches anlegen und testen, ob ordner oder datei existiert.
+|  2018-08-29   |    - Do (inkl)                            |       19,5   | Erfolgreiches anlegen und testen, ob ordner oder datei existiert.
 |               |                                           |              | Wechsel zu dxapp gradle version.
 +---------------+-------------------------------------------+--------------+-----------------------
 |               |                                           |              | 
@@ -182,9 +182,9 @@ ToDo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren is
 15:30 - 15:45   test, ob umbau von String nach char-array klappt! nein, klappt nicht.
 15:45 - debugging
 18:15 - umstellung auf bytes statt chars
-18:30 - 19:00   erneuter versuch mit string: Ordernanlegen und der check, ob was existiert, geht!
+18:30 - 19:15   erneuter versuch mit string: Ordernanlegen und der check, ob was existiert, geht!
 
-4,5
+4,75
 
 ## notiz 2018-08-28
 
