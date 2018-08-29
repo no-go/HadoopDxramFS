@@ -11,13 +11,11 @@ public class BlockinfoChunk extends DataStructure {
 
     public BlockinfoChunk() {
         _blockinfo = new Blockinfo();
-        _blockinfo.init();
     }
 
     public BlockinfoChunk(final long p_id) {
         super(p_id);
         _blockinfo = new Blockinfo();
-        _blockinfo.init();
         setID(p_id);
     }
 
@@ -40,8 +38,8 @@ public class BlockinfoChunk extends DataStructure {
         p_exporter.writeLong(_blockinfo.length);
         p_exporter.writeBoolean(_blockinfo.corrupt);
         p_exporter.writeLong(_blockinfo.storageId);
-        p_exporter.writeCharArray(_blockinfo.host);
-        p_exporter.writeCharArray(_blockinfo.addr);
+        p_exporter.writeString(_blockinfo.host);
+        p_exporter.writeString(_blockinfo.addr);
         p_exporter.writeInt(_blockinfo.port);
     }
 
@@ -52,8 +50,8 @@ public class BlockinfoChunk extends DataStructure {
         _blockinfo.length = p_importer.readLong(_blockinfo.length);
         _blockinfo.corrupt = p_importer.readBoolean(_blockinfo.corrupt);
         _blockinfo.storageId = p_importer.readLong(_blockinfo.storageId);
-        _blockinfo.host = p_importer.readCharArray(_blockinfo.host);
-        _blockinfo.addr = p_importer.readCharArray(_blockinfo.addr);
+        _blockinfo.host = p_importer.readString(_blockinfo.host);
+        _blockinfo.addr = p_importer.readString(_blockinfo.addr);
         _blockinfo.port = p_importer.readInt(_blockinfo.port);
     }
 
@@ -66,8 +64,8 @@ public class BlockinfoChunk extends DataStructure {
         /// @todo I use a complete byte to store a bit? yes, this is what serilisation do here
         size += Byte.BYTES; // corrupt
         size += Long.BYTES; // storageId
-        size += ObjectSizeUtil.sizeofCharArray(_blockinfo.host);
-        size += ObjectSizeUtil.sizeofCharArray(_blockinfo.addr);
+        size += ObjectSizeUtil.sizeofString(_blockinfo.host);
+        size += ObjectSizeUtil.sizeofString(_blockinfo.addr);
         size += Integer.BYTES; // port
         return size;
     }

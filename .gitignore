@@ -2,15 +2,15 @@ connector/.idea/**/*
 connector/target/**/*
 connector/out/**/*
 
-fs_project/.idea/**/*
-fs_project/target/**/*
-fs_project/out/**/*
+dxram_part/dxapp/build/**/*
+dxram_part/dxapp/.idea/**/*
+dxram_part/dxapp/.gradle/**/*
+dxram_part/dxapp/src/main/*.iml
 
-Hildeburh/dxapp/build/**/*
-Hildeburh/dxapp/.idea/**/*
-Hildeburh/dxapp/.gradle/**/*
-Hildeburh/dxapp/src/main/*.iml
-Hildeburh/dxnet/**/*
+dxram_part/dxnet/build/**/*
+dxram_part/dxnet/.idea/**/*
+dxram_part/dxnet/.gradle/**/*
+dxram_part/dxnet/src/main/*.iml
 
 # Compiled class file
 *.class

@@ -11,13 +11,11 @@ public class BlockChunk extends DataStructure {
 
     public BlockChunk() {
         _block = new Block();
-        _block.init();
     }
 
     public BlockChunk(final long p_id) {
         super(p_id);
         _block = new Block();
-        _block.init();
         setID(p_id);
     }
 

@@ -147,6 +147,9 @@ public class DxramFsApp extends AbstractApplication {
         DxramFsConfig.file_blocksize = file_blocksize;
         DxramFsConfig.ref_ids_each_fsnode = ref_ids_each_fsnode;
         DxramFsConfig.max_pathlength_chars = max_pathlength_chars;
+        DxramFsConfig.max_filenamelength_chars = max_filenamelength_chars;
+        DxramFsConfig.max_hostlength_chars = max_hostlength_chars;
+        DxramFsConfig.max_addrlength_chars = max_addrlength_chars;
         
         // local default: the first/only dxnet peer will be the rpc handling server
         myNodePeerConfig = aPeer;
@@ -154,12 +157,12 @@ public class DxramFsApp extends AbstractApplication {
         
         ROOTN = new FsNodeChunk();
         if (nameS.getChunkID(ROOT_Chunk, 10) == ChunkID.INVALID_ID) {
-            
             //for debug, testing, developing:
             //myNodePeerConfig = aPeer;
             //dxnetInit = new DxnetInit(nopeConfig, myNodePeerConfig.nodeId); // peer1
             
             // initial, if root does not exists
+            ROOTN.get().init();
             ROOT_CID = chunkS.create(ROOTN.sizeofObject(), 1)[0];
             nameS.register(ROOT_CID, ROOT_Chunk);
             // maybe a new chunkid after register chunk with string in ROOT_Chunk
@@ -168,7 +171,7 @@ public class DxramFsApp extends AbstractApplication {
             chunkS.get(ROOTN);
             ROOTN.get().init();
             ROOTN.get().type = FsNodeType.FOLDER;
-            ROOTN.get().name = new String("/").toCharArray();
+            ROOTN.get().name = "/";
             ROOTN.get().refSize = 0;
             ROOTN.get().backId = ROOT_CID;
             chunkS.put(ROOTN);
@@ -267,7 +270,8 @@ public class DxramFsApp extends AbstractApplication {
                 long entryChunkId = nodeChunk.get().refIds[i];
                 FsNodeChunk entryChunk = new FsNodeChunk(entryChunkId);
                 chunkS.get(entryChunk);
-                if (new String(entryChunk.get().name).equals(name)) {
+                //LOG.debug("getIn: " + nodeChunk.get().name + "/" + entryChunk.get().name);
+                if (name.equals(entryChunk.get().name)) {
                     return entryChunkId;
                 }
             } else {
@@ -302,14 +306,15 @@ public class DxramFsApp extends AbstractApplication {
     private long mkDirIn(String name, FsNodeChunk parentNode) {
         FsNodeChunk newdir = new FsNodeChunk();
         newdir.get().init();
+        //LOG.debug("before put " + name);
+        //LOG.debug("config " + String.valueOf(DxramFsConfig.max_filenamelength_chars));
         chunkS.create(newdir);
         newdir.get().type = FsNodeType.FOLDER;
-        newdir.get().name = name.toCharArray();
+        newdir.get().name = name;
         newdir.get().backId = parentNode.getID();
         newdir.get().refSize = 0;
-        LOG.debug("before put " + newdir.get().name);
         chunkS.put(newdir);
-        LOG.debug("after put " + newdir.get().name);
+        //LOG.debug("after put " + newdir.get().name);
 
         // @todo handle more than ref_ids_each_fsnode entries !!
         int refSize = parentNode.get().refSize;

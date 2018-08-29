@@ -12,13 +12,11 @@ public class FsNodeChunk extends DataStructure {
 
     public FsNodeChunk() {
         _fsNode = new FsNode();
-        _fsNode.init();
     }
 
     public FsNodeChunk(final long p_id) {
         super(p_id);
         _fsNode = new FsNode();
-        _fsNode.init();
         setID(p_id);
     }
 
@@ -38,7 +36,7 @@ public class FsNodeChunk extends DataStructure {
     public void exportObject(final Exporter p_exporter) {
         p_exporter.writeLong(_fsNode.ID);
         p_exporter.writeLong(_fsNode.backId);
-        p_exporter.writeCharArray(_fsNode.name);
+        p_exporter.writeString(_fsNode.name);
         p_exporter.writeInt(_fsNode.type);
         p_exporter.writeLong(_fsNode.size);
         p_exporter.writeInt(_fsNode.refSize);
@@ -50,7 +48,7 @@ public class FsNodeChunk extends DataStructure {
     public void importObject(final Importer p_importer) {
         _fsNode.ID = p_importer.readLong(_fsNode.ID);
         _fsNode.backId = p_importer.readLong(_fsNode.backId);
-        _fsNode.name = p_importer.readCharArray(_fsNode.name);
+        _fsNode.name = p_importer.readString(_fsNode.name);
         _fsNode.type = p_importer.readInt(_fsNode.type);
         _fsNode.size = p_importer.readLong(_fsNode.size);
         _fsNode.refSize = p_importer.readInt(_fsNode.refSize);
@@ -63,7 +61,7 @@ public class FsNodeChunk extends DataStructure {
         int size = 0;
         size += Long.BYTES; // ID
         size += Long.BYTES; // referenceId backId
-        size += ObjectSizeUtil.sizeofCharArray(_fsNode.name);
+        size += ObjectSizeUtil.sizeofString(_fsNode.name);
         //size += _fsNode.name.getBytes().length +1; // name @todo the +1 is a bit suspect
         size += Integer.BYTES; // fsNodeType type
         size += Long.BYTES; // size

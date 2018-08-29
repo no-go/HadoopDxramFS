@@ -23,7 +23,15 @@ hier meine Basis.
 - dxnet mit RPC sync message Konzept
 - stückweise umbau des Dummy Hadoop FS (/tmp/myfs) in ein System, was RPC und dxram nutzt (seit 2018-08-21)
 
-...
+## offen
+
+- ...
+- Anpassung und test der dxram, dxnet, hadoop und hbase config, so das leicht verständlich und konfigurierbar ist (evtl. scheme von hadoop nutzen?)
+- untersch. Szenarien testen, bei denen DXNet nicht nur als verbindung auf localhost zwischen hadoop node und dxram peer dient
+- hbase und maprecuce java codebeispiele testen
+- speedtest und vergleich mit anderen hadoop inmemory lösungen
+- ausfallsicherheit und ggf. verteilte logs auf daten für synchronität und sicherheit der Konsistenz(?)
+- explizites fehlverhalten von knoten testen
 
 -------------------------------------------------------------------------------------
 
@@ -144,6 +152,9 @@ bis hier 205,25h
 |               |                                           |              | Erste RPC Messages und einbau eine Synchronen request-response logik (incl. 21.8.)
 |  2018-08-24   |    - Fr                                   |       22,75  | Erste Versuche, Ordner in DXRAM zu speichern (incl. 24.8.)
 +---------------+-------------------------------------------+--------------+-----------------------
+|  2018-08-29   |    - Do (inkl)                            |       19,25  | Erfolgreiches anlegen und testen, ob ordner oder datei existiert.
+|               |                                           |              | Wechsel zu dxapp gradle version.
++---------------+-------------------------------------------+--------------+-----------------------
 |               |                                           |              | 
 
 
@@ -157,6 +168,9 @@ bis hier 205,25h
 -----------------------------------------------------------------------------------------------
 
 
+todo: response soll an den ursprünglichen absender, nicht per default an dxnet peer1
+todo: statt chunkid == -1 sollte ich mit INVALID chunkid arbeiten
+ToDo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren ist (und später auch hbase)
 
 
 ## notiz 2018-08-29
@@ -165,10 +179,12 @@ bis hier 205,25h
             möglichst leicht mehrere Hadoop, dxnet und dxram Knoten laufen zu lassen.
 
 14:45 - 15:30   umbau meines bash-skripts für exxizientere Enwicklung, Test, Start und Install
-15:30 -         test, ob umbau von String nach char-array klappt!
+15:30 - 15:45   test, ob umbau von String nach char-array klappt! nein, klappt nicht.
+15:45 - debugging
+18:15 - umstellung auf bytes statt chars
+18:30 - 19:00   erneuter versuch mit string: Ordernanlegen und der check, ob was existiert, geht!
 
-ToDo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren ist (und später auch hbase)
-
+4,5
 
 ## notiz 2018-08-28
 
@@ -176,19 +192,22 @@ ToDo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren is
                 das Projekt für dxram gebaut habe. Aktuell ist die "Hildeburh" sache mit den dxram und dxapp
                 sachen via gradle sehr gut. Hildeburh in dxram_part umgenannt
 
+2,5
+
 ## notiz 2018-08-27
 
 13:45 - 14:00   Analyse logs
 14:45 - 16:00   Vermutung, dass "name" +1 byte mehr braucht, test. OK!
 17:30 - 19:30   Einbau der restlichen dxramFS rpc methoden in Hildeburh und test zusammen mit Hadoop
 
+3,5
+
+
 Probleme gefunden: CHunks müssen beim create eine feste Größe haben, sonst knallt es sehr schnell
 
 todo: gradle version on dxnet in hadoop connector einbauen OK
 todo: dummy peer2 zum testen auch in hadoop einbauen (unklar, wozu ich den verwenden werde) OK
-todo: response soll an den ursprünglichen absender, nicht per default an dxnet peer1
-todo: statt chunkid == -1 sollte ich mit INVALID chunkid arbeiten
-todo: Dateiname als char array und nicht als string, um feste Chunkgröße zu haben
+todo: Dateiname als char array und nicht als string, um feste Chunkgröße zu haben OK, aufgegeben
 
 Peers:
 0xB1BD   1
@@ -220,7 +239,9 @@ DXNet: Sending sync
                 - die ergebnisse von peer1 und peer2 nach dem zählen werden
                   leider nicht ge-synct
 
-Todo: analyse des loggs!!
+3
+
+Todo: analyse des loggs!! ok
 
 superPeer:
 
@@ -307,6 +328,9 @@ Aktueller Entwicklungsdesktop:
   - in den beiden anderen habe ich . ./my-env.sh gestartet und bin in
     das aktuelle dxram verzeichnis gewechselt.
   - mit newSuper und newPeer in den terminals wird bin/dxram entsprechend gestartet
+
+
+5,75
 
 
 

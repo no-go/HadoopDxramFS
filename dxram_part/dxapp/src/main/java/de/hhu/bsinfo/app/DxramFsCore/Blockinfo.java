@@ -1,5 +1,6 @@
 package de.hhu.bsinfo.app.dxramfscore;
 
+import java.util.Arrays;
 
 public class Blockinfo {
     public long ID; // chunkid of that BlockinfoChunk
@@ -8,15 +9,19 @@ public class Blockinfo {
     public boolean corrupt; // @todo how does this happend?
     public long storageId; // to the BlockChunk id, where the data exists (only 1 id because no replica)
     /* we do not have replica like in the blocklocation class of hadoop */
-    public char[] host = new char[0];
-    public char[] addr = new char[0];
+    public String host;
+    public String addr;
     public int port;
 
     public Blockinfo() {}
 
     public void init() {
-        this.host = new char[DxramFsConfig.max_hostlength_chars];
-        this.addr = new char[DxramFsConfig.max_addrlength_chars];
+        char[] dummy = new char[DxramFsConfig.max_hostlength_chars];
+        Arrays.fill(dummy, ' ');
+        this.host = new String(dummy);
+        char[] dummy2 = new char[DxramFsConfig.max_addrlength_chars];
+        Arrays.fill(dummy2, ' ');
+        this.addr = new String(dummy2);
     }
 };
 

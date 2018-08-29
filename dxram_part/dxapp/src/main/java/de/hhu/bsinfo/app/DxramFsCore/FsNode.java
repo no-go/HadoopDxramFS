@@ -1,5 +1,7 @@
 package de.hhu.bsinfo.app.dxramfscore;
 
+import java.util.Arrays;
+
 public class FsNode {
     // chunkid
     public long ID;
@@ -8,7 +10,7 @@ public class FsNode {
     // in a ext: the chunkid of parent ext or file
     public long backId;
     // the file or folder name (without / in it - only root has a single / as name)
-    public char[] name = new char[0];
+    public String name;
     // file, folder or ext (stores more refIds)
     public int type;
     public long size; // file: total bytes / folder: number of entries
@@ -58,7 +60,9 @@ public class FsNode {
 
     public void init() {
         this.type = FsNodeType.FOLDER;
-        this.name = new char[DxramFsConfig.max_filenamelength_chars];
+        char[] dummy = new char[DxramFsConfig.max_filenamelength_chars];
+        Arrays.fill(dummy, ' ');
+        this.name = new String(dummy);
         this.refIds = new long[DxramFsConfig.ref_ids_each_fsnode];
     }
 };
