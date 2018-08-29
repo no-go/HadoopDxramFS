@@ -159,6 +159,17 @@ bis hier 205,25h
 
 
 
+## notiz 2018-08-29
+
+14:30 - 14:45   überlegung, wie sich das scheme des Dateisystems in hadoop nutzen lässt, um wirklich
+            möglichst leicht mehrere Hadoop, dxnet und dxram Knoten laufen zu lassen.
+
+14:45 - 15:30   umbau meines bash-skripts für exxizientere Enwicklung, Test, Start und Install
+15:30 -         test, ob umbau von String nach char-array klappt!
+
+ToDo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren ist (und später auch hbase)
+
+
 ## notiz 2018-08-28
 
 15:15 - 17:45   umbau in char Array statt String in Chunks. Beenden des "fs_project", wo ich mit intellij
@@ -173,8 +184,8 @@ bis hier 205,25h
 
 Probleme gefunden: CHunks müssen beim create eine feste Größe haben, sonst knallt es sehr schnell
 
-todo: gradle version on dxnet in hadoop connector einbauen
-todo: dummy peer2 zum testen auch in hadoop einbauen (unklar, wozu ich den verwenden werde)
+todo: gradle version on dxnet in hadoop connector einbauen OK
+todo: dummy peer2 zum testen auch in hadoop einbauen (unklar, wozu ich den verwenden werde) OK
 todo: response soll an den ursprünglichen absender, nicht per default an dxnet peer1
 todo: statt chunkid == -1 sollte ich mit INVALID chunkid arbeiten
 todo: Dateiname als char array und nicht als string, um feste Chunkgröße zu haben
