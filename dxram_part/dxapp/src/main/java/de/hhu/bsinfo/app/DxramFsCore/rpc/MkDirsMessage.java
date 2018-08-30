@@ -16,8 +16,8 @@ import java.nio.charset.StandardCharsets;
 public class MkDirsMessage extends Message {
 
     public static final Logger LOG = LogManager.getLogger(MkDirsMessage.class.getName());
-    public static final byte MTYPE = 18;
-    public static final byte TAG = 42;
+    public static final byte MTYPE = 42;
+    public static final byte TAG = 18;
     private byte[] _data;
 
     public static boolean gotResult;

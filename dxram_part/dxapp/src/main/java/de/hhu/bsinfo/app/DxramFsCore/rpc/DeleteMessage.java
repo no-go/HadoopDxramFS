@@ -16,8 +16,8 @@ import java.nio.charset.StandardCharsets;
 public class DeleteMessage extends Message {
 
     public static final Logger LOG = LogManager.getLogger(DeleteMessage.class.getName());
-    public static final byte MTYPE = 12;
-    public static final byte TAG = 42;
+    public static final byte MTYPE = 42;
+    public static final byte TAG = 12;
     private byte[] data;
 
     public static boolean gotResult;

@@ -16,8 +16,8 @@ import java.nio.charset.StandardCharsets;
 public class FileStatusMessage extends Message {
 
     public static final Logger LOG = LogManager.getLogger(FileStatusMessage.class.getName());
-    public static final byte MTYPE = 15;
-    public static final byte TAG = 42;
+    public static final byte MTYPE = 42;
+    public static final byte TAG = 15;
     private byte[] data;
 
     public static boolean gotResult;

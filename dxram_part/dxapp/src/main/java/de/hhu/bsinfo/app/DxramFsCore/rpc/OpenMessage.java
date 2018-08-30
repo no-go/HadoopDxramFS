@@ -16,8 +16,8 @@ import java.nio.charset.StandardCharsets;
 public class OpenMessage extends Message {
 
     public static final Logger LOG = LogManager.getLogger(OpenMessage.class.getName());
-    public static final byte MTYPE = 19;
-    public static final byte TAG = 42;
+    public static final byte MTYPE = 42;
+    public static final byte TAG = 19;
     private byte[] data;
 
     public static boolean gotResult;

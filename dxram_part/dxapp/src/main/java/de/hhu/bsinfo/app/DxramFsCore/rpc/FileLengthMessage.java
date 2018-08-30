@@ -16,8 +16,8 @@ import java.nio.charset.StandardCharsets;
 public class FileLengthMessage extends Message {
 
     public static final Logger LOG = LogManager.getLogger(FileLengthMessage.class.getName());
-    public static final byte MTYPE = 14;
-    public static final byte TAG = 42;
+    public static final byte MTYPE = 42;
+    public static final byte TAG = 14;
     private byte[] _data;
     private long _length;
 

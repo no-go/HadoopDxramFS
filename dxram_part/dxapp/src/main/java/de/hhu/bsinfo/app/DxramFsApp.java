@@ -212,7 +212,7 @@ public class DxramFsApp extends AbstractApplication {
                 IsDirectoryMessage msg = (IsDirectoryMessage) dxnetInit.idmh.Result();
                 // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
                 IsDirectoryMessage response = new IsDirectoryMessage(
-                        (short) dxnet_local_id,
+                        msg.getDestination(),
                         externalHandleIsDirectory(msg)
                 );
                 try {
@@ -329,7 +329,7 @@ public class DxramFsApp extends AbstractApplication {
     // ------------------------------------------------------------------------------------------------
 
     private ExistsMessage externalHandleExists(ExistsMessage msg) {
-        ExistsMessage response = new ExistsMessage((short) dxnet_local_id, exists(msg.get_data()));
+        ExistsMessage response = new ExistsMessage(msg.getDestination(), exists(msg.get_data()));
         return response;
     }
 
@@ -361,7 +361,7 @@ public class DxramFsApp extends AbstractApplication {
             back = "fail. path empty";
         }
 
-        MkDirsMessage response = new MkDirsMessage((short) dxnet_local_id, back);
+        MkDirsMessage response = new MkDirsMessage(msg.getDestination(), back);
         return response;
     }
 

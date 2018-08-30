@@ -152,7 +152,7 @@ bis hier 205,25h
 |               |                                           |              | Erste RPC Messages und einbau eine Synchronen request-response logik (incl. 21.8.)
 |  2018-08-24   |    - Fr                                   |       22,75  | Erste Versuche, Ordner in DXRAM zu speichern (incl. 24.8.)
 +---------------+-------------------------------------------+--------------+-----------------------
-|  2018-08-29   |    - Do (inkl)                            |       19,5   | Erfolgreiches anlegen und testen, ob ordner oder datei existiert.
+|  2018-08-29   |    - Mi (inkl)                            |       19,5   | Erfolgreiches anlegen und testen, ob ordner oder datei existiert.
 |               |                                           |              | Wechsel zu dxapp gradle version.
 +---------------+-------------------------------------------+--------------+-----------------------
 |               |                                           |              | 
@@ -171,6 +171,14 @@ bis hier 205,25h
 todo: response soll an den ursprünglichen absender, nicht per default an dxnet peer1
 todo: statt chunkid == -1 sollte ich mit INVALID chunkid arbeiten
 ToDo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren ist (und später auch hbase)
+
+
+## notiz 2018-08-30
+
+14:30 -         response geht an ursprünglichen absender, nicht per default an dxnet config knoten
+                der als hadoop-connector hinterlegt ist.
+                verschieben des my-environment bash scripts.
+                umnummerierung der Massage-Typen und subtypen.
 
 
 ## notiz 2018-08-29

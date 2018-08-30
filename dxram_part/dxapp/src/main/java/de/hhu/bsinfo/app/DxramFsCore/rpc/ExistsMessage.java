@@ -16,8 +16,8 @@ import java.nio.charset.StandardCharsets;
 public class ExistsMessage extends Message {
 
     public static final Logger LOG = LogManager.getLogger(ExistsMessage.class.getName());
-    public static final byte MTYPE = 13;
-    public static final byte TAG = 42;
+    public static final byte MTYPE = 42;
+    public static final byte TAG = 13;
     private byte[] _data;
 
     public static boolean gotResult;

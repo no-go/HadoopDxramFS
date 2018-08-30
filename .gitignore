@@ -17,6 +17,7 @@ dxram_part/dxnet/src/main/*.iml
 
 # Log file
 *.log
+zookeeper.out
 
 # BlueJ files
 *.ctxt

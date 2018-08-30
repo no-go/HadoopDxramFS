@@ -16,8 +16,8 @@ import java.nio.charset.StandardCharsets;
 public class IsDirectoryMessage extends Message {
 
     public static final Logger LOG = LogManager.getLogger(IsDirectoryMessage.class.getName());
-    public static final byte MTYPE = 16;
-    public static final byte TAG = 42;
+    public static final byte MTYPE = 42;
+    public static final byte TAG = 16;
     private byte[] data;
 
     public static boolean gotResult;

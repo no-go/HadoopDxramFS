@@ -16,8 +16,8 @@ import java.nio.charset.StandardCharsets;
 public class ListMessage extends Message {
 
     public static final Logger LOG = LogManager.getLogger(ListMessage.class.getName());
-    public static final byte MTYPE = 17;
-    public static final byte TAG = 42;
+    public static final byte MTYPE = 42;
+    public static final byte TAG = 17;
     private byte[] data;
 
     public static boolean gotResult;

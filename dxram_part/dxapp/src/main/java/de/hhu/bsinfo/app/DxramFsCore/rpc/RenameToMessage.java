@@ -16,8 +16,8 @@ import java.nio.charset.StandardCharsets;
 public class RenameToMessage extends Message {
 
     public static final Logger LOG = LogManager.getLogger(RenameToMessage.class.getName());
-    public static final byte MTYPE = 20;
-    public static final byte TAG = 42;
+    public static final byte MTYPE = 42;
+    public static final byte TAG = 20;
     private byte[] data;
 
     public static boolean gotResult;
