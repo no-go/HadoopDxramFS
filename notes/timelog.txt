@@ -168,9 +168,10 @@ bis hier 205,25h
 -----------------------------------------------------------------------------------------------
 
 
-todo: statt chunkid == -1 sollte ich mit INVALID chunkid arbeiten
+todo: delete, renameTo
+todo: getFileStatus, listFiles
 ToDo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren ist (und später auch hbase)
-
+todo: EXT nutzen (folder und files)!
 
 ## notiz 2018-08-30
 
@@ -178,8 +179,10 @@ ToDo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren is
                 der als hadoop-connector hinterlegt ist.
                 verschieben des my-environment bash scripts.
                 umnummerierung der Massage-Typen und subtypen.
+16:00 - 17:30   isdir und getsize
+                statt chunkid == -1 sollte ich mit INVALID chunkid arbeiten OK
 
-todo: isdir und getsize
+
 
 ## notiz 2018-08-29
 

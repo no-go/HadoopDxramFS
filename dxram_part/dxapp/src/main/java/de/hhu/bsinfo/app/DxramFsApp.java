@@ -172,8 +172,10 @@ public class DxramFsApp extends AbstractApplication {
             ROOTN.get().init();
             ROOTN.get().type = FsNodeType.FOLDER;
             ROOTN.get().name = "/";
+            ROOTN.get().size = 0;
             ROOTN.get().refSize = 0;
             ROOTN.get().backId = ROOT_CID;
+            ROOTN.get().forwardId = ROOT_CID;
             chunkS.put(ROOTN);
 
         } else {
@@ -207,10 +209,7 @@ public class DxramFsApp extends AbstractApplication {
 
             if (dxnetInit.idmh.gotResult()) {
                 IsDirectoryMessage msg = (IsDirectoryMessage) dxnetInit.idmh.Result();
-                IsDirectoryMessage response = new IsDirectoryMessage(
-                        msg.getSource(),
-                        externalHandleIsDirectory(msg)
-                );
+                IsDirectoryMessage response = externalHandleIsDirectory(msg);
                 try {
                     dxnetInit.getDxNet().sendMessage(response);
                 } catch (NetworkException e) {
@@ -272,7 +271,7 @@ public class DxramFsApp extends AbstractApplication {
                 // @todo an die forwardId rann gehen, wenn refSize = ref_ids_each_fsnode
             }
         }
-        return -1;
+        return ChunkID.INVALID_ID;
     }
 
     private String exists(String path) {
@@ -286,18 +285,47 @@ public class DxramFsApp extends AbstractApplication {
         } else if (ROOTN.get().refSize < 1) {
             back = "no / empty";
         } else {
-            FsNodeChunk subNode = ROOTN; // @todo copy oder clone ??
+            FsNodeChunk subNode = ROOTN;
             for (int i=0; i < pathparts.length; i++) {
                 long subChunkId = getIn(pathparts[i], subNode);
-                if (subChunkId == -1) return "no";
-                subNode = new FsNodeChunk(subChunkId); // @todo wird hier ROOTN evtl überschrieben?
+                if (subChunkId == ChunkID.INVALID_ID) return "no";
+                subNode = new FsNodeChunk(subChunkId);
                 chunkS.get(subNode);
+            }
+            // for ended without return: thus the path+file must exists!
+        }
+        return back;
+    }
+
+    private String isDir(String path) {
+        String back = "OK";
+
+        String[] pathparts = path.split("/");
+        LOG.debug(String.join(" , ", pathparts));
+        chunkS.get(ROOTN);
+        if (path.length() == 0) {
+            back = "OK / is a dir";
+        } else if (ROOTN.get().refSize < 1) {
+            back = "no / empty";
+        } else {
+            FsNodeChunk subNode = ROOTN;
+            for (int i=0; i < pathparts.length; i++) {
+                long subChunkId = getIn(pathparts[i], subNode);
+                if (subChunkId == ChunkID.INVALID_ID) {
+                    return "no it does not exist";
+                }
+                subNode = new FsNodeChunk(subChunkId);
+                chunkS.get(subNode);
+                // the complete patch must contains folders!
+                if (subNode.get().type != FsNodeType.FOLDER) {
+                    return "no it is not a folder";
+                }
             }
         }
         return back;
     }
 
-    private long mkDirIn(String name, FsNodeChunk parentNode) {
+    private long mkDir(String name, FsNodeChunk parentNode) {
         FsNodeChunk newdir = new FsNodeChunk();
         newdir.get().init();
         //LOG.debug("before put " + name);
@@ -306,6 +334,8 @@ public class DxramFsApp extends AbstractApplication {
         newdir.get().type = FsNodeType.FOLDER;
         newdir.get().name = name;
         newdir.get().backId = parentNode.getID();
+        newdir.get().forwardId = newdir.getID();   // to self as dummy link
+        newdir.get().size = 0;
         newdir.get().refSize = 0;
         chunkS.put(newdir);
         //LOG.debug("after put " + newdir.get().name);
@@ -313,6 +343,7 @@ public class DxramFsApp extends AbstractApplication {
         // @todo handle more than ref_ids_each_fsnode entries !!
         int refSize = parentNode.get().refSize;
         parentNode.get().refIds[refSize] = newdir.getID();
+        parentNode.get().size++;
         parentNode.get().refSize++;
 
         // @todo error handling
@@ -339,17 +370,17 @@ public class DxramFsApp extends AbstractApplication {
             long subChunkId = ROOT_CID;
             for (int i = 0; i < pathparts.length; i++) {
                 subChunkId = getIn(pathparts[i], subNode);
-                if (subChunkId == -1) {
+                if (subChunkId == ChunkID.INVALID_ID) {
                     // @todo: if we have to create the whole structure(?)
                     //return new MkDirsMessage((short) dxnet_local_id, "fail. upper folder not exists");
-                    subChunkId = mkDirIn(pathparts[i], subNode);
+                    subChunkId = mkDir(pathparts[i], subNode);
                 }
                 subNode = new FsNodeChunk(subChunkId);
                 chunkS.get(subNode);
             }
 
             // subNode should be the folder, where we have to create a new folder
-            //mkDirIn(pathparts[pathparts.length -1], subNode);
+            //mkDir(pathparts[pathparts.length -1], subNode);
             back = "OK " + String.valueOf(ROOTN.get().refSize);
         } else {
             back = "fail. path empty";
@@ -359,17 +390,63 @@ public class DxramFsApp extends AbstractApplication {
         return response;
     }
 
-    private String externalHandleIsDirectory(IsDirectoryMessage msg) {
-        String path = msg.getData();
-        // @todo fill with functionality !!
-        return "OK dir!";
+    private IsDirectoryMessage externalHandleIsDirectory(IsDirectoryMessage msg) {
+        IsDirectoryMessage response = new IsDirectoryMessage(msg.getSource(), isDir(msg.getData()));
+        return response;
     }
 
     private FileLengthMessage externalHandleFileLength(FileLengthMessage msg) {
         String path = msg.get_data();
-        // @todo fill with functionality !!
-        FileLengthMessage response = new FileLengthMessage(msg.getSource(), "OK");
-        response.set_length(42);
+        long fileLength = -1;
+        String back = "OK";
+
+        String[] pathparts = path.split("/");
+        LOG.debug(String.join(" , ", pathparts));
+        chunkS.get(ROOTN);
+        if (path.length() == 0) {
+            back = "no / is a dir";
+        } else if (ROOTN.get().refSize < 1) {
+            back = "no / empty";
+        } else {
+            boolean failure = false;
+            FsNodeChunk subNode = ROOTN;
+            int i;
+            long subChunkId;
+            for (i=0; i < (pathparts.length -1); i++) {
+                subChunkId = getIn(pathparts[i], subNode);
+                if (subChunkId == ChunkID.INVALID_ID) {
+                    back = "no: path part does not exist";
+                    failure = true;
+                    break;
+                } else {
+                    subNode = new FsNodeChunk(subChunkId);
+                    chunkS.get(subNode);
+                    if (subNode.get().type != FsNodeType.FOLDER) {
+                        back = "no: path part is not a folder";
+                        failure = true;
+                        break;
+                    }
+                }
+            }
+            if (!failure) {
+                // access to the last path part (i = pathparts.length -1)
+                subChunkId = getIn(pathparts[i], subNode);
+                if (subChunkId == ChunkID.INVALID_ID) {
+                    back = "no: file does not exist";
+                } else {
+                    subNode = new FsNodeChunk(subChunkId);
+                    chunkS.get(subNode);
+                    if (subNode.get().type == FsNodeType.FILE) {
+                        fileLength = subNode.get().size;
+                    } else {
+                        back = "no: it is a folder or EXT?!";
+                    }
+                }
+            }
+        }
+        
+        FileLengthMessage response = new FileLengthMessage(msg.getSource(), back);
+        response.set_length(fileLength);
         return response;
     }
 

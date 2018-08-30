@@ -89,14 +89,16 @@ public class DxramFile {
         ExistsMessage msg = new ExistsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
         boolean res = msg.send(_dxnet);
         LOG.debug("exists msg Response: " + String.valueOf(res));
-        return _dummy.exists();
+        _dummy.exists();
+        return res;
     }
 
     public boolean mkdirs() throws IOException {
         MkDirsMessage msg = new MkDirsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
         boolean res = msg.send(_dxnet);
         LOG.debug("mkdirs msg Response: " + String.valueOf(res));
-        return _dummy.mkdirs();
+        _dummy.mkdirs();
+        return res;
     }
 
 
@@ -104,7 +106,8 @@ public class DxramFile {
         IsDirectoryMessage msg = new IsDirectoryMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
         boolean res = msg.send(_dxnet);
         LOG.debug("isdir msg Response: " + String.valueOf(res));
-        return _dummy.isDirectory();
+        _dummy.isDirectory();
+        return res;
     }
     
     public long length() {
