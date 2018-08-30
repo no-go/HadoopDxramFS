@@ -189,13 +189,10 @@ public class DxramFsApp extends AbstractApplication {
         while (doEndlessLoop) {
             try {
                 Thread.sleep(100);
-            } catch (InterruptedException ignored) {
-                // @todo nicht sicher, ob das die richtige stelle ist, um ein response zu machen
-
-            }
+            } catch (InterruptedException ignored) {}
             
-            // @todo: response should be sent to the original sender of the message
-            //  -> maybe to handle requests from other hadoop nodes in the future
+            // response is sent to the original sender of the message
+            // -> maybe to handle requests from other hadoop nodes in the future
 
             if (dxnetInit.emh.gotResult()) {
                 ExistsMessage msg = (ExistsMessage) dxnetInit.emh.Result();
@@ -210,9 +207,8 @@ public class DxramFsApp extends AbstractApplication {
 
             if (dxnetInit.idmh.gotResult()) {
                 IsDirectoryMessage msg = (IsDirectoryMessage) dxnetInit.idmh.Result();
-                // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
                 IsDirectoryMessage response = new IsDirectoryMessage(
-                        msg.getDestination(),
+                        msg.getSource(),
                         externalHandleIsDirectory(msg)
                 );
                 try {
@@ -224,7 +220,6 @@ public class DxramFsApp extends AbstractApplication {
 
             if (dxnetInit.flmh.gotResult()) {
                 FileLengthMessage msg = (FileLengthMessage) dxnetInit.flmh.Result();
-                // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
                 FileLengthMessage response = externalHandleFileLength(msg);
                 try {
                     dxnetInit.getDxNet().sendMessage(response);
@@ -235,7 +230,6 @@ public class DxramFsApp extends AbstractApplication {
 
             if (dxnetInit.mdmh.gotResult()) {
                 MkDirsMessage msg = (MkDirsMessage) dxnetInit.mdmh.Result();
-                // @todo: geht nicht reuse() und isResponse() ? wie ist das angedacht?
                 MkDirsMessage response = externalHandleMkDirs(msg);
                 try {
                     dxnetInit.getDxNet().sendMessage(response);
@@ -329,7 +323,7 @@ public class DxramFsApp extends AbstractApplication {
     // ------------------------------------------------------------------------------------------------
 
     private ExistsMessage externalHandleExists(ExistsMessage msg) {
-        ExistsMessage response = new ExistsMessage(msg.getDestination(), exists(msg.get_data()));
+        ExistsMessage response = new ExistsMessage(msg.getSource(), exists(msg.get_data()));
         return response;
     }
 
@@ -361,7 +355,7 @@ public class DxramFsApp extends AbstractApplication {
             back = "fail. path empty";
         }
 
-        MkDirsMessage response = new MkDirsMessage(msg.getDestination(), back);
+        MkDirsMessage response = new MkDirsMessage(msg.getSource(), back);
         return response;
     }
 
@@ -374,7 +368,7 @@ public class DxramFsApp extends AbstractApplication {
     private FileLengthMessage externalHandleFileLength(FileLengthMessage msg) {
         String path = msg.get_data();
         // @todo fill with functionality !!
-        FileLengthMessage response = new FileLengthMessage((short) dxnet_local_id, "OK");
+        FileLengthMessage response = new FileLengthMessage(msg.getSource(), "OK");
         response.set_length(42);
         return response;
     }
