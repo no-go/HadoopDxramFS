@@ -19,6 +19,7 @@ public class RenameToMessage extends Message {
     public static final byte MTYPE = 42;
     public static final byte TAG = 20;
     private byte[] data;
+    private byte[] toData;
 
     public static boolean gotResult;
     public static RenameToMessage result;
@@ -26,10 +27,13 @@ public class RenameToMessage extends Message {
     public String getData() {
         return new String(data, StandardCharsets.UTF_8);
     }
+    public String getToData() {
+        return new String(toData, StandardCharsets.UTF_8);
+    }
 
     @Override
     protected final int getPayloadLength() {
-        return ObjectSizeUtil.sizeofByteArray(data);
+        return ObjectSizeUtil.sizeofByteArray(data) + ObjectSizeUtil.sizeofByteArray(toData);
     }
 
     @Override
@@ -37,6 +41,7 @@ public class RenameToMessage extends Message {
             final AbstractMessageExporter p_exporter
     ) {
         p_exporter.writeByteArray(data);
+        p_exporter.writeByteArray(toData);
     }
 
     @Override
@@ -44,6 +49,7 @@ public class RenameToMessage extends Message {
             final AbstractMessageImporter p_importer
     ) {
         data = p_importer.readByteArray(data);
+        toData = p_importer.readByteArray(toData);
     }
 
     // ---------------------------------------------------------------
@@ -55,12 +61,14 @@ public class RenameToMessage extends Message {
     public RenameToMessage(final short p_destination) {
         super(p_destination, RenameToMessage.MTYPE, RenameToMessage.TAG);
         data = new byte[DxramFsConfig.max_pathlength_chars];
+        toData = new byte[0];
     }
 
-    public RenameToMessage(final short p_destination, final String p_data) {
+    public RenameToMessage(final short p_destination, final String p_data, final String to_data) {
         super(p_destination, RenameToMessage.MTYPE, RenameToMessage.TAG);
         gotResult = false;
         data = p_data.getBytes(StandardCharsets.UTF_8);
+        toData = to_data.getBytes(StandardCharsets.UTF_8);
     }
 
     // ---------------------------------------------------------------
@@ -103,6 +111,7 @@ public class RenameToMessage extends Message {
         public void onIncomingMessage(Message p_message) {
             result = (RenameToMessage) p_message;
             LOG.info(result.getData());
+            LOG.info(result.getToData());
             gotResult = true;
         }
 

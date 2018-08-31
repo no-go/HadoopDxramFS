@@ -168,10 +168,89 @@ bis hier 205,25h
 -----------------------------------------------------------------------------------------------
 
 
+todo: delete von ordnern ist noch nicht korrekt (ref-array eintrag löschen/aufschieben)!
+      EXT und FILE unbeachtet! 
 todo: delete, renameTo
 todo: getFileStatus, listFiles
 ToDo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren ist (und später auch hbase)
 todo: EXT nutzen (folder und files)!
+
+
+## notiz 2018-08-31
+
+12:45 - 16:15   update Strukturen Bilder, renameTo und delete dummys, delete... angefangen
+
+rekursives löschen ist ein problem oder es liegt an dem nicht korrekt geänderten
+refIds Array
+
+tux@abook.localhost.fake$ bin/hadoop fs -rm -r -R /c
+18/08/31 15:46:10 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+[15:46:12.915][main][INFO ][de.hhu.bsinfo.dxramfs.connector.DxramFileSystem] initialize(dxram://abook.localhost.fake:9000, Configuration: core-default.xml, core-site.xml, mapred-default.xml, mapred-site.xml, yarn-default.xml, yarn-site.xml, hdfs-default.xml, hdfs-site.xml)
+[15:46:14.505][main][INFO ][DefaultMessageHandlerPool] Network: DefaultMessageHandlerPool: Initialising 2 threads
+[15:46:14.526][main][INFO ][ExclusiveMessageHandler] Network: ExclusiveMessageHandler: Initialising thread
+[15:46:14.533][main][INFO ][DXNet] Network: MessageCreationCoordinator
+[15:46:14.580][main][INFO ][NIOConnectionManager] Starting NIOSelector...
+[15:46:15.149][main][WARN ][NIOSelector] Receive buffer could not be set properly. Check OS settings! Requested: 2097152, actual: 212992
+[15:46:15.254][main][INFO ][de.hhu.bsinfo.dxramfs.connector.DxramFileSystem] initialize myuri: dxram://abook.localhost.fake:9000/
+[15:46:15.255][main][INFO ][de.hhu.bsinfo.dxramfs.connector.DxramFileSystem] getWorkingDirectory()
+[15:46:15.256][main][INFO ][de.hhu.bsinfo.dxramfs.connector.DxramFileSystem] initialize working Dir: dxram://abook.localhost.fake:9000/user/tux
+[15:46:15.291][main][INFO ][de.hhu.bsinfo.dxramfs.connector.DxramFileSystem] fixRelativePart(/c)
+[15:46:15.351][main][INFO ][de.hhu.bsinfo.dxramfs.connector.DxramFileSystem] getFileStatus(dxram://abook.localhost.fake:9000/c)
+[15:46:15.351][main][INFO ][de.hhu.bsinfo.dxramfs.connector.DxramFileSystem] fixRelativePart(dxram://abook.localhost.fake:9000/c)
+[15:46:15.368][main][DEBUG][AbstractConnectionManager] Active create connection to: 0x1
+[15:46:15.404][main][DEBUG][AbstractFlowControl] Flow control settings for node 0x1: window size 524288, threshold 0,800000
+[15:46:15.556][main][WARN ][NIOPipeOut] Send buffer size could not be set properly. Check OS settings! Requested: 2097152, actual: 212992
+[15:46:15.585][main][DEBUG][AbstractConnectionManager] Connection created: 0x1
+[15:46:15.883][Network-NIOSelector][DEBUG][NIOConnectionManager] Passive create new connection to 0x1
+[15:46:15.944][Network: MessageHandler 1][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.ExistsMessage] OK
+[15:46:16.020][main][DEBUG][de.hhu.bsinfo.app.dxramfscore.rpc.ExistsMessage] got Response: OK
+[15:46:16.020][main][DEBUG][de.hhu.bsinfo.dxramfs.connector.DxramFile] exists msg Response: true
+[15:46:16.178][Network: MessageHandler 2][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.FileLengthMessage] no: it is a folder or EXT?!
+[15:46:16.222][main][DEBUG][de.hhu.bsinfo.app.dxramfscore.rpc.FileLengthMessage] got Response: no: it is a folder or EXT?!
+[15:46:16.222][main][DEBUG][de.hhu.bsinfo.dxramfs.connector.DxramFile] length msg Response: -1
+[15:46:16.251][Network: MessageHandler 1][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.IsDirectoryMessage] OK
+[15:46:16.327][main][DEBUG][de.hhu.bsinfo.app.dxramfscore.rpc.IsDirectoryMessage] got Response: OK
+[15:46:16.327][main][DEBUG][de.hhu.bsinfo.dxramfs.connector.DxramFile] isdir msg Response: true
+[15:46:16.330][main][INFO ][de.hhu.bsinfo.dxramfs.connector.DxramFileSystem] getWorkingDirectory()
+[15:46:16.336][main][INFO ][de.hhu.bsinfo.dxramfs.connector.DxramFileSystem] getFileStatus(dxram://abook.localhost.fake:9000/c)
+[15:46:16.342][main][INFO ][de.hhu.bsinfo.dxramfs.connector.DxramFileSystem] fixRelativePart(dxram://abook.localhost.fake:9000/c)
+[15:46:16.466][Network: MessageHandler 2][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.ExistsMessage] OK
+[15:46:16.544][main][DEBUG][de.hhu.bsinfo.app.dxramfscore.rpc.ExistsMessage] got Response: OK
+[15:46:16.544][main][DEBUG][de.hhu.bsinfo.dxramfs.connector.DxramFile] exists msg Response: true
+[15:46:16.701][Network: MessageHandler 2][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.FileLengthMessage] no: it is a folder or EXT?!
+[15:46:16.747][main][DEBUG][de.hhu.bsinfo.app.dxramfscore.rpc.FileLengthMessage] got Response: no: it is a folder or EXT?!
+[15:46:16.747][main][DEBUG][de.hhu.bsinfo.dxramfs.connector.DxramFile] length msg Response: -1
+[15:46:16.892][Network: MessageHandler 1][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.IsDirectoryMessage] OK
+[15:46:16.948][main][DEBUG][de.hhu.bsinfo.app.dxramfscore.rpc.IsDirectoryMessage] got Response: OK
+[15:46:16.948][main][DEBUG][de.hhu.bsinfo.dxramfs.connector.DxramFile] isdir msg Response: true
+18/08/31 15:46:16 INFO Configuration.deprecation: io.bytes.per.checksum is deprecated. Instead, use dfs.bytes-per-checksum
+[15:46:16.972][main][INFO ][de.hhu.bsinfo.dxramfs.connector.DxramFileSystem] delete(dxram://abook.localhost.fake:9000/c, true)
+[15:46:16.987][main][INFO ][de.hhu.bsinfo.dxramfs.connector.DxramFileSystem] fixRelativePart(dxram://abook.localhost.fake:9000/c)
+[15:46:17.093][Network: MessageHandler 2][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.ExistsMessage] OK
+[15:46:17.190][main][DEBUG][de.hhu.bsinfo.app.dxramfscore.rpc.ExistsMessage] got Response: OK
+[15:46:17.191][main][DEBUG][de.hhu.bsinfo.dxramfs.connector.DxramFile] exists msg Response: true
+[15:46:17.317][Network: MessageHandler 2][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.IsDirectoryMessage] OK
+[15:46:17.397][main][DEBUG][de.hhu.bsinfo.app.dxramfscore.rpc.IsDirectoryMessage] got Response: OK
+[15:46:17.397][main][DEBUG][de.hhu.bsinfo.dxramfs.connector.DxramFile] isdir msg Response: true
+[15:46:17.398][main][INFO ][de.hhu.bsinfo.dxramfs.connector.DxramFileSystem] delete(dxram://abook.localhost.fake:9000/c)
+[15:46:17.503][Network: MessageHandler 1][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.IsDirectoryMessage] OK
+[15:46:17.604][main][DEBUG][de.hhu.bsinfo.app.dxramfscore.rpc.IsDirectoryMessage] got Response: OK
+[15:46:17.604][main][DEBUG][de.hhu.bsinfo.dxramfs.connector.DxramFile] isdir msg Response: true
+[15:46:17.605][main][INFO ][de.hhu.bsinfo.dxramfs.connector.DxramFileSystem] delete(dxram://abook.localhost.fake:9000/c/deg)
+[15:46:17.744][Network: MessageHandler 1][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.IsDirectoryMessage] OK
+[15:46:17.840][main][DEBUG][de.hhu.bsinfo.app.dxramfscore.rpc.IsDirectoryMessage] got Response: OK
+[15:46:17.841][main][DEBUG][de.hhu.bsinfo.dxramfs.connector.DxramFile] isdir msg Response: true
+[15:46:18.057][Network: MessageHandler 1][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.DeleteMessage] OK
+[15:46:18.144][main][DEBUG][de.hhu.bsinfo.app.dxramfscore.rpc.DeleteMessage] got Response: OK
+[15:46:18.144][main][DEBUG][de.hhu.bsinfo.dxramfs.connector.DxramFile] delete msg Response: true
+[15:46:18.267][Network: MessageHandler 1][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.DeleteMessage] no. fail on c
+[15:46:18.345][main][DEBUG][de.hhu.bsinfo.app.dxramfscore.rpc.DeleteMessage] got Response: no. fail on c
+Deleted /c
+[15:46:18.345][main][DEBUG][de.hhu.bsinfo.dxramfs.connector.DxramFile] delete msg Response: false
+
+
+
+
 
 ## notiz 2018-08-30
 

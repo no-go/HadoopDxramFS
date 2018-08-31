@@ -224,15 +224,15 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.8671713"
-     inkscape:cx="186.07134"
-     inkscape:cy="429.47853"
+     inkscape:zoom="1.7343426"
+     inkscape:cx="409.00816"
+     inkscape:cy="382.53875"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1920"
-     inkscape:window-height="1029"
-     inkscape:window-x="0"
+     inkscape:window-width="1890"
+     inkscape:window-height="1059"
+     inkscape:window-x="30"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:snap-global="false"
@@ -248,7 +248,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -491,7 +491,9 @@
          x="141.10101"
          y="92.733879"
          style="stroke-width:0.08723483"
-         id="tspan4607-4-3">forwardId: </tspan><tspan
+         id="tspan4607-4-3">forwardId: <tspan
+   style="fill:#b3b3b3"
+   id="tspan1162">4713</tspan></tspan><tspan
          sodipodi:role="line"
          x="141.10101"
          y="97.095627"
@@ -654,7 +656,9 @@
          x="22.37019"
          y="145.04372"
          style="stroke-width:0.06088493"
-         id="tspan4607-0-5">forwardId: </tspan><tspan
+         id="tspan4607-0-5">forwardId: <tspan
+   style="fill:#b3b3b3"
+   id="tspan1164">601</tspan></tspan><tspan
          sodipodi:role="line"
          x="22.37019"
          y="148.08797"
@@ -1303,7 +1307,9 @@
          x="165.86333"
          y="185.16006"
          style="stroke-width:0.06088493"
-         id="tspan4607-0-5-9-0-8">forwardId: </tspan><tspan
+         id="tspan4607-0-5-9-0-8">forwardId: <tspan
+   style="fill:#b3b3b3"
+   id="tspan1166">11899</tspan></tspan><tspan
          sodipodi:role="line"
          x="165.86333"
          y="188.2043"

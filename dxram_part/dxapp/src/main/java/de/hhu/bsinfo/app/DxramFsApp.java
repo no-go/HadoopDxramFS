@@ -9,6 +9,7 @@ import de.hhu.bsinfo.dxram.DXRAM;
 import de.hhu.bsinfo.dxram.app.AbstractApplication;
 import de.hhu.bsinfo.dxram.boot.BootService;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
+import de.hhu.bsinfo.dxram.chunk.ChunkRemoveService;
 import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
 import de.hhu.bsinfo.dxram.engine.DXRAMVersion;
 import de.hhu.bsinfo.app.dxramfspeer.*;
@@ -62,6 +63,7 @@ public class DxramFsApp extends AbstractApplication {
     private long ROOT_CID;
     private BootService bootS;
     private ChunkService chunkS;
+    private ChunkRemoveService removeS;
     private NameserviceService nameS;
 
     private FsNodeChunk ROOTN;
@@ -101,6 +103,7 @@ public class DxramFsApp extends AbstractApplication {
         bootS = getService(BootService.class);
         chunkS = getService(ChunkService.class);
         nameS = getService(NameserviceService.class);
+        removeS = getService(ChunkRemoveService.class);
 
         System.out.println(
                 "application " + getApplicationName() + " on a peer" +
@@ -236,6 +239,26 @@ public class DxramFsApp extends AbstractApplication {
                     e.printStackTrace();
                 }
             }
+            
+            if (dxnetInit.dmh.gotResult()) {
+                DeleteMessage msg = (DeleteMessage) dxnetInit.dmh.Result();
+                DeleteMessage response = externalHandleDelete(msg);
+                try {
+                    dxnetInit.getDxNet().sendMessage(response);
+                } catch (NetworkException e) {
+                    e.printStackTrace();
+                }
+            }
+            
+            if (dxnetInit.rtmh.gotResult()) {
+                RenameToMessage msg = (RenameToMessage) dxnetInit.rtmh.Result();
+                RenameToMessage response = externalHandleRenameTo(msg);
+                try {
+                    dxnetInit.getDxNet().sendMessage(response);
+                } catch (NetworkException e) {
+                    e.printStackTrace();
+                }
+            }
 
             // todo: andere Message Handler beifügen - ggf array oder so machen?
 
@@ -257,8 +280,8 @@ public class DxramFsApp extends AbstractApplication {
      * @return
      */
     private long getIn(String name, FsNodeChunk nodeChunk) {
-        int refSize = nodeChunk.get().refSize;
-        for (int i=0; i<refSize; i++) {
+        int size = nodeChunk.get().refSize;
+        for (int i=0; i<size; i++) {
             if (i < DxramFsConfig.ref_ids_each_fsnode) {
                 long entryChunkId = nodeChunk.get().refIds[i];
                 FsNodeChunk entryChunk = new FsNodeChunk(entryChunkId);
@@ -282,7 +305,7 @@ public class DxramFsApp extends AbstractApplication {
         chunkS.get(ROOTN);
         if (path.length() == 0) {
             back = "OK / exists";
-        } else if (ROOTN.get().refSize < 1) {
+        } else if (ROOTN.get().size < 1) {
             back = "no / empty";
         } else {
             FsNodeChunk subNode = ROOTN;
@@ -295,6 +318,60 @@ public class DxramFsApp extends AbstractApplication {
             // for ended without return: thus the path+file must exists!
         }
         return back;
+    }
+
+    private String delete(String path) {
+        String back = "OK";
+
+        String[] pathparts = path.split("/");
+        LOG.debug(String.join(" , ", pathparts));
+        chunkS.get(ROOTN);
+        if (ROOTN.get().size < 1) {
+            return "OK / is still empty";
+        } else {
+            FsNodeChunk subNode = ROOTN;
+            long subChunkId = ROOT_CID;
+            long parentId = ROOT_CID;
+            for (int i=0; i < pathparts.length; i++) {
+                subChunkId = getIn(pathparts[i], subNode);
+                if (subChunkId == ChunkID.INVALID_ID) return "no";
+                subNode = new FsNodeChunk(subChunkId);
+                chunkS.get(subNode);
+                parentId = subNode.get().backId;
+            }
+            if (!deleteThat(subNode)) {
+                back = "no. fail on " + path;
+            } else {
+                subNode = new FsNodeChunk(parentId);
+                chunkS.get(subNode);
+                subNode.get().size--;
+                // @todo handle EXT
+                if (subNode.get().size < ref_ids_each_fsnode) {
+                    subNode.get().refSize--;
+                    // @todo this is wrong !!! we have to search the correct id and
+                    // move the last entry to the deleted one !!!
+                    subNode.get().refIds[subNode.get().refSize] = ChunkID.INVALID_ID;
+                }
+            }
+        }
+        return back;
+    }
+    
+    private boolean deleteThat(FsNodeChunk nodeChunk) {
+        long size = nodeChunk.get().size;
+        long refSize = nodeChunk.get().refSize;
+        
+        if (nodeChunk.get().type == FsNodeType.FOLDER && size == 0) {
+            // it is a empty folder, we can delete it
+            
+            // we are root? - we do not want to delete root here
+            if (nodeChunk.getID() == ROOT_CID) return false;
+            if (removeS.remove(nodeChunk.getID()) != 1) return false;
+            return true;
+        } else {
+            // @todo delete FILE and handle folder and files in EXT fsNodes
+        }
+        return false;
     }
 
     private String isDir(String path) {
@@ -405,7 +482,7 @@ public class DxramFsApp extends AbstractApplication {
         chunkS.get(ROOTN);
         if (path.length() == 0) {
             back = "no / is a dir";
-        } else if (ROOTN.get().refSize < 1) {
+        } else if (ROOTN.get().size < 1) {
             back = "no / empty";
         } else {
             boolean failure = false;
@@ -447,6 +524,22 @@ public class DxramFsApp extends AbstractApplication {
         
         FileLengthMessage response = new FileLengthMessage(msg.getSource(), back);
         response.set_length(fileLength);
+        return response;
+    }
+    
+    
+    
+    // todo: delete must be atomic/sync to all hadoop nodes - recursive delete, too!!
+    private DeleteMessage externalHandleDelete(DeleteMessage msg) {
+        // recursion handles my connector code in hadoop !
+        DeleteMessage response = new DeleteMessage(msg.getSource(), delete(msg.getData()));
+        return response;
+    }
+    
+    // dummy
+    private RenameToMessage externalHandleRenameTo(RenameToMessage msg) {
+        // getData, getToData
+        RenameToMessage response = new RenameToMessage(msg.getSource(), "OK", "-");
         return response;
     }
 

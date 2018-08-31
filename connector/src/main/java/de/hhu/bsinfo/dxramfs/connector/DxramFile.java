@@ -117,26 +117,29 @@ public class DxramFile {
         return _dummy.length();
     }
 
-
-
-
-
-
-
-
-
-
     public boolean delete() throws IOException {
-        /// @todo File OP
-        //send("delete() " + _dummy.getName());
+        DeleteMessage msg = new DeleteMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
+        boolean res = msg.send(_dxnet);
+        LOG.debug("delete msg Response: " + String.valueOf(res));
         return _dummy.delete();
     }
     
     public boolean renameTo(DxramFile dest) {
-        /// @todo File OP
-        //send("rename() " + _dummy.getName() + " ->" + dest._dummy.getName());
+        RenameToMessage msg = new RenameToMessage(
+                DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId,
+                hpath2path(_absPath),
+                hpath2path(dest._absPath)
+        );
+        boolean res = msg.send(_dxnet);
+        LOG.debug("renameTo msg Response: " + String.valueOf(res));
         return _dummy.renameTo(dest._dummy);
     }
+
+
+
+
+
+
 
     public DxramFile[] listFiles() throws FileNotFoundException, IOException {
         ArrayList<DxramFile> fArrayList = new ArrayList<>();
