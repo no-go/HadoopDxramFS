@@ -152,8 +152,9 @@ bis hier 205,25h
 |               |                                           |              | Erste RPC Messages und einbau eine Synchronen request-response logik (incl. 21.8.)
 |  2018-08-24   |    - Fr                                   |       22,75  | Erste Versuche, Ordner in DXRAM zu speichern (incl. 24.8.)
 +---------------+-------------------------------------------+--------------+-----------------------
-|  2018-08-29   |    - Mi (inkl)                            |       19,5   | Erfolgreiches anlegen und testen, ob ordner oder datei existiert.
+|  2018-08-29   |    - Fr (inkl)                            |       25,5   | Erfolgreiches anlegen und testen, ob ordner oder datei existiert.
 |               |                                           |              | Wechsel zu dxapp gradle version.
+|               |                                           |              | start implementierung von delete
 +---------------+-------------------------------------------+--------------+-----------------------
 |               |                                           |              | 
 
@@ -176,12 +177,55 @@ ToDo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren is
 todo: EXT nutzen (folder und files)!
 
 
+
+## notiz 2018-09-03
+
+15:45 - 17:45 debugging und implemetierung von delete
+-> rekursives löschen mit unterordnern sollte nun klappen. ungetestet.
+-> es pleibt dabei, dass der hadoop node das rekursive implementiert!!!
+
+tested: hadoop fs -rm /c/test2
+-> nein, weil test2 ordner ist (ok)
+tested: hadoop fs -rm -r /c/test2
+-> geht ok
+
+was ist unterschied zwischen -r und -R? ES gibt keinen!
+rekursives löschen geht scheinbar nicht, weil evtl. return wert vom echten dateisystem probleme macht?
+-> achtung! Hadoop kennt bei orndern nur -r, was wirklich den ganzen inhalt des ornders mit löscht
+   ohne zu meckern!
+
+
+
+[17:38:50.150][Network: MessageHandler 2][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.IsDirectoryMessage] y
+[17:38:50.173][DxramFsApp][DEBUG][DxramFsApp] y
+[17:38:50.250][Network: MessageHandler 1][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.IsDirectoryMessage] y/g
+[17:38:50.277][DxramFsApp][DEBUG][DxramFsApp] y , g
+[17:38:50.393][Network: MessageHandler 2][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.DeleteMessage] y/g
+[17:38:50.478][DxramFsApp][DEBUG][DxramFsApp] y , g
+[17:38:50.479][DxramFsApp][DEBUG][DxramFsApp] Found y
+[17:38:50.479][DxramFsApp][DEBUG][DxramFsApp] Found g
+[17:38:50.479][DxramFsApp][DEBUG][DxramFsApp] node size 0 in g
+[17:38:50.513][DxramFsApp][DEBUG][DxramFsApp] refIds[0] is Chunk [0xB1BD000000000006]
+[17:38:50.577][Network: MessageHandler 2][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.DeleteMessage] y
+[17:38:50.617][DxramFsApp][DEBUG][DxramFsApp] y
+[17:38:50.617][DxramFsApp][DEBUG][DxramFsApp] Found y
+[17:38:50.617][DxramFsApp][DEBUG][DxramFsApp] node size 1 in y
+[17:38:51.048][Network-NIOSelector][DEBUG][NIOSelector] Could not read from channel (0x0)!
+
+
+nach dem löschen von g wird scheinbar im parent node y nicht die größe neu gesetzt!!
+gefixed ungetestet! put vergessen!
+
+
 ## notiz 2018-08-31
 
 12:45 - 16:15   update Strukturen Bilder, renameTo und delete dummys, delete... angefangen
 
 rekursives löschen ist ein problem oder es liegt an dem nicht korrekt geänderten
 refIds Array
+
+3,5
+
 
 tux@abook.localhost.fake$ bin/hadoop fs -rm -r -R /c
 18/08/31 15:46:10 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
@@ -236,6 +280,7 @@ tux@abook.localhost.fake$ bin/hadoop fs -rm -r -R /c
 [15:46:17.503][Network: MessageHandler 1][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.IsDirectoryMessage] OK
 [15:46:17.604][main][DEBUG][de.hhu.bsinfo.app.dxramfscore.rpc.IsDirectoryMessage] got Response: OK
 [15:46:17.604][main][DEBUG][de.hhu.bsinfo.dxramfs.connector.DxramFile] isdir msg Response: true
+
 [15:46:17.605][main][INFO ][de.hhu.bsinfo.dxramfs.connector.DxramFileSystem] delete(dxram://abook.localhost.fake:9000/c/deg)
 [15:46:17.744][Network: MessageHandler 1][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.IsDirectoryMessage] OK
 [15:46:17.840][main][DEBUG][de.hhu.bsinfo.app.dxramfscore.rpc.IsDirectoryMessage] got Response: OK
@@ -260,6 +305,12 @@ Deleted /c
                 umnummerierung der Massage-Typen und subtypen.
 16:00 - 17:30   isdir und getsize
                 statt chunkid == -1 sollte ich mit INVALID chunkid arbeiten OK
+
+
+2,5
+
+
+
 
 
 

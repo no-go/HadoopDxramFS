@@ -180,6 +180,7 @@ public class DxramFsApp extends AbstractApplication {
             ROOTN.get().backId = ROOT_CID;
             ROOTN.get().forwardId = ROOT_CID;
             chunkS.put(ROOTN);
+            LOG.debug("Create Root / on Chunk [%s]", String.format("0x%X", ROOTN.getID()));
 
         } else {
             //for debug, testing, developing:
@@ -337,6 +338,7 @@ public class DxramFsApp extends AbstractApplication {
                 if (subChunkId == ChunkID.INVALID_ID) return "no";
                 subNode = new FsNodeChunk(subChunkId);
                 chunkS.get(subNode);
+                LOG.debug("Found " + subNode.get().name);
                 parentId = subNode.get().backId;
             }
             if (!deleteThat(subNode)) {
@@ -344,13 +346,27 @@ public class DxramFsApp extends AbstractApplication {
             } else {
                 subNode = new FsNodeChunk(parentId);
                 chunkS.get(subNode);
-                subNode.get().size--;
                 // @todo handle EXT
                 if (subNode.get().size < ref_ids_each_fsnode) {
-                    subNode.get().refSize--;
-                    // @todo this is wrong !!! we have to search the correct id and
-                    // move the last entry to the deleted one !!!
-                    subNode.get().refIds[subNode.get().refSize] = ChunkID.INVALID_ID;
+                    for (int j=0; j<subNode.get().refSize; j++) {
+                        LOG.debug("refIds[%d] is Chunk [%s]", j, String.format("0x%X", subNode.get().refIds[j]));
+                        if (subNode.get().refIds[j] == subChunkId) {
+                            // resize refindex for new entry
+                            subNode.get().refSize--;
+                            // resize total size in the folder
+                            subNode.get().size--;
+                            // write last array entry to the position, we want to delete
+                            subNode.get().refIds[j] = subNode.get().refIds[subNode.get().refSize];
+                            // overwrite last array entry with INVALID to set it free
+                            subNode.get().refIds[subNode.get().refSize] = ChunkID.INVALID_ID;
+                            chunkS.put(subNode);
+                            return "OK";
+                        }
+                    }
+                    LOG.debug("no [%s] in parent Chunk [%s]", String.format("0x%X", subChunkId), String.format("0x%X", subNode.getID()));
+                    back = "fail finding/removing " + path + " from refIds of parent node " + subNode.get().name;
+                } else {
+                    back = "we did not handle nodes with more than ref_ids_each_fsnode entryies in it";
                 }
             }
         }
@@ -360,6 +376,7 @@ public class DxramFsApp extends AbstractApplication {
     private boolean deleteThat(FsNodeChunk nodeChunk) {
         long size = nodeChunk.get().size;
         long refSize = nodeChunk.get().refSize;
+        LOG.debug("node size %d in %s", size, nodeChunk.get().name);
         
         if (nodeChunk.get().type == FsNodeType.FOLDER && size == 0) {
             // it is a empty folder, we can delete it
@@ -415,6 +432,7 @@ public class DxramFsApp extends AbstractApplication {
         newdir.get().size = 0;
         newdir.get().refSize = 0;
         chunkS.put(newdir);
+        LOG.debug("Create %s on Chunk [%s]", name, String.format("0x%X", newdir.getID()));
         //LOG.debug("after put " + newdir.get().name);
 
         // @todo handle more than ref_ids_each_fsnode entries !!
