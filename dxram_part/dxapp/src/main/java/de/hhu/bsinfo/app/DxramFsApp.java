@@ -448,6 +448,74 @@ public class DxramFsApp extends AbstractApplication {
         return newdir.getID();
     }
 
+    // @todo: is this the correct behavior: /a/b exists and we want to move /c into /a/b but we did not get /a/b/c ! we get an error, that /a/b still exists!
+    // ------> HINT: this error did not happend by using the hodoop dxramfs connector, because that code handles it!
+    // ------> maybe the connector ask many "exists()" in that situation.
+    // ------> for the future: test files rename!
+    private String rename(String from, String to) {
+        String back = "OK";
+        if (from.length() == 0) return "fail. / not moveable.";
+        if (exists(to).startsWith("OK")) return "fail. '"+to+"' still exists.";
+        // @todo if "to" is a folder, we have to move a folder or file into that folder and check before, if this new structure exists,too!
+        if (!exists(from).startsWith("OK")) return "fail. '"+from+"' does not exists.";
+
+        String[] fromParts = from.split("/");
+        String[] toParts = to.split("/");
+        // get the from-chunk
+        FsNodeChunk browseNode = ROOTN;
+        long browseChunkId = ROOT_CID;
+        chunkS.get(browseNode);
+        for (int i=0; i < fromParts.length; i++) {
+            browseChunkId = getIn(fromParts[i], browseNode);
+            browseNode = new FsNodeChunk(browseChunkId);
+            chunkS.get(browseNode);
+        }
+        FsNodeChunk fromChunk = browseNode;
+        
+        // get the parent-chunk of "from"
+        FsNodeChunk oldParentChunk = new FsNodeChunk(fromChunk.get().backId);
+        chunkS.get(oldParentChunk);
+        
+        // may create (and get) parent folder of "to"-file (or folder)
+        browseNode = ROOTN;
+        browseChunkId = ROOT_CID;
+        chunkS.get(browseNode);
+        for (int i = 0; i < toParts.length -1; i++) {
+            // @todo: length -1 because we need the parent! but if "to" is a folder, we have to move it into the folder!
+            browseChunkId = getIn(toParts[i], browseNode);
+            if (browseChunkId == ChunkID.INVALID_ID) {
+                browseChunkId = mkDir(toParts[i], browseNode);
+            }
+            browseNode = new FsNodeChunk(browseChunkId);
+            chunkS.get(browseNode);
+        }
+        FsNodeChunk toParentChunk = browseNode;
+        
+        // rename the from-chunk
+        // - handle move to root: @todo make a "move into a FOLDER" at this place!
+        if (toParentChunk.getID() == ROOT_CID) {
+            // name unchanged
+            if (exists(fromParts[fromParts.length-1]).startsWith("OK")) return "no. something with that name still exists in /";
+            fromChunk.get().backId = toParentChunk.getID();
+        } else {
+            fromChunk.get().name = new String(toParts[toParts.length-1].getBytes(DxramFsConfig.STRING_STD_CHARSET));
+            fromChunk.get().backId = toParentChunk.getID();
+        }
+        // @todo error handling
+        chunkS.put(fromChunk);
+        
+        // @todo handle more than ref_ids_each_fsnode entries !!!!!
+        int refSize = toParentChunk.get().refSize;
+        toParentChunk.get().refIds[refSize] = fromChunk.getID();
+        toParentChunk.get().size++;
+        toParentChunk.get().refSize++;
+
+        // @todo error handling
+        chunkS.put(toParentChunk);
+        
+        return back;
+    }
+
     // ------------------------------------------------------------------------------------------------
 
     private ExistsMessage externalHandleExists(ExistsMessage msg) {
@@ -548,18 +616,15 @@ public class DxramFsApp extends AbstractApplication {
     }
     
     
-    
-    // todo: delete must be atomic/sync to all hadoop nodes - recursive delete, too!!
+    // todo: delete must be atomic/sync to all hadoop nodes
     private DeleteMessage externalHandleDelete(DeleteMessage msg) {
-        // recursion handles my connector code in hadoop !
+        // recursion handles my connector code (listFiles...) in hadoop !
         DeleteMessage response = new DeleteMessage(msg.getSource(), delete(msg.getData()));
         return response;
     }
     
-    // dummy
     private RenameToMessage externalHandleRenameTo(RenameToMessage msg) {
-        // getData, getToData
-        RenameToMessage response = new RenameToMessage(msg.getSource(), "OK", "-");
+        RenameToMessage response = new RenameToMessage(msg.getSource(), rename(msg.getData(), msg.getToData()), "-");
         return response;
     }
 

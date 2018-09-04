@@ -26,6 +26,9 @@ hier meine Basis.
 ## vermutlich noch lange zeit offen offen
 
 - ...
+- test: muss ich -f (force) z.B. bei "rename" implementieren?
+- test: muss ich einen richtigen Zeitstemple implementieren?
+- test: muss ich (speziell für HBASE) eine append() implementieren?
 - Anpassung und test der dxram, dxnet, hadoop und hbase config, so das leicht verständlich und konfigurierbar ist (evtl. scheme von hadoop nutzen?)
 - untersch. Szenarien testen, bei denen DXNet nicht nur als verbindung auf localhost zwischen hadoop node und dxram peer dient
 - hbase und maprecuce java codebeispiele testen
@@ -172,7 +175,6 @@ bis hier 205,25h
 
 ## very next milestones
 
-todo: renameTo
 todo: getFileStatus, listFiles
 todo: open/create
 todo: delete von ordnern ist noch nicht korrekt (ref-array eintrag löschen/aufschieben)!
@@ -195,7 +197,8 @@ todo: test alles auf cluster/hilbert
 
 13:00 - 13:30   test rekursives löschen (ok, aber problem mit umlauten)
 13:30 - 15:15   debugging umlaute equals problem - DXRAM arbeitet mit ASCII für strings
-15:15 -         start renameTo()
+15:15 - 17:15   renameTo() - erstaunlich, was der connector bereits an "ordner in ordner verschieben" organisiert und in der DxramFsApp nicht
+                implementiert sein muss!
 
 
 ## notiz 2018-09-03

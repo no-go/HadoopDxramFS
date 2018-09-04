@@ -89,7 +89,7 @@ public class DxramFile {
         ExistsMessage msg = new ExistsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
         boolean res = msg.send(_dxnet);
         LOG.debug("exists msg Response: " + String.valueOf(res));
-        _dummy.exists();
+        if (res) _dummy.exists();
         return res;
     }
 
@@ -97,7 +97,7 @@ public class DxramFile {
         MkDirsMessage msg = new MkDirsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
         boolean res = msg.send(_dxnet);
         LOG.debug("mkdirs msg Response: " + String.valueOf(res));
-        _dummy.mkdirs();
+        if (res) _dummy.mkdirs();
         return res;
     }
 
@@ -106,7 +106,7 @@ public class DxramFile {
         IsDirectoryMessage msg = new IsDirectoryMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
         boolean res = msg.send(_dxnet);
         LOG.debug("isdir msg Response: " + String.valueOf(res));
-        _dummy.isDirectory();
+        if (res) _dummy.isDirectory();
         return res;
     }
     
@@ -114,14 +114,16 @@ public class DxramFile {
         FileLengthMessage msg = new FileLengthMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
         long res = msg.send(_dxnet);
         LOG.debug("length msg Response: " + String.valueOf(res));
-        return _dummy.length();
+        if (res != -1) _dummy.length();
+        return res;
     }
 
     public boolean delete() throws IOException {
         DeleteMessage msg = new DeleteMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
         boolean res = msg.send(_dxnet);
         LOG.debug("delete msg Response: " + String.valueOf(res));
-        return _dummy.delete();
+        if (res) _dummy.delete();
+        return res;
     }
     
     public boolean renameTo(DxramFile dest) {
@@ -132,7 +134,8 @@ public class DxramFile {
         );
         boolean res = msg.send(_dxnet);
         LOG.debug("renameTo msg Response: " + String.valueOf(res));
-        return _dummy.renameTo(dest._dummy);
+        if (res) _dummy.renameTo(dest._dummy);
+        return res;
     }
 
 
