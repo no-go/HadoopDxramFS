@@ -10,8 +10,8 @@ export ZOOKEEPER_ROOT="/home/tux/zookeeper/"
 export HDXRAMFS_SRC=$(pwd)/connector/
 export DXRAMAPP_SRC="${HDXRAMFS_SRC}../dxram_part/dxapp/"
 export JAVA_HOME=/usr
-export HADOOP_CONF_DIR="${HADOOPSRC}/hadoop-dist/target/hadoop-${HVERS}/etc/hadoop/"
-export HADOOP_HOME="${HADOOPSRC}/hadoop-dist/target/hadoop-${HVERS}/"
+export HADOOP_CONF_DIR="${HADOOPSRC}hadoop-dist/target/hadoop-${HVERS}/etc/hadoop/"
+export HADOOP_HOME="${HADOOPSRC}hadoop-dist/target/hadoop-${HVERS}/"
 
 export DATADIRECOTRY="${ZOOKEEPER_ROOT}/zooData"
 

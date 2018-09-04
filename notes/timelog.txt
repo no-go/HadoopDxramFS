@@ -23,7 +23,7 @@ hier meine Basis.
 - dxnet mit RPC sync message Konzept
 - stückweise umbau des Dummy Hadoop FS (/tmp/myfs) in ein System, was RPC und dxram nutzt (seit 2018-08-21)
 
-## offen
+## vermutlich noch lange zeit offen offen
 
 - ...
 - Anpassung und test der dxram, dxnet, hadoop und hbase config, so das leicht verständlich und konfigurierbar ist (evtl. scheme von hadoop nutzen?)
@@ -169,20 +169,40 @@ bis hier 205,25h
 -----------------------------------------------------------------------------------------------
 
 
+
+## very next milestones
+
+todo: renameTo
+todo: getFileStatus, listFiles
+todo: open/create
 todo: delete von ordnern ist noch nicht korrekt (ref-array eintrag löschen/aufschieben)!
       EXT und FILE unbeachtet! 
-todo: delete, renameTo
-todo: getFileStatus, listFiles
-ToDo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren ist (und später auch hbase)
 todo: EXT nutzen (folder und files)!
+todo: test mapreduce wordcount
+ToDo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren ist (und später auch hbase)
+todo: test hbase (cli)
+todo: test mapreduce java code beispiel
+todo: test hbase java code beispiel
+todo: test alles auf cluster/hilbert
 
+-----------------------------------------------------------------------------------------------
+
+
+
+
+
+## notiz 2018-09-04
+
+13:00 - 13:30   test rekursives löschen (ok, aber problem mit umlauten)
+13:30 - 15:15   debugging umlaute equals problem - DXRAM arbeitet mit ASCII für strings
+15:15 -         start renameTo()
 
 
 ## notiz 2018-09-03
 
 15:45 - 17:45 debugging und implemetierung von delete
 -> rekursives löschen mit unterordnern sollte nun klappen. ungetestet.
--> es pleibt dabei, dass der hadoop node das rekursive implementiert!!!
+-> es bleibt dabei, dass der hadoop node das rekursive implementiert!!!
 
 tested: hadoop fs -rm /c/test2
 -> nein, weil test2 ordner ist (ok)
@@ -215,6 +235,12 @@ rekursives löschen geht scheinbar nicht, weil evtl. return wert vom echten date
 
 nach dem löschen von g wird scheinbar im parent node y nicht die größe neu gesetzt!!
 gefixed ungetestet! put vergessen!
+
+
+
+
+
+
 
 
 ## notiz 2018-08-31

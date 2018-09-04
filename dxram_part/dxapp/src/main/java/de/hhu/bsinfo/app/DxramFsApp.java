@@ -57,7 +57,7 @@ public class DxramFsApp extends AbstractApplication {
     private int max_addrlength_chars = 48;
 
     // ++++++++ --------------------------
-
+    
     private static final Logger LOG = LogManager.getFormatterLogger(DxramFsApp.class.getSimpleName());
 
     private long ROOT_CID;
@@ -282,13 +282,15 @@ public class DxramFsApp extends AbstractApplication {
      */
     private long getIn(String name, FsNodeChunk nodeChunk) {
         int size = nodeChunk.get().refSize;
+        String nname = new String(name.getBytes(DxramFsConfig.STRING_STD_CHARSET));
         for (int i=0; i<size; i++) {
             if (i < DxramFsConfig.ref_ids_each_fsnode) {
                 long entryChunkId = nodeChunk.get().refIds[i];
                 FsNodeChunk entryChunk = new FsNodeChunk(entryChunkId);
                 chunkS.get(entryChunk);
-                //LOG.debug("getIn: " + nodeChunk.get().name + "/" + entryChunk.get().name);
-                if (name.equals(entryChunk.get().name)) {
+                LOG.debug("getIn: is '" + entryChunk.get().name + "' == '" + nname + "' ?");
+                
+                if (nname.equals(entryChunk.get().name)) {
                     return entryChunkId;
                 }
             } else {
@@ -426,7 +428,7 @@ public class DxramFsApp extends AbstractApplication {
         //LOG.debug("config " + String.valueOf(DxramFsConfig.max_filenamelength_chars));
         chunkS.create(newdir);
         newdir.get().type = FsNodeType.FOLDER;
-        newdir.get().name = name;
+        newdir.get().name = new String(name.getBytes(DxramFsConfig.STRING_STD_CHARSET));
         newdir.get().backId = parentNode.getID();
         newdir.get().forwardId = newdir.getID();   // to self as dummy link
         newdir.get().size = 0;
