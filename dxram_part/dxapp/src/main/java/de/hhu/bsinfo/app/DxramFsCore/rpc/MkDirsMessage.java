@@ -24,7 +24,7 @@ public class MkDirsMessage extends Message {
     public static MkDirsMessage result;
 
     public String get_data() {
-        return new String(_data, StandardCharsets.UTF_8);
+        return new String(_data, DxramFsConfig.STRING_STD_CHARSET);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class MkDirsMessage extends Message {
     public MkDirsMessage(final short p_destination, final String p_data) {
         super(p_destination, MkDirsMessage.MTYPE, MkDirsMessage.TAG);
         gotResult = false;
-        _data = p_data.getBytes(StandardCharsets.UTF_8);
+        _data = p_data.getBytes(DxramFsConfig.STRING_STD_CHARSET);
     }
 
     // ---------------------------------------------------------------

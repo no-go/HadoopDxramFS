@@ -27,7 +27,7 @@ public class DxramFile {
     
     private Path        _absPath;
     private URI         _uri;
-    private long        _blocksize;
+    private long        _blocksize; // never changed: it is the number of bytes for 1block in the dxramfs filesystem
     private DXNet       _dxnet;
     
     /// @todo File OP
@@ -138,38 +138,60 @@ public class DxramFile {
         return res;
     }
 
+    public FileStatus getFileStatus() {
+        return new FileStatus(
+                this.length(),
+                this.isDirectory(),
+                0, _blocksize, 0L, 0L, (FsPermission)null, (String)null, (String)null,
+                getPath()
+        );
+    }
 
+    public DxramFile[] listFiles() throws FileNotFoundException, IOException {
+        ArrayList<DxramFile> fArrayList = new ArrayList<>();
 
+        // do requests (and count received elements to get new start index), until we get null (nothing/empty)
+        int startidx = 0;
 
+        while (startidx != -1) {
+            String reqPath = hpath2path(_absPath);
+            ListMessage msg = new ListMessage(
+                    DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId,
+                    reqPath,
+                    startidx
+            );
+            String[] res = msg.send(_dxnet);
+            if (res == null) {
+                startidx = -1; // end while loop
+            } else {
+                startidx += res.length;
+                for (String re : res) {
+                    DxramFile dxfile = new DxramFile(_dxnet, new Path(_absPath + Path.SEPARATOR + re), _uri);
+                    fArrayList.add(dxfile);
+                }
+            }
+        }
 
+        return fArrayList.toArray(new DxramFile[fArrayList.size()]);
+    }
 
-
+    /*
     public DxramFile[] listFiles() throws FileNotFoundException, IOException {
         ArrayList<DxramFile> fArrayList = new ArrayList<>();
         //send("listFiles() " + _dummy.getName());
 
-        /// @todo File OP
         for (File childFile : _dummy.listFiles()) {
             Path p = lpath2hpath(childFile.getAbsolutePath());
-            
-            /// @todo _blocksize is a dummy at this place, because local fs did not store it
             DxramFile dxfile = new DxramFile(_dxnet, p, _uri);
-            
             fArrayList.add(dxfile);
         }
         return fArrayList.toArray(new DxramFile[fArrayList.size()]);
     }
-    
-    public FileStatus getFileStatus() {
-        //send("getFileStatus() " + _dummy.getName());
+    */
 
-        return new FileStatus(
-            this.length(),
-            this.isDirectory(),
-            0, _blocksize, 0L, 0L, (FsPermission)null, (String)null, (String)null,
-            getPath()
-        );
-    }
+
+
+
 
     //-------------------------------------------------------------------------------------- create
     public FSDataOutputStream create(

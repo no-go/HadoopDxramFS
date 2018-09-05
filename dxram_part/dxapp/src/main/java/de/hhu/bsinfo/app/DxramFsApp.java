@@ -261,6 +261,16 @@ public class DxramFsApp extends AbstractApplication {
                 }
             }
 
+            if (dxnetInit.lmh.gotResult()) {
+                ListMessage msg = (ListMessage) dxnetInit.lmh.Result();
+                ListMessage response = externalHandleList(msg);
+                try {
+                    dxnetInit.getDxNet().sendMessage(response);
+                } catch (NetworkException e) {
+                    e.printStackTrace();
+                }
+            }
+
             // todo: andere Message Handler beifügen - ggf array oder so machen?
 
             //chunkS.get(ROOTN);
@@ -299,6 +309,21 @@ public class DxramFsApp extends AbstractApplication {
         }
         return ChunkID.INVALID_ID;
     }
+
+    private String[] list(String name, int startidx) {
+        return list(name, startidx, -1);
+    }
+    
+    private String[] list(String name, int startidx, int maxJoinChars) {
+        // @todo: implement !
+        
+        // if maxJoinChars == -1 -> ignore this value
+        
+        if (startidx>2) return null;
+        String[] back = { "Tick", "Trick", "Track" };
+        return back;
+    }
+
 
     private String exists(String path) {
         String back = "OK";
@@ -626,6 +651,21 @@ public class DxramFsApp extends AbstractApplication {
     private RenameToMessage externalHandleRenameTo(RenameToMessage msg) {
         RenameToMessage response = new RenameToMessage(msg.getSource(), rename(msg.getData(), msg.getToData()), "-");
         return response;
+    }
+
+    private ListMessage externalHandleList(ListMessage msg) {
+        String reqFolder = msg.getData();
+        int reqStartIdx = msg.getCount();
+        String[] contents = list(reqFolder, reqStartIdx, DxramFsConfig.max_pathlength_chars);
+        if (contents == null || contents.length == 0) {
+            return new ListMessage(msg.getSource(), "", -1);
+        } else {
+            return new ListMessage(
+                msg.getSource(),
+                String.join("/", contents),
+                contents.length
+            );
+        }
     }
 
 }

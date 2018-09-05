@@ -94,6 +94,7 @@
     </orderEntry>
     <orderEntry type="library" name="Maven: org.apache.zookeeper:zookeeper:3.4.6" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty:3.7.0.Final" level="project" />
-    <orderEntry type="library" name="Maven: dxutils.perf-timer:perf-timer:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: bsinfo:perf-timer:1.0.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.projectlombok:lombok:1.18.2" level="project" />
   </component>
 </module>

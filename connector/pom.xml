@@ -33,6 +33,8 @@
     <suntools.version>1.5.0</suntools.version>
     <zookeeper.version>3.4.6</zookeeper.version>
     <perftimer.version>1.0.0</perftimer.version>
+    <lombok.version>1.18.2</lombok.version>
+    <dxutils.version>0.5.0-SNAPSHOT</dxutils.version>
   </properties>
 
   <repositories>
@@ -110,10 +112,21 @@
       <version>${zookeeper.version}</version>
     </dependency>
     <dependency>
-      <groupId>dxutils.perf-timer</groupId>
+      <groupId>bsinfo</groupId>
       <artifactId>perf-timer</artifactId>
       <version>${perftimer.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- dependency>
+      <groupId>bsinfo</groupId>
+      <artifactId>dxutils</artifactId>
+      <version>${dxutils.version}</version>
+    </dependency -->
   </dependencies>
   
   <build>

@@ -175,7 +175,7 @@ bis hier 205,25h
 
 ## very next milestones
 
-todo: getFileStatus, listFiles
+todo: listFiles
 todo: open/create
 todo: delete von ordnern ist noch nicht korrekt (ref-array eintrag löschen/aufschieben)!
       EXT und FILE unbeachtet! 
@@ -191,6 +191,17 @@ todo: test alles auf cluster/hilbert
 
 
 
+## notiz 2018-09-05
+
+11:30 - 12:30 ansehn, was in dxnet neu und public ist. Hat sich zu viel geändert auch im build prozess.
+        leider neuerungen zu aufwändig in mein project integrierbar. maven und gradle Tutorial mit allem
+        drum und dran nötig!!!
+
+15:15 - anfang getFilestatus ... wie setze ich das elegant um? - Da derzeit weder zeitstempel
+        noch permissions in dxram (FSNode) abgelegt werden, da es nicht nötig erscheint, ist
+        hier kein RPC notwendig. Infos zur Blockgröße ist eh Dateisystemabhängig und die anzahl der
+        Replikate ist derzeit 0
+15:45 - 18:00   anfang listFiles... liefert dummy
 
 
 ## notiz 2018-09-04

@@ -25,10 +25,10 @@ public class RenameToMessage extends Message {
     public static RenameToMessage result;
 
     public String getData() {
-        return new String(data, StandardCharsets.UTF_8);
+        return new String(data, DxramFsConfig.STRING_STD_CHARSET);
     }
     public String getToData() {
-        return new String(toData, StandardCharsets.UTF_8);
+        return new String(toData, DxramFsConfig.STRING_STD_CHARSET);
     }
 
     @Override
@@ -67,8 +67,8 @@ public class RenameToMessage extends Message {
     public RenameToMessage(final short p_destination, final String p_data, final String to_data) {
         super(p_destination, RenameToMessage.MTYPE, RenameToMessage.TAG);
         gotResult = false;
-        data = p_data.getBytes(StandardCharsets.UTF_8);
-        toData = to_data.getBytes(StandardCharsets.UTF_8);
+        data = p_data.getBytes(DxramFsConfig.STRING_STD_CHARSET);
+        toData = to_data.getBytes(DxramFsConfig.STRING_STD_CHARSET);
     }
 
     // ---------------------------------------------------------------

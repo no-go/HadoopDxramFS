@@ -24,7 +24,7 @@ public class IsDirectoryMessage extends Message {
     public static IsDirectoryMessage result;
 
     public String getData() {
-        return new String(data, StandardCharsets.UTF_8);
+        return new String(data, DxramFsConfig.STRING_STD_CHARSET);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class IsDirectoryMessage extends Message {
     public IsDirectoryMessage(final short p_destination, final String p_data) {
         super(p_destination, IsDirectoryMessage.MTYPE, IsDirectoryMessage.TAG);
         gotResult = false;
-        data = p_data.getBytes(StandardCharsets.UTF_8);
+        data = p_data.getBytes(DxramFsConfig.STRING_STD_CHARSET);
     }
 
     // ---------------------------------------------------------------

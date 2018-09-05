@@ -11,39 +11,44 @@ import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.nio.charset.StandardCharsets;
-
 public class ListMessage extends Message {
 
     public static final Logger LOG = LogManager.getLogger(ListMessage.class.getName());
     public static final byte MTYPE = 42;
     public static final byte TAG = 17;
-    private byte[] data;
+    private byte[] _data;
+    private int _count;
 
     public static boolean gotResult;
     public static ListMessage result;
 
     public String getData() {
-        return new String(data, StandardCharsets.UTF_8);
+        return new String(_data, DxramFsConfig.STRING_STD_CHARSET);
+    }
+
+    public int getCount() {
+        return _count;
     }
 
     @Override
     protected final int getPayloadLength() {
-        return ObjectSizeUtil.sizeofByteArray(data);
+        return ObjectSizeUtil.sizeofByteArray(_data) + Integer.BYTES;
     }
 
     @Override
     protected final void writePayload(
             final AbstractMessageExporter p_exporter
     ) {
-        p_exporter.writeByteArray(data);
+        p_exporter.writeByteArray(_data);
+        p_exporter.writeInt(_count);
     }
 
     @Override
     protected final void readPayload(
             final AbstractMessageImporter p_importer
     ) {
-        data = p_importer.readByteArray(data);
+        _data = p_importer.readByteArray(_data);
+        _count = p_importer.readInt(_count);
     }
 
     // ---------------------------------------------------------------
@@ -54,13 +59,15 @@ public class ListMessage extends Message {
 
     public ListMessage(final short p_destination) {
         super(p_destination, ListMessage.MTYPE, ListMessage.TAG);
-        data = new byte[DxramFsConfig.max_pathlength_chars];
+        _data = new byte[DxramFsConfig.max_pathlength_chars];
+        _count = 0;
     }
 
-    public ListMessage(final short p_destination, final String p_data) {
+    public ListMessage(final short p_destination, final String p_data, final int p_count) {
         super(p_destination, ListMessage.MTYPE, ListMessage.TAG);
         gotResult = false;
-        data = p_data.getBytes(StandardCharsets.UTF_8);
+        _data = p_data.getBytes(DxramFsConfig.STRING_STD_CHARSET);
+        _count = p_count;
     }
 
     // ---------------------------------------------------------------
@@ -73,7 +80,7 @@ public class ListMessage extends Message {
      * @param dxnet
      * @return
      */
-    public boolean send(DXNet dxnet) {
+    public String[] send(DXNet dxnet) {
         try {
             dxnet.sendMessage(this);
             while (gotResult == false) {
@@ -85,14 +92,14 @@ public class ListMessage extends Message {
                 }
             }
             LOG.debug("got Response: " + result.getData());
-            if (result.getData().startsWith("OK")) {
-                return true;
+            if (result.getCount() < 0) {
+                return null;
             } else {
-                return false;
+                return result.getData().split("/");
             }
         } catch (NetworkException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
     }
 

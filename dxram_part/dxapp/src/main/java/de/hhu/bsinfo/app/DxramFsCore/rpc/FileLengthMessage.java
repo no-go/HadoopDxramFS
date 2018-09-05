@@ -25,7 +25,7 @@ public class FileLengthMessage extends Message {
     public static FileLengthMessage result;
 
     public String get_data() {
-        return new String(_data, StandardCharsets.UTF_8);
+        return new String(_data, DxramFsConfig.STRING_STD_CHARSET);
     }
 
     public long get_length() {
@@ -73,7 +73,7 @@ public class FileLengthMessage extends Message {
     public FileLengthMessage(final short p_destination, final String p_data) {
         super(p_destination, FileLengthMessage.MTYPE, FileLengthMessage.TAG);
         gotResult = false;
-        _data = p_data.getBytes(StandardCharsets.UTF_8);
+        _data = p_data.getBytes(DxramFsConfig.STRING_STD_CHARSET);
         _length = -1;
     }
 

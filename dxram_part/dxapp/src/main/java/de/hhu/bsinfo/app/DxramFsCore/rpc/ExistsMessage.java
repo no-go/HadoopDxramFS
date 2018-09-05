@@ -24,7 +24,7 @@ public class ExistsMessage extends Message {
     public static ExistsMessage result;
 
     public String get_data() {
-        return new String(_data, StandardCharsets.UTF_8);
+        return new String(_data, DxramFsConfig.STRING_STD_CHARSET);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class ExistsMessage extends Message {
     public ExistsMessage(final short p_destination, final String p_data) {
         super(p_destination, ExistsMessage.MTYPE, ExistsMessage.TAG);
         gotResult = false;
-        _data = p_data.getBytes(StandardCharsets.UTF_8);
+        _data = p_data.getBytes(DxramFsConfig.STRING_STD_CHARSET);
     }
 
     // ---------------------------------------------------------------

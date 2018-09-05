@@ -15,7 +15,6 @@ public class DxnetInit {
     public DeleteMessage.InHandler dmh;
     public ExistsMessage.InHandler emh;
     public FileLengthMessage.InHandler flmh;
-    public FileStatusMessage.InHandler fsmh;
     public IsDirectoryMessage.InHandler idmh;
     public ListMessage.InHandler lmh;
     public MkDirsMessage.InHandler mdmh;
@@ -55,7 +54,6 @@ public class DxnetInit {
         _dxNet.registerMessageType(DeleteMessage.MTYPE, DeleteMessage.TAG, DeleteMessage.class);
         _dxNet.registerMessageType(ExistsMessage.MTYPE, ExistsMessage.TAG, ExistsMessage.class);
         _dxNet.registerMessageType(FileLengthMessage.MTYPE, FileLengthMessage.TAG, FileLengthMessage.class);
-        _dxNet.registerMessageType(FileStatusMessage.MTYPE, FileStatusMessage.TAG, FileStatusMessage.class);
         _dxNet.registerMessageType(IsDirectoryMessage.MTYPE, IsDirectoryMessage.TAG, IsDirectoryMessage.class);
         _dxNet.registerMessageType(ListMessage.MTYPE, ListMessage.TAG, ListMessage.class);
         _dxNet.registerMessageType(MkDirsMessage.MTYPE, MkDirsMessage.TAG, MkDirsMessage.class);
@@ -67,7 +65,6 @@ public class DxnetInit {
         dmh = new DeleteMessage.InHandler();
         emh = new ExistsMessage.InHandler();
         flmh = new FileLengthMessage.InHandler();
-        fsmh = new FileStatusMessage.InHandler();
         idmh = new IsDirectoryMessage.InHandler();
         lmh = new ListMessage.InHandler();
         mdmh = new MkDirsMessage.InHandler();
@@ -79,7 +76,6 @@ public class DxnetInit {
         _dxNet.register(DeleteMessage.MTYPE, DeleteMessage.TAG, dmh);
         _dxNet.register(ExistsMessage.MTYPE, ExistsMessage.TAG, emh);
         _dxNet.register(FileLengthMessage.MTYPE, FileLengthMessage.TAG, flmh);
-        _dxNet.register(FileStatusMessage.MTYPE, FileStatusMessage.TAG, fsmh);
         _dxNet.register(IsDirectoryMessage.MTYPE, IsDirectoryMessage.TAG, idmh);
         _dxNet.register(ListMessage.MTYPE, ListMessage.TAG, lmh);
         _dxNet.register(MkDirsMessage.MTYPE, MkDirsMessage.TAG, mdmh);
