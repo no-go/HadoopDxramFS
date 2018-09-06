@@ -192,7 +192,10 @@ todo: test alles auf cluster/hilbert
 
 ## notiz 2018-09-06
 
-11:00 - 
+11:00 - 12:00   start implementing listFiles with non-dummy code
+13:45 - 14:00   ...
+todo: test it (with umlaute)
+
 
 ## notiz 2018-09-05
 

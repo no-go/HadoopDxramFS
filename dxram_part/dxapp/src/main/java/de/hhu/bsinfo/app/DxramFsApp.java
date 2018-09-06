@@ -347,13 +347,17 @@ public class DxramFsApp extends AbstractApplication {
             return null;
         }
         ArrayList<String> entries = new ArrayList<>();
-
+        int charCount = 0;
         for (int i=startidx; i<size; i++) {
             if (i < DxramFsConfig.ref_ids_each_fsnode) {
                 long entryChunkId = subNode.get().refIds[i];
                 FsNodeChunk entryChunk = new FsNodeChunk(entryChunkId);
                 chunkS.get(entryChunk);
                 // @todo: handle if maxJoinChars == -1 -> ignore this value
+                if (maxJoinChars > 0) {
+                    charCount += entryChunk.get().name.length() +1; // +1 for "/" in "join()"
+                    if (charCount > maxJoinChars) break;
+                } 
                 entries.add(entryChunk.get().name);
 
             } else {
@@ -700,6 +704,7 @@ public class DxramFsApp extends AbstractApplication {
         if (contents == null || contents.length == 0) {
             return new ListMessage(msg.getSource(), "", -1);
         } else {
+            // we return the (part of an) array with: "entry1/entry2/entry3/entry4/...."
             return new ListMessage(
                 msg.getSource(),
                 String.join("/", contents),
