@@ -175,10 +175,8 @@ bis hier 205,25h
 
 ## very next milestones
 
-todo: listFiles
-todo: open/create
-todo: delete von ordnern ist noch nicht korrekt (ref-array eintrag löschen/aufschieben)!
-      EXT und FILE unbeachtet! 
+todo: test listFiles it (with umlaute)
+todo: create, open
 todo: EXT nutzen (folder und files)!
 todo: test mapreduce wordcount
 ToDo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren ist (und später auch hbase)
@@ -193,8 +191,7 @@ todo: test alles auf cluster/hilbert
 ## notiz 2018-09-06
 
 11:00 - 12:00   start implementing listFiles with non-dummy code
-13:45 - 14:00   ...
-todo: test it (with umlaute)
+14:00 - 15:30   add some EXT (untested) support but not in delete, rename, mkDir
 
 
 ## notiz 2018-09-05

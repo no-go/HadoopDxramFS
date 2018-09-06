@@ -290,12 +290,18 @@ public class DxramFsApp extends AbstractApplication {
      * @param nodeChunk
      * @return
      */
+    // handles EXT
     private long getIn(String name, FsNodeChunk nodeChunk) {
         int size = nodeChunk.get().size;
         String nname = new String(name.getBytes(DxramFsConfig.STRING_STD_CHARSET));
+        int charCount = 0;
+        int extCount = 0;
+        int indexInExt = 0;
+        FsNodeChunk getRefsIn = nodeChunk;
         for (int i=0; i<size; i++) {
-            if (i < DxramFsConfig.ref_ids_each_fsnode) {
-                long entryChunkId = nodeChunk.get().refIds[i];
+            indexInExt = i - extCount * DxramFsConfig.ref_ids_each_fsnode;
+            if (indexInExt < DxramFsConfig.ref_ids_each_fsnode) {
+                long entryChunkId = getRefsIn.get().refIds[indexInExt];
                 FsNodeChunk entryChunk = new FsNodeChunk(entryChunkId);
                 chunkS.get(entryChunk);
                 LOG.debug("getIn: is '" + entryChunk.get().name + "' == '" + nname + "' ?");
@@ -304,16 +310,21 @@ public class DxramFsApp extends AbstractApplication {
                     return entryChunkId;
                 }
             } else {
-                // @todo an die forwardId rann gehen, wenn refSize = ref_ids_each_fsnode
+                getRefsIn = new FsNodeChunk(getRefsIn.get().forwardId);
+                chunkS.get(getRefsIn);
+                LOG.debug("getIn: Need Chunk [%s] as EXT FsNode", String.format("0x%X", getRefsIn.getID()));
+                extCount++;
             }
         }
         return ChunkID.INVALID_ID;
     }
 
+    // handles EXT
     private String[] list(String name, int startidx) {
         return list(name, startidx, -1);
     }
     
+    // handles EXT
     private String[] list(String path, int startidx, int maxJoinChars) {
         String[] pathparts = path.split("/");
         chunkS.get(ROOTN);
@@ -336,6 +347,7 @@ public class DxramFsApp extends AbstractApplication {
         }
     }
 
+    // handles EXT
     private String[] list(FsNodeChunk subNode, int startidx, int maxJoinChars) {
         int size = subNode.get().size;
         if (subNode.get().type != FsNodeType.FOLDER) {
@@ -348,12 +360,15 @@ public class DxramFsApp extends AbstractApplication {
         }
         ArrayList<String> entries = new ArrayList<>();
         int charCount = 0;
+        int extCount = 0;
+        int indexInExt = 0;
+        FsNodeChunk getRefsIn = subNode;
         for (int i=startidx; i<size; i++) {
-            if (i < DxramFsConfig.ref_ids_each_fsnode) {
-                long entryChunkId = subNode.get().refIds[i];
+            indexInExt = i - extCount * DxramFsConfig.ref_ids_each_fsnode;
+            if (indexInExt < DxramFsConfig.ref_ids_each_fsnode) {
+                long entryChunkId = getRefsIn.get().refIds[indexInExt];
                 FsNodeChunk entryChunk = new FsNodeChunk(entryChunkId);
                 chunkS.get(entryChunk);
-                // @todo: handle if maxJoinChars == -1 -> ignore this value
                 if (maxJoinChars > 0) {
                     charCount += entryChunk.get().name.length() +1; // +1 for "/" in "join()"
                     if (charCount > maxJoinChars) break;
@@ -361,7 +376,10 @@ public class DxramFsApp extends AbstractApplication {
                 entries.add(entryChunk.get().name);
 
             } else {
-                // @todo an die forwardId rann gehen, wenn refSize = ref_ids_each_fsnode
+                getRefsIn = new FsNodeChunk(getRefsIn.get().forwardId);
+                chunkS.get(getRefsIn);
+                LOG.debug("list: Need Chunk [%s] as EXT FsNode", String.format("0x%X", getRefsIn.getID()));
+                extCount++;
             }
         }
 
@@ -369,6 +387,7 @@ public class DxramFsApp extends AbstractApplication {
     }
 
 
+    // handles EXT
     private String exists(String path) {
         String back = "OK";
 
@@ -417,7 +436,9 @@ public class DxramFsApp extends AbstractApplication {
             } else {
                 subNode = new FsNodeChunk(parentId);
                 chunkS.get(subNode);
-                // @todo handle EXT
+                
+                // @todo EXT to handle more than ref_ids_each_fsnode entries !!!!!
+                
                 if (subNode.get().size < ref_ids_each_fsnode) {
                     for (int j=0; j<subNode.get().refSize; j++) {
                         LOG.debug("refIds[%d] is Chunk [%s]", j, String.format("0x%X", subNode.get().refIds[j]));
@@ -457,11 +478,15 @@ public class DxramFsApp extends AbstractApplication {
             if (removeS.remove(nodeChunk.getID()) != 1) return false;
             return true;
         } else {
+            
+            // @todo EXT to handle more than ref_ids_each_fsnode entries !!!!!
             // @todo delete FILE and handle folder and files in EXT fsNodes
+            
         }
         return false;
     }
 
+    // handles EXT
     private String isDir(String path) {
         String back = "OK";
 
@@ -506,7 +531,10 @@ public class DxramFsApp extends AbstractApplication {
         LOG.debug("Create %s on Chunk [%s]", name, String.format("0x%X", newdir.getID()));
         //LOG.debug("after put " + newdir.get().name);
 
-        // @todo handle more than ref_ids_each_fsnode entries !!
+
+        // @todo EXT to handle more than ref_ids_each_fsnode entries !!
+        
+        
         int refSize = parentNode.get().refSize;
         parentNode.get().refIds[refSize] = newdir.getID();
         parentNode.get().size++;
@@ -525,7 +553,9 @@ public class DxramFsApp extends AbstractApplication {
         String back = "OK";
         if (from.length() == 0) return "fail. / not moveable.";
         if (exists(to).startsWith("OK")) return "fail. '"+to+"' still exists.";
-        // @todo if "to" is a folder, we have to move a folder or file into that folder and check before, if this new structure exists,too!
+        /* @todo if "to" is a folder, we have to move a folder or file into that folder and 
+           check before, if this new structure exists,too!
+        */
         if (!exists(from).startsWith("OK")) return "fail. '"+from+"' does not exists.";
 
         String[] fromParts = from.split("/");
@@ -573,7 +603,8 @@ public class DxramFsApp extends AbstractApplication {
         // @todo error handling
         chunkS.put(fromChunk);
         
-        // @todo handle more than ref_ids_each_fsnode entries !!!!!
+        // @todo EXT to handle more than ref_ids_each_fsnode entries !!!!!
+        
         int refSize = toParentChunk.get().refSize;
         toParentChunk.get().refIds[refSize] = fromChunk.getID();
         toParentChunk.get().size++;
@@ -587,11 +618,11 @@ public class DxramFsApp extends AbstractApplication {
 
     // ------------------------------------------------------------------------------------------------
 
+    // handles EXT
     private ExistsMessage externalHandleExists(ExistsMessage msg) {
         ExistsMessage response = new ExistsMessage(msg.getSource(), exists(msg.get_data()));
         return response;
     }
-
 
     private MkDirsMessage externalHandleMkDirs(MkDirsMessage msg) {
         String back;
@@ -624,11 +655,13 @@ public class DxramFsApp extends AbstractApplication {
         return response;
     }
 
+    // handles EXT
     private IsDirectoryMessage externalHandleIsDirectory(IsDirectoryMessage msg) {
         IsDirectoryMessage response = new IsDirectoryMessage(msg.getSource(), isDir(msg.getData()));
         return response;
     }
 
+    // handles EXT
     private FileLengthMessage externalHandleFileLength(FileLengthMessage msg) {
         String path = msg.get_data();
         long fileLength = -1;
@@ -697,6 +730,7 @@ public class DxramFsApp extends AbstractApplication {
         return response;
     }
 
+    // handles EXT
     private ListMessage externalHandleList(ListMessage msg) {
         String reqFolder = msg.getData();
         int reqStartIdx = msg.getCount();
