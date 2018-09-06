@@ -6,6 +6,10 @@ instead of HDFS.
 
 **It is still in pre Alpha state!** and is still working in a `/tmp/myfs/` folder instead of dxram!
 
+**since 6. Sep. 2018**: `exists`, `mkdir`, `list`, `isdir`, `size`, `delete` and `rename` works in DXRAM,
+but `mkdir`, `delete` and `rename` does not with more than `ref_ids_each_fsnode` entries.
+UTF8/16 chars or a path with more than `max_pathlength_chars` are a problem, too.
+
 ![logo](notes/logo.png)
 
 ## Links
@@ -99,7 +103,9 @@ use hadoop fs CLI to access `dxram://namenode:9000` from `core-site.xml`
 
 ## todo
 
--   extract dxnet or dxram hostname/ip/port frome hadoop fs-scheme!
+-   extract dxnet or dxram hostname/ip/port from hadoop fs-scheme!
+-   switch to dxnet gradle (since 4. Sep 2018) in connector and dxram_part
+-   Check,if ASCII-only filenames, no append() and timestamp with 0 in Filesystem is a problem for mapreduce or HBASE
 
 ## other stuff
 

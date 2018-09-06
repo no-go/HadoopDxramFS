@@ -6,7 +6,7 @@ hier meine Basis.
 
 # Roadmap
 
-- HBASE + Hadoop installation localhost und einfache tests (2017-0-19)
+- HBASE + Hadoop installation localhost und einfache tests (2017-10-19)
 - zookeeper und kerberos
 - Entscheidung: nur HBASE thrift interface, Hadoop + libfuse oder Hadoop FileSystem
 - Recherche andere Hadoop Filesystem Connectoren
@@ -150,17 +150,20 @@ bis hier 205,25h
 +---------------+-------------------------------------------+--------------+-----------------------
 |  2018-07-20   | Vortrag DXGraph                           |         1,5  |
 +---------------+-------------------------------------------+--------------+-----------------------
-|  2018-08-17   |    - Fr                                   |         7,5  | Wiedereinarbeitung in code nach langer pause (excl. 17.8.)
+|  2018-08-10   |    - Fr                                   |         7,5  | Wiedereinarbeitung in code nach langer pause (excl. 17.8.)
 +---------------+-------------------------------------------+--------------+-----------------------
-|               |                                           |              | Erste RPC Messages und einbau eine Synchronen request-response logik (incl. 21.8.)
-|  2018-08-24   |    - Fr                                   |       22,75  | Erste Versuche, Ordner in DXRAM zu speichern (incl. 24.8.)
+| ab            |                                           |              | Erste RPC Messages und einbau eine Synchronen 
+|               |                                           |              | request-response logik (incl. 21.8.)
+|  2018-08-17   |    - Fr                                   |       22,75  | Erste Versuche, Ordner in DXRAM zu speichern (incl. 24.8.)
 +---------------+-------------------------------------------+--------------+-----------------------
-|  2018-08-29   |    - Fr (inkl)                            |       25,5   | Erfolgreiches anlegen und testen, ob ordner oder datei existiert.
+|  2018-08-24   |    - Fr (inkl)                            |       25,5   | Erfolgreiches anlegen und testen, ob ordner oder datei existiert.
 |               |                                           |              | Wechsel zu dxapp gradle version.
 |               |                                           |              | start implementierung von delete
 +---------------+-------------------------------------------+--------------+-----------------------
-|               |                                           |              | 
-
+|  2018-08-31   |    - Fr (inkl)                            |       14     | Fertigstellung und Probleme mit Umlaute in DXRAM getestet: 
+|               |                                           |              |  exists, mkdir, list, isdir, size, delete, rename
++---------------+-------------------------------------------+--------------+-----------------------
+|  2018-09-07
 
 
 
@@ -175,24 +178,29 @@ bis hier 205,25h
 
 ## very next milestones
 
-todo: test listFiles it (with umlaute)
 todo: create, open
 todo: EXT nutzen (folder und files)!
 todo: test mapreduce wordcount
-ToDo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren ist (und später auch hbase)
+todo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren ist (und später auch hbase)
 todo: test hbase (cli)
 todo: test mapreduce java code beispiel
 todo: test hbase java code beispiel
 todo: test alles auf cluster/hilbert
+todo: because dxram use ASCII for String, /näö and /nöä is the same!
 
 -----------------------------------------------------------------------------------------------
+
+
 
 
 ## notiz 2018-09-06
 
 11:00 - 12:00   start implementing listFiles with non-dummy code
 14:00 - 15:30   add some EXT (untested) support but not in delete, rename, mkDir
+15:30 - 16:45   listFiles tested (not EXT) and OK
+16:45 - 17:00   Project-Doku
 
+4h
 
 ## notiz 2018-09-05
 
@@ -206,20 +214,24 @@ todo: test alles auf cluster/hilbert
         Replikate ist derzeit 0
 15:45 - 18:00   anfang listFiles... liefert dummy
 
+3,75h
 
 ## notiz 2018-09-04
 
 13:00 - 13:30   test rekursives löschen (ok, aber problem mit umlauten)
 13:30 - 15:15   debugging umlaute equals problem - DXRAM arbeitet mit ASCII für strings
-15:15 - 17:15   renameTo() - erstaunlich, was der connector bereits an "ordner in ordner verschieben" organisiert und in der DxramFsApp nicht
-                implementiert sein muss!
+15:15 - 17:15   renameTo() - erstaunlich, was der connector bereits an "ordner in ordner verschieben" organisiert 
+                und in der DxramFsApp nicht implementiert sein muss!
 
+4,25h
 
 ## notiz 2018-09-03
 
 15:45 - 17:45 debugging und implemetierung von delete
 -> rekursives löschen mit unterordnern sollte nun klappen. ungetestet.
 -> es bleibt dabei, dass der hadoop node das rekursive implementiert!!!
+
+2h
 
 tested: hadoop fs -rm /c/test2
 -> nein, weil test2 ordner ist (ok)

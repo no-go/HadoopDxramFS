@@ -292,12 +292,19 @@ public class DxramFsApp extends AbstractApplication {
      */
     // handles EXT
     private long getIn(String name, FsNodeChunk nodeChunk) {
-        int size = nodeChunk.get().size;
+        // nodeChunk is a folder and we do not believe it needs "long" to count the files in it!
+        int size = (int) nodeChunk.get().size; 
         String nname = new String(name.getBytes(DxramFsConfig.STRING_STD_CHARSET));
         int charCount = 0;
         int extCount = 0;
         int indexInExt = 0;
         FsNodeChunk getRefsIn = nodeChunk;
+        
+        // handle some specials about the root entry
+        if (name.equals("") || name.equals("/")) {
+            return ROOT_CID;
+        }
+        
         for (int i=0; i<size; i++) {
             indexInExt = i - extCount * DxramFsConfig.ref_ids_each_fsnode;
             if (indexInExt < DxramFsConfig.ref_ids_each_fsnode) {
@@ -314,6 +321,7 @@ public class DxramFsApp extends AbstractApplication {
                 chunkS.get(getRefsIn);
                 LOG.debug("getIn: Need Chunk [%s] as EXT FsNode", String.format("0x%X", getRefsIn.getID()));
                 extCount++;
+                i--;
             }
         }
         return ChunkID.INVALID_ID;
@@ -327,14 +335,13 @@ public class DxramFsApp extends AbstractApplication {
     // handles EXT
     private String[] list(String path, int startidx, int maxJoinChars) {
         String[] pathparts = path.split("/");
-        chunkS.get(ROOTN);
-        if (ROOTN.get().size < 1) { // FS is empty
+        FsNodeChunk subNode = ROOTN;
+        long subChunkId = ROOT_CID;
+        chunkS.get(subNode);
+        if (subNode.get().size < 1) { // FS is empty
             return null;
         } else {
-            FsNodeChunk subNode = ROOTN;
-            long subChunkId = ROOT_CID;
-            int i;
-            for (i=0; i < pathparts.length; i++) {
+            for (int i=0; i < pathparts.length; i++) {
                 subChunkId = getIn(pathparts[i], subNode);
                 if (subChunkId == ChunkID.INVALID_ID) {
                     // @todo how to handle "not exists" ?!
@@ -349,12 +356,13 @@ public class DxramFsApp extends AbstractApplication {
 
     // handles EXT
     private String[] list(FsNodeChunk subNode, int startidx, int maxJoinChars) {
-        int size = subNode.get().size;
         if (subNode.get().type != FsNodeType.FOLDER) {
             // return the single filename
             String[] back = { subNode.get().name };
             return back;
         }
+        // nodeChunk is a folder and we do not believe it needs "long" to count the files in it!
+        int size = (int) subNode.get().size;
         if (startidx >= size) {
             return null;
         }
@@ -380,6 +388,7 @@ public class DxramFsApp extends AbstractApplication {
                 chunkS.get(getRefsIn);
                 LOG.debug("list: Need Chunk [%s] as EXT FsNode", String.format("0x%X", getRefsIn.getID()));
                 extCount++;
+                i--;
             }
         }
 
