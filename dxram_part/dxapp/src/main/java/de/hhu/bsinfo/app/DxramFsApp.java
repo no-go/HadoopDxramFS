@@ -291,7 +291,7 @@ public class DxramFsApp extends AbstractApplication {
      * @return
      */
     private long getIn(String name, FsNodeChunk nodeChunk) {
-        int size = nodeChunk.get().refSize;
+        int size = nodeChunk.get().size;
         String nname = new String(name.getBytes(DxramFsConfig.STRING_STD_CHARSET));
         for (int i=0; i<size; i++) {
             if (i < DxramFsConfig.ref_ids_each_fsnode) {
@@ -314,14 +314,54 @@ public class DxramFsApp extends AbstractApplication {
         return list(name, startidx, -1);
     }
     
-    private String[] list(String name, int startidx, int maxJoinChars) {
-        // @todo: implement !
-        
-        // if maxJoinChars == -1 -> ignore this value
-        
-        if (startidx>2) return null;
-        String[] back = { "Tick", "Trick", "Track" };
-        return back;
+    private String[] list(String path, int startidx, int maxJoinChars) {
+        String[] pathparts = path.split("/");
+        chunkS.get(ROOTN);
+        if (ROOTN.get().size < 1) { // FS is empty
+            return null;
+        } else {
+            FsNodeChunk subNode = ROOTN;
+            long subChunkId = ROOT_CID;
+            int i;
+            for (i=0; i < pathparts.length; i++) {
+                subChunkId = getIn(pathparts[i], subNode);
+                if (subChunkId == ChunkID.INVALID_ID) {
+                    // @todo how to handle "not exists" ?!
+                    return null;
+                }
+                subNode = new FsNodeChunk(subChunkId);
+                chunkS.get(subNode);
+            }
+            return list(subNode, startidx, maxJoinChars);
+        }
+    }
+
+    private String[] list(FsNodeChunk subNode, int startidx, int maxJoinChars) {
+        int size = subNode.get().size;
+        if (subNode.get().type != FsNodeType.FOLDER) {
+            // return the single filename
+            String[] back = { subNode.get().name };
+            return back;
+        }
+        if (startidx >= size) {
+            return null;
+        }
+        ArrayList<String> entries = new ArrayList<>();
+
+        for (int i=startidx; i<size; i++) {
+            if (i < DxramFsConfig.ref_ids_each_fsnode) {
+                long entryChunkId = subNode.get().refIds[i];
+                FsNodeChunk entryChunk = new FsNodeChunk(entryChunkId);
+                chunkS.get(entryChunk);
+                // @todo: handle if maxJoinChars == -1 -> ignore this value
+                entries.add(entryChunk.get().name);
+
+            } else {
+                // @todo an die forwardId rann gehen, wenn refSize = ref_ids_each_fsnode
+            }
+        }
+
+        return entries.toArray(new String[entries.size()]);
     }
 
 
