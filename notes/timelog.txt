@@ -178,7 +178,9 @@ bis hier 205,25h
 
 ## very next milestones
 
-todo: create, open
+todo: create + DxramOutputStream
+todo: write and read Bytes Message (?!)
+todo: open
 todo: EXT nutzen (folder und files)!
 todo: test mapreduce wordcount
 todo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren ist (und später auch hbase)
@@ -191,7 +193,11 @@ todo: because dxram use ASCII for String, /näö and /nöä is the same!
 -----------------------------------------------------------------------------------------------
 
 
+## notiz 2018-09-10
 
+15:00 - 16:00 create file angefangen. 
+17:15 - 18:15 vergleich GoogleHadoopOutputStream, wie geht java.nio.channels.Channels
+        lernen, wie das mit den output stream in java geht und mit hadoop
 
 ## notiz 2018-09-06
 

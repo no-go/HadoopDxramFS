@@ -77,6 +77,10 @@ public class DxramFile {
         return _absPath;
     }
 
+    public String toString() {
+        return _absPath.toString();
+    }
+
 
 
 
@@ -193,7 +197,7 @@ public class DxramFile {
 
 
 
-    //-------------------------------------------------------------------------------------- create
+    //---------------------------------------------------------------------------------- create (new, write a byte)
     public FSDataOutputStream create(
         int bufferSize, 
         short replication,
@@ -205,34 +209,44 @@ public class DxramFile {
         if (this.exists() && this.isDirectory()) {
             throw new IOException("existing directory");
         }
-        if (this.exists()) throw new FileAlreadyExistsException("file still exists");
-        
-        /// @todo File OP
-        //send("create: java io file.getAbsolutePath() " + _dummy.getName());
-        String absolutePath = _dummy.getAbsolutePath();
-        String filePath = absolutePath.substring(0, absolutePath.lastIndexOf(Path.SEPARATOR));
-        
-        //LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName() + "() filepath = {}",filePath);
-        
-        /// @todo File OP
-        //send("create: java io Files.notExists(Paths.get(filePath))) " + filePath);
-        if (Files.notExists(Paths.get(filePath))) {
-            Path absF = lpath2hpath(filePath);
-            DxramFile dxfile = new DxramFile(_dxnet, absF, _uri);
+        if (this.exists()) {
+            throw new FileAlreadyExistsException("file still exists");
+        }
+        // get dir
+        String fileDir = hpath2path(_absPath).substring(0, hpath2path(_absPath).lastIndexOf(Path.SEPARATOR));
+        // check, if dir still exists
+        ExistsMessage msg = new ExistsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, fileDir);
+        boolean fileDirExists = msg.send(_dxnet);
+        Path hpath = new Path(_uri.toString() + fileDir);
+        if (!fileDirExists) {
+            DxramFile dxfile = new DxramFile(_dxnet, hpath, _uri);
             dxfile.mkdirs();
         } else {
             if (recursive == false) throw new IOException("director(ies) do not exists");
         }
         
-        /// @todo File OP
-        //send("create: java io file.createNewFile() " + _dummy.getName());
-        _dummy.createNewFile();
-        OutputStream out = new FileOutputStream(_dummy);
-        FSDataOutputStream outs = new FSDataOutputStream(out, (Statistics)null);
+        LOG.debug("createNewFile: '" + _absPath.getName() + "' in '" + hpath + "'");
+        DxramOutputStream dxouts = new DxramOutputStream(hpath2path(_absPath), _dxnet);
+
+        FSDataOutputStream outs = new FSDataOutputStream(dxouts, (Statistics)null) {
+            @Override
+            public void close() throws IOException {
+                // close normal FSDataOutputStream, which close the DxramOutputStream:
+                super.close();
+                //completePendingCommand();
+                //disconnect(client);
+            }
+        };
+
+        // We do not need the dummy stuff for a local filesystem anymore
+        //_dummy.createNewFile();
+        //OutputStream out = new FileOutputStream(_dummy);
+        //FSDataOutputStream outs = new FSDataOutputStream(out, (Statistics)null);
+
         return outs;
     }
 
-    //-------------------------------------------------------------------------------------- open
+    //-------------------------------------------------------------------------------------- open (get, read)
     public FSDataInputStream open(int bufferSize) throws IOException {
         if (this.isDirectory()) throw new IOException("is directory");
         byte[] data = new byte[(int) this.length()];
@@ -248,11 +262,9 @@ public class DxramFile {
         return dais;
     }
 
-    public String toString() {
-        return _absPath.toString();
-    }
-    
-    
+
+    //------------------------------------------------------------------------- getFileBlockLocations
+
     public BlockLocation[] getFileBlockLocations(
         long start,
         long len
