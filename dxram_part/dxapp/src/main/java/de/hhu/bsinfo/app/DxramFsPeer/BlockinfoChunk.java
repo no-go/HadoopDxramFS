@@ -34,8 +34,8 @@ public class BlockinfoChunk extends DataStructure {
     @Override
     public void exportObject(final Exporter p_exporter) {
         p_exporter.writeLong(_blockinfo.ID);
-        p_exporter.writeLong(_blockinfo.offset);
-        p_exporter.writeLong(_blockinfo.length);
+        p_exporter.writeInt(_blockinfo.offset);
+        p_exporter.writeInt(_blockinfo.length);
         p_exporter.writeBoolean(_blockinfo.corrupt);
         p_exporter.writeLong(_blockinfo.storageId);
         p_exporter.writeString(_blockinfo.host);
@@ -46,8 +46,8 @@ public class BlockinfoChunk extends DataStructure {
     @Override
     public void importObject(final Importer p_importer) {
         _blockinfo.ID = p_importer.readLong(_blockinfo.ID);
-        _blockinfo.offset = p_importer.readLong(_blockinfo.offset);
-        _blockinfo.length = p_importer.readLong(_blockinfo.length);
+        _blockinfo.offset = p_importer.readInt(_blockinfo.offset);
+        _blockinfo.length = p_importer.readInt(_blockinfo.length);
         _blockinfo.corrupt = p_importer.readBoolean(_blockinfo.corrupt);
         _blockinfo.storageId = p_importer.readLong(_blockinfo.storageId);
         _blockinfo.host = p_importer.readString(_blockinfo.host);
@@ -59,8 +59,8 @@ public class BlockinfoChunk extends DataStructure {
     public int sizeofObject() {
         int size = 0;
         size += Long.BYTES; // ID
-        size += Long.BYTES; // offset
-        size += Long.BYTES; // length
+        size += Integer.BYTES; // offset
+        size += Integer.BYTES; // length
         /// @todo I use a complete byte to store a bit? yes, this is what serilisation do here
         size += Byte.BYTES; // corrupt
         size += Long.BYTES; // storageId

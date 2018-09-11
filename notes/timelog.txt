@@ -192,6 +192,32 @@ todo: because dxram use ASCII for String, /näö and /nöä is the same!
 
 -----------------------------------------------------------------------------------------------
 
+## notiz 2018-09-11
+
+15:45 - 17:00 weiter implementierung eigener Output stream
+
+
+        --------------------------------------------------------!!!
+
+        Ich bin mit nicht ganz sicher, aber ich habe den eindruck, dass ich die
+        Sache mit den Blöcken und der Blocklocation speziell in einem eigenen
+        Input und Output Stream nutzen muss. Einen direkten zugriff durch das
+        Dateisystem auf die Blöcke ist für mich nicht erkennbar. Ich vermute
+        der Ablauf ist in etwa so:
+        
+        - mapreduce will auf bytes x-z zugreifen
+        - es wird ermittelt, in welchen Blocks diese bytes in der Datei liegen
+        - es wird zu der Datei gefragt, wo ihre Blöcke alle liegen
+        - man nimmt sich die Locations raus, die zu x-z passen
+        - man wechelt in hadoop zu dem Node, wo die Blöcke liegen
+        - beim zugriff auf die Datei mit einem Stream wird nun
+          direkt auf die stelle wo x-z liegt gesprungen
+        - stream läd den passenden Block (was schnell geht, da auf dem Node
+          ist er ja gespeichert)
+        - mapreduce-job fummelt im stream herum und macht am ende close = flush
+
+        --------------------------------------------------------!!!
+
 
 ## notiz 2018-09-10
 
