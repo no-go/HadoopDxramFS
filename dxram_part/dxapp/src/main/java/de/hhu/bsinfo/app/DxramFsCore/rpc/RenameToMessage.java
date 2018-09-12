@@ -17,7 +17,7 @@ public class RenameToMessage extends Message {
 
     public static final Logger LOG = LogManager.getLogger(RenameToMessage.class.getName());
     public static final byte MTYPE = 42;
-    public static final byte TAG = 20;
+    public static final byte TAG = 19;
     private byte[] data;
     private byte[] toData;
 

@@ -15,7 +15,7 @@ public class ListMessage extends Message {
 
     public static final Logger LOG = LogManager.getLogger(ListMessage.class.getName());
     public static final byte MTYPE = 42;
-    public static final byte TAG = 17;
+    public static final byte TAG = 16;
     private byte[] _data;
     private int _count;
 

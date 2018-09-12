@@ -1,66 +1,69 @@
 package de.hhu.bsinfo.app.dxramfscore.rpc;
 
+import de.hhu.bsinfo.app.dxramfscore.Block;
+
+import de.hhu.bsinfo.app.dxramfscore.DxramFsConfig;
 import de.hhu.bsinfo.dxnet.DXNet;
 import de.hhu.bsinfo.dxnet.MessageReceiver;
 import de.hhu.bsinfo.dxnet.core.AbstractMessageExporter;
 import de.hhu.bsinfo.dxnet.core.AbstractMessageImporter;
 import de.hhu.bsinfo.dxnet.core.Message;
 import de.hhu.bsinfo.dxnet.core.NetworkException;
-import de.hhu.bsinfo.app.dxramfscore.DxramFsConfig;
 import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.nio.charset.StandardCharsets;
+public class AskBlockMessage extends Message {
 
-public class OpenMessage extends Message {
-
-    public static final Logger LOG = LogManager.getLogger(OpenMessage.class.getName());
+    public static final Logger LOG = LogManager.getLogger(AskBlockMessage.class.getName());
     public static final byte MTYPE = 42;
-    public static final byte TAG = 19;
-    private byte[] data;
+    public static final byte TAG = 20;
+    private long _id;
 
-    public static boolean gotResult;
-    public static OpenMessage result;
+    public static Block _result;
+    public static boolean success;
 
-    public String getData() {
-        return new String(data, DxramFsConfig.STRING_STD_CHARSET);
+    public long getAskBlockId() {
+        return _id;
     }
 
     @Override
     protected final int getPayloadLength() {
-        return ObjectSizeUtil.sizeofByteArray(data);
+        return Long.BYTES;
     }
 
     @Override
     protected final void writePayload(
             final AbstractMessageExporter p_exporter
     ) {
-        p_exporter.writeByteArray(data);
+        p_exporter.writeLong(_id);
     }
 
     @Override
     protected final void readPayload(
             final AbstractMessageImporter p_importer
     ) {
-        data = p_importer.readByteArray(data);
+        _id = p_importer.readLong(_id);
     }
 
     // ---------------------------------------------------------------
 
-    public OpenMessage() {
+    public AskBlockMessage() {
         super();
     }
 
-    public OpenMessage(final short p_destination) {
-        super(p_destination, OpenMessage.MTYPE, OpenMessage.TAG);
-        data = new byte[DxramFsConfig.max_pathlength_chars];
+    public AskBlockMessage(final short p_destination) {
+        super(p_destination, AskBlockMessage.MTYPE, AskBlockMessage.TAG);
+        _id = 0;
+        _result = null;
+        success = false;
     }
 
-    public OpenMessage(final short p_destination, final String p_data) {
-        super(p_destination, OpenMessage.MTYPE, OpenMessage.TAG);
-        gotResult = false;
-        data = p_data.getBytes(DxramFsConfig.STRING_STD_CHARSET);
+    public AskBlockMessage(final short p_destination, final long id) {
+        super(p_destination, AskBlockMessage.MTYPE, AskBlockMessage.TAG);
+        _id = id;
+        _result = null;
+        success = false;
     }
 
     // ---------------------------------------------------------------
@@ -75,8 +78,9 @@ public class OpenMessage extends Message {
      */
     public boolean send(DXNet dxnet) {
         try {
+            AskBlockMessage._result = null;
             dxnet.sendMessage(this);
-            while (gotResult == false) {
+            while (AskBlockMessage._result == null) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ignored) {
@@ -84,8 +88,8 @@ public class OpenMessage extends Message {
                     // maybe handle response here !!
                 }
             }
-            LOG.debug("got Response: " + result.getData());
-            if (result.getData().startsWith("OK")) {
+            LOG.debug("got Block by ask!");
+            if (AskBlockMessage.success) {
                 return true;
             } else {
                 return false;
@@ -99,19 +103,12 @@ public class OpenMessage extends Message {
 
     public static class InHandler implements MessageReceiver {
 
+        public AskBlockMessage askMsg;
+
         @Override
         public void onIncomingMessage(Message p_message) {
-            result = (OpenMessage) p_message;
-            LOG.info(result.getData());
-            gotResult = true;
-        }
-
-        public Message Result() {
-            return result;
-        }
-
-        public boolean gotResult() {
-            return gotResult;
+            askMsg = (AskBlockMessage) p_message;
+            LOG.info(askMsg._id);
         }
     }
 }

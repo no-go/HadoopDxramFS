@@ -9,7 +9,7 @@ import java.net.InetSocketAddress;
 
 public class DxnetInit {
     private DXNet _dxNet;
-
+    // tag 10 - 20
     public BlockLocationsMessage.InHandler blmh;
     public CreateMessage.InHandler cmh;
     public DeleteMessage.InHandler dmh;
@@ -18,8 +18,13 @@ public class DxnetInit {
     public IsDirectoryMessage.InHandler idmh;
     public ListMessage.InHandler lmh;
     public MkDirsMessage.InHandler mdmh;
-    public OpenMessage.InHandler omh;
     public RenameToMessage.InHandler rtmh;
+
+    public GetBlockMessage.InHandler getBlockmh;
+    public AskBlockMessage.InHandler askBlockmh;
+
+    // tag 21-
+
 
     public DxnetInit(NodePeerConfig nopeConfig, short myNodeId) {
         DXNetConfig conf = new DXNetConfig();
@@ -57,8 +62,10 @@ public class DxnetInit {
         _dxNet.registerMessageType(IsDirectoryMessage.MTYPE, IsDirectoryMessage.TAG, IsDirectoryMessage.class);
         _dxNet.registerMessageType(ListMessage.MTYPE, ListMessage.TAG, ListMessage.class);
         _dxNet.registerMessageType(MkDirsMessage.MTYPE, MkDirsMessage.TAG, MkDirsMessage.class);
-        _dxNet.registerMessageType(OpenMessage.MTYPE, OpenMessage.TAG, OpenMessage.class);
         _dxNet.registerMessageType(RenameToMessage.MTYPE, RenameToMessage.TAG, RenameToMessage.class);
+
+        _dxNet.registerMessageType(GetBlockMessage.MTYPE, GetBlockMessage.TAG, GetBlockMessage.class);
+        _dxNet.registerMessageType(AskBlockMessage.MTYPE, AskBlockMessage.TAG, AskBlockMessage.class);
 
         blmh = new BlockLocationsMessage.InHandler();
         cmh = new CreateMessage.InHandler();
@@ -68,8 +75,10 @@ public class DxnetInit {
         idmh = new IsDirectoryMessage.InHandler();
         lmh = new ListMessage.InHandler();
         mdmh = new MkDirsMessage.InHandler();
-        omh = new OpenMessage.InHandler();
         rtmh = new RenameToMessage.InHandler();
+
+        getBlockmh = new GetBlockMessage.InHandler();
+        askBlockmh = new AskBlockMessage.InHandler();
 
         _dxNet.register(BlockLocationsMessage.MTYPE, BlockLocationsMessage.TAG, blmh);
         _dxNet.register(CreateMessage.MTYPE, CreateMessage.TAG, cmh);
@@ -79,8 +88,10 @@ public class DxnetInit {
         _dxNet.register(IsDirectoryMessage.MTYPE, IsDirectoryMessage.TAG, idmh);
         _dxNet.register(ListMessage.MTYPE, ListMessage.TAG, lmh);
         _dxNet.register(MkDirsMessage.MTYPE, MkDirsMessage.TAG, mdmh);
-        _dxNet.register(OpenMessage.MTYPE, OpenMessage.TAG, omh);
         _dxNet.register(RenameToMessage.MTYPE, RenameToMessage.TAG, rtmh);
+
+        _dxNet.register(GetBlockMessage.MTYPE, GetBlockMessage.TAG, getBlockmh);
+        _dxNet.register(AskBlockMessage.MTYPE, AskBlockMessage.TAG, askBlockmh);
     }
 
     public DXNet getDxNet() {

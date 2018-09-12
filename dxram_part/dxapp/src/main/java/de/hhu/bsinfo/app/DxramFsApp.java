@@ -270,6 +270,36 @@ public class DxramFsApp extends AbstractApplication {
                     e.printStackTrace();
                 }
             }
+            
+            if (dxnetInit.askBlockmh.askMsg != null) {
+                long askId = dxnetInit.askBlockmh.askMsg.getAskBlockId();
+                short dest = dxnetInit.askBlockmh.askMsg.getSource();
+                dxnetInit.askBlockmh.askMsg = null;
+                BlockChunk blockChunk = new BlockChunk(askId);
+                chunkS.get(blockChunk);
+                GetBlockMessage response = null;
+                if (blockChunk.getID() == ChunkID.INVALID_ID) {
+                    response = new GetBlockMessage(dest);
+                    response.setSuccess(false);
+                } else {
+                    response = new GetBlockMessage(dest, blockChunk.get());
+                    response.setSuccess(true);
+                }
+                try {
+                    dxnetInit.getDxNet().sendMessage(response);
+                } catch (NetworkException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            /* only hadoop got such messages
+             * 
+            if (dxnetInit.getBlockmh.gotResult()) {
+                GetBlockMessage msg = (GetBlockMessage) dxnetInit.getBlockmh.Result();
+                AskBlockMessage.success = msg.getSuccess();
+                AskBlockMessage._result = msg.getData();
+            }
+            */
 
             // todo: andere Message Handler beifügen - ggf array oder so machen?
 

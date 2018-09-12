@@ -178,9 +178,15 @@ bis hier 205,25h
 
 ## very next milestones
 
-todo: create + DxramOutputStream
-todo: write and read Bytes Message (?!)
+todo: create 
+todo: ask- and get-Blocks Message mit FsNode + Blockinfo anfrage
+todo: ask- and get-Blocks Message: kalkulation, welcher block nötig ist
+
+todo: write with DxramOutputStream
+todo: ask- and get-Blocks Message testen
+
 todo: open
+
 todo: EXT nutzen (folder und files)!
 todo: test mapreduce wordcount
 todo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren ist (und später auch hbase)
@@ -192,9 +198,15 @@ todo: because dxram use ASCII for String, /näö and /nöä is the same!
 
 -----------------------------------------------------------------------------------------------
 
+## notiz 2018-09-12
+
+11:15 - 12:00 über eigene response und request massages bei blöcken nachgedacht
+16:00 - 19:15 request, response, ask- and get-Block Message 
+
+
 ## notiz 2018-09-11
 
-15:45 - 17:00 weiter implementierung eigener Output stream
+15:45 - 17:15 weiter implementierung eigener Output stream
 
 
         --------------------------------------------------------!!!
