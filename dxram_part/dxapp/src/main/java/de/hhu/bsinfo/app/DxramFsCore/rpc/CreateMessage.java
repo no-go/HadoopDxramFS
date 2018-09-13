@@ -7,6 +7,7 @@ import de.hhu.bsinfo.dxnet.core.AbstractMessageImporter;
 import de.hhu.bsinfo.dxnet.core.Message;
 import de.hhu.bsinfo.dxnet.core.NetworkException;
 import de.hhu.bsinfo.app.dxramfscore.DxramFsConfig;
+import de.hhu.bsinfo.dxramfs.connector.DxramFs;
 import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,6 +20,16 @@ public class CreateMessage extends Message {
     public static final byte MTYPE = 42;
     public static final byte TAG = 11;
     private byte[] data;
+    private long fsNodeChunkId;
+
+    public long getFsNodeChunkId() {
+        return fsNodeChunkId;
+    }
+
+    public void setFsNodeChunkId(long fsNodeChunkId) {
+        this.fsNodeChunkId = fsNodeChunkId;
+    }
+
 
     public static boolean gotResult;
     public static CreateMessage result;
@@ -29,13 +40,14 @@ public class CreateMessage extends Message {
 
     @Override
     protected final int getPayloadLength() {
-        return ObjectSizeUtil.sizeofByteArray(data);
+        return Long.BYTES + ObjectSizeUtil.sizeofByteArray(data);
     }
 
     @Override
     protected final void writePayload(
             final AbstractMessageExporter p_exporter
     ) {
+        p_exporter.writeLong(fsNodeChunkId);
         p_exporter.writeByteArray(data);
     }
 
@@ -43,6 +55,7 @@ public class CreateMessage extends Message {
     protected final void readPayload(
             final AbstractMessageImporter p_importer
     ) {
+        fsNodeChunkId = p_importer.readLong(fsNodeChunkId);
         data = p_importer.readByteArray(data);
     }
 
@@ -54,13 +67,23 @@ public class CreateMessage extends Message {
 
     public CreateMessage(final short p_destination) {
         super(p_destination, CreateMessage.MTYPE, CreateMessage.TAG);
-        data = new byte[DxramFsConfig.max_pathlength_chars];
+        fill(new byte[DxramFsConfig.max_pathlength_chars], DxramFsConfig.INVALID_ID);
     }
 
     public CreateMessage(final short p_destination, final String p_data) {
         super(p_destination, CreateMessage.MTYPE, CreateMessage.TAG);
+        fill(p_data.getBytes(DxramFsConfig.STRING_STD_CHARSET), DxramFsConfig.INVALID_ID);
+    }
+
+    public CreateMessage(final short p_destination, final String p_data, final long fsNodeChunkId) {
+        super(p_destination, CreateMessage.MTYPE, CreateMessage.TAG);
+        fill(p_data.getBytes(DxramFsConfig.STRING_STD_CHARSET), fsNodeChunkId);
+    }
+
+    private void fill(final byte[] p_data, final long fsNodeChunkId) {
         gotResult = false;
-        data = p_data.getBytes(DxramFsConfig.STRING_STD_CHARSET);
+        this.fsNodeChunkId = fsNodeChunkId;
+        data = p_data;
     }
 
     // ---------------------------------------------------------------

@@ -215,8 +215,8 @@ public class DxramFile {
         // get dir
         String fileDir = hpath2path(_absPath).substring(0, hpath2path(_absPath).lastIndexOf(Path.SEPARATOR));
         // check, if dir still exists
-        ExistsMessage msg = new ExistsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, fileDir);
-        boolean fileDirExists = msg.send(_dxnet);
+        ExistsMessage emsg = new ExistsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, fileDir);
+        boolean fileDirExists = emsg.send(_dxnet);
         Path hpath = new Path(_uri.toString() + fileDir);
         if (!fileDirExists) {
             DxramFile dxfile = new DxramFile(_dxnet, hpath, _uri);
@@ -224,9 +224,24 @@ public class DxramFile {
         } else {
             if (recursive == false) throw new IOException("director(ies) do not exists");
         }
-        
+
+        CreateMessage cmsg = new CreateMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
+        boolean res = cmsg.send(_dxnet);
+
+
+
+        long fsNodeId = cmsg.getFsNodeChunkId();
+        if (!res) throw new IOException("create new file in dxram went wrong");
+
         LOG.debug("createNewFile: '" + _absPath.getName() + "' in '" + hpath + "'");
+
+
+
+
         DxramOutputStream dxouts = new DxramOutputStream(hpath2path(_absPath), _dxnet);
+
+
+
 
         FSDataOutputStream outs = new FSDataOutputStream(dxouts, (Statistics)null) {
             @Override

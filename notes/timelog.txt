@@ -178,7 +178,12 @@ bis hier 205,25h
 
 ## very next milestones
 
-todo: create
+
+Filecreate in DxramFile: -----------------
+
+todo: test create empty file
+todo: aus der chunkid die nodeid mit service raussuchen und passend host,ipaddr,port in Blockinfo hinterlegen
+
 todo: BlockLocations/Info abfrage!
 
 todo: ask- and get-Blocks Message mit FsNode + Blockinfo anfrage
@@ -187,9 +192,13 @@ todo: ask- and get-Blocks Message: kalkulation, welcher block nötig ist
 todo: write with DxramOutputStream
 todo: ask- and get-Blocks Message testen
 
+Open in DxramFile: -----------------
+
 todo: open
 
 todo: EXT nutzen (folder und files)!
+todo: delete files
+
 todo: test mapreduce wordcount
 todo: wiederholen, wie hadoop für multiknoten mit mapreduce zu konfigurieren ist (und später auch hbase)
 todo: test hbase (cli)
@@ -206,6 +215,11 @@ todo: because dxram use ASCII for String, /näö and /nöä is the same!
 14:15 - 15:45 untersuchen, wie hadoop das mit dem Stream und den buffer macht 
               sowie die BlockLocations. überlegungen, was als nächstes Programmiert
               werden muss (leeren file erzeugen, Blockinfo/location anfrage, Streambuffer mit Blocks schreiben)
+
+16:45 - 18:45   start create file
+                offen: Blockinfo mit host,ip,port füllen
+
+
 
 neue aufgabe: getBlockLocations requesthandling mit
  - angefragte datei

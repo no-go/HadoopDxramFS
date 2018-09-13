@@ -4,6 +4,7 @@ import java.nio.charset.Charset;
 public class DxramFsConfig {
     // @todo: US_ASCII is fix in DXRAM for string, but it should be the standard java+hadoop utf16 ! (4. Sep 2018)  
     public static final Charset STRING_STD_CHARSET = java.nio.charset.StandardCharsets.US_ASCII;
+    public static final long INVALID_ID = -1;
 
     public static int file_blocksize;
     public static int ref_ids_each_fsnode;

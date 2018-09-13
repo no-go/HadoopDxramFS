@@ -54,7 +54,7 @@ public class AskBlockMessage extends Message {
 
     public AskBlockMessage(final short p_destination) {
         super(p_destination, AskBlockMessage.MTYPE, AskBlockMessage.TAG);
-        _id = 0;
+        _id = DxramFsConfig.INVALID_ID;
         _result = null;
         success = false;
     }

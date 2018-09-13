@@ -301,6 +301,19 @@ public class DxramFsApp extends AbstractApplication {
             }
             */
 
+            if (dxnetInit.cmh.gotResult()) {
+                CreateMessage msg = (CreateMessage) dxnetInit.cmh.Result();
+                CreateMessage response = externalHandleCreate(msg);
+                try {
+                    dxnetInit.getDxNet().sendMessage(response);
+                } catch (NetworkException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+
+
             // todo: andere Message Handler beifügen - ggf array oder so machen?
 
             //chunkS.get(ROOTN);
@@ -583,6 +596,57 @@ public class DxramFsApp extends AbstractApplication {
         chunkS.put(parentNode);
         return newdir.getID();
     }
+    
+    private long mkFile(String name, FsNodeChunk parentNode) {
+        FsNodeChunk newf = new FsNodeChunk();
+        newf.get().init();
+        chunkS.create(newf);
+        LOG.debug("Create %s on Chunk [%s]", name, String.format("0x%X", newf.getID()));
+        
+        newf.get().type = FsNodeType.FILE;
+        newf.get().name = new String(name.getBytes(DxramFsConfig.STRING_STD_CHARSET));
+        newf.get().backId = parentNode.getID();
+        newf.get().forwardId = newf.getID();   // to self as dummy link
+        newf.get().size = 0; // count the total bytes of the file!!
+        newf.get().refSize = 1; // we create a single block with length 0
+        // we increment the refSize of the file, if we need additional blocks
+        // we use EXT, if refSize >= ref_ids_each_fsnode
+
+        BlockinfoChunk binch = new BlockinfoChunk();
+        binch.get().init();
+        chunkS.create(binch);
+        LOG.debug("Create Blockinfo on Chunk [%s]", String.format("0x%X", binch.getID()));
+        newf.get().refIds[0] = binch.getID(); // add the first, single Blockinfo as chunkid
+        chunkS.put(newf);
+        
+        binch.get().offset = 0;  // Offset of the block in the file (index/position of that block in the file)
+        binch.get().length = 0; // store how many byte did we need from this block? INT -> 2GB int limit!?
+        binch.get().corrupt = false;
+        
+        // @todo we have to get it from the nodeid of the chunk lookup and search the concrete values by BootService
+        //binch.get().host;
+        //binch.get().addr;
+        //binch.get().port;
+
+        BlockChunk bloch = new BlockChunk();
+        bloch.get().init();
+        chunkS.create(bloch);
+        LOG.debug("Create Block on Chunk [%s]", String.format("0x%X", bloch.getID()));
+
+        binch.get().storageId = bloch.getID(); // to the BlockChunk id, where the data exists (only 1 id because no/0 replica)
+        chunkS.put(binch);
+
+        // @todo EXT to handle more than ref_ids_each_fsnode entries !!
+        
+        int refSize = parentNode.get().refSize;
+        parentNode.get().refIds[refSize] = newf.getID();
+        parentNode.get().size++;
+        parentNode.get().refSize++;
+
+        // @todo error handling
+        chunkS.put(parentNode);
+        return newf.getID();
+    }
 
     // @todo: is this the correct behavior: /a/b exists and we want to move /c into /a/b but we did not get /a/b/c ! we get an error, that /a/b still exists!
     // ------> HINT: this error did not happend by using the hodoop dxramfs connector, because that code handles it!
@@ -784,6 +848,39 @@ public class DxramFsApp extends AbstractApplication {
                 contents.length
             );
         }
+    }
+    
+    private CreateMessage externalHandleCreate(CreateMessage msg) {
+        String back;
+        String path = msg.getData();
+        String[] pathparts = path.split("/");
+        LOG.debug(String.join(" , ", pathparts));
+        
+        FsNodeChunk subNode = ROOTN;
+        long subChunkId = ROOT_CID;
+
+        if (path.length() > 0) {
+            int i;
+            for (i = 0; i < pathparts.length-1; i++) { // browse to folder
+                subChunkId = getIn(pathparts[i], subNode);
+                if (subChunkId == ChunkID.INVALID_ID) break;
+                subNode = new FsNodeChunk(subChunkId);
+                chunkS.get(subNode);
+            }
+            
+            if (subChunkId == ChunkID.INVALID_ID) {
+                back = "fail. path wrong.";
+            } else {
+                subChunkId = mkFile(pathparts[i], subNode);
+                back = "OK.";
+            }
+
+        } else {
+            back = "fail. name is empty";
+        }
+
+        CreateMessage response = new CreateMessage(msg.getSource(), back, subChunkId);
+        return response;
     }
 
 }
