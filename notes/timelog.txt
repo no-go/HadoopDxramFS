@@ -178,7 +178,9 @@ bis hier 205,25h
 
 ## very next milestones
 
-todo: create 
+todo: create
+todo: BlockLocations/Info abfrage!
+
 todo: ask- and get-Blocks Message mit FsNode + Blockinfo anfrage
 todo: ask- and get-Blocks Message: kalkulation, welcher block nötig ist
 
@@ -197,6 +199,65 @@ todo: test alles auf cluster/hilbert
 todo: because dxram use ASCII for String, /näö and /nöä is the same!
 
 -----------------------------------------------------------------------------------------------
+
+
+## notiz 2018-09-13
+
+14:15 - 15:45 untersuchen, wie hadoop das mit dem Stream und den buffer macht 
+              sowie die BlockLocations. überlegungen, was als nächstes Programmiert
+              werden muss (leeren file erzeugen, Blockinfo/location anfrage, Streambuffer mit Blocks schreiben)
+
+neue aufgabe: getBlockLocations requesthandling mit
+ - angefragte datei
+ - start (long): index des ersten blocks
+ - length (long): anzahl blöcke
+-> Auch hier: splittung von kleiner request message und großer Response message.
+-> Außerdem: schleife, um weitere (length > size of response) daten zu holen.
+-> wichtig: auf korrekte reihenfolge (Offset !) achten und EXT nutzen
+   -> da es nicht einfach ein delete eines Blocks mitten in der datei gibt (!!!)
+      sollte die reihenfolge der refIDs im array und EXT sich nicht ändern.
+   -> löschen und nachrücken von refIDs gibt es nur in Ordnern, wo die Speicherung
+      der Reihenfolge dieser IDs keine Rolle spielt.
+
+
+überlegung, doch auf https://ignite.apache.org/features/igfs.html umzuwechseln.
+Apache Hadoop Dateisystem inmemory. alternative
+
+Ignite hat viel in hadoop angepasst wie. z.b. eigene Jobs für Mapreduce !!!
+
+notizen:
+
+über original DFS Stream von hadoop:
+
+ * DFSOutputStream creates files from a stream of bytes.
+ *
+ * The client application writes data that is cached internally by
+ * this stream. Data is broken up into packets, each packet is
+ * typically 64K in size. A packet comprises of chunks. Each chunk
+ * is typically 512 bytes and has an associated checksum with it.
+ *
+ * When a client application fills up the currentPacket, it is
+ * enqueued into the dataQueue of DataStreamer. DataStreamer is a
+ * thread that picks up packets from the dataQueue and sends it to
+ * the first datanode in the pipeline.
+
+original hadoopfs:
+
+    callGetBlockLocations(ClientProtocol namenode,
+      String src, long start, long length)
+      throws IOException {
+    try {
+      return namenode.getBlockLocations(src, start, length);
+
+früher war es getFileBlockStorageLocations() was dann mit einer Block-Liste
+StorageIDs ausgab. Der namenode verwaltet diese IDs aber nun direkt:
+
+   * This API has been deprecated since the NameNode now tracks datanode
+   * storages separately. Storage IDs can be gotten from {@link
+   * BlockLocation#getStorageIds()}, which are functionally equivalent to
+   * the volume IDs returned here (although a String rather than a byte[]).
+
+
 
 ## notiz 2018-09-12
 

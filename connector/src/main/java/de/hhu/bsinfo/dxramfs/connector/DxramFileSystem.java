@@ -313,6 +313,15 @@ public class DxramFileSystem extends FileSystem {
         return dxfile.getFileStatus();
     }
 
+    // @todo unsure, if we realy need this method wrapper
+    @Override
+    public BlockLocation[] getFileBlockLocations(FileStatus fileStatus, long start, long len) throws IOException {
+        if (fileStatus == null) {
+            return null;
+        }
+        return getFileBlockLocations(fileStatus.getPath(), start, len);
+    }
+
     @Override
     public BlockLocation[] getFileBlockLocations(
             Path f,

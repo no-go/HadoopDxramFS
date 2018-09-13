@@ -4,8 +4,8 @@ import java.util.Arrays;
 
 public class Blockinfo {
     public long ID; // chunkid of that BlockinfoChunk
-    public int offset;  // @todo Offset of the block in the file (do I need this? Did I need it for append?)
-    public int length; // @todo how many byte did we need from this block?
+    public int offset;  // @todo Offset of the block in the file (index/position of that block in the file)
+    public int length; // @todo how many byte did we need from this block? -> 2GB int limit!!
     public boolean corrupt; // @todo how does this happend?
     public long storageId; // to the BlockChunk id, where the data exists (only 1 id because no replica)
     /* we do not have replica like in the blocklocation class of hadoop */
