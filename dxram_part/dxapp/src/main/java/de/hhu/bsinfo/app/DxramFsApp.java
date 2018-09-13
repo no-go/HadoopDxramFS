@@ -624,6 +624,7 @@ public class DxramFsApp extends AbstractApplication {
         binch.get().corrupt = false;
         
         // @todo we have to get it from the nodeid of the chunk lookup and search the concrete values by BootService
+        // -> we should fill this values dynamically on request!!
         //binch.get().host;
         //binch.get().addr;
         //binch.get().port;
