@@ -3,12 +3,14 @@ package de.hhu.bsinfo.app;
 import com.google.gson.annotations.Expose;
 
 import java.util.ArrayList;
+import java.net.InetSocketAddress;
 
 import de.hhu.bsinfo.dxnet.core.NetworkException;
 import de.hhu.bsinfo.dxram.DXRAM;
 import de.hhu.bsinfo.dxram.app.AbstractApplication;
 import de.hhu.bsinfo.dxram.boot.BootService;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
+import de.hhu.bsinfo.dxram.lookup.LookupService;
 import de.hhu.bsinfo.dxram.chunk.ChunkRemoveService;
 import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
 import de.hhu.bsinfo.dxram.engine.DXRAMVersion;
@@ -63,6 +65,7 @@ public class DxramFsApp extends AbstractApplication {
     private long ROOT_CID;
     private BootService bootS;
     private ChunkService chunkS;
+    private LookupService lookS;
     private ChunkRemoveService removeS;
     private NameserviceService nameS;
 
@@ -101,6 +104,7 @@ public class DxramFsApp extends AbstractApplication {
     @Override
     public void main() {
         bootS = getService(BootService.class);
+        lookS = getService(LookupService.class);
         chunkS = getService(ChunkService.class);
         nameS = getService(NameserviceService.class);
         removeS = getService(ChunkRemoveService.class);
@@ -623,18 +627,32 @@ public class DxramFsApp extends AbstractApplication {
         binch.get().length = 0; // store how many byte did we need from this block? INT -> 2GB int limit!?
         binch.get().corrupt = false;
         
-        // @todo we have to get it from the nodeid of the chunk lookup and search the concrete values by BootService
-        // -> we should fill this values dynamically on request!!
-        //binch.get().host;
-        //binch.get().addr;
-        //binch.get().port;
-
         BlockChunk bloch = new BlockChunk();
         bloch.get().init();
         chunkS.create(bloch);
         LOG.debug("Create Block on Chunk [%s]", String.format("0x%X", bloch.getID()));
 
         binch.get().storageId = bloch.getID(); // to the BlockChunk id, where the data exists (only 1 id because no/0 replica)
+
+
+        // @todo we have to get it from the nodeid of the chunk lookup and search the concrete values by BootService
+        // -> we should fill this values dynamically on request!!
+        
+        short blockOwningPeer = lookS.getPrimaryPeer(bloch.getID());
+        InetSocketAddress nodeDetail = bootS.getNodeAddress(blockOwningPeer);
+        
+        binch.get().host = nodeDetail.getHostString(); // hostname or alternative the ip address
+        binch.get().addr = nodeDetail.getAddress().getHostAddress(); // the ip address as string!
+        binch.get().port = nodeDetail.getPort();
+        
+        LOG.debug(
+            "BlockChunk [%s] is on %s (%s:%d)",
+            String.format("0x%X", bloch.getID()),
+            binch.get().host,
+            binch.get().addr,
+            binch.get().port
+        );
+
         chunkS.put(binch);
 
         // @todo EXT to handle more than ref_ids_each_fsnode entries !!

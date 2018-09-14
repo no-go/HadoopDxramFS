@@ -18,12 +18,14 @@ public class DxramOutputStream extends OutputStream {
     private Blockinfo _blockinfo;
 
     /**
-     * Constructor
+     * @todo Constructor
      * @param remotePath is without the dxramfs://host:port part!
      */
     public DxramOutputStream(String remotePath, DXNet dxnet) {
 
         // we need file/FsNode with size, too!!
+
+        // @todo get fsnode ?!
 
         _remotePath = remotePath;
         _dxnet = dxnet;
@@ -33,10 +35,10 @@ public class DxramOutputStream extends OutputStream {
         _blockinfo.init();
         _blockinfo.length = 0;
 
-        // get blockid by calculation and filename via Blocklocations
+        // get blockid by calculation and filename via Blocklocations ?!
 
         // use blockid to load block into buffer
-        AskBlockMessage msg = new AskBlockMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId,4711);
+        AskBlockMessage msg = new AskBlockMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId,0xB1BD000000000007l);
         boolean res = msg.send(_dxnet);
         if (res) {
             _block = AskBlockMessage._result;

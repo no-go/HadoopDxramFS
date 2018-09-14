@@ -7,7 +7,6 @@ import de.hhu.bsinfo.dxnet.core.AbstractMessageImporter;
 import de.hhu.bsinfo.dxnet.core.Message;
 import de.hhu.bsinfo.dxnet.core.NetworkException;
 import de.hhu.bsinfo.app.dxramfscore.DxramFsConfig;
-import de.hhu.bsinfo.dxramfs.connector.DxramFs;
 import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -17,13 +17,18 @@ public class GetBlockMessage extends Message {
     public static final Logger LOG = LogManager.getLogger(GetBlockMessage.class.getName());
     public static final byte MTYPE = 42;
     public static final byte TAG = 18;
-    private Block _block;
+
+    private long bID;
+    private byte[] bdata;
     private boolean _success;
 
     public static boolean gotResult;
     public static GetBlockMessage result;
 
     public Block getData() {
+        Block _block = new Block();
+        _block.ID = bID;
+        _block._data = bdata;
         return _block;
     }
 
@@ -37,15 +42,15 @@ public class GetBlockMessage extends Message {
 
     @Override
     protected final int getPayloadLength() {
-        return (Long.BYTES + DxramFsConfig.file_blocksize + ObjectSizeUtil.sizeofBoolean());
+        return (Long.BYTES + ObjectSizeUtil.sizeofByteArray(bdata) + ObjectSizeUtil.sizeofBoolean());
     }
 
     @Override
     protected final void writePayload(
             final AbstractMessageExporter p_exporter
     ) {
-        p_exporter.writeLong(_block.ID);
-        p_exporter.writeByteArray(_block._data);
+        p_exporter.writeLong(bID);
+        p_exporter.writeByteArray(bdata);
         p_exporter.writeBoolean(_success);
     }
 
@@ -53,8 +58,8 @@ public class GetBlockMessage extends Message {
     protected final void readPayload(
             final AbstractMessageImporter p_importer
     ) {
-        _block.ID = p_importer.readLong(_block.ID);
-        _block._data = p_importer.readByteArray(_block._data);
+        bID = p_importer.readLong(bID);
+        bdata = p_importer.readByteArray(bdata);
         _success = p_importer.readBoolean(_success);
     }
 
@@ -70,15 +75,16 @@ public class GetBlockMessage extends Message {
     public GetBlockMessage(final short p_destination) {
         super(p_destination, GetBlockMessage.MTYPE, GetBlockMessage.TAG);
         gotResult = false;
-        _block = new Block();
-        _block.init();
+        bID = DxramFsConfig.INVALID_ID;
+        bdata = new byte[DxramFsConfig.file_blocksize];
         _success = false;
     }
 
     public GetBlockMessage(final short p_destination, final Block p_data) {
         super(p_destination, GetBlockMessage.MTYPE, GetBlockMessage.TAG);
         gotResult = false;
-        _block = p_data;
+        bID = p_data.ID;
+        bdata = p_data._data;
         _success = false;
     }
 

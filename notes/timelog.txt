@@ -163,7 +163,10 @@ bis hier 205,25h
 |  2018-08-31   |    - Fr (inkl)                            |       14     | Fertigstellung und Probleme mit Umlaute in DXRAM getestet: 
 |               |                                           |              |  exists, mkdir, list, isdir, size, delete, rename
 +---------------+-------------------------------------------+--------------+-----------------------
-|  2018-09-07
+|  2018-09-07   |    - Fr (inkl)                            |       15     | leere Datei anlegen, angefragten Block übertragen, Start mit
+|               |                                           |              | Buffered Stream um Datei mit Daten zu füllen
++---------------+-------------------------------------------+--------------+-----------------------
+|  2018-09-14   |                                           |              | 
 
 
 
@@ -181,16 +184,12 @@ bis hier 205,25h
 
 Filecreate in DxramFile: -----------------
 
-todo: test create empty file
-todo: aus der chunkid die nodeid mit service raussuchen und passend host,ipaddr,port in Blockinfo hinterlegen
-
 todo: BlockLocations/Info abfrage!
-
 todo: ask- and get-Blocks Message mit FsNode + Blockinfo anfrage
 todo: ask- and get-Blocks Message: kalkulation, welcher block nötig ist
 
+todo: Mapping von dxram Peer IP:Port -> dxnet IP:Port -> hadoop IP:xPerfPort (recherce notwendig)
 todo: write with DxramOutputStream
-todo: ask- and get-Blocks Message testen
 
 Open in DxramFile: -----------------
 
@@ -210,16 +209,31 @@ todo: because dxram use ASCII for String, /näö and /nöä is the same!
 -----------------------------------------------------------------------------------------------
 
 
+## notiz 2018-09-14
+
+15:15 - 16:45   start implementing stuff to fill host,ip,port in Blockinfo
+                aus der chunkid die nodeid/peer mit service raussuchen und passend host,ipaddr,port in Blockinfo hinterlegen
+18:30 - 20:45   test file anlegen ok
+                ask- and get-Blocks Message getestet
+
+3,75
+
+todo: heisst replication 1 bei create, dass es nur 1 gibt (also kein replikat)?
+todo: soll length bei ordnern die anzahl der einträge liefern?
+      
+todo: problem erstellung datei in / !!!
+
+
 ## notiz 2018-09-13
 
 14:15 - 15:45 untersuchen, wie hadoop das mit dem Stream und den buffer macht 
               sowie die BlockLocations. überlegungen, was als nächstes Programmiert
               werden muss (leeren file erzeugen, Blockinfo/location anfrage, Streambuffer mit Blocks schreiben)
 
-16:45 - 18:45   start create file
+16:45 - 19:00   start create file
                 offen: Blockinfo mit host,ip,port füllen
 
-
+3,75
 
 neue aufgabe: getBlockLocations requesthandling mit
  - angefragte datei
@@ -278,11 +292,13 @@ StorageIDs ausgab. Der namenode verwaltet diese IDs aber nun direkt:
 11:15 - 12:00 über eigene response und request massages bei blöcken nachgedacht
 16:00 - 19:15 request, response, ask- and get-Block Message 
 
+4
 
 ## notiz 2018-09-11
 
 15:45 - 17:15 weiter implementierung eigener Output stream
 
+1,5
 
         --------------------------------------------------------!!!
 
@@ -311,6 +327,9 @@ StorageIDs ausgab. Der namenode verwaltet diese IDs aber nun direkt:
 15:00 - 16:00 create file angefangen. 
 17:15 - 18:15 vergleich GoogleHadoopOutputStream, wie geht java.nio.channels.Channels
         lernen, wie das mit den output stream in java geht und mit hadoop
+
+2
+
 
 ## notiz 2018-09-06
 
