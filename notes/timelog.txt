@@ -184,12 +184,16 @@ bis hier 205,25h
 
 Filecreate in DxramFile: -----------------
 
+todo: Yarn und Blocklocation: wie weiss YARN mit NodeManager, welcher Node in Hadoop welchen Port bekommt?
+
+todo: Mapping von dxram Peer IP:Port -> dxnet IP:Port -> hadoop IP:xPerfPort (recherce notwendig)
+
 todo: BlockLocations/Info abfrage!
 todo: ask- and get-Blocks Message mit FsNode + Blockinfo anfrage
 todo: ask- and get-Blocks Message: kalkulation, welcher block nötig ist
-
-todo: Mapping von dxram Peer IP:Port -> dxnet IP:Port -> hadoop IP:xPerfPort (recherce notwendig)
 todo: write with DxramOutputStream
+
+todo: problem erstellung datei in / !!!
 
 Open in DxramFile: -----------------
 
@@ -205,8 +209,69 @@ todo: test mapreduce java code beispiel
 todo: test hbase java code beispiel
 todo: test alles auf cluster/hilbert
 todo: because dxram use ASCII for String, /näö and /nöä is the same!
+todo: was sind SequenceFiles
 
 -----------------------------------------------------------------------------------------------
+
+
+
+## notiz 2018-09-15 (Sa)
+
+15:00 - 16:15   recherche bzgl replikat, config, ordner size
+
+The total number of files in the file system will be what's specified in the dfs.replication factor. 
+So, if you set dfs.replication=1, then there will be only one copy of the file in the file system.
+
+=> Mit einer Kopie meinen die, die Datei existiert nur ein mal!
+=> steht in "hdfs-site.xml" das: dfs.replication=1, existieren die Blöcke nur 1 fach
+=> Diese Config-Datei ist nur für HDFS! Dieser und andere DxramFS Default-Werte 
+   stehen in de.hhu.bsinfo.dxramfs.connector.ConfigKeys, wo aber
+   "file_blocksize" durch "core-site.xml" überschrieben werden kann.
+
+    recherche bzgl ordner size
+    --------------------------
+    - todo: ornder sollten nicht -1 sondern 0 an bytes zurückgeben (DONE, aber ungetestet)
+    Im code kommt man an die genutzten bytes des ordners angeblich so:
+      FileSystem.getContentSummary(FileStatus.getPath()).getLength();
+
+16:15 - 17:15   recherche bzgl config vergleich ignite, mapreduce
+
+    todo: xfer port, nutzung von Blocklocations!! Wie mappe ich dxram peer auf dxnet peer auf hadoop node?
+
+    https://hadoop.apache.org/docs/r2.8.3/hadoop-project-dist/hadoop-common/ClusterSetup.html
+    MapReduce zusammenfassung
+    -------------------------
+    2 master:
+    - ein NameNode        (hdfs daemon)
+    - ein ResourceManager (YARN daemon)
+
+    n slaves:
+    - DataNode    (hdfs daemon)
+    - NodeManager (YARN daemon, healthy nutzen vermutlich via statistics des filesystems?)
+
+    - MapReduce Job History Server Daemon (wichtig! oft einzelner rechner!)
+
+    Es gibt read-only xml Configs für alle (..-default.xml) und dann nochmal
+    "site" (?) spezifisch (-site.xml).
+    
+    Es wird nahe gelegt, das Starten der Daemons site-spezifisch mit Environment
+    Variablen und bash-scripten zu steuern: (..-env.sh)
+    
+    Folgendes (und append und time) hatte ich bislang noch nicht in core-site.xml auf
+    dem Schirm: io.file.buffer.size, 131072, Size of read/write buffer used in SequenceFiles. 
+
+    Ein "slaves" file mit allen via ssh erreichbaren YARN sachen zu erreichen. Was
+    nur einmal in yarn gestartet werden muss, wird nur einmal gestartet und sonst je
+    NodeManager! das macht $HADOOP_PREFIX/sbin/start-yarn.sh mit der slaves datei!
+    
+    den start des JobHistory servers darf man nicht vergessen zu starten!
+    
+    -> weiterhin offen: wie nutzt yarn/jobmanager welche daten, um die Blocklocation
+    zu verarbeiten? wo sind in der config diese daten hinterlegt?
+
+todo: Yarn und Blocklocation: wie weiss YARN mit NodeManager, welcher Node in Hadoop welchen Port bekommt?
+
+
 
 
 ## notiz 2018-09-14
@@ -218,12 +283,9 @@ todo: because dxram use ASCII for String, /näö and /nöä is the same!
 
 3,75
 
-todo: heisst replication 1 bei create, dass es nur 1 gibt (also kein replikat)?
-todo: soll length bei ordnern die anzahl der einträge liefern?
+todo: heisst replication 1 bei create, dass es nur 1 gibt (also kein replikat)? ja
+todo: soll length bei ordnern die anzahl der einträge liefern? nein, 0
       
-todo: problem erstellung datei in / !!!
-
-
 ## notiz 2018-09-13
 
 14:15 - 15:45 untersuchen, wie hadoop das mit dem Stream und den buffer macht 

@@ -92,7 +92,7 @@ public class ListMessage extends Message {
                 }
             }
             LOG.debug("got Response: " + result.getData());
-            if (result.getCount() < 0) {
+            if (result.getCount() < 1) { // good till < 0,but < 1 may be better?!
                 return null;
             } else {
                 return result.getData().split("/");

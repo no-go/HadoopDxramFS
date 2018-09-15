@@ -786,16 +786,16 @@ public class DxramFsApp extends AbstractApplication {
     // handles EXT
     private FileLengthMessage externalHandleFileLength(FileLengthMessage msg) {
         String path = msg.get_data();
-        long fileLength = -1;
+        long fileLength = 0;
         String back = "OK";
 
         String[] pathparts = path.split("/");
         LOG.debug(String.join(" , ", pathparts));
         chunkS.get(ROOTN);
         if (path.length() == 0) {
-            back = "no / is a dir";
+            back = "OK / is a dir";
         } else if (ROOTN.get().size < 1) {
-            back = "no / empty";
+            back = "OK / empty";
         } else {
             boolean failure = false;
             FsNodeChunk subNode = ROOTN;
