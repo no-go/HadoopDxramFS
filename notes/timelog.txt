@@ -210,9 +210,22 @@ todo: test hbase java code beispiel
 todo: test alles auf cluster/hilbert
 todo: because dxram use ASCII for String, /näö and /nöä is the same!
 todo: was sind SequenceFiles
+todo: get/set Working Directory
+todo: UNitTests !! https://hadoop.apache.org/docs/r2.7.4/hadoop-project-dist/hadoop-common/filesystem/testing.html
+todo: habe/muss ich FileContext implementieren?
+
 
 -----------------------------------------------------------------------------------------------
 
+## notiz 2018-09-17
+
+12:45 - 15:15 recherche yarn und block locations
+
+            https://issues.apache.org/jira/browse/HDFS-10760
+            Der Port in Blocklocations ist der Port des DataXceiver, was für den NameNode+DataNode
+            von HDFS dazu dient zu wissen, wo der Block liegt.
+            Wie bei Ignite sieht es so aus, dass man für YARN etwas entwickeln muss, damit
+            die Hadoop-"Verarbeitungs-Nodes" zu den "Block-Locations" gemappt werden können.
 
 
 ## notiz 2018-09-15 (Sa)
@@ -269,7 +282,12 @@ So, if you set dfs.replication=1, then there will be only one copy of the file i
     -> weiterhin offen: wie nutzt yarn/jobmanager welche daten, um die Blocklocation
     zu verarbeiten? wo sind in der config diese daten hinterlegt?
 
+    Vorsicht! Seit Hadoop2 (MRv2) ist Job- und TaskManager mit slots veraltet!
+    -> map/reduce slots gibt es nicht mehr. Das sind nun Container!
+
 todo: Yarn und Blocklocation: wie weiss YARN mit NodeManager, welcher Node in Hadoop welchen Port bekommt?
+
+
 
 
 
@@ -3779,6 +3797,8 @@ für fremde Dateisysteme entwicklen kann und das nötige Verhalten in diesem
 Dokument (6 Seiten) festgehalten:
 
 [https://issues.apache.org/jira/secure/attachment/12572328/HadoopFilesystemContract.pdf](https://issues.apache.org/jira/secure/attachment/12572328/HadoopFilesystemContract.pdf)
+
+https://wiki.apache.org/hadoop/HCFS
 
 Darin wird sowohl des Verhalten in konkurierenden Situationen beschrieben,
 das Konsistenz-Model bei CRUD, der Umgang mit Netzwerk Problemen, die Limits
