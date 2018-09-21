@@ -217,9 +217,23 @@ todo: habe/muss ich FileContext implementieren?
 
 -----------------------------------------------------------------------------------------------
 
+## notiz 2018-09-21
+
+14:00 - 16:00   recherche wo die schnittkante zwischen hdfs und YARN ist.
+                Derzeit wirkt in Hadoop 2.8.2 es so, als wenn noch nicht alles von
+                hdfs (aus kompatibilität) auf Container in NodeManager umgebait ist.
+                sehe im code noch "slots". RPC und xFerPort aus BlockLocation
+                weiterhin schleierhaft. Obwohl getBlockLocations() nahezu überall
+                in Hadoop auftaucht, sehe ich immer wieder Verbindungen zu hdfs code.
+                
+
+todo: einlesen in YARN api, konkretes MapReduce word-Count Bespiel raussuchen
+    -> wie geht hadoop hier vor? wo greift BlockLocation im Code?
+    -> was geschieht per default ohne HDFS?
+
 ## notiz 2018-09-17
 
-12:45 - 15:15 recherche yarn und block locations
+12:45 - 15:45 recherche yarn und block locations
 
             https://issues.apache.org/jira/browse/HDFS-10760
             Der Port in Blocklocations ist der Port des DataXceiver, was für den NameNode+DataNode
@@ -227,6 +241,8 @@ todo: habe/muss ich FileContext implementieren?
             Wie bei Ignite sieht es so aus, dass man für YARN etwas entwickeln muss, damit
             die Hadoop-"Verarbeitungs-Nodes" zu den "Block-Locations" gemappt werden können.
 
+todo: vergleich https://apacheignite-fs.readme.io/docs/map-reduce
+todo: mehr mit "ResourceManager" und "NodeManager" beschäftigen.
 
 ## notiz 2018-09-15 (Sa)
 
@@ -255,11 +271,11 @@ So, if you set dfs.replication=1, then there will be only one copy of the file i
     MapReduce zusammenfassung
     -------------------------
     2 master:
-    - ein NameNode        (hdfs daemon)
+    - ein NameNode        (hdfs daemon?)
     - ein ResourceManager (YARN daemon)
 
     n slaves:
-    - DataNode    (hdfs daemon)
+    - DataNode    (hdfs daemon?)
     - NodeManager (YARN daemon, healthy nutzen vermutlich via statistics des filesystems?)
 
     - MapReduce Job History Server Daemon (wichtig! oft einzelner rechner!)
