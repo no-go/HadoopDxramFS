@@ -29,6 +29,13 @@ hier meine Basis.
 - test: muss ich -f (force) z.B. bei "rename" implementieren?
 - test: muss ich einen richtigen Zeitstemple implementieren?
 - test: muss ich (speziell für HBASE) eine append() implementieren?
+ - > ja!
+ 
+ https://stackoverflow.com/questions/42549872/can-apache-yarn-be-used-without-hdfs#42554370
+ 
+ For what "filesystem" is, look at the Filesystem Specification. You need a consistent view across the filesytem: newly create files list(), deleted ones aren't found, updates immediately visible. And rename() of files and directories must be an atomic operation, ideally O(1). It's used for atomic commits of work, checkpoints, ... Oh, and for HBase, append() is needed.
+
+
 - Anpassung und test der dxram, dxnet, hadoop und hbase config, so das leicht verständlich und konfigurierbar ist (evtl. scheme von hadoop nutzen?)
 - untersch. Szenarien testen, bei denen DXNet nicht nur als verbindung auf localhost zwischen hadoop node und dxram peer dient
 - hbase und maprecuce java codebeispiele testen
@@ -166,7 +173,10 @@ bis hier 205,25h
 |  2018-09-07   |    - Fr (inkl)                            |       15     | leere Datei anlegen, angefragten Block übertragen, Start mit
 |               |                                           |              | Buffered Stream um Datei mit Daten zu füllen
 +---------------+-------------------------------------------+--------------+-----------------------
-|  2018-09-14   |                                           |              | 
+|  2018-09-14   |     "                                     |        7,25  | krank. Problem mit verzahnung YAST und HDFS (NodeManager) gefunden.
+|               |                                           |              |
++---------------+-------------------------------------------+--------------+-----------------------
+|  2018-09-21   |                                           |              | 
 
 
 
@@ -217,6 +227,227 @@ todo: habe/muss ich FileContext implementieren?
 
 -----------------------------------------------------------------------------------------------
 
+
+## notiz 2018-09-24
+
+13:45 - 15:15   Vertiefung mapReduce Beispiel, um so den zusammenhang von YAST, NodeManager und FS zu erkennen.
+15:15 - 17:15   YAST ist auf HDFS ausgelegt. Ansonsten (Vermutung) liefert BlockLocation
+                einfach nur "localhost", da YAST davon ausgeht, dass die Sachen auf dem Node, auf dem
+                es erzeugt wird, auch gespeichert wird. YAST scheint sowas erkennen zu können durch
+                Statistiken über cpu,memory,disk -> Problem: Bei uns wird nicht zwingend der
+                Block dort abgelegt, wo ein "create" ausgeführt wird.
+                Aspekt "local": YARN geht davon aus, dass das HDFS auch als locales fs
+                im System eingebunden ist. Stimmt dies wirklich? Wie erkennt YAST, welche Recourcen
+                wie verwendet werden?
+ -> untersuchen, was "ignite" in der implementierung als "BlockLocation" zurück gibt.
+ -> die kochen auch nur mit wasser: viele Klassen sehr leer. Am ende wird auch nur "9001" als port drangeknautscht!
+
+Fazit: Für YARN und MapReduce muss man sich eine für das eigene Dateisystem auch eine eigene Node
+Verwaltung einfallen lassen. Schaut man sich das an: https://apacheignite.readme.io/docs/yarn-deployment
+so muss man wohl HDFS und Yarn nutzen, aber für YARN eine eigne Application bauen.
+Ein genaues augenmerk sollte ich auf so eine konkrete Ignite YARN-App werfen, um hier
+nach der Verwendung der BlockLocations zu suchen, welche dort der Ignite DataNodes entsprechen.
+Der Aufbau ist in https://apacheignite-fs.readme.io/docs/map-reduce (altes MapReduce)
+genauer beschrieben.
+
+!!!! Eine gute überlegung wäre, nun ein Schritt weiter zu gehen und zu schauen, was
+!!!! HBASE konkret nutzt: Hat es eigene YARN Applicationen? Nutzt es das alte Slot Prinzip?
+!!!! Ist HBASE für das MapReduce oder YARN ausgelegt?
+
+
+todo: vergleich https://apacheignite-fs.readme.io/docs/map-reduce
+https://apacheignite-fs.readme.io/docs/file-system
+
+
+modules/hadoop/src/main/java/org/apache/ignite/hadoop/fs/v2/IgniteHadoopFileSystem.java
+
+    /** {@inheritDoc} */
+    @Override public BlockLocation[] getFileBlockLocations(Path path, long start, long len) throws IOException {
+        A.notNull(path, "path");
+
+        IgfsPath igfsPath = convert(path);
+
+        enterBusy();
+
+        try {
+            long now = System.currentTimeMillis();
+
+            List<IgfsBlockLocation> affinity = new ArrayList<>(
+                rmtClient.affinity(igfsPath, start, len));
+
+            BlockLocation[] arr = new BlockLocation[affinity.size()];
+
+            for (int i = 0; i < arr.length; i++)
+                arr[i] = convert(affinity.get(i));
+
+            if (LOG.isDebugEnabled())
+                LOG.debug("Fetched file locations [path=" + path + ", fetchTime=" +
+                    (System.currentTimeMillis() - now) + ", locations=" + Arrays.asList(arr) + ']');
+
+            return arr;
+        }
+        finally {
+            leaveBusy();
+        }
+    }
+
+    /**
+     * Convert IGFS affinity block location into Hadoop affinity block location.
+     *
+     * @param block IGFS affinity block location.
+     * @return Hadoop affinity block location.
+     */
+    private BlockLocation convert(IgfsBlockLocation block) {
+        Collection<String> names = block.names();
+        Collection<String> hosts = block.hosts();
+
+        return new BlockLocation(
+            names.toArray(new String[names.size()]) /* hostname:portNumber of data nodes */,
+            hosts.toArray(new String[hosts.size()]) /* hostnames of data nodes */,
+            block.start(), block.length()
+        ) {
+            @Override public String toString() {
+                try {
+                    return "BlockLocation [offset=" + getOffset() + ", length=" + getLength() +
+                        ", hosts=" + Arrays.asList(getHosts()) + ", names=" + Arrays.asList(getNames()) + ']';
+                }
+                catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+    }
+
+
+  rmtClient ist:
+  import org.apache.ignite.internal.processors.hadoop.impl.igfs.HadoopIgfsWrapper;
+
+    @Override public Collection<IgfsBlockLocation> affinity(final IgfsPath path, final long start,
+        final long len) throws IOException {
+        return withReconnectHandling(new FileSystemClosure<Collection<IgfsBlockLocation>>() {
+            @Override public Collection<IgfsBlockLocation> apply(HadoopIgfsEx hadoop,
+                IgfsHandshakeResponse hndResp) throws IgniteCheckedException, IOException {
+                return hadoop.affinity(path, start, len);
+            }
+        }, path);
+    }
+
+modules/hadoop/src/main/java/org/apache/ignite/internal/processors/hadoop/impl/delegate/HadoopIgfsSecondaryFileSystemDelegateImpl.java
+package org.apache.ignite.internal.processors.hadoop.impl.delegate;
+
+
+    /** {@inheritDoc} */
+    @Override public Collection<IgfsBlockLocation> affinity(IgfsPath path, long start, long len,
+        long maxLen) throws IgniteException {
+        try {
+            BlockLocation[] hadoopBlocks = fileSystemForUser().getFileBlockLocations(convert(path), start, len);
+
+            List<IgfsBlockLocation> blks = new ArrayList<>(hadoopBlocks.length);
+
+            for (int i = 0; i < hadoopBlocks.length; ++i)
+                blks.add(convertBlockLocation(hadoopBlocks[i]));
+
+            return blks;
+        }
+        catch (FileNotFoundException ignored) {
+            return Collections.emptyList();
+        }
+        catch (IOException e) {
+            throw handleSecondaryFsError(e, "Failed affinity for path: " + path);
+        }
+    }
+
+    /**
+     * Convert IGFS affinity block location into Hadoop affinity block location.
+     *
+     * @param block IGFS affinity block location.
+     * @return Hadoop affinity block location.
+     */
+    private IgfsBlockLocation convertBlockLocation(BlockLocation block) {
+        try {
+            String[] names = block.getNames();
+            String[] hosts = block.getHosts();
+
+            return new IgfsBlockLocationImpl(
+                block.getOffset(), block.getLength(),
+                Arrays.asList(names), Arrays.asList(hosts));
+        } catch (IOException e) {
+            throw handleSecondaryFsError(e, "Failed convert block location: " + block);
+        }
+    }
+
+modules/core/src/main/java/org/apache/ignite/igfs/IgfsBlockLocation.java
+modules/core/src/main/java/org/apache/ignite/internal/processors/igfs/IgfsBlockLocationImpl.java
+->
+    private void convertFromNodes(Collection<ClusterNode> nodes) {
+        Collection<String> names = new LinkedHashSet<>();
+        Collection<String> hosts = new LinkedHashSet<>();
+        Collection<UUID> nodeIds = new ArrayList<>(nodes.size());
+
+        for (final ClusterNode node : nodes) {
+            // Normalize host names into Hadoop-expected format.
+            try {
+                Collection<InetAddress> addrs = U.toInetAddresses(node);
+
+                for (InetAddress addr : addrs) {
+                    if (addr.getHostName() == null)
+                        names.add(addr.getHostAddress() + ":" + 9001);
+                    else {
+                        names.add(addr.getHostName() + ":" + 9001); // hostname:portNumber
+                        hosts.add(addr.getHostName());
+                    }
+                }
+            }
+            catch (IgniteCheckedException ignored) {
+                names.addAll(node.addresses());
+            }
+
+            nodeIds.add(node.id());
+        }
+
+        this.nodeIds = nodeIds;
+        this.names = names;
+        this.hosts = hosts;
+    }
+
+
+noch mehr Notizen:
+
+Hadoop Streaming is a utility which allows users to create and run jobs with any 
+executables (e.g. shell utilities) as the mapper and/or the reducer.
+
+YARN ist für HDFS ausgelegt!
+https://stackoverflow.com/questions/42549872/can-apache-yarn-be-used-without-hdfs#42554370
+
+
+For what "filesystem" is, look at the Filesystem Specification. You need a consistent view across 
+the filesytem: newly create files list(), deleted ones aren't found, updates immediately visible. 
+And rename() of files and directories must be an atomic operation, ideally O(1). It's used for 
+atomic commits of work, checkpoints, ... 
+
+---> Oh, and for HBase, append() is needed !!!!!
+
+
+https://hadoop.apache.org/docs/r2.8.2/hadoop-yarn/hadoop-yarn-site/ReservationSystem.html
+
+http://hadoop.apache.org/docs/r2.7.3/hadoop-project-dist/hadoop-common/filesystem/introduction.html
+
+Code weiterhin offen:
+
+- create:
+   -  blockdaten aus file (FSNode) infos holen sowie aus der Blockinfo/location
+   -  blockdaten in buffer laden
+   -  buffer füllen, ändern, flush
+- open:
+   -  noch leer
+
+
+
+
+
+
+
+
 ## notiz 2018-09-21
 
 14:00 - 16:00   recherche wo die schnittkante zwischen hdfs und YARN ist.
@@ -231,6 +462,8 @@ todo: einlesen in YARN api, konkretes MapReduce word-Count Bespiel raussuchen
     -> wie geht hadoop hier vor? wo greift BlockLocation im Code?
     -> was geschieht per default ohne HDFS?
 
+2h
+
 ## notiz 2018-09-17
 
 12:45 - 15:45 recherche yarn und block locations
@@ -243,6 +476,8 @@ todo: einlesen in YARN api, konkretes MapReduce word-Count Bespiel raussuchen
 
 todo: vergleich https://apacheignite-fs.readme.io/docs/map-reduce
 todo: mehr mit "ResourceManager" und "NodeManager" beschäftigen.
+
+3h
 
 ## notiz 2018-09-15 (Sa)
 
@@ -262,6 +497,9 @@ So, if you set dfs.replication=1, then there will be only one copy of the file i
     - todo: ornder sollten nicht -1 sondern 0 an bytes zurückgeben (DONE, aber ungetestet)
     Im code kommt man an die genutzten bytes des ordners angeblich so:
       FileSystem.getContentSummary(FileStatus.getPath()).getLength();
+
+
+1,25h
 
 16:15 - 17:15   recherche bzgl config vergleich ignite, mapreduce
 
@@ -303,8 +541,7 @@ So, if you set dfs.replication=1, then there will be only one copy of the file i
 
 todo: Yarn und Blocklocation: wie weiss YARN mit NodeManager, welcher Node in Hadoop welchen Port bekommt?
 
-
-
+1h
 
 
 
