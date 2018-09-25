@@ -227,6 +227,34 @@ todo: habe/muss ich FileContext implementieren?
 
 -----------------------------------------------------------------------------------------------
 
+## notiz 2018-09-25
+
+14:30 - 15:15 HDFS: NameNode zentraller punkt, der die DataNodes kennt, wo daten liegen
+            -> wie bilde ich das ab?
+            -> vergleich ignite jobtracker
+16:00 - hdfs und hadoop prozessverwaltung sind nicht getrennt. NameNode und DataNode sind unmittelbar
+        mit hdfs verknüpft. YARN ist nicht hdfs unabhängig. Prozessübertragung zwischen Anwendung und
+        DataNodes sowie deren orchestrierung via NameNode ist auf hdfs zugeschnitten.
+        Blocklocation liefert per default "localhost" als dummy.
+
+
+todo: UMBAU DER IDEE!
+
+- aus dxram://localhost:dummyport/ wird dxram://localhost:65220/
+- localhost ist im Konzept von HDFS der hostname des NameNodes !
+- BlockLocation: die host:65221 und host:65222 .... sind im HDFS Konzept die Zugänge zu den DataNodes, zu denen die
+  Prozesse migriert werden mit einem HDFS eigenen xfer Protokoll
+- BlockLocation: Was genau muss im "localhost" dummy stehen, wenn es ein fremdes Dateisystem ist?
+- HBASE ohne YARN? YARN mit nur file:/// statt hdfs:// ?
+- zu testen: HBASE single node - geht dies ohne HDFS Namenode/Datanodes?
+- zu testen: HBASE single node - evtl. vergleich mit file:/// ?
+- wie hdfs-site oder core oder mapred-site.xml muss ich mir ein node-mapping für einen multimode betrieb einfallen lassen,
+  so dass BlockLocation Daten (für mich) auswertbar sind. Ggf. auch start-skripte!
+
+
+
+
+http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html#NameNode_and_DataNodes
 
 ## notiz 2018-09-24
 
