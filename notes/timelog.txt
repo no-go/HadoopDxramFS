@@ -227,12 +227,79 @@ todo: habe/muss ich FileContext implementieren?
 
 -----------------------------------------------------------------------------------------------
 
+## notiz 2018-09-26
+
+13:00 - 14:00   Konzept für Multinode und "Missbrauch" von NodeManager und HDFS als "Vehikel"
+                zur prozessmigration (?)
+14:45 - 17:45   überlegung von blocklocation zu erben und eine DxramBlockLocation zu machen, wo
+                dann nur ein Array element drin ist und die dxram peer id gespeichert wird, damit man
+                die in YAST irgendwie einem DataNode von HDFS zuordnen kann
+
+Yarn integration: wie machen es andere?
+http://www.alluxio.org/docs/1.8/en/Running-Alluxio-Yarn-Integration.html
+-> die empfehlen, ihr system nicht als application in Yarn laufen zu lassen (sondern nebenher?),
+da YARN bei Applicationen die lange ständig laufen nicht gut brauchbar ist (nicht dafür ausgelegt).
+Woher kommt diese aussage? wie laufen diese Anwendungen konkret?
+-> es schaut so aus, als wenn binaries in HDFS abgelegt werden, die dann in YARN gestartet werden
+   und dort auf den zugeteilten Containern Resourcen haben. Die Application kann nun wohl
+   intern auf das "selbstgemachte" Dateisystem zugreifen. Hat man jedoch viele kleine Prozeduren,
+   so kann YARN nicht in der Application diese im YARN Cluster verteilen. Hier wäre die frage,
+   ob man eine eigene Verteilung der Prozedur macht, was jedoch YARN ein wenig überflüssig
+   erscheinen lässt (und mit HDFS evtl. alles ausbremst)
+-> nebenher: Wichtig ist, YARN die Resourcen (CPU, Speicher)zu beschneiden, um es nebenher
+laufen zu lassen. In unserem Fall müsste YARN je "site" neben DXRAMfsApp laufen.
+
+
+Wenn ich mir beschreibung und quellcode von alluxio (vormals tachyon) ansehe, so hab ich den eindruck,
+dass die das gesammte Hadoop Ökosystem kopiert haben (und Alluxio nennen), wobei die HDFS
+ebenfalls als "alluxio" bezeichnen. Die Idee ist aber, dass man ähnlich wie in linux mit dem
+Mount Befehl alles mögliche in alluxio hinein mounten kann, um so alle fs's die es so gibt durch
+alluxio allen auf speziellen fs's basierten systemen zur verfügung zu stellen. Das kann
+Hadoop eigentlich auch, aber statt untersch. Schemes je Dateisystem, steht da nun "alluxio://"
+und die Systeme sind je Ordner/mountpoint andere. Was verwirrend ist:
+
+- "Running Alluxio Standalone with YARN" beschreibt nicht, wie eine Hadoop/Yarn Application
+  alluxio nutzen kann
+- "Configuring Alluxio with HDFS" sieht aus, dass nicht alluxio anstelle von hdfs genutzt wird,
+  sondern man in Alluxio arbeiten soll, wo allerdings die Daten in Wahrheit in hdfs abgelegt sind,
+  um ggf auch in Hadoop damit arbeiten zu können.
+- "Running Hadoop MapReduce on Alluxio" kommt meinem Ansatz sehr nahe, allerdings wird
+  hier zwar auf "alluxio://" statt "hdfs://" zugegriffen, aber das Beispiel beschreibt keine
+  MultiNode/Core anwendung sondern nur auf "localhost" ein wordcount.
+  -> der Quellcode ist ggf interessant: wie gehen die mit JobTracker und Yarn um?
+  -> wie arbeiten die mit Blocklocation? Wo/Wie werden mit Alluxio Master Jobs auf
+     die Worker verteilt? http://www.alluxio.org/overview/architecture
+
+
+- todo: wordcount example mapreduce ansehn! http://www.alluxio.org/docs/1.8/en/Running-Hadoop-MapReduce-on-Alluxio.html
+- todo: von blocklocation zu erben, um dxram oder dxnet peer/node dort speichern zu können
+ class FileSystem getBlockLocations() -> liefert "localhost:50010" (datanode transfer addresss) als
+ default mit einem Block von der Größe der Datei.
+ ipc.addresss ist 50020 (ggf nur für metadaten?)
+
+aha, in "wire" findet man dann auch sehr, sehr hdfs mäßigen code:
+  https://github.com/Alluxio/alluxio/blob/master/core/common/src/main/java/alluxio/wire/BlockLocation.java
+  über thrift (=RPC) werden dann BlockLocations zu workern gemappt (krummes deutsch).
+  wire/FileBlockInfo.java  auch interessant
+
+- nein todo: Ist DxRamFile nicht in warheit FileContext, was von Hadoop auch (angeblich) gebraucht wird?
+  -> also das arbeitet mit AbstractFS, was mein FS bereits erfüllt. Also FileContext muss ich mir nicht wirklich weiter ansehn!!
+  https://hadoop.apache.org/docs/r2.8.2/api/org/apache/hadoop/fs/FileContext.html
+
+
+https://ambari.apache.org/1.2.3/installing-hadoop-using-ambari/content/reference_chap2_1.html
+
+-> ambari: hadoop einfach verwaltbar machen. August 2018 version 2.7.1 statt aktuell 3.0.0 wird genutzt
+
+
+
+
 ## notiz 2018-09-25
 
 14:30 - 15:15 HDFS: NameNode zentraller punkt, der die DataNodes kennt, wo daten liegen
             -> wie bilde ich das ab?
             -> vergleich ignite jobtracker
-16:00 - hdfs und hadoop prozessverwaltung sind nicht getrennt. NameNode und DataNode sind unmittelbar
+16:00 - 17:30 hdfs und hadoop prozessverwaltung sind nicht getrennt. NameNode und DataNode sind unmittelbar
         mit hdfs verknüpft. YARN ist nicht hdfs unabhängig. Prozessübertragung zwischen Anwendung und
         DataNodes sowie deren orchestrierung via NameNode ist auf hdfs zugeschnitten.
         Blocklocation liefert per default "localhost" als dummy.
