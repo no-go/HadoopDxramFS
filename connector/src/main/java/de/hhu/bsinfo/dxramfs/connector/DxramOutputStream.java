@@ -25,7 +25,7 @@ public class DxramOutputStream extends OutputStream {
 
         // we need file/FsNode with size, too!!
 
-        // @todo get fsnode ?!
+        // @todo get fsnode ?!   code is still a testing dummy !!! +++++++++++++++++++++++++++++
 
         _remotePath = remotePath;
         _dxnet = dxnet;
@@ -38,7 +38,7 @@ public class DxramOutputStream extends OutputStream {
         // get blockid by calculation and filename via Blocklocations ?!
 
         // use blockid to load block into buffer
-        AskBlockMessage msg = new AskBlockMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId,0xB1BD000000000007l);
+        AskBlockMessage msg = new AskBlockMessage(DxramFileSystem.nopeConfig.peerMappings.get(0).nodeId,0xB1BD000000000007l);
         boolean res = msg.send(_dxnet);
         if (res) {
             _block = AskBlockMessage._result;

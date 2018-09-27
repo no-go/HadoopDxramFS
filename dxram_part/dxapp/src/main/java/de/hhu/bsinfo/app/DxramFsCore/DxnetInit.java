@@ -33,16 +33,16 @@ public class DxnetInit {
         conf.getCoreConfig().setOwnNodeId(myNodeId);
         nodeMap = new DXNetNodeMap(myNodeId);
 
-        // the haddoop node, who wants to acces to the dxram peers
+        // the haddoop node, who wants to access to the dxram peers
         nodeMap.addNode(
                 nopeConfig.nodeId,
-                new InetSocketAddress(nopeConfig.addr, nopeConfig.port)
+                new InetSocketAddress(nopeConfig.dxnet_addr, nopeConfig.dxnet_port)
         );
 
-        for (NodePeerConfig.PeerConfig nc: nopeConfig.dxPeers) {
+        for (NodePeerConfig.Mapping nc: nopeConfig.peerMappings) {
             nodeMap.addNode(
                     nc.nodeId,
-                    new InetSocketAddress(nc.addr, nc.port)
+                    new InetSocketAddress(nc.dxnet_addr, nc.dxnet_port)
             );
         }
 

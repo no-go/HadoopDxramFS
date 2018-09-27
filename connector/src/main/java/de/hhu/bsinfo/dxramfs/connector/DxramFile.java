@@ -29,20 +29,37 @@ public class DxramFile {
     private URI         _uri;
     private long        _blocksize; // never changed: it is the number of bytes for 1block in the dxramfs filesystem
     private DXNet       _dxnet;
-    
+
     /// @todo File OP
     private java.io.File _dummy;
 
     public DxramFile(DXNet dxnet, Path absPath, URI uri) {
-        _dxnet     = dxnet;
-        _uri       = uri;
-        _blocksize = DxramFsConfig.file_blocksize;
-        _absPath   = absPath;
+        _dxnet      = dxnet;
+        _uri        = uri;
+        _blocksize  = DxramFsConfig.file_blocksize;
+        _absPath    = absPath;
         
         /// @todo File OP
         String s = hpath2lDEBUGpath(_absPath);
         _dummy   = new java.io.File(s);
     }
+
+
+
+
+
+
+    public short getNearPeerId() {
+        // @todo try to match my hadoop host or ip to the same host or ip in the node-peer mapping list!
+        // @todo it should be a dxnet peer with a dxram peer mapping, because the other ones are hadoop requesting dxnet-peers
+        return DxramFileSystem.nopeConfig.peerMappings.get(0).nodeId;
+    }
+
+
+
+
+
+
 
     /** @todo File OP
      *  connector://localhost:9000/abc/de -> /tmp/myfs/abc/de
@@ -90,7 +107,7 @@ public class DxramFile {
 
 
     public boolean exists() {
-        ExistsMessage msg = new ExistsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
+        ExistsMessage msg = new ExistsMessage(getNearPeerId(), hpath2path(_absPath));
         boolean res = msg.send(_dxnet);
         LOG.debug("exists msg Response: " + String.valueOf(res));
         if (res) _dummy.exists();
@@ -98,7 +115,7 @@ public class DxramFile {
     }
 
     public boolean mkdirs() throws IOException {
-        MkDirsMessage msg = new MkDirsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
+        MkDirsMessage msg = new MkDirsMessage(getNearPeerId(), hpath2path(_absPath));
         boolean res = msg.send(_dxnet);
         LOG.debug("mkdirs msg Response: " + String.valueOf(res));
         if (res) _dummy.mkdirs();
@@ -107,7 +124,7 @@ public class DxramFile {
 
 
     public boolean isDirectory() {
-        IsDirectoryMessage msg = new IsDirectoryMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
+        IsDirectoryMessage msg = new IsDirectoryMessage(getNearPeerId(), hpath2path(_absPath));
         boolean res = msg.send(_dxnet);
         LOG.debug("isdir msg Response: " + String.valueOf(res));
         if (res) _dummy.isDirectory();
@@ -115,7 +132,7 @@ public class DxramFile {
     }
     
     public long length() {
-        FileLengthMessage msg = new FileLengthMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
+        FileLengthMessage msg = new FileLengthMessage(getNearPeerId(), hpath2path(_absPath));
         long res = msg.send(_dxnet);
         LOG.debug("length msg Response: " + String.valueOf(res));
         if (res != -1) _dummy.length();
@@ -123,7 +140,7 @@ public class DxramFile {
     }
 
     public boolean delete() throws IOException {
-        DeleteMessage msg = new DeleteMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
+        DeleteMessage msg = new DeleteMessage(getNearPeerId(), hpath2path(_absPath));
         boolean res = msg.send(_dxnet);
         LOG.debug("delete msg Response: " + String.valueOf(res));
         if (res) _dummy.delete();
@@ -132,7 +149,7 @@ public class DxramFile {
     
     public boolean renameTo(DxramFile dest) {
         RenameToMessage msg = new RenameToMessage(
-                DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId,
+                getNearPeerId(),
                 hpath2path(_absPath),
                 hpath2path(dest._absPath)
         );
@@ -160,7 +177,7 @@ public class DxramFile {
         while (startidx != -1) {
             String reqPath = hpath2path(_absPath);
             ListMessage msg = new ListMessage(
-                    DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId,
+                    getNearPeerId(),
                     reqPath,
                     startidx
             );
@@ -215,7 +232,7 @@ public class DxramFile {
         // get dir
         String fileDir = hpath2path(_absPath).substring(0, hpath2path(_absPath).lastIndexOf(Path.SEPARATOR));
         // check, if dir still exists
-        ExistsMessage emsg = new ExistsMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, fileDir);
+        ExistsMessage emsg = new ExistsMessage(getNearPeerId(), fileDir);
         boolean fileDirExists = emsg.send(_dxnet);
         Path hpath = new Path(_uri.toString() + fileDir);
         if (!fileDirExists) {
@@ -225,7 +242,7 @@ public class DxramFile {
             if (recursive == false) throw new IOException("director(ies) do not exists");
         }
 
-        CreateMessage cmsg = new CreateMessage(DxramFileSystem.nopeConfig.dxPeers.get(0).nodeId, hpath2path(_absPath));
+        CreateMessage cmsg = new CreateMessage(getNearPeerId(), hpath2path(_absPath));
         boolean res = cmsg.send(_dxnet);
 
 

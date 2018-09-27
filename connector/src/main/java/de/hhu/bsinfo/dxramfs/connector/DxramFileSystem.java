@@ -58,25 +58,11 @@ public class DxramFileSystem extends FileSystem {
     }
 
     private DXNet connect() {
-        nopeConfig = new NodePeerConfig();
-        nopeConfig.nodeId = Short.valueOf(getConf().get("dxnet_local_id"));
-        nopeConfig.addr = getConf().get("dxnet_local_addr");
-        nopeConfig.port = Integer.valueOf(getConf().get("dxnet_local_port"));
 
-        nopeConfig.dxPeers = new ArrayList<>();
-
-        // @todo if you realy want to run MANY dxram/dxnet peers on local, you have to change this !!
-        NodePeerConfig.PeerConfig aPeer = new NodePeerConfig.PeerConfig();
-        aPeer.nodeId = Short.valueOf(getConf().get("dxnet_local_peer_id"));
-        aPeer.addr = getConf().get("dxnet_local_peer_addr");
-        aPeer.port = Integer.valueOf(getConf().get("dxnet_local_peer_port"));
-        nopeConfig.dxPeers.add(aPeer);
-
-        NodePeerConfig.PeerConfig aPeer2 = new NodePeerConfig.PeerConfig();
-        aPeer2.nodeId = Short.valueOf(getConf().get("dxnet_local_peer2_id"));
-        aPeer2.addr = getConf().get("dxnet_local_peer2_addr");
-        aPeer2.port = Integer.valueOf(getConf().get("dxnet_local_peer2_port"));
-        nopeConfig.dxPeers.add(aPeer2);
+        nopeConfig = NodePeerConfig.factory(
+                Short.valueOf(getConf().get("dxnet.me")),
+                getConf().getStrings("dxnet.to_dxram_peers")
+        );
 
         DxnetInit dxini = new DxnetInit(nopeConfig, nopeConfig.nodeId);
         return dxini.getDxNet();

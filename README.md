@@ -156,16 +156,16 @@ File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
     <property>
         <name>fs.defaultFS</name>
         <!-- value>file:///tmp/tee/</value -->
-        <!-- value>hdfs://localhost:9000</value -->
+        <!-- value>hdfs://abook.localhost.fake:9000</value -->
         <value>dxram://localhost:9000</value>
     </property>
- 
+
     <property>
         <name>dxram.file_blocksize</name>
         <!-- blocksize is smaller than chunksize (dxram: jan 2018 max was 8MB) -->
         <value>4194304</value>
     </property>
-    
+
     <property>
         <name>dxram.ref_ids_each_fsnode</name>
         <value>128</value>
@@ -189,42 +189,16 @@ File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
         <value>48</value>
     </property>
 
-
     <property>
-        <name>dxnet_local_id</name>
+        <name>dxnet.me</name>
         <value>0</value>
     </property>
+
     <property>
-        <name>dxnet_local_port</name>
-        <value>65220</value>
-    </property>
-    <property>
-        <name>dxnet_local_addr</name>
-        <value>127.0.0.1</value>
-    </property>
-    <property>
-        <name>dxnet_local_peer_id</name>
-        <value>1</value>
-    </property>
-    <property>
-        <name>dxnet_local_peer_port</name>
-        <value>65221</value>
-    </property>
-    <property>
-        <name>dxnet_local_peer_addr</name>
-        <value>127.0.0.1</value>
-    </property>
-    <property>
-        <name>dxnet_local_peer2_id</name>
-        <value>2</value>
-    </property>
-    <property>
-        <name>dxnet_local_peer2_port</name>
-        <value>65222</value>
-    </property>
-    <property>
-        <name>dxnet_local_peer2_addr</name>
-        <value>127.0.0.1</value>
+        <name>dxnet.to_dxram_peers</name>
+        <!-- me is talking to localhost:65221 or localhost:65222, and them are talking to localhost:22222 or 22223. -->
+        <!-- the dxnet-dxram peer mapping localhost:65221 at localhost:22222 is good, to identify the location of a block. -->
+        <value>0@127.0.0.1:65220@,1@127.0.0.1:65221@127.0.0.1:22222,2@127.0.0.1:65222@127.0.0.1:22223,3@127.0.0.1:65224@</value>
     </property>
 
 </configuration>

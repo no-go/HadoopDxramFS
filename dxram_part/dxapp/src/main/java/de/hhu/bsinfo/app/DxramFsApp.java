@@ -24,25 +24,9 @@ import org.apache.logging.log4j.Logger;
 import de.hhu.bsinfo.dxram.generated.BuildConfig;
 
 public class DxramFsApp extends AbstractApplication {
-    // +++++++ these constants are dummyies! you get the values from config!
+    // +++++++ these constants are dummies! you get the values from config!
     @Expose
-    private int dxnet_local_id = 40;
-    @Expose
-    private String dxnet_local_addr = "127.0.0.1";
-    @Expose
-    private int dxnet_local_port = 6500;
-    @Expose
-    private int dxnet_local_peer_id = 41;
-    @Expose
-    private String dxnet_local_peer_addr = "127.0.0.1";
-    @Expose
-    private int dxnet_local_peer_port = 6501;
-    @Expose
-    private int dxnet_local_peer2_id = 42;
-    @Expose
-    private String dxnet_local_peer2_addr = "127.0.0.1";
-    @Expose
-    private int dxnet_local_peer2_port = 6502;
+    private String dxnet_to_dxram_peers = "id@ip:dxnetport@,dxnet node id @ ip:dxnetport@ip:dxRAMport,...";
     @Expose
     private String ROOT_Chunk = "dummy";
     @Expose
@@ -73,7 +57,6 @@ public class DxramFsApp extends AbstractApplication {
     private DxnetInit dxnetInit;
     
     public static NodePeerConfig nopeConfig;
-    private NodePeerConfig.PeerConfig myNodePeerConfig;
     
     private boolean doEndlessLoop = true;
 
@@ -108,65 +91,42 @@ public class DxramFsApp extends AbstractApplication {
         chunkS = getService(ChunkService.class);
         nameS = getService(NameserviceService.class);
         removeS = getService(ChunkRemoveService.class);
-
+        
         System.out.println(
                 "application " + getApplicationName() + " on a peer" +
                         " and my dxram node id is " + NodeID.toHexString(bootS.getNodeID())
         );
-        System.out.println("Where your Hadoop Node is:");
-        System.out.println("DXNET dxnet_local_id  : " + dxnet_local_id);
-        System.out.println("DXNET dxnet_local_addr: " + dxnet_local_addr);
-        System.out.println("DXNET dxnet_local_port: " + dxnet_local_port);
 
-        nopeConfig = new NodePeerConfig();
-        // the single client hadoop dxnet peer, which sends rpc via dxnet
-        nopeConfig.nodeId = (short) dxnet_local_id;
-        nopeConfig.addr = dxnet_local_addr;
-        nopeConfig.port = dxnet_local_port;
-
-        nopeConfig.dxPeers = new ArrayList<>();
-
-        // @todo if you realy want to run many dxram/dxnet peers on local, you have to change this !!
-        System.out.println("How Hadoop DxramFs has to connect me:");
-        System.out.println("DXNET dxnet_local_peer_id  : " + dxnet_local_peer_id);
-        System.out.println("DXNET dxnet_local_peer_addr: " + dxnet_local_peer_addr);
-        System.out.println("DXNET dxnet_local_peer_port: " + dxnet_local_peer_port);
-        
-        System.out.println("or for debugging, testing, developing:");
-        System.out.println("DXNET dxnet_local_peer2_id  : " + dxnet_local_peer2_id);
-        System.out.println("DXNET dxnet_local_peer2_addr: " + dxnet_local_peer2_addr);
-        System.out.println("DXNET dxnet_local_peer2_port: " + dxnet_local_peer2_port);
-        
-        
-        NodePeerConfig.PeerConfig aPeer = new NodePeerConfig.PeerConfig();
-        aPeer.nodeId = (short) dxnet_local_peer_id;
-        aPeer.addr = dxnet_local_peer_addr;
-        aPeer.port = dxnet_local_peer_port;
-        nopeConfig.dxPeers.add(aPeer);
-        
-        //for debug, testing, developing:
-        NodePeerConfig.PeerConfig aPeer2 = new NodePeerConfig.PeerConfig();
-        aPeer2.nodeId = (short) dxnet_local_peer2_id;
-        aPeer2.addr = dxnet_local_peer2_addr;
-        aPeer2.port = dxnet_local_peer2_port;
-        nopeConfig.dxPeers.add(aPeer2);
- 
         DxramFsConfig.file_blocksize = file_blocksize;
         DxramFsConfig.ref_ids_each_fsnode = ref_ids_each_fsnode;
         DxramFsConfig.max_pathlength_chars = max_pathlength_chars;
         DxramFsConfig.max_filenamelength_chars = max_filenamelength_chars;
         DxramFsConfig.max_hostlength_chars = max_hostlength_chars;
         DxramFsConfig.max_addrlength_chars = max_addrlength_chars;
+
+        // if my dxram peer port and ip is ... I have to search a mapped dxnet ip and port from the config!
+        // we submit it to the NodePeerConfig factory to match it
+
+        short dxramNodeMeId = bootS.getNodeID();
+        InetSocketAddress nodeDetail = bootS.getNodeAddress(dxramNodeMeId);
+
+        nopeConfig = NodePeerConfig.factory(
+            nodeDetail.getHostString(),
+            nodeDetail.getAddress().getHostAddress(),
+            nodeDetail.getPort(),
+            dxnet_to_dxram_peers.split(",")
+        );
+
+        System.out.println("How Hadoop DxramFs can contact me:");
+        System.out.println("DXNET dxnet peer_id  : " + nopeConfig.nodeId);
+        System.out.println("DXNET dxnet peer_addr: " + nopeConfig.dxnet_addr);
+        System.out.println("DXNET dxnet peer_port: " + nopeConfig.dxnet_port);
         
-        // local default: the first/only dxnet peer will be the rpc handling server
-        myNodePeerConfig = aPeer;
-        dxnetInit = new DxnetInit(nopeConfig, myNodePeerConfig.nodeId);
+        dxnetInit = new DxnetInit(nopeConfig, nopeConfig.nodeId);
+        
         
         ROOTN = new FsNodeChunk();
         if (nameS.getChunkID(ROOT_Chunk, 10) == ChunkID.INVALID_ID) {
-            //for debug, testing, developing:
-            //myNodePeerConfig = aPeer;
-            //dxnetInit = new DxnetInit(nopeConfig, myNodePeerConfig.nodeId); // peer1
             
             // initial, if root does not exists
             ROOTN.get().init();
@@ -187,10 +147,6 @@ public class DxramFsApp extends AbstractApplication {
             LOG.debug("Create Root / on Chunk [%s]", String.format("0x%X", ROOTN.getID()));
 
         } else {
-            //for debug, testing, developing:
-            //myNodePeerConfig = aPeer2;
-            //dxnetInit = new DxnetInit(nopeConfig, myNodePeerConfig.nodeId); // peer2
-
             ROOT_CID = nameS.getChunkID(ROOT_Chunk, 10);
             ROOTN.setID(ROOT_CID);
             chunkS.get(ROOTN);
@@ -827,8 +783,11 @@ public class DxramFsApp extends AbstractApplication {
                     chunkS.get(subNode);
                     if (subNode.get().type == FsNodeType.FILE) {
                         fileLength = subNode.get().size;
+                    } else if (subNode.get().type == FsNodeType.FOLDER) {
+                        fileLength = 0;
+                        back = "OK but a folder";
                     } else {
-                        back = "no: it is a folder or EXT?!";
+                        back = "no: it is a EXT?!";
                     }
                 }
             }

@@ -237,6 +237,18 @@ todo: habe/muss ich FileContext implementieren?
             http://www.alluxio.org/docs/1.8/en/Running-Hadoop-MapReduce-on-Alluxio.html
             -> das ist echt nicht verteilt und vergleichbar mit file:/// access
 
+15:00 - 20:30 configs überarbeiten, um leichter peers auf dxnet+dxram seite hinzufügen zu können
+
+
+
+Neu: DxramFile hat ein getNearPeerId(), wo man implementieren kann, an welchen
+dxnet-peer sich ein hadoop-node zu wenden hat, wenn er RPC machen will um z.B. Blöcke zu holen.
+Die Stelle ist dann in zukunft ausbaufähig um z.B. mit Blocklocations als Parameter
+oder so zu arbeiten..
+
+
+
+
 In Mapper.java von hadoop-mapreduce-client-core steht:
   Applications may write a custom {@link MapRunnable} to exert greater
   control on map processing e.g. multi-threaded <code>Mapper</code>s etc.
@@ -254,7 +266,7 @@ next steps:
   infos zum dxram peer und dxnet peer abgelegt sind.
 
 - config verbessern, bei der ip+port mapping klar hinterlegt ist
-  -> ziel ist es, dass ein einzelner "hadoop-client (host+port(65220) im scheme hinterlegt)"
+  -> ziel ist es, dass ein einzelner "hadoop-client (host+port(65220) im scheme hinterlegt?)"
      irgendwann mit der "DxramBlocklocation" via dxnet den peer anspricht (aktuell 65221...),
      auf dem auch der dxram-peer den block gespeichert hat.
   -> in ferner zukunft kann man dann darüber nachdenken, wie sich mehrere hadoop clients
