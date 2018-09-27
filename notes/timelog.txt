@@ -25,11 +25,12 @@ hier meine Basis.
 
 ## vermutlich noch lange zeit offen offen
 
+- test: muss ich (speziell für HBASE) eine append() implementieren?
+ - > ja!
+
 - ...
 - test: muss ich -f (force) z.B. bei "rename" implementieren?
 - test: muss ich einen richtigen Zeitstemple implementieren?
-- test: muss ich (speziell für HBASE) eine append() implementieren?
- - > ja!
  
  https://stackoverflow.com/questions/42549872/can-apache-yarn-be-used-without-hdfs#42554370
  
@@ -220,12 +221,54 @@ todo: test hbase java code beispiel
 todo: test alles auf cluster/hilbert
 todo: because dxram use ASCII for String, /näö and /nöä is the same!
 todo: was sind SequenceFiles
-todo: get/set Working Directory
+todo: get/set Working Directory ?!
 todo: UNitTests !! https://hadoop.apache.org/docs/r2.7.4/hadoop-project-dist/hadoop-common/filesystem/testing.html
 todo: habe/muss ich FileContext implementieren?
 
 
+
+
+
 -----------------------------------------------------------------------------------------------
+
+## notiz 2018-09-27
+
+12:00 - 13:00 wordcount example mapreduce ansehn!
+            http://www.alluxio.org/docs/1.8/en/Running-Hadoop-MapReduce-on-Alluxio.html
+            -> das ist echt nicht verteilt und vergleichbar mit file:/// access
+
+In Mapper.java von hadoop-mapreduce-client-core steht:
+  Applications may write a custom {@link MapRunnable} to exert greater
+  control on map processing e.g. multi-threaded <code>Mapper</code>s etc.
+ * @see JobConf
+ * @see InputFormat
+ * @see Partitioner  
+ * @see Reducer
+ * @see MapReduceBase
+ * @see MapRunnable
+ * @see SequenceFile
+
+next steps:
+
+- Eigene Blocklocation machen (auf die man casten kann), in der speziell
+  infos zum dxram peer und dxnet peer abgelegt sind.
+
+- config verbessern, bei der ip+port mapping klar hinterlegt ist
+  -> ziel ist es, dass ein einzelner "hadoop-client (host+port(65220) im scheme hinterlegt)"
+     irgendwann mit der "DxramBlocklocation" via dxnet den peer anspricht (aktuell 65221...),
+     auf dem auch der dxram-peer den block gespeichert hat.
+  -> in ferner zukunft kann man dann darüber nachdenken, wie sich mehrere hadoop clients
+     zur verarbeitung nutzen lassen!! Evtl. wäre dann eine Prozessmigration auf/in die
+     dxramApp denkbar (an YARN vorbei)
+
+!!!!!!!!!!!!!!
+
+
+
+
+
+
+
 
 ## notiz 2018-09-26
 
