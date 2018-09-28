@@ -231,6 +231,52 @@ todo: habe/muss ich FileContext implementieren?
 
 -----------------------------------------------------------------------------------------------
 
+
+## notiz 2018-09-28
+
+12:45 - 13:30   wo nutzt HBASE getBlockLocation() ?
+    grep -r --color BlockLocation .
+    ./hbase-server/src/main/java/org/apache/hadoop/hbase/util/FSRegionScanner.java
+
+    -> mit getHosts() wird je Block gezählt, welche Host wie viele Blöcke der Datei hat
+        -> port steht dort nicht drin!
+
+15:00 - 16:00   was wird hier in HBASE gebraucht? was muss ich anbieten und tun, damit ich hier eingreifen
+                kann um eine Verteilung hin zu bekommen?
+
+Es gibt nun folgende Möglichkeiten, wie HBASE und YARN vorgehen könnten, um das 
+Serialisieren/Deserialisieren der HBASE-Blöcke/Dateien zu verteilen, wenn es nicht HDFS ist:
+
+0) NameNode/Datanode ohne HDFS garnicht startbar - Hier muss wenigstens ein kleines System
+   existieren. HBASE möglicherweise auch nicht mit mehreren RegionServern startbar.
+1) HBASE wertet von der BlockLocation nur den Host aus und wählt den RegionServer, der
+   zum Host passt und die meisten Blöcke zur Datei besitzt. Hadoop bzw.
+   die Regionserver(YARN-App?) macht ihren Job an der passenden Stelle und versucht
+   nicht die Blocklocation oder andere Balancing Sachen aus. Es wird streng der
+   Regionserver genommen, den HBASE vorgibt.
+2) wie 1, aber YARN erkennt, dass es sich beim FS nicht um HDFS handelt und wertet
+   daher BlockLocation nicht aus - stattdessen werden andere Balancing versuche
+   (CPU, Speicher) von YARN unternommen, die ein "arbeiten, wo die meinsten Daten lokal sind"
+   vereiteln.
+3) wie 2, aber YARN erkennt, dass es nicht HDFS ist und ERWARTET in der Blocklocation
+   den DUMMY wert "locahlost:50010" -> Das wäre dumm, da ich hier andere Werte reinschreiben
+   wollte bzgl. dxnet und dxram
+4) wie 1, allerdings ist das von HBASE nur für die Wahl des RegionServers, der evtl.
+   den localen NodeManager (YARN) mit einzelnen Jobs füttert. In dem Fall bleiben 1, 2 und 3
+   weiterhin offen: Bliebt der Job je Block lokal?
+
+
+
+Todo nächste Woche:
+- FSNode Daten holen
+- genau wie "List" in einer request-response Schleife die Blockinfo/FileBlockLocations holen
+- mit FSNode und Blockinfo den passenden Block holen und in OutputStream in den Buffer laden
+- eine flushBlockMessage realisieren (+kleiner ResponseMessage dazu), um Buffer/Block
+  in DxramOutputStream zu übertragen
+- open() mit DxramInputStream realisieren
+
+
+
 ## notiz 2018-09-27
 
 12:00 - 13:00 wordcount example mapreduce ansehn!
