@@ -24,6 +24,8 @@ public class DxnetInit {
     public AskBlockMessage.InHandler askBlockmh;
 
     // tag 21-
+    
+    public FsNodeMessage.InHandler fsnodemh;
 
 
     public DxnetInit(NodePeerConfig nopeConfig, short myNodeId) {
@@ -66,6 +68,8 @@ public class DxnetInit {
 
         _dxNet.registerMessageType(GetBlockMessage.MTYPE, GetBlockMessage.TAG, GetBlockMessage.class);
         _dxNet.registerMessageType(AskBlockMessage.MTYPE, AskBlockMessage.TAG, AskBlockMessage.class);
+        
+        _dxNet.registerMessageType(FsNodeMessage.MTYPE, FsNodeMessage.TAG, FsNodeMessage.class); // 21
 
         blmh = new BlockLocationsMessage.InHandler();
         cmh = new CreateMessage.InHandler();
@@ -80,6 +84,8 @@ public class DxnetInit {
         getBlockmh = new GetBlockMessage.InHandler();
         askBlockmh = new AskBlockMessage.InHandler();
 
+        fsnodemh = new FsNodeMessage.InHandler(); // 21
+
         _dxNet.register(BlockLocationsMessage.MTYPE, BlockLocationsMessage.TAG, blmh);
         _dxNet.register(CreateMessage.MTYPE, CreateMessage.TAG, cmh);
         _dxNet.register(DeleteMessage.MTYPE, DeleteMessage.TAG, dmh);
@@ -92,6 +98,8 @@ public class DxnetInit {
 
         _dxNet.register(GetBlockMessage.MTYPE, GetBlockMessage.TAG, getBlockmh);
         _dxNet.register(AskBlockMessage.MTYPE, AskBlockMessage.TAG, askBlockmh);
+
+        _dxNet.register(FsNodeMessage.MTYPE, FsNodeMessage.TAG, fsnodemh); // 21
     }
 
     public DXNet getDxNet() {

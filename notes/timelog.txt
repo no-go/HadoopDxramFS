@@ -177,7 +177,12 @@ bis hier 205,25h
 |  2018-09-14   |     "                                     |        7,25  | krank. Problem mit verzahnung YAST und HDFS (NodeManager) gefunden.
 |               |                                           |              |
 +---------------+-------------------------------------------+--------------+-----------------------
-|  2018-09-21   |                                           |              | 
+|  2018-09-21   |     "                                     |       18     | Vergleich jobverteilungs-Konzepte bei anderen Projekten,
+|               |                                           |              | HBASE: Zusammenspiel Recherche YAST, BlockLocation, RegionServer
++---------------+-------------------------------------------+--------------+-----------------------
+|  2018-09-28   |                                           |              | 
++---------------+-------------------------------------------+--------------+-----------------------
+|  2018-10-05   |                                           |              | 
 
 
 
@@ -231,6 +236,25 @@ todo: habe/muss ich FileContext implementieren?
 
 -----------------------------------------------------------------------------------------------
 
+## notiz 2018-10-01
+
+14:45 - 15:00   Pflege dieser Projekt-Doku
+15:30 - 16:00   start implementierung getFsNode
+16:00 - 17:30   Überarbeitung der Struktur bzgl. HBASE, YARN und NodeManager
+17:30 - 18:00   start implementierung getFsNode
+
+Todo diese Woche:
+- FSNode Daten holen
+- genau wie "List" in einer request-response Schleife die Blockinfo/FileBlockLocations holen
+- mit FSNode und Blockinfo den passenden Block holen und in OutputStream in den Buffer laden
+- eine flushBlockMessage realisieren (+kleiner ResponseMessage dazu), um Buffer/Block
+  in DxramOutputStream zu übertragen
+- open() mit DxramInputStream realisieren
+
+
+
+
+
 
 ## notiz 2018-09-28
 
@@ -243,6 +267,9 @@ todo: habe/muss ich FileContext implementieren?
 
 15:00 - 16:00   was wird hier in HBASE gebraucht? was muss ich anbieten und tun, damit ich hier eingreifen
                 kann um eine Verteilung hin zu bekommen?
+
+
+16,25 + 0,75 + 1 = 18
 
 Es gibt nun folgende Möglichkeiten, wie HBASE und YARN vorgehen könnten, um das 
 Serialisieren/Deserialisieren der HBASE-Blöcke/Dateien zu verteilen, wenn es nicht HDFS ist:
@@ -267,15 +294,6 @@ Serialisieren/Deserialisieren der HBASE-Blöcke/Dateien zu verteilen, wenn es ni
 
 
 
-Todo nächste Woche:
-- FSNode Daten holen
-- genau wie "List" in einer request-response Schleife die Blockinfo/FileBlockLocations holen
-- mit FSNode und Blockinfo den passenden Block holen und in OutputStream in den Buffer laden
-- eine flushBlockMessage realisieren (+kleiner ResponseMessage dazu), um Buffer/Block
-  in DxramOutputStream zu übertragen
-- open() mit DxramInputStream realisieren
-
-
 
 ## notiz 2018-09-27
 
@@ -285,7 +303,7 @@ Todo nächste Woche:
 
 15:00 - 20:30 configs überarbeiten, um leichter peers auf dxnet+dxram seite hinzufügen zu können
 
-
+9,75 + 6,5 = 16,25
 
 Neu: DxramFile hat ein getNearPeerId(), wo man implementieren kann, an welchen
 dxnet-peer sich ein hadoop-node zu wenden hat, wenn er RPC machen will um z.B. Blöcke zu holen.
@@ -335,6 +353,8 @@ next steps:
 14:45 - 17:45   überlegung von blocklocation zu erben und eine DxramBlockLocation zu machen, wo
                 dann nur ein Array element drin ist und die dxram peer id gespeichert wird, damit man
                 die in YAST irgendwie einem DataNode von HDFS zuordnen kann
+
+5,75 + 4 = 9,75
 
 Yarn integration: wie machen es andere?
 http://www.alluxio.org/docs/1.8/en/Running-Alluxio-Yarn-Integration.html
@@ -405,6 +425,7 @@ https://ambari.apache.org/1.2.3/installing-hadoop-using-ambari/content/reference
         DataNodes sowie deren orchestrierung via NameNode ist auf hdfs zugeschnitten.
         Blocklocation liefert per default "localhost" als dummy.
 
+3,5 + 0,75 + 1,5 = 5,75
 
 todo: UMBAU DER IDEE!
 
@@ -437,6 +458,8 @@ http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign
                 wie verwendet werden?
  -> untersuchen, was "ignite" in der implementierung als "BlockLocation" zurück gibt.
  -> die kochen auch nur mit wasser: viele Klassen sehr leer. Am ende wird auch nur "9001" als port drangeknautscht!
+
+3,5
 
 Fazit: Für YARN und MapReduce muss man sich eine für das eigene Dateisystem auch eine eigene Node
 Verwaltung einfallen lassen. Schaut man sich das an: https://apacheignite.readme.io/docs/yarn-deployment

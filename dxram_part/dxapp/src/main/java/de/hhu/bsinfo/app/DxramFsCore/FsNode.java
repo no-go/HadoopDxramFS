@@ -11,7 +11,7 @@ public class FsNode {
     public long backId;
     // the file or folder name (without / in it - only root has a single / as name)
     public String name;
-    // file, folder or ext (stores more refIds)
+    // folder=1, file or ext (ext to stores more refIds)
     public int type;
     public long size; // file: total bytes / folder: number of entries
     public int refSize; // file: total number of blocks (if >= 100, use forwardId) / folder/ext: number of entries in refIds

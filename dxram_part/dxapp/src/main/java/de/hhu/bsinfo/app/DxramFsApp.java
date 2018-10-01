@@ -271,6 +271,15 @@ public class DxramFsApp extends AbstractApplication {
                 }
             }
 
+            if (dxnetInit.fsnodemh.gotResult()) {
+                FsNodeMessage msg = (FsNodeMessage) dxnetInit.fsnodemh.Result();
+                FsNodeMessage response = externalHandleFsNode(msg);
+                try {
+                    dxnetInit.getDxNet().sendMessage(response);
+                } catch (NetworkException e) {
+                    e.printStackTrace();
+                }
+            }
 
 
 
