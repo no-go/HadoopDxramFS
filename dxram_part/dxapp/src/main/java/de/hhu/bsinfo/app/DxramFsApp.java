@@ -271,9 +271,24 @@ public class DxramFsApp extends AbstractApplication {
                 }
             }
 
+
+
+
+
+
             if (dxnetInit.fsnodemh.gotResult()) {
                 FsNodeMessage msg = (FsNodeMessage) dxnetInit.fsnodemh.Result();
                 FsNodeMessage response = externalHandleFsNode(msg);
+                try {
+                    dxnetInit.getDxNet().sendMessage(response);
+                } catch (NetworkException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (dxnetInit.fsnodeByIdmh.gotResult()) {
+                FsNodeByIdMessage msg = (FsNodeByIdMessage) dxnetInit.fsnodeByIdmh.Result();
+                FsNodeByIdMessage response = externalHandleFsNodeById(msg);
                 try {
                     dxnetInit.getDxNet().sendMessage(response);
                 } catch (NetworkException e) {
@@ -605,6 +620,8 @@ public class DxramFsApp extends AbstractApplication {
         
         short blockOwningPeer = lookS.getPrimaryPeer(bloch.getID());
         InetSocketAddress nodeDetail = bootS.getNodeAddress(blockOwningPeer);
+        
+        // @todo map dxram host+addr+port to dxnet host+addr+port !!!!!!
         
         binch.get().host = nodeDetail.getHostString(); // hostname or alternative the ip address
         binch.get().addr = nodeDetail.getAddress().getHostAddress(); // the ip address as string!

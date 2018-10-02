@@ -1,24 +1,22 @@
 package de.hhu.bsinfo.app.dxramfscore.rpc;
 
+import de.hhu.bsinfo.app.dxramfscore.DxramFsConfig;
+import de.hhu.bsinfo.app.dxramfscore.FsNode;
 import de.hhu.bsinfo.dxnet.DXNet;
 import de.hhu.bsinfo.dxnet.MessageReceiver;
 import de.hhu.bsinfo.dxnet.core.AbstractMessageExporter;
 import de.hhu.bsinfo.dxnet.core.AbstractMessageImporter;
 import de.hhu.bsinfo.dxnet.core.Message;
 import de.hhu.bsinfo.dxnet.core.NetworkException;
-import de.hhu.bsinfo.app.dxramfscore.DxramFsConfig;
-import de.hhu.bsinfo.app.dxramfscore.FsNode;
 import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.nio.charset.StandardCharsets;
+public class FsNodeByIdMessage extends Message {
 
-public class FsNodeMessage extends Message {
-
-    public static final Logger LOG = LogManager.getLogger(FsNodeMessage.class.getName());
+    public static final Logger LOG = LogManager.getLogger(FsNodeByIdMessage.class.getName());
     public static final byte MTYPE = 42;
-    public static final byte TAG = 21;
+    public static final byte TAG = 22;
     private byte[] _data;
 
     private long _ID;
@@ -31,7 +29,7 @@ public class FsNodeMessage extends Message {
     private long[] _refIds;
 
     public static boolean gotResult;
-    public static FsNodeMessage result;
+    public static FsNodeByIdMessage result;
 
     public String get_data() {
         return new String(_data, DxramFsConfig.STRING_STD_CHARSET);
@@ -107,17 +105,17 @@ public class FsNodeMessage extends Message {
 
     // ---------------------------------------------------------------
 
-    public FsNodeMessage() {
+    public FsNodeByIdMessage() {
         super();
     }
 
-    public FsNodeMessage(final short p_destination) {
-        super(p_destination, FsNodeMessage.MTYPE, FsNodeMessage.TAG);
+    public FsNodeByIdMessage(final short p_destination) {
+        super(p_destination, FsNodeByIdMessage.MTYPE, FsNodeByIdMessage.TAG);
         _data = new byte[DxramFsConfig.max_pathlength_chars];
     }
 
-    public FsNodeMessage(final short p_destination, final String p_data) {
-        super(p_destination, FsNodeMessage.MTYPE, FsNodeMessage.TAG);
+    public FsNodeByIdMessage(final short p_destination, final String p_data) {
+        super(p_destination, FsNodeByIdMessage.MTYPE, FsNodeByIdMessage.TAG);
         gotResult = false;
         _data = p_data.getBytes(DxramFsConfig.STRING_STD_CHARSET);
     }
@@ -160,7 +158,7 @@ public class FsNodeMessage extends Message {
 
         @Override
         public void onIncomingMessage(Message p_message) {
-            result = (FsNodeMessage) p_message;
+            result = (FsNodeByIdMessage) p_message;
             LOG.info(result.get_data());
             gotResult = true;
         }

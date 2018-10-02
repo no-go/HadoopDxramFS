@@ -1,7 +1,10 @@
 package de.hhu.bsinfo.dxramfs.connector;
 import de.hhu.bsinfo.app.dxramfscore.Block;
 import de.hhu.bsinfo.app.dxramfscore.Blockinfo;
+import de.hhu.bsinfo.app.dxramfscore.DxramFsConfig;
+import de.hhu.bsinfo.app.dxramfscore.FsNode;
 import de.hhu.bsinfo.app.dxramfscore.rpc.AskBlockMessage;
+import de.hhu.bsinfo.app.dxramfscore.rpc.FsNodeMessage;
 import de.hhu.bsinfo.dxnet.DXNet;
 
 import java.io.IOException;
@@ -14,21 +17,33 @@ public class DxramOutputStream extends OutputStream {
 
     private DXNet _dxnet;
     private String _remotePath;
-    private Block _block;
+    private FsNode _fsNode;
     private Blockinfo _blockinfo;
+    private Block _block;
 
-    /**
-     * @todo Constructor
-     * @param remotePath is without the dxramfs://host:port part!
-     */
-    public DxramOutputStream(String remotePath, DXNet dxnet) {
+    public DxramOutputStream(DxramFile dxramFile, DXNet dxnet) throws IOException {
+        _remotePath = dxramFile.getPathWithoutScheme();
+        _dxnet = dxnet;
 
-        // we need file/FsNode with size, too!!
+        FsNodeMessage fsnMsg = new FsNodeMessage(dxramFile.getNearPeerId(), _remotePath);
+        _fsNode = fsnMsg.send(_dxnet);
+        if (_fsNode == null) {
+            throw new IOException("something is really wrong");
+        }
+
+        // output is for write. the default is: write to the file end (?) -> wehave to load the last block
+
+        int blockIndex = (int) ( _fsNode.size / (long) DxramFsConfig.file_blocksize);
+        if (blockIndex >= DxramFsConfig.ref_ids_each_fsnode) {
+            // @todo based on the fsNode data, we should load EXT FsNodeByIdMessage !!!!!!!!!!!!
+        } else {
+
+        }
+
+
 
         // @todo get fsnode ?!   code is still a testing dummy !!! +++++++++++++++++++++++++++++
 
-        _remotePath = remotePath;
-        _dxnet = dxnet;
         _block = new Block();
         _blockinfo = new Blockinfo();
         _block.init();
@@ -54,25 +69,25 @@ public class DxramOutputStream extends OutputStream {
         // fill buffer
         _block._data[_blockinfo.length] = (byte) b;
         _blockinfo.length++;
-        // @todo flush + get block or buffer
+        // @todo flush (add/put block) + get block or buffer
     }
 
     @Override
-    public void write(byte[] var1) throws IOException {
-        this.write(var1, 0, var1.length);
+    public void write(byte[] dat) throws IOException {
+        // @todo we have to write on which position in the block???!!
+        this.write(dat, 0, dat.length);
     }
 
     @Override
-    public void write(byte[] var1, int var2, int var3) throws IOException {
-        // @todo flush + get block or buffer
-        if (var1 == null) {
+    public void write(byte[] dat, int startpos, int leng) throws IOException {
+        // @todo flush (add/put block) + get block or buffer
+        if (dat == null) {
             throw new NullPointerException();
-        } else if (var2 >= 0 && var2 <= var1.length && var3 >= 0 && var2 + var3 <= var1.length && var2 + var3 >= 0) {
-            if (var3 != 0) {
-                for(int var4 = 0; var4 < var3; ++var4) {
-                    this.write(var1[var2 + var4]);
+        } else if (startpos >= 0 && startpos <= dat.length && leng >= 0 && startpos + leng <= dat.length && startpos + leng >= 0) {
+            if (leng != 0) {
+                for(int var4 = 0; var4 < leng; ++var4) {
+                    this.write(dat[startpos + var4]);
                 }
-
             }
         } else {
             throw new IndexOutOfBoundsException();
@@ -81,7 +96,7 @@ public class DxramOutputStream extends OutputStream {
 
     @Override
     public void flush() throws IOException {
-        // @todo send block or buffer
+        // @todo flush (add/put block) + get block or buffer
 
         // @todo we have to update fsnode, too! maybe with the block update via dxramApp
     }

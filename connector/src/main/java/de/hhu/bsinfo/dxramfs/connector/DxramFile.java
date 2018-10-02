@@ -93,6 +93,9 @@ public class DxramFile {
     public Path getPath() {
         return _absPath;
     }
+    public String getPathWithoutScheme() {
+        return hpath2path(_absPath);
+    }
 
     public String toString() {
         return _absPath.toString();
@@ -255,7 +258,7 @@ public class DxramFile {
 
 
 
-        DxramOutputStream dxouts = new DxramOutputStream(hpath2path(_absPath), _dxnet);
+        DxramOutputStream dxouts = new DxramOutputStream(this, _dxnet);
 
 
 

@@ -10,7 +10,7 @@ import java.net.InetSocketAddress;
 public class DxnetInit {
     private DXNet _dxNet;
     // tag 10 - 20
-    public BlockLocationsMessage.InHandler blmh;
+    public BlockinfoMessage.InHandler bimh;
     public CreateMessage.InHandler cmh;
     public DeleteMessage.InHandler dmh;
     public ExistsMessage.InHandler emh;
@@ -24,8 +24,9 @@ public class DxnetInit {
     public AskBlockMessage.InHandler askBlockmh;
 
     // tag 21-
-    
+
     public FsNodeMessage.InHandler fsnodemh;
+    public FsNodeByIdMessage.InHandler fsnodeByIdmh; //22
 
 
     public DxnetInit(NodePeerConfig nopeConfig, short myNodeId) {
@@ -56,7 +57,7 @@ public class DxnetInit {
                 nodeMap
         );
 
-        _dxNet.registerMessageType(BlockLocationsMessage.MTYPE, BlockLocationsMessage.TAG, BlockLocationsMessage.class);
+        _dxNet.registerMessageType(BlockinfoMessage.MTYPE, BlockinfoMessage.TAG, BlockinfoMessage.class);
         _dxNet.registerMessageType(CreateMessage.MTYPE, CreateMessage.TAG, CreateMessage.class);
         _dxNet.registerMessageType(DeleteMessage.MTYPE, DeleteMessage.TAG, DeleteMessage.class);
         _dxNet.registerMessageType(ExistsMessage.MTYPE, ExistsMessage.TAG, ExistsMessage.class);
@@ -68,10 +69,11 @@ public class DxnetInit {
 
         _dxNet.registerMessageType(GetBlockMessage.MTYPE, GetBlockMessage.TAG, GetBlockMessage.class);
         _dxNet.registerMessageType(AskBlockMessage.MTYPE, AskBlockMessage.TAG, AskBlockMessage.class);
-        
-        _dxNet.registerMessageType(FsNodeMessage.MTYPE, FsNodeMessage.TAG, FsNodeMessage.class); // 21
 
-        blmh = new BlockLocationsMessage.InHandler();
+        _dxNet.registerMessageType(FsNodeMessage.MTYPE, FsNodeMessage.TAG, FsNodeMessage.class); // 21
+        _dxNet.registerMessageType(FsNodeByIdMessage.MTYPE, FsNodeByIdMessage.TAG, FsNodeByIdMessage.class); // 22
+
+        bimh = new BlockinfoMessage.InHandler();
         cmh = new CreateMessage.InHandler();
         dmh = new DeleteMessage.InHandler();
         emh = new ExistsMessage.InHandler();
@@ -85,8 +87,9 @@ public class DxnetInit {
         askBlockmh = new AskBlockMessage.InHandler();
 
         fsnodemh = new FsNodeMessage.InHandler(); // 21
+        fsnodeByIdmh = new FsNodeByIdMessage.InHandler(); // 22
 
-        _dxNet.register(BlockLocationsMessage.MTYPE, BlockLocationsMessage.TAG, blmh);
+        _dxNet.register(BlockinfoMessage.MTYPE, BlockinfoMessage.TAG, bimh);
         _dxNet.register(CreateMessage.MTYPE, CreateMessage.TAG, cmh);
         _dxNet.register(DeleteMessage.MTYPE, DeleteMessage.TAG, dmh);
         _dxNet.register(ExistsMessage.MTYPE, ExistsMessage.TAG, emh);
@@ -100,6 +103,7 @@ public class DxnetInit {
         _dxNet.register(AskBlockMessage.MTYPE, AskBlockMessage.TAG, askBlockmh);
 
         _dxNet.register(FsNodeMessage.MTYPE, FsNodeMessage.TAG, fsnodemh); // 21
+        _dxNet.register(FsNodeByIdMessage.MTYPE, FsNodeByIdMessage.TAG, fsnodeByIdmh); // 22
     }
 
     public DXNet getDxNet() {
