@@ -271,11 +271,6 @@ public class DxramFsApp extends AbstractApplication {
                 }
             }
 
-
-
-
-
-
             if (dxnetInit.fsnodemh.gotResult()) {
                 FsNodeMessage msg = (FsNodeMessage) dxnetInit.fsnodemh.Result();
                 FsNodeMessage response = externalHandleFsNode(msg);
@@ -289,6 +284,16 @@ public class DxramFsApp extends AbstractApplication {
             if (dxnetInit.fsnodeByIdmh.gotResult()) {
                 FsNodeByIdMessage msg = (FsNodeByIdMessage) dxnetInit.fsnodeByIdmh.Result();
                 FsNodeByIdMessage response = externalHandleFsNodeById(msg);
+                try {
+                    dxnetInit.getDxNet().sendMessage(response);
+                } catch (NetworkException e) {
+                    e.printStackTrace();
+                }
+            }
+            
+            if (dxnetInit.bimh.gotResult()) {
+                BlockinfoMessage msg = (BlockinfoMessage) dxnetInit.bimh.Result();
+                BlockinfoMessage response = externalHandleBlockinfo(msg);
                 try {
                     dxnetInit.getDxNet().sendMessage(response);
                 } catch (NetworkException e) {
@@ -447,6 +452,28 @@ public class DxramFsApp extends AbstractApplication {
         return back;
     }
 
+    // handles EXT
+    private FsNode getFsNode(String path) {
+        String[] pathparts = path.split("/");
+        LOG.debug(String.join(" , ", pathparts));
+        FsNodeChunk subNode = ROOTN;
+        chunkS.get(subNode);
+        if (path.length() == 0) {
+            return null;
+        } else if (ROOTN.get().size < 1) {
+            return null;
+        } else {
+            for (int i=0; i < pathparts.length; i++) {
+                long subChunkId = getIn(pathparts[i], subNode);
+                if (subChunkId == ChunkID.INVALID_ID) return null;
+                subNode = new FsNodeChunk(subChunkId);
+                chunkS.get(subNode);
+            }
+            // for ended without return: thus the path+file must exists!
+        }
+        return subNode.get();
+    }
+    
     private String delete(String path) {
         String back = "OK";
 
@@ -884,6 +911,70 @@ public class DxramFsApp extends AbstractApplication {
         }
 
         CreateMessage response = new CreateMessage(msg.getSource(), back, subChunkId);
+        return response;
+    }
+
+    // handles EXT
+    private FsNodeMessage externalHandleFsNode(FsNodeMessage msg) {
+        String back = "OK";
+        String path = msg.get_data();
+        FsNode fsnode = null;
+        
+        if (path.length() > 0) {
+            fsnode = getFsNode(path);
+            if (fsnode == null) back = "fail. path wrong.";
+        } else {
+            back = "fail. name is empty";
+        }
+
+        FsNodeMessage response = new FsNodeMessage(msg.getSource(), back);
+        response.set_fsNode(fsnode);
+        return response;
+    }
+    
+    // does not need to handle EXT
+    private FsNodeByIdMessage externalHandleFsNodeById(FsNodeByIdMessage msg) {
+        String back = "OK";
+        String chunkidstr = msg.get_data();
+        FsNode fsnode = null;
+        
+        if (chunkidstr.length() > 0) {
+            FsNodeChunk subNode = new FsNodeChunk(Long.valueOf(chunkidstr));
+            chunkS.get(subNode);
+            if (subNode.getID() == ChunkID.INVALID_ID) {
+                back = "fail. id wrong.";
+            } else {
+                fsnode = subNode.get();
+            }
+        } else {
+            back = "fail. id is empty";
+        }
+
+        FsNodeByIdMessage response = new FsNodeByIdMessage(msg.getSource(), back);
+        response.set_fsNode(fsnode);
+        return response;
+    }
+    
+    // does not need to handle EXT
+    private BlockinfoMessage externalHandleBlockinfo(BlockinfoMessage msg) {
+        String back = "OK";
+        String chunkidstr = msg.get_data();
+        Blockinfo bi = null;
+        
+        if (chunkidstr.length() > 0) {
+            BlockinfoChunk biChunk = new BlockinfoChunk(Long.valueOf(chunkidstr));
+            chunkS.get(biChunk);
+            if (biChunk.getID() == ChunkID.INVALID_ID) {
+                back = "fail. id wrong.";
+            } else {
+                bi = biChunk.get();
+            }
+        } else {
+            back = "fail. id is empty";
+        }
+
+        BlockinfoMessage response = new BlockinfoMessage(msg.getSource(), back);
+        response.set_Blockinfo(bi);
         return response;
     }
 

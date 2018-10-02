@@ -21,13 +21,13 @@ public class BlockinfoMessage extends Message {
     private byte[] _data;
 
     private long _ID;
-    private long _size;
-    private byte[] _name;
-    private int _type;
-    private int _refSize;
-    private long _backId;
-    private long _forwardId;
-    private long[] _refIds;
+    private int _offset;
+    private int _length;
+    private boolean _corrupt;
+    private long _storageId;
+    private byte[] _host;
+    private byte[] _addr;
+    private int _port;
 
     public static boolean gotResult;
     public static BlockinfoMessage result;
@@ -38,39 +38,44 @@ public class BlockinfoMessage extends Message {
 
     public Blockinfo get_Blockinfo() {
         Blockinfo bi = new Blockinfo();
-        fsn.ID = _ID;
-        fsn.size = _size;
-        fsn.name = new String(_name, DxramFsConfig.STRING_STD_CHARSET);
-        fsn.type = _type;
-        fsn.refSize = _refSize;
-        fsn.backId = _backId;
-        fsn.forwardId = _forwardId;
-        fsn.refIds = _refIds;
-        return fsn;
+        bi.ID = _ID;
+        bi.offset = _offset;
+        bi.length = _length;
+        bi.corrupt = _corrupt;
+        bi.storageId = _storageId;
+        bi.host = new String(_host, DxramFsConfig.STRING_STD_CHARSET);
+        bi.addr = new String(_addr, DxramFsConfig.STRING_STD_CHARSET);
+        bi.port = _port;
+        return bi;
     }
 
     public void set_Blockinfo(Blockinfo bi) {
-        this._ID = fsn.ID;
-        this._size = fsn.size;
-        this._name = fsn.name.getBytes(DxramFsConfig.STRING_STD_CHARSET);
-        this._type = fsn.type;
-        this._refSize = fsn.refSize;
-        this._backId = fsn.backId;
-        this._forwardId = fsn.forwardId;
-        this._refIds = fsn.refIds;
+        if (bi == null) {
+            bi = new Blockinfo();
+            bi.init();
+            bi.ID = DxramFsConfig.INVALID_ID;
+        }
+        this._ID = bi.ID;
+        this._offset = bi.offset;
+        this._length = bi.length;
+        this._corrupt = bi.corrupt;
+        this._storageId = bi.storageId;
+        this._host = bi.host.getBytes(DxramFsConfig.STRING_STD_CHARSET);
+        this._addr = bi.addr.getBytes(DxramFsConfig.STRING_STD_CHARSET);
+        this._port = bi.port;
     }
 
     @Override
     protected final int getPayloadLength() {
         int s = ObjectSizeUtil.sizeofByteArray(_data);
         s += Long.BYTES;
-        s += Long.BYTES;
-        s += ObjectSizeUtil.sizeofByteArray(_name);
         s += Integer.BYTES;
         s += Integer.BYTES;
+        s += Integer.BYTES; // boolean
         s += Long.BYTES;
-        s += Long.BYTES;
-        s += ObjectSizeUtil.sizeofLongArray(_refIds);
+        s += ObjectSizeUtil.sizeofByteArray(_host);
+        s += ObjectSizeUtil.sizeofByteArray(_addr);
+        s += Integer.BYTES;
         return s;
     }
 
@@ -80,13 +85,13 @@ public class BlockinfoMessage extends Message {
     ) {
         p_exporter.writeByteArray(_data);
         p_exporter.writeLong(_ID);
-        p_exporter.writeLong(_size);
-        p_exporter.writeByteArray(_name);
-        p_exporter.writeInt(_type);
-        p_exporter.writeInt(_refSize);
-        p_exporter.writeLong(_backId);
-        p_exporter.writeLong(_forwardId);
-        p_exporter.writeLongArray(_refIds);
+        p_exporter.writeInt(_offset);
+        p_exporter.writeInt(_length);
+        p_exporter.writeBoolean(_corrupt);
+        p_exporter.writeLong(_storageId);
+        p_exporter.writeByteArray(_host);
+        p_exporter.writeByteArray(_addr);
+        p_exporter.writeInt(_port);
     }
 
     @Override
@@ -95,13 +100,13 @@ public class BlockinfoMessage extends Message {
     ) {
         _data = p_importer.readByteArray(_data);
         _ID = p_importer.readLong(_ID);
-        _size = p_importer.readLong(_size);
-        _name = p_importer.readByteArray(_name);
-        _type = p_importer.readInt(_type);
-        _refSize = p_importer.readInt(_refSize);
-        _backId = p_importer.readLong(_backId);
-        _forwardId = p_importer.readLong(_forwardId);
-        _refIds = p_importer.readLongArray(_refIds);
+        _offset = p_importer.readInt(_offset);
+        _length = p_importer.readInt(_length);
+        _corrupt = p_importer.readBoolean(_corrupt);
+        _storageId = p_importer.readLong(_storageId);
+        _host = p_importer.readByteArray(_host);
+        _addr = p_importer.readByteArray(_addr);
+        _port = p_importer.readInt(_port);
     }
 
     // ---------------------------------------------------------------
@@ -113,12 +118,14 @@ public class BlockinfoMessage extends Message {
     public BlockinfoMessage(final short p_destination) {
         super(p_destination, FsNodeMessage.MTYPE, FsNodeMessage.TAG);
         _data = new byte[DxramFsConfig.max_pathlength_chars];
+        set_Blockinfo(null);
     }
 
     public BlockinfoMessage(final short p_destination, final String p_data) {
         super(p_destination, FsNodeMessage.MTYPE, FsNodeMessage.TAG);
         gotResult = false;
         _data = p_data.getBytes(DxramFsConfig.STRING_STD_CHARSET);
+        set_Blockinfo(null);
     }
 
     // ---------------------------------------------------------------

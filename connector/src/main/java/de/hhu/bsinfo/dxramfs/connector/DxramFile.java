@@ -230,6 +230,7 @@ public class DxramFile {
             throw new IOException("existing directory");
         }
         if (this.exists()) {
+            // @todo DOES this really matter? did we use "create" for just writing?
             throw new FileAlreadyExistsException("file still exists");
         }
         // get dir
@@ -248,20 +249,12 @@ public class DxramFile {
         CreateMessage cmsg = new CreateMessage(getNearPeerId(), hpath2path(_absPath));
         boolean res = cmsg.send(_dxnet);
 
-
-
         long fsNodeId = cmsg.getFsNodeChunkId();
         if (!res) throw new IOException("create new file in dxram went wrong");
 
         LOG.debug("createNewFile: '" + _absPath.getName() + "' in '" + hpath + "'");
 
-
-
-
         DxramOutputStream dxouts = new DxramOutputStream(this, _dxnet);
-
-
-
 
         FSDataOutputStream outs = new FSDataOutputStream(dxouts, (Statistics)null) {
             @Override
@@ -281,7 +274,7 @@ public class DxramFile {
         return outs;
     }
 
-    //-------------------------------------------------------------------------------------- open (get, read)
+    //-------------------------------------------------------------------------------------- open (get,read - maybe write?)
     public FSDataInputStream open(int bufferSize) throws IOException {
         if (this.isDirectory()) throw new IOException("is directory");
         byte[] data = new byte[(int) this.length()];

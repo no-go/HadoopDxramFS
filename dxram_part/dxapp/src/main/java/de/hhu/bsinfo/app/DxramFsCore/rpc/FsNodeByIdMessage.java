@@ -49,6 +49,11 @@ public class FsNodeByIdMessage extends Message {
     }
 
     public void set_fsNode(FsNode fsn) {
+        if (fsn == null) {
+            fsn = new FsNode();
+            fsn.init();
+            fsn.ID = DxramFsConfig.INVALID_ID;
+        }
         this._ID = fsn.ID;
         this._size = fsn.size;
         this._name = fsn.name.getBytes(DxramFsConfig.STRING_STD_CHARSET);
@@ -112,12 +117,14 @@ public class FsNodeByIdMessage extends Message {
     public FsNodeByIdMessage(final short p_destination) {
         super(p_destination, FsNodeByIdMessage.MTYPE, FsNodeByIdMessage.TAG);
         _data = new byte[DxramFsConfig.max_pathlength_chars];
+        set_fsNode(null);
     }
 
     public FsNodeByIdMessage(final short p_destination, final String p_data) {
         super(p_destination, FsNodeByIdMessage.MTYPE, FsNodeByIdMessage.TAG);
         gotResult = false;
         _data = p_data.getBytes(DxramFsConfig.STRING_STD_CHARSET);
+        set_fsNode(null);
     }
 
     // ---------------------------------------------------------------

@@ -170,6 +170,10 @@ bis hier 205,25h
 +---------------+-------------------------------------------+--------------+-----------------------
 |  2018-08-31   |    - Fr (inkl)                            |       14     | Fertigstellung und Probleme mit Umlaute in DXRAM getestet: 
 |               |                                           |              |  exists, mkdir, list, isdir, size, delete, rename
+
+
+bis hier: 332,25
+
 +---------------+-------------------------------------------+--------------+-----------------------
 |  2018-09-07   |    - Fr (inkl)                            |       15     | leere Datei anlegen, angefragten Block übertragen, Start mit
 |               |                                           |              | Buffered Stream um Datei mit Daten zu füllen
@@ -180,6 +184,11 @@ bis hier 205,25h
 |  2018-09-21   |     "                                     |       18     | Vergleich jobverteilungs-Konzepte bei anderen Projekten,
 |               |                                           |              | HBASE: Zusammenspiel Recherche YAST, BlockLocation, RegionServer
 +---------------+-------------------------------------------+--------------+-----------------------
+
+
+bis hier: 372,5
+
+
 |  2018-09-28   |                                           |              | 
 +---------------+-------------------------------------------+--------------+-----------------------
 |  2018-10-05   |                                           |              | 
@@ -236,11 +245,22 @@ todo: habe/muss ich FileContext implementieren?
 
 -----------------------------------------------------------------------------------------------
 
+
+
+
 ## notiz 2018-10-02
 
-12:30 - 13:45   start implementierung getFsNode und get Blockinfo
+12:30 - 13:45   implementierung getFsNode und get Blockinfo
+17:00 - 19:45   ", fertig aber ungetestet
 
+Todo:
+- eine flush() realisieren (+kleiner ResponseMessage dazu), um Buffer/Block
+  in DxramOutputStream zu übertragen
 
+- get Blockinfos: via Dateiname, blätterbar "start block id, anzahl der blöcke, die ich will"
+  -> genau wie "List" in einer request-response Schleife die FileBlockLocations/Blockinfos holen
+
+- open() mit DxramInputStream realisieren
 
 ## notiz 2018-10-01
 
@@ -248,21 +268,6 @@ todo: habe/muss ich FileContext implementieren?
 15:30 - 16:00   start implementierung getFsNode
 16:00 - 17:30   Überarbeitung der Struktur bzgl. HBASE, YARN und NodeManager
 17:30 - 18:00   start implementierung getFsNode
-
-Todo diese Woche:
-
-- FSNode Daten holen
-
-- get Blockinfo: via chunkId von FsNode daten
-- mit FSNode und Blockinfo den passenden Block holen und in OutputStream in den Buffer laden
-
-- get Blockinfos: via Dateiname, blätterbar "start block id, anzahl der blöcke, die ich will"
-  -> genau wie "List" in einer request-response Schleife die FileBlockLocations/Blockinfos holen
-
-- eine flushBlockMessage realisieren (+kleiner ResponseMessage dazu), um Buffer/Block
-  in DxramOutputStream zu übertragen
-
-- open() mit DxramInputStream realisieren
 
 
 
