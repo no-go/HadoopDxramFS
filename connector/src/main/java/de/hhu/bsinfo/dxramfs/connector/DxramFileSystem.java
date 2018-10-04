@@ -101,16 +101,13 @@ public class DxramFileSystem extends FileSystem {
         }
     }
 
-    /**
-     * this is a dummy
-     */
     @Override
-    public FSDataOutputStream append(
-        Path f, int bufferSize, Progressable progress
-    ) throws IOException {
+    public FSDataOutputStream append(Path f, int bufferSize, Progressable progress) throws IOException {
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {}, {})",
             f, bufferSize, progress);
-        return null;
+        Path absF = fixRelativePart(f);
+        DxramFile dxfile = new DxramFile(_dxn, absF, _myUri);
+        return dxfile.append(bufferSize);
     }
 
     @Override
@@ -162,7 +159,7 @@ public class DxramFileSystem extends FileSystem {
         Path absF = fixRelativePart(f);
         DxramFile dxfile = new DxramFile(_dxn, absF, _myUri);
         
-        return dxfile.create(bufferSize, replication, true);
+        return dxfile.create(overwrite, bufferSize, replication, true);
     }
 
     @Override
@@ -181,7 +178,7 @@ public class DxramFileSystem extends FileSystem {
         Path absF = fixRelativePart(f);
         DxramFile dxfile = new DxramFile(_dxn, absF, _myUri);
         
-        return dxfile.create(bufferSize, replication, false);
+        return dxfile.create(overwrite, bufferSize, replication, false);
     }
 
     @Override

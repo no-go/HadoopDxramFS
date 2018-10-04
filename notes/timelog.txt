@@ -26,7 +26,7 @@ hier meine Basis.
 ## vermutlich noch lange zeit offen offen
 
 - test: muss ich (speziell für HBASE) eine append() implementieren?
- - > ja!
+ - > ja! (eingebaut seit 4.10.2018)
 
 - ...
 - test: muss ich -f (force) z.B. bei "rename" implementieren?
@@ -36,13 +36,21 @@ hier meine Basis.
  
  For what "filesystem" is, look at the Filesystem Specification. You need a consistent view across the filesytem: newly create files list(), deleted ones aren't found, updates immediately visible. And rename() of files and directories must be an atomic operation, ideally O(1). It's used for atomic commits of work, checkpoints, ... Oh, and for HBase, append() is needed.
 
-
+- because dxram use ASCII for String, /näö and /nöä is the same -> test/fix the DxramFSConfig.java file
 - Anpassung und test der dxram, dxnet, hadoop und hbase config, so das leicht verständlich und konfigurierbar ist (evtl. scheme von hadoop nutzen?)
 - untersch. Szenarien testen, bei denen DXNet nicht nur als verbindung auf localhost zwischen hadoop node und dxram peer dient
 - hbase und maprecuce java codebeispiele testen
 - speedtest und vergleich mit anderen hadoop inmemory lösungen
 - ausfallsicherheit und ggf. verteilte logs auf daten für synchronität und sicherheit der Konsistenz(?)
 - explizites fehlverhalten von knoten testen
+- unklar, wie append() effizient mit blöcken arbeiten soll. Was nimmt Hadoop einem an Arbeit ab,
+  um lesend auf mehreren Blöcken zu arbeiten und append() ggf. von mehreren Nodes aus geschieht?
+- fscontract unittests mit DxramFs unter Hadoop testen/ausführen!
+  https://hadoop.apache.org/docs/r2.7.4/hadoop-project-dist/hadoop-common/filesystem/testing.html
+- habe/muss ich FileContext implementieren?
+- Sollten mehrere Rechner an der selben Datei änderungen machen die "FsNode" verändern, so gibt es
+  ein Problem! Von meiner Seite im Code wird hier nichts blockiert oder gemerged.
+
 
 -------------------------------------------------------------------------------------
 
@@ -197,8 +205,6 @@ bis hier: 372,5
 
 +---------------+-------------------------------------------+--------------+-----------------------
 |               |                                           |              | 
-
-
 |               |                                           |              | 
 -----------------------------------------------------------------------------------------------
 
@@ -209,15 +215,7 @@ bis hier: 372,5
 
 Filecreate in DxramFile: -----------------
 
-todo: Yarn und Blocklocation: wie weiss YARN mit NodeManager, welcher Node in Hadoop welchen Port bekommt?
-
-todo: Mapping von dxram Peer IP:Port -> dxnet IP:Port -> hadoop IP:xPerfPort (recherce notwendig)
-
-todo: BlockLocations/Info abfrage!
-todo: ask- and get-Blocks Message mit FsNode + Blockinfo anfrage
-todo: ask- and get-Blocks Message: kalkulation, welcher block nötig ist
 todo: write with DxramOutputStream
-
 todo: problem erstellung datei in / !!!
 
 Open in DxramFile: -----------------
@@ -233,13 +231,6 @@ todo: test hbase (cli)
 todo: test mapreduce java code beispiel
 todo: test hbase java code beispiel
 todo: test alles auf cluster/hilbert
-todo: because dxram use ASCII for String, /näö and /nöä is the same!
-todo: was sind SequenceFiles
-todo: get/set Working Directory ?!
-todo: UNitTests !! https://hadoop.apache.org/docs/r2.7.4/hadoop-project-dist/hadoop-common/filesystem/testing.html
-todo: habe/muss ich FileContext implementieren?
-todo: Sollten mehrere Rechner an der selben Datei änderungen machen die "FsNode" verändern, so gibt es
-      ein Problem! Von meiner Seite im Code wird hier nichts blockiert oder gemerged.
 
 
 
@@ -248,11 +239,28 @@ todo: Sollten mehrere Rechner an der selben Datei änderungen machen die "FsNode
 -----------------------------------------------------------------------------------------------
 
 
+
+
+
+Todo:
+- Block und EXT erzeugung.
+- testen aller neuen gets und flush
+- was ist mit dateiverkleinerung?
+- get Blockinfos: via Dateiname, blätterbar "start block id, anzahl der blöcke, die ich will"
+  -> genau wie "List" in einer request-response Schleife die FileBlockLocations/Blockinfos holen
+
+- open() mit DxramInputStream realisieren
+
+
 ## notiz 2018-10-04
 
 14:00 - 16:00   start mit flush().
+16:45 - 19:15   DxramFsApp handling flush message and sending ok message. append() implemented.
+                Primitives (nicht EXT oder Block erzeugendes) flush()+ok implementiert.
+                -> ungetestet!
 
-todo: DxramFsApp handling flush and sending ok.
+Eigentlich wird beim flush() nur in FsNode "size" angefasst und bei Blockinfo auch nur sehr wenig.
+-> warum solltealles übertragen?
 
 Sollten mehrere Rechner an der selben Datei änderungen machen die "FsNode" verändern, so gibt es
 ein Problem! Von meiner Seite im Code wird hier nichts blockiert oder gemerged.
@@ -262,15 +270,6 @@ ein Problem! Von meiner Seite im Code wird hier nichts blockiert oder gemerged.
 
 12:30 - 13:45   implementierung getFsNode und get Blockinfo
 17:00 - 19:45   ", fertig aber ungetestet
-
-Todo:
-- eine flush() realisieren (+kleiner ResponseMessage dazu), um Buffer/Block
-  in DxramOutputStream zu übertragen
-
-- get Blockinfos: via Dateiname, blätterbar "start block id, anzahl der blöcke, die ich will"
-  -> genau wie "List" in einer request-response Schleife die FileBlockLocations/Blockinfos holen
-
-- open() mit DxramInputStream realisieren
 
 ## notiz 2018-10-01
 

@@ -303,7 +303,58 @@ public class DxramFsApp extends AbstractApplication {
 
 
 
-            // todo: andere Message Handler beifügen - ggf array oder so machen?
+
+
+            /* dxnetInit.flush Ok Mh :  only hadoop code got such messages !!
+             */ 
+            
+            if (dxnetInit.flushMh.dataMsg != null) {
+                // @todo did we really copying?
+                FsNode fsnode = dxnetInit.flushMh.dataMsg.getFsNode();
+                Blockinfo bli = dxnetInit.flushMh.dataMsg.getBlockinfo();
+                Block bl = dxnetInit.flushMh.dataMsg.getBlock();
+                short dest = dxnetInit.askBlockmh.askMsg.getSource();
+                
+                // @todo handle EXT and create new Blocks, if full ----------------------- !!
+                
+                FsNodeChunk fsnodeChunk = new FsNodeChunk(fsnode.ID);
+                chunkS.get(fsnodeChunk);
+                fsnodeChunk.get().size = fsnode.size;
+                
+                BlockinfoChunk bliChunk = new BlockinfoChunk(bli.ID);
+                chunkS.get(bliChunk);
+                bliChunk.get().length = bli.length;
+                
+                BlockChunk blChunk = new BlockChunk(bl.ID);
+                chunkS.get(blChunk);
+                blChunk.get()._data = bl._data; // @todo clone() ?
+                
+                // @todo handle more possible fails better
+                chunkS.put(fsnodeChunk, bliChunk, blChunk);
+
+                dxnetInit.flushMh.dataMsg = null;
+                FlushOkMessage response = null;
+                
+                // @todo handle more possible fails better
+                if (blChunk.getID() == ChunkID.INVALID_ID) {
+                    response = new FlushOkMessage(dest, false);
+                } else {
+                    response = new FlushOkMessage(dest, true);
+                }
+                try {
+                    dxnetInit.getDxNet().sendMessage(response);
+                } catch (NetworkException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+
+
+
+
+
+            // @todo: andere Message Handler beifügen - ggf array oder so machen?
 
             //chunkS.get(ROOTN);
             //LOG.debug(String.valueOf(ROOTN.get().refSize));

@@ -215,10 +215,30 @@ public class DxramFile {
 
 
 
+    public FSDataOutputStream append(int bufferSize) throws IOException {
+        DxramOutputStream dxouts = new DxramOutputStream(this, _dxnet);
+        FSDataOutputStream outs = new FSDataOutputStream(dxouts, (Statistics) null) {
+            @Override
+            public void close() throws IOException {
+                // close normal FSDataOutputStream, which close the DxramOutputStream:
+                super.close();
+                //completePendingCommand();
+                //disconnect(client);
+            }
+        };
+
+        // We do not need the dummy stuff for a local filesystem anymore
+        //_dummy.createNewFile();
+        //OutputStream out = new FileOutputStream(_dummy);
+        //FSDataOutputStream outs = new FSDataOutputStream(out, (Statistics)null);
+
+        return outs;
+    }
 
 
     //---------------------------------------------------------------------------------- create (new, write a byte)
     public FSDataOutputStream create(
+        boolean overwrite,
         int bufferSize, 
         short replication,
         boolean recursive
@@ -230,8 +250,12 @@ public class DxramFile {
             throw new IOException("existing directory");
         }
         if (this.exists()) {
-            // @todo DOES this really matter? did we use "create" for just writing?
-            throw new FileAlreadyExistsException("file still exists");
+            if (overwrite) {
+                LOG.debug("create with overwrite deletes the old file");
+                delete();
+            } else {
+                throw new FileAlreadyExistsException("file still exists and should not be overwritten");
+            }
         }
         // get dir
         String fileDir = hpath2path(_absPath).substring(0, hpath2path(_absPath).lastIndexOf(Path.SEPARATOR));
@@ -254,24 +278,7 @@ public class DxramFile {
 
         LOG.debug("createNewFile: '" + _absPath.getName() + "' in '" + hpath + "'");
 
-        DxramOutputStream dxouts = new DxramOutputStream(this, _dxnet);
-
-        FSDataOutputStream outs = new FSDataOutputStream(dxouts, (Statistics)null) {
-            @Override
-            public void close() throws IOException {
-                // close normal FSDataOutputStream, which close the DxramOutputStream:
-                super.close();
-                //completePendingCommand();
-                //disconnect(client);
-            }
-        };
-
-        // We do not need the dummy stuff for a local filesystem anymore
-        //_dummy.createNewFile();
-        //OutputStream out = new FileOutputStream(_dummy);
-        //FSDataOutputStream outs = new FSDataOutputStream(out, (Statistics)null);
-
-        return outs;
+        return append(bufferSize);
     }
 
     //-------------------------------------------------------------------------------------- open (get,read - maybe write?)
