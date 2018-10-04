@@ -71,7 +71,7 @@ public class BlockinfoMessage extends Message {
         s += Long.BYTES;
         s += Integer.BYTES;
         s += Integer.BYTES;
-        s += Integer.BYTES; // boolean
+        s += ObjectSizeUtil.sizeofBoolean();
         s += Long.BYTES;
         s += ObjectSizeUtil.sizeofByteArray(_host);
         s += ObjectSizeUtil.sizeofByteArray(_addr);

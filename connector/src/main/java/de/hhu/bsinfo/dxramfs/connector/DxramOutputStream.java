@@ -91,12 +91,11 @@ public class DxramOutputStream extends OutputStream {
 
     @Override
     public void flush() throws IOException {
-        // write fsnode
-
-        // write blockinfo
-
-        // write block
-
+        FlushMessage msg = new FlushMessage(_dxramFile.getNearPeerId(), _fsNode, _blockinfo, _block);
+        boolean res = msg.send(_dxnet);
+        if (!res) {
+            throw new IOException("flush(): something is really wrong");
+        }
     }
 
     @Override

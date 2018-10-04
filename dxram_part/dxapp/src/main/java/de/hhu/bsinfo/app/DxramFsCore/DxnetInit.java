@@ -28,6 +28,8 @@ public class DxnetInit {
     public FsNodeMessage.InHandler fsnodemh;
     public FsNodeByIdMessage.InHandler fsnodeByIdmh; //22
 
+    public FlushMessage.InHandler flushMh;
+    public FlushOkMessage.InHandler flushOkMh;  // 24
 
     public DxnetInit(NodePeerConfig nopeConfig, short myNodeId) {
         DXNetConfig conf = new DXNetConfig();
@@ -73,6 +75,9 @@ public class DxnetInit {
         _dxNet.registerMessageType(FsNodeMessage.MTYPE, FsNodeMessage.TAG, FsNodeMessage.class); // 21
         _dxNet.registerMessageType(FsNodeByIdMessage.MTYPE, FsNodeByIdMessage.TAG, FsNodeByIdMessage.class); // 22
 
+        _dxNet.registerMessageType(FlushMessage.MTYPE, FlushMessage.TAG, FlushMessage.class);
+        _dxNet.registerMessageType(FlushOkMessage.MTYPE, FlushOkMessage.TAG, FlushOkMessage.class);
+
         bimh = new BlockinfoMessage.InHandler();
         cmh = new CreateMessage.InHandler();
         dmh = new DeleteMessage.InHandler();
@@ -89,6 +94,9 @@ public class DxnetInit {
         fsnodemh = new FsNodeMessage.InHandler(); // 21
         fsnodeByIdmh = new FsNodeByIdMessage.InHandler(); // 22
 
+        flushMh = new FlushMessage.InHandler();
+        flushOkMh = new FlushOkMessage.InHandler();
+
         _dxNet.register(BlockinfoMessage.MTYPE, BlockinfoMessage.TAG, bimh);
         _dxNet.register(CreateMessage.MTYPE, CreateMessage.TAG, cmh);
         _dxNet.register(DeleteMessage.MTYPE, DeleteMessage.TAG, dmh);
@@ -104,6 +112,10 @@ public class DxnetInit {
 
         _dxNet.register(FsNodeMessage.MTYPE, FsNodeMessage.TAG, fsnodemh); // 21
         _dxNet.register(FsNodeByIdMessage.MTYPE, FsNodeByIdMessage.TAG, fsnodeByIdmh); // 22
+
+        _dxNet.register(FlushMessage.MTYPE, FlushMessage.TAG, flushMh); // 23
+        _dxNet.register(FlushOkMessage.MTYPE, FlushOkMessage.TAG, flushOkMh); // 24
+
     }
 
     public DXNet getDxNet() {

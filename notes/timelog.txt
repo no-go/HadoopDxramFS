@@ -238,6 +238,8 @@ todo: was sind SequenceFiles
 todo: get/set Working Directory ?!
 todo: UNitTests !! https://hadoop.apache.org/docs/r2.7.4/hadoop-project-dist/hadoop-common/filesystem/testing.html
 todo: habe/muss ich FileContext implementieren?
+todo: Sollten mehrere Rechner an der selben Datei änderungen machen die "FsNode" verändern, so gibt es
+      ein Problem! Von meiner Seite im Code wird hier nichts blockiert oder gemerged.
 
 
 
@@ -246,6 +248,14 @@ todo: habe/muss ich FileContext implementieren?
 -----------------------------------------------------------------------------------------------
 
 
+## notiz 2018-10-04
+
+14:00 - 16:00   start mit flush().
+
+todo: DxramFsApp handling flush and sending ok.
+
+Sollten mehrere Rechner an der selben Datei änderungen machen die "FsNode" verändern, so gibt es
+ein Problem! Von meiner Seite im Code wird hier nichts blockiert oder gemerged.
 
 
 ## notiz 2018-10-02
