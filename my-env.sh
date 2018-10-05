@@ -20,6 +20,7 @@ export PATH=$JAVA_HOME/bin:$HADOOP_HOME/bin/:$HADOOP_HOME/sbin/:$PATH
 
 
 echo zook..................... start zookeeper
+echo compiNst................. compile and install all
 echo .
 echo cdconn.............. cd ${HDXRAMFS_SRC}
 alias cdconn="cd ${HDXRAMFS_SRC}"
@@ -54,6 +55,7 @@ zook() {
 }
 
 instnode() {
+    echo "start install hadoop connector for accessing dxramFs App in ${HADOOP_HOME}/share/hadoop/common/lib/"
     cp -f ${HDXRAMFS_SRC}/target/hadoop-dxram-fs-*.jar \
         ${HADOOP_HOME}/share/hadoop/common/lib/hadoopDxramFs.jar
     cp -f ${HDXRAMFS_SRC}/lib/*.jar \
@@ -63,6 +65,7 @@ instnode() {
 }
 
 instpeer() {
+    echo "start install dxramFs App to ${DXRAM_RUN}"
     cp -f ${DXRAMAPP_SRC}/build/libs/dxapp-dxramfs-*.jar ${DXRAM_RUN}/dxapp/
     cp -f ${DXRAMAPP_SRC}/DxramFsApp.conf ${DXRAM_RUN}/dxapp/
 }
@@ -96,6 +99,8 @@ updateHDFS() {
     cp ${HADOOPSRC}/hadoop-hdfs-project/hadoop-hdfs-client/target/hadoop-hdfs-client-${HVERS}.jar \
        ${HADOOP_HOME}/share/hadoop/hdfs/lib/
 }
+
+alias copiNst="cdconn; mvn clean; mvn package; instnode; cdapp; ./build.sh; instpeer;"
 
 #startDxnetPeer() {
     #java \

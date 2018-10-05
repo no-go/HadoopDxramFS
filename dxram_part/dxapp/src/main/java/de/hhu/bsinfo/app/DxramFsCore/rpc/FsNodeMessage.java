@@ -1,5 +1,6 @@
 package de.hhu.bsinfo.app.dxramfscore.rpc;
 
+import de.hhu.bsinfo.app.dxramfscore.FsNodeType;
 import de.hhu.bsinfo.dxnet.DXNet;
 import de.hhu.bsinfo.dxnet.MessageReceiver;
 import de.hhu.bsinfo.dxnet.core.AbstractMessageExporter;
@@ -19,16 +20,15 @@ public class FsNodeMessage extends Message {
     public static final Logger LOG = LogManager.getLogger(FsNodeMessage.class.getName());
     public static final byte MTYPE = 42;
     public static final byte TAG = 21;
-    private byte[] _data;
-
     private long _ID;
     private long _size;
-    private byte[] _name;
     private int _type;
     private int _refSize;
     private long _backId;
     private long _forwardId;
-    private long[] _refIds;
+    private byte[] _data;
+    //private byte[] _name;
+    //private long[] _refIds;
 
     public static boolean gotResult;
     public static FsNodeMessage result;
@@ -37,46 +37,57 @@ public class FsNodeMessage extends Message {
         return new String(_data, DxramFsConfig.STRING_STD_CHARSET);
     }
 
-    public FsNode get_fsNode() {
+    public final FsNode get_fsNode() {
         FsNode fsn = new FsNode();
+        fsn.init();
         fsn.ID = _ID;
         fsn.size = _size;
-        fsn.name = new String(_name, DxramFsConfig.STRING_STD_CHARSET);
         fsn.type = _type;
         fsn.refSize = _refSize;
         fsn.backId = _backId;
         fsn.forwardId = _forwardId;
-        fsn.refIds = _refIds;
+        //fsn.name = new String(_name, DxramFsConfig.STRING_STD_CHARSET);
+        //fsn.refIds = _refIds;
         return fsn;
     }
 
+    /*
     public void set_fsNode(FsNode fsn) {
-        if (fsn == null) {
-            fsn = new FsNode();
-            fsn.init();
-            fsn.ID = DxramFsConfig.INVALID_ID;
-        }
         this._ID = fsn.ID;
         this._size = fsn.size;
-        this._name = fsn.name.getBytes(DxramFsConfig.STRING_STD_CHARSET);
         this._type = fsn.type;
         this._refSize = fsn.refSize;
         this._backId = fsn.backId;
         this._forwardId = fsn.forwardId;
-        this._refIds = fsn.refIds;
+
+        //this._name = fsn.name.getBytes(DxramFsConfig.STRING_STD_CHARSET);
+        //this._refIds = fsn.refIds;
+
+
+        this._name = new byte[DxramFsConfig.max_filenamelength_chars];
+        for (int i=0; i<DxramFsConfig.max_filenamelength_chars && i < fsn.name.getBytes(DxramFsConfig.STRING_STD_CHARSET).length; i++) {
+            this._name[i] = fsn.name.getBytes(DxramFsConfig.STRING_STD_CHARSET)[i];
+        }
+
+        this._refIds = new long[DxramFsConfig.ref_ids_each_fsnode];
+        for (int i=0; i<DxramFsConfig.ref_ids_each_fsnode; i++) {
+            this._refIds[i] = fsn.refIds[i];
+        }
     }
+    */
 
     @Override
     protected final int getPayloadLength() {
-        int s = ObjectSizeUtil.sizeofByteArray(_data);
+        int s = 0;
         s += Long.BYTES;
         s += Long.BYTES;
-        s += ObjectSizeUtil.sizeofByteArray(_name);
         s += Integer.BYTES;
         s += Integer.BYTES;
         s += Long.BYTES;
         s += Long.BYTES;
-        s += ObjectSizeUtil.sizeofLongArray(_refIds);
+        s += /*2+ DxramFsConfig.max_pathlength_chars; */ObjectSizeUtil.sizeofByteArray(_data);
+        //s += /*2+ DxramFsConfig.max_filenamelength_chars; */ObjectSizeUtil.sizeofByteArray(_name);
+        //s += /*2+ Long.BYTES * DxramFsConfig.ref_ids_each_fsnode; */ObjectSizeUtil.sizeofLongArray(_refIds);
         return s;
     }
 
@@ -84,30 +95,30 @@ public class FsNodeMessage extends Message {
     protected final void writePayload(
             final AbstractMessageExporter p_exporter
     ) {
-        p_exporter.writeByteArray(_data);
         p_exporter.writeLong(_ID);
         p_exporter.writeLong(_size);
-        p_exporter.writeByteArray(_name);
         p_exporter.writeInt(_type);
         p_exporter.writeInt(_refSize);
         p_exporter.writeLong(_backId);
         p_exporter.writeLong(_forwardId);
-        p_exporter.writeLongArray(_refIds);
+        p_exporter.writeByteArray(_data);
+        //p_exporter.writeByteArray(_name);
+        //p_exporter.writeLongArray(_refIds);
     }
 
     @Override
     protected final void readPayload(
             final AbstractMessageImporter p_importer
     ) {
-        _data = p_importer.readByteArray(_data);
         _ID = p_importer.readLong(_ID);
         _size = p_importer.readLong(_size);
-        _name = p_importer.readByteArray(_name);
         _type = p_importer.readInt(_type);
         _refSize = p_importer.readInt(_refSize);
         _backId = p_importer.readLong(_backId);
         _forwardId = p_importer.readLong(_forwardId);
-        _refIds = p_importer.readLongArray(_refIds);
+        _data = p_importer.readByteArray(_data);
+        //_name = p_importer.readByteArray(_name);
+        //_refIds = p_importer.readLongArray(_refIds);
     }
 
     // ---------------------------------------------------------------
@@ -118,15 +129,53 @@ public class FsNodeMessage extends Message {
 
     public FsNodeMessage(final short p_destination) {
         super(p_destination, FsNodeMessage.MTYPE, FsNodeMessage.TAG);
+        _ID = DxramFsConfig.INVALID_ID;
+        _size = 0;
+        _type = FsNodeType.FILE;
+        _refSize = 1;
+        _backId = DxramFsConfig.INVALID_ID;
+        _forwardId = DxramFsConfig.INVALID_ID;
         _data = new byte[DxramFsConfig.max_pathlength_chars];
-        set_fsNode(null);
+        //_name = new byte[DxramFsConfig.max_filenamelength_chars];
+        //_refIds = new long[DxramFsConfig.ref_ids_each_fsnode];
     }
 
-    public FsNodeMessage(final short p_destination, final String p_data) {
+    public FsNodeMessage(final short p_destination, final String _data) {
+        super(p_destination, FsNodeMessage.MTYPE, FsNodeMessage.TAG);
+        this._data = _data.getBytes(DxramFsConfig.STRING_STD_CHARSET);
+        _ID = DxramFsConfig.INVALID_ID;
+        _size = 0;
+        _type = FsNodeType.FILE;
+        _refSize = 1;
+        _backId = DxramFsConfig.INVALID_ID;
+        _forwardId = DxramFsConfig.INVALID_ID;
+        //_name = new byte[DxramFsConfig.max_filenamelength_chars];
+        //_refIds = new long[DxramFsConfig.ref_ids_each_fsnode];
+    }
+
+    public FsNodeMessage(
+            final short p_destination,
+            final String _data,
+            final long _ID,
+            final long _size,
+            final int _type,
+            final int _refSize,
+            final long _backId,
+            final long _forwardId,
+            final String _name,
+            final long[] _refIds
+    ) {
         super(p_destination, FsNodeMessage.MTYPE, FsNodeMessage.TAG);
         gotResult = false;
-        _data = p_data.getBytes(DxramFsConfig.STRING_STD_CHARSET);
-        set_fsNode(null);
+        this._data = _data.getBytes(DxramFsConfig.STRING_STD_CHARSET);
+        this._ID = _ID;
+        this._size = _size;
+        this._type = _type;
+        this._refSize = _refSize;
+        this._backId = _backId;
+        this._forwardId = _forwardId;
+        //this._name = _name.getBytes(DxramFsConfig.STRING_STD_CHARSET);
+        //this._refIds = _refIds;
     }
 
     // ---------------------------------------------------------------
@@ -141,6 +190,7 @@ public class FsNodeMessage extends Message {
      */
     public FsNode send(DXNet dxnet) {
         try {
+            LOG.debug("send payload: " + getPayloadLength());
             dxnet.sendMessage(this);
             while (gotResult == false) {
                 try {
@@ -152,6 +202,7 @@ public class FsNodeMessage extends Message {
             }
             LOG.debug("got Response: " + result.get_data());
             if (result.get_data().startsWith("OK")) {
+                //LOG.debug(result.get_fsNode().name + " with size:" + result.get_fsNode().size);
                 return result.get_fsNode();
             } else {
                 return null;

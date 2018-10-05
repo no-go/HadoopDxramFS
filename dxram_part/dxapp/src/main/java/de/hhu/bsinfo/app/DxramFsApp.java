@@ -274,6 +274,7 @@ public class DxramFsApp extends AbstractApplication {
             if (dxnetInit.fsnodemh.gotResult()) {
                 FsNodeMessage msg = (FsNodeMessage) dxnetInit.fsnodemh.Result();
                 FsNodeMessage response = externalHandleFsNode(msg);
+                //LOG.debug(response.get_fsNode().name);
                 try {
                     dxnetInit.getDxNet().sendMessage(response);
                 } catch (NetworkException e) {
@@ -315,7 +316,7 @@ public class DxramFsApp extends AbstractApplication {
                 Block bl = dxnetInit.flushMh.dataMsg.getBlock();
                 short dest = dxnetInit.askBlockmh.askMsg.getSource();
                 
-                // @todo handle EXT and create new Blocks, if full ----------------------- !!
+                // @todo handle EXT ----------------------- !!
                 
                 FsNodeChunk fsnodeChunk = new FsNodeChunk(fsnode.ID);
                 chunkS.get(fsnodeChunk);
@@ -331,6 +332,21 @@ public class DxramFsApp extends AbstractApplication {
                 
                 // @todo handle more possible fails better
                 chunkS.put(fsnodeChunk, bliChunk, blChunk);
+
+                // if Blockinfo offset not equal fsnode.size/DxramFsConfig.file_blocksize -> add a new block
+                
+                int newRefId = (int) (fsnodeChunk.get().size/(long)DxramFsConfig.file_blocksize);
+                if (
+                    // the block is full AND
+                    (bliChunk.get().length == DxramFsConfig.file_blocksize) &&
+                    // it is the last block of the file AND
+                    ( newRefId == (bliChunk.get().offset +1) ) &&
+                    // e.g. the new calculated refId is 1 (= we need 2 blocks to store) but we have only 1 (=refSize) blocks
+                    (newRefId == fsnodeChunk.get().refSize)
+                ) {
+                    // @todo handle more possible fails better
+                    enlarge(fsnodeChunk);
+                }
 
                 dxnetInit.flushMh.dataMsg = null;
                 FlushOkMessage response = null;
@@ -365,7 +381,69 @@ public class DxramFsApp extends AbstractApplication {
 
 
 
+
+
+
+
+
+
+
+
     // ------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+    private void enlarge(FsNodeChunk nodeChunk) {
+        // @todo: handles EXT
+        BlockinfoChunk binch = new BlockinfoChunk();
+        binch.get().init();
+        chunkS.create(binch);
+        LOG.debug("Create Blockinfo on Chunk [%s]", String.format("0x%X", binch.getID()));
+        
+        // @todo: handles EXT
+        int refSize = nodeChunk.get().refSize;
+        nodeChunk.get().refIds[refSize] = binch.getID(); // add the single Blockinfo as chunkid
+        nodeChunk.get().refSize++;
+        chunkS.put(nodeChunk);
+        
+        binch.get().offset = (int)(nodeChunk.get().size/(long)DxramFsConfig.file_blocksize);
+        binch.get().length = 0; // store how many byte did we need from this block? INT -> 2GB int limit!?
+        binch.get().corrupt = false;
+
+        BlockChunk bloch = new BlockChunk();
+        bloch.get().init();
+        chunkS.create(bloch);
+        LOG.debug("Create Block on Chunk [%s]", String.format("0x%X", bloch.getID()));
+
+        binch.get().storageId = bloch.getID();
+
+        // later we should fill this values dynamically on request!!
+        
+        short blockOwningPeer = lookS.getPrimaryPeer(bloch.getID());
+        InetSocketAddress nodeDetail = bootS.getNodeAddress(blockOwningPeer);
+        
+        // later you have to map this dxram host+addr+port to dxnet host+addr+port
+        
+        binch.get().host = nodeDetail.getHostString(); // hostname or alternative the ip address
+        binch.get().addr = nodeDetail.getAddress().getHostAddress(); // the ip address as string!
+        binch.get().port = nodeDetail.getPort();
+        LOG.debug(
+            "BlockChunk [%s] is on %s (%s:%d)",
+            String.format("0x%X", bloch.getID()),
+            binch.get().host,
+            binch.get().addr,
+            binch.get().port
+        );
+        
+        chunkS.put(binch);
+    }
 
     /**
      * Get the ChunkId of a FsNode with "name" in FsNode (a folder) or -1, if it not exists
@@ -670,53 +748,13 @@ public class DxramFsApp extends AbstractApplication {
         newf.get().backId = parentNode.getID();
         newf.get().forwardId = newf.getID();   // to self as dummy link
         newf.get().size = 0; // count the total bytes of the file!!
-        newf.get().refSize = 1; // we create a single block with length 0
+        newf.get().refSize = 0; // we create a single block with length 0
         // we increment the refSize of the file, if we need additional blocks
-        // we use EXT, if refSize >= ref_ids_each_fsnode
-
-        BlockinfoChunk binch = new BlockinfoChunk();
-        binch.get().init();
-        chunkS.create(binch);
-        LOG.debug("Create Blockinfo on Chunk [%s]", String.format("0x%X", binch.getID()));
-        newf.get().refIds[0] = binch.getID(); // add the first, single Blockinfo as chunkid
         chunkS.put(newf);
-        
-        binch.get().offset = 0;  // Offset of the block in the file (index/position of that block in the file)
-        binch.get().length = 0; // store how many byte did we need from this block? INT -> 2GB int limit!?
-        binch.get().corrupt = false;
-        
-        BlockChunk bloch = new BlockChunk();
-        bloch.get().init();
-        chunkS.create(bloch);
-        LOG.debug("Create Block on Chunk [%s]", String.format("0x%X", bloch.getID()));
+        enlarge(newf);
 
-        binch.get().storageId = bloch.getID(); // to the BlockChunk id, where the data exists (only 1 id because no/0 replica)
-
-
-        // @todo we have to get it from the nodeid of the chunk lookup and search the concrete values by BootService
-        // -> we should fill this values dynamically on request!!
-        
-        short blockOwningPeer = lookS.getPrimaryPeer(bloch.getID());
-        InetSocketAddress nodeDetail = bootS.getNodeAddress(blockOwningPeer);
-        
-        // @todo map dxram host+addr+port to dxnet host+addr+port !!!!!!
-        
-        binch.get().host = nodeDetail.getHostString(); // hostname or alternative the ip address
-        binch.get().addr = nodeDetail.getAddress().getHostAddress(); // the ip address as string!
-        binch.get().port = nodeDetail.getPort();
-        
-        LOG.debug(
-            "BlockChunk [%s] is on %s (%s:%d)",
-            String.format("0x%X", bloch.getID()),
-            binch.get().host,
-            binch.get().addr,
-            binch.get().port
-        );
-
-        chunkS.put(binch);
-
+        // update directory entry
         // @todo EXT to handle more than ref_ids_each_fsnode entries !!
-        
         int refSize = parentNode.get().refSize;
         parentNode.get().refIds[refSize] = newf.getID();
         parentNode.get().size++;
@@ -978,9 +1016,18 @@ public class DxramFsApp extends AbstractApplication {
             back = "fail. name is empty";
         }
 
-        FsNodeMessage response = new FsNodeMessage(msg.getSource(), back);
-        response.set_fsNode(fsnode);
-        return response;
+        return new FsNodeMessage(
+            msg.getSource(),
+            back,
+            fsnode.ID,
+            fsnode.size,
+            fsnode.type,
+            fsnode.refSize,
+            fsnode.backId,
+            fsnode.forwardId,
+            fsnode.name,
+            fsnode.refIds
+        );
     }
     
     // does not need to handle EXT
@@ -1019,6 +1066,17 @@ public class DxramFsApp extends AbstractApplication {
                 back = "fail. id wrong.";
             } else {
                 bi = biChunk.get();
+                
+                // we filling this infos dynamically:
+
+                short blockOwningPeer = lookS.getPrimaryPeer(bi.storageId);
+                InetSocketAddress nodeDetail = bootS.getNodeAddress(blockOwningPeer);
+                
+                // you have to map this dxram host+addr+port to dxnet host+addr+port !
+                
+                bi.host = nodeDetail.getHostString(); // hostname or alternative the ip address
+                bi.addr = nodeDetail.getAddress().getHostAddress(); // the ip address as string!
+                bi.port = nodeDetail.getPort();
             }
         } else {
             back = "fail. id is empty";

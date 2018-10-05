@@ -61,7 +61,7 @@ public class FsNode {
     public void init() {
         this.type = FsNodeType.FOLDER;
         char[] dummy = new char[DxramFsConfig.max_filenamelength_chars];
-        Arrays.fill(dummy, ' ');
+        Arrays.fill(dummy, ' '); // better '\0' ?!?!
         this.name = new String(dummy);
         this.refIds = new long[DxramFsConfig.ref_ids_each_fsnode];
     }

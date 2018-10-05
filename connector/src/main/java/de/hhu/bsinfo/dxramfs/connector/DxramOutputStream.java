@@ -61,7 +61,9 @@ public class DxramOutputStream extends OutputStream {
     @Override
     public void write(int b) throws IOException {
         if (_blockinfo.length == DxramFsConfig.file_blocksize) {
+            // block is full
             flush();
+            // get (maybe enlarged) new/next block and other data
             readTail();
         }
         _block._data[_blockinfo.length] = (byte) b;

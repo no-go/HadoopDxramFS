@@ -197,7 +197,9 @@ bis hier: 332,25
 bis hier: 372,5
 
 
-|  2018-09-28   |                                           |              | 
+|  2018-09-28   |    "                                      |      18,25   | Start der übertragung der Daten, um create() und append() zu realisieren.
+|               |                                           |              | flush() realisiert mit anlegen neuer blöcke. Test des Codes scheitert mal
+|               |                                           |              | wieder an dxnet und der übertragung von array daten.
 +---------------+-------------------------------------------+--------------+-----------------------
 |  2018-10-05   |                                           |              | 
 
@@ -240,12 +242,52 @@ todo: test alles auf cluster/hilbert
 
 
 
+## notiz 2018-10-05
 
+12:30 - 12:45   recherche: hat hdfs eine art "get" und "set" block? Bisher nicht gefunden. Ich gehe von
+                konkreten auf HDFS client/xfer/server Operationen aus, die im Detail auf Blocks
+                arbeiten. HBASE scheint hier etwas "primitiver" zu arbeiten, in dem es nicht Blöcke
+                sondern Dateien (HFILE) auf Regionservern als Unterteilung nutzt.
+12:45 - 14:30   Blocks erzeugen. alles ungetestet. Compilieren hadoop+dxram teile klappt
+
+14:30 - 19:30   erster Test, ob Code der letzten Tage Blöcke anlegt und Filesystem updatet
+                -> get FsNode geht bereits nicht. Riesen probleme bei der übertragung von
+                arrays in dxnet, sogar wenn man diese auf eine feste größe setzt.
+
+7h
+
+
+peer:
+
+[19:11:47.532][Network: MessageHandler 2][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.FsNodeMessage] abba/README.txt._COPYING_
+[19:11:47.604][DxramFsApp][DEBUG][DxramFsApp] abba , README.txt._COPYING_
+[19:11:47.606][DxramFsApp][DEBUG][DxramFsApp] getIn: is 'abba' == 'abba' ?
+[19:11:47.607][DxramFsApp][DEBUG][DxramFsApp] getIn: is 'README.txt._COPYING_' == 'README.txt._COPYING_' ?
+de.hhu.bsinfo.dxnet.core.NetworkException: Message deserialization finished too early (without overflow): 161 (payload size) > 73 (deserialized bytes), current Message: de.hhu.bsinfo.app.dxramfscore.rpc.FsNodeMessage, importer type: MessageImporterDefault, importer detail: m_usedCounter 11, m_bufferAddress 0x7f417c0501d0, m_currentPosition 83, m_startPosition 10
+ImporterCollectionState:
+m_importer [m_usedCounter 11, m_bufferAddress 0x7f417c0501d0, m_currentPosition 83, m_startPosition 10]
+
+
+
+client:
+
+[19:11:47.484][main][DEBUG][de.hhu.bsinfo.app.dxramfscore.rpc.FsNodeMessage] send payload: 66
+[19:11:47.639][Network: MessageHandler 2][INFO ][de.hhu.bsinfo.app.dxramfscore.rpc.FsNodeMessage] OK
+[19:11:47.688][main][DEBUG][de.hhu.bsinfo.app.dxramfscore.rpc.FsNodeMessage] got Response: OK
+[19:16:56.808][Network-NIOSelector][DEBUG][NIOSelector] Could not read from channel (0x1)!
+[19:16:56.820][Network-NIOSelector][WARN ][NIOSelector] Selected key is invalid: sun.nio.ch.SelectionKeyImpl@24a00e7e
+^C
+
+
+
+
+im HDFS client projekt gibt es: HdfsBlockLocation extends BlockLocation
+-> dort ist noch eine attribut "LocatedBlock" hinterlegt (?)
 
 Todo:
-- Block und EXT erzeugung.
 - testen aller neuen gets und flush
 - was ist mit dateiverkleinerung?
+- EXT erzeugung.
 - get Blockinfos: via Dateiname, blätterbar "start block id, anzahl der blöcke, die ich will"
   -> genau wie "List" in einer request-response Schleife die FileBlockLocations/Blockinfos holen
 
@@ -259,6 +301,8 @@ Todo:
                 Primitives (nicht EXT oder Block erzeugendes) flush()+ok implementiert.
                 -> ungetestet!
 
+4,5h
+
 Eigentlich wird beim flush() nur in FsNode "size" angefasst und bei Blockinfo auch nur sehr wenig.
 -> warum solltealles übertragen?
 
@@ -271,6 +315,8 @@ ein Problem! Von meiner Seite im Code wird hier nichts blockiert oder gemerged.
 12:30 - 13:45   implementierung getFsNode und get Blockinfo
 17:00 - 19:45   ", fertig aber ungetestet
 
+4h
+
 ## notiz 2018-10-01
 
 14:45 - 15:00   Pflege dieser Projekt-Doku
@@ -278,7 +324,7 @@ ein Problem! Von meiner Seite im Code wird hier nichts blockiert oder gemerged.
 16:00 - 17:30   Überarbeitung der Struktur bzgl. HBASE, YARN und NodeManager
 17:30 - 18:00   start implementierung getFsNode
 
-
+2,75h
 
 
 
