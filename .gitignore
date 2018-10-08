@@ -12,6 +12,9 @@ dxram_part/dxnet/.idea/**/*
 dxram_part/dxnet/.gradle/**/*
 dxram_part/dxnet/src/main/*.iml
 
+nonHadoopClient_debug/build/**/*
+nonHadoopClient_debug/.gradle/**/*
+
 # Compiled class file
 *.class
 
