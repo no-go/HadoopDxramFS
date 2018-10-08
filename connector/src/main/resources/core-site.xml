@@ -58,7 +58,7 @@
         <name>dxnet.to_dxram_peers</name>
         <!-- me is talking to localhost:65221 or localhost:65222, and them are talking to localhost:22222 or 22223. -->
         <!-- the dxnet-dxram peer mapping localhost:65221 at localhost:22222 is good, to identify the location of a block. -->
-        <value>0@127.0.0.1:65220@,1@127.0.0.1:65221@127.0.0.1:22222,2@127.0.0.1:65222@127.0.0.1:22223,3@127.0.0.1:65224@</value>
+        <value>0@127.0.0.1:65220@,1@127.0.0.1:65221@127.0.0.1:22222,2@127.0.0.1:65222@127.0.0.1:22223,3@127.0.0.1:65223@</value>
     </property>
 
 </configuration>
