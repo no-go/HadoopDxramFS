@@ -244,8 +244,10 @@ todo: test alles auf cluster/hilbert
 
 ## notiz 2018-10-08
 
-12:30 - 14:00   dxnet test client zum debuggen, um nicht hadoop dafür immer verweden zu müssen
+12:30 - 14:15   dxnet test client zum debuggen, um nicht hadoop dafür immer verweden zu müssen
+14:45 - 17:00   mit hadoop-freiem Client: FsNode holen klappt, aber eine 2. Request danach läuft schief.
 
+todo: debug and test rename() und delete() bei Dateien (zur zeit datei delete inkomplett)
 
 
 

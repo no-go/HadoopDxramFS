@@ -664,6 +664,8 @@ public class DxramFsApp extends AbstractApplication {
         
         if (nodeChunk.get().type == FsNodeType.FOLDER && size == 0) {
             // it is a empty folder, we can delete it
+
+            // @todo delete all EXT ??
             
             // we are root? - we do not want to delete root here
             if (nodeChunk.getID() == ROOT_CID) return false;
@@ -671,11 +673,13 @@ public class DxramFsApp extends AbstractApplication {
             return true;
         } else {
             
-            // @todo EXT to handle more than ref_ids_each_fsnode entries !!!!!
+            // @todo !!!!!!!!!!!!!!!!!!! ------------------------------------------- IMPROVEMENT
             // @todo delete FILE and handle folder and files in EXT fsNodes
             
+            if (removeS.remove(nodeChunk.getID()) != 1) return false;
+            return true;
         }
-        return false;
+        //return false;
     }
 
     // handles EXT
@@ -765,10 +769,17 @@ public class DxramFsApp extends AbstractApplication {
         return newf.getID();
     }
 
+
+
+
+    // @todo: rename() erzeugt den eintrag 2x !!! -> kann daran liegen, dass file loeschen noch nicht tat
+
+
     // @todo: is this the correct behavior: /a/b exists and we want to move /c into /a/b but we did not get /a/b/c ! we get an error, that /a/b still exists!
     // ------> HINT: this error did not happend by using the hodoop dxramfs connector, because that code handles it!
     // ------> maybe the connector ask many "exists()" in that situation.
     // ------> for the future: test files rename!
+    // @todo: only works with folders ?!?!
     private String rename(String from, String to) {
         String back = "OK";
         if (from.length() == 0) return "fail. / not moveable.";
