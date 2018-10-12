@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -15,7 +18,7 @@ package de.hhu.bsinfo.dxutils.serialization;
 
 /**
  * Interface for an instance which can import/de-serialize
- * Objects. This instance can (for dxExample) read the contents
+ * Objects. This instance can (for example) read the contents
  * of an object from a file.
  *
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 17.12.15
@@ -62,6 +65,15 @@ public interface Importer {
      * @return Value read.
      */
     short readShort(short p_short);
+
+    /**
+     * Read a char from the target.
+     * Use this call in your importable object in the
+     * import call to read data from the target.
+     *
+     * @return Value read.
+     */
+    char readChar(char p_char);
 
     /**
      * Read an int from the target.
@@ -140,6 +152,17 @@ public interface Importer {
     int readShorts(final short[] p_array);
 
     /**
+     * Read data into a char array from target.
+     * Use this call in your importable object in the
+     * import call to read data from the target.
+     *
+     * @param p_array
+     *         Array to read into.
+     * @return Number of chars read;
+     */
+    int readChars(final char[] p_array);
+
+    /**
      * Read data into an int array from target.
      * Use this call in your importable object in the
      * import call to read data from the target.
@@ -192,6 +215,21 @@ public interface Importer {
     int readShorts(final short[] p_array, final int p_offset, final int p_length);
 
     /**
+     * Read data into a char array from target.
+     * Use this call in your importable object in the
+     * import call to read data from the target.
+     *
+     * @param p_array
+     *         Array to read into.
+     * @param p_offset
+     *         Offset to start in the array for reading into.
+     * @param p_length
+     *         Number of chars to read.
+     * @return Number of chars read.
+     */
+    int readChars(final char[] p_array, final int p_offset, final int p_length);
+
+    /**
      * Read data into an int array from target.
      * Use this call in your importable object in the
      * import call to read data from the target.
@@ -238,6 +276,15 @@ public interface Importer {
      * @return New array with data read.
      */
     short[] readShortArray(short[] p_array);
+
+    /**
+     * Read a char array from the target.
+     * The array to be read must be stored as self containing object,
+     * i.e. with length information
+     *
+     * @return New array with data read.
+     */
+    char[] readCharArray(char[] p_array);
 
     /**
      * Read an int array from the target.

@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -55,11 +58,13 @@ public final class MessageDirectory {
         Constructor<?> constructor;
 
         m_lock.lock();
+
         try {
             constructor = p_class.getDeclaredConstructor();
         } catch (final NoSuchMethodException e) {
             m_lock.unlock();
-            throw new IllegalArgumentException("Class " + p_class.getCanonicalName() + " has no default constructor", e);
+            throw new IllegalArgumentException("Class " + p_class.getCanonicalName() + " has no default constructor",
+                    e);
         }
 
         if (contains(p_type, p_subtype)) {
@@ -115,7 +120,8 @@ public final class MessageDirectory {
 
         constructor = getConstructor(p_type, p_subtype);
 
-        // Try again in a loop, if constructor was not registered. Stop if request timeout is reached as answering later has no effect
+        // Try again in a loop, if constructor was not registered. Stop if request timeout is reached as answering
+        // later has no effect
         if (constructor == null) {
             time = System.currentTimeMillis();
             while (constructor == null && System.currentTimeMillis() < time + m_timeOut) {
@@ -126,7 +132,9 @@ public final class MessageDirectory {
         }
 
         if (constructor == null) {
-            throw new NetworkRuntimeException("Could not create message instance: Message type (" + p_type + ':' + p_subtype + ") not registered");
+            throw new NetworkRuntimeException(
+                    "Could not create message instance: Message type (" + p_type + ':' + p_subtype +
+                            ") not registered");
         }
 
         try {
@@ -155,7 +163,8 @@ public final class MessageDirectory {
             return false;
         }
 
-        result = constructors.length > p_type && !(constructors[p_type] == null || constructors[p_type].length <= p_subtype) &&
+        result = constructors.length > p_type &&
+                !(constructors[p_type] == null || constructors[p_type].length <= p_subtype) &&
                 constructors[p_type][p_subtype] != null;
 
         return result;

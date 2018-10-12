@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -42,8 +45,9 @@ public class MessageImporterCollection {
 
     @Override
     public String toString() {
-        return "m_importer [" + m_importer + "]\nm_importerOverflow [" + m_importerOverflow + "]\nm_importerUnderflow [" + m_importerUnderflow +
-                "]\nm_importerUnderOverflow [" + m_importerUnderOverflow + "]\nCurrent used (" + m_currentUsed.getClass().getSimpleName() + ") [" +
+        return "m_importer [" + m_importer + "]\nm_importerOverflow [" + m_importerOverflow +
+                "]\nm_importerUnderflow [" + m_importerUnderflow + "]\nm_importerUnderOverflow [" +
+                m_importerUnderOverflow + "]\nCurrent used (" + m_currentUsed.getClass().getSimpleName() + ") [" +
                 m_currentUsed + "]\nPrev used (" + m_prevUsed.getClass().getSimpleName() + ") [" + m_prevUsed + ']';
     }
 
@@ -60,8 +64,8 @@ public class MessageImporterCollection {
      *         size of message's payload
      * @return the AbstractMessageImporter
      */
-    AbstractMessageImporter getImporter(final int p_payloadSize, final long p_addr, final int p_position, final int p_bufferSize,
-            final UnfinishedImExporterOperation p_unfinishedOperation) {
+    AbstractMessageImporter getImporter(final int p_payloadSize, final long p_addr, final int p_position,
+            final int p_bufferSize, final UnfinishedImExporterOperation p_unfinishedOperation) {
         AbstractMessageImporter ret;
         int bytesCopied = p_unfinishedOperation.getBytesCopied();
 

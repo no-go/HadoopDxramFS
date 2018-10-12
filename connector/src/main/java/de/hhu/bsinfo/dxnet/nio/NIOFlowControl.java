@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -17,7 +20,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.hhu.bsinfo.dxnet.core.AbstractFlowControl;
-import de.hhu.bsinfo.dxnet.core.NetworkException;
 
 /**
  * Extends the flow control for write signalling.
@@ -44,8 +46,9 @@ public class NIOFlowControl extends AbstractFlowControl {
      * @param p_connection
      *         the NIO connection.
      */
-    NIOFlowControl(final short p_destinationNodeId, final int p_flowControlWindowSize, final float p_flowControlWindowThreshold,
-            final NIOSelector p_nioSelector, final NIOConnection p_connection) {
+    NIOFlowControl(final short p_destinationNodeId, final int p_flowControlWindowSize,
+            final float p_flowControlWindowThreshold, final NIOSelector p_nioSelector,
+            final NIOConnection p_connection) {
         super(p_destinationNodeId, p_flowControlWindowSize, p_flowControlWindowThreshold);
 
         m_nioSelector = p_nioSelector;
@@ -53,13 +56,13 @@ public class NIOFlowControl extends AbstractFlowControl {
     }
 
     @Override
-    public void flowControlWrite() throws NetworkException {
+    public void flowControlWrite() {
         m_nioSelector.changeOperationInterestAsync(InterestQueue.WRITE_FLOW_CONTROL, m_connection);
     }
 
     @Override
     public byte getAndResetFlowControlData() {
-        int bytesLeft;
+        long bytesLeft;
         byte ret;
 
         // not using CAS here requires this to be called by a single thread, only
@@ -74,9 +77,7 @@ public class NIOFlowControl extends AbstractFlowControl {
             throw new IllegalStateException("Negative flow control");
         }
 
-        // #if LOGGER >= TRACE
         LOGGER.trace("getAndResetFlowControlData (%X): %d", m_destinationNodeID, bytesLeft);
-        // #endif /* LOGGER >= TRACE */
 
         return ret;
     }

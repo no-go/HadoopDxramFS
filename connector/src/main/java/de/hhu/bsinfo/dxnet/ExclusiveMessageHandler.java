@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -20,8 +23,8 @@ import org.apache.logging.log4j.Logger;
 
 import de.hhu.bsinfo.dxnet.core.MessageHeader;
 import de.hhu.bsinfo.dxnet.core.MessageHeaderPool;
-import de.hhu.bsinfo.dxutils.stats.StatisticsOperation;
-import de.hhu.bsinfo.dxutils.stats.StatisticsRecorderManager;
+import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
+import de.hhu.bsinfo.dxutils.stats.Time;
 
 /**
  * Distributes incoming exclusive messages
@@ -30,9 +33,14 @@ import de.hhu.bsinfo.dxutils.stats.StatisticsRecorderManager;
  */
 final class ExclusiveMessageHandler {
     private static final Logger LOGGER = LogManager.getFormatterLogger(ExclusiveMessageHandler.class.getSimpleName());
-    private static final String RECORDER = "DXNet-MessageHeaderStoreX";
-    private static final StatisticsOperation SOP_PUSH = StatisticsRecorderManager.getOperation(RECORDER, "Push");
-    private static final StatisticsOperation SOP_WAIT = StatisticsRecorderManager.getOperation(RECORDER, "Wait");
+
+    private static final Time SOP_PUSH = new Time(ExclusiveMessageHandler.class, "Push");
+    private static final Time SOP_WAIT = new Time(ExclusiveMessageHandler.class, "Wait");
+
+    static {
+        StatisticsManager.get().registerOperation(ExclusiveMessageHandler.class, SOP_PUSH);
+        StatisticsManager.get().registerOperation(ExclusiveMessageHandler.class, SOP_WAIT);
+    }
 
     // must be a power of two to work with wrap around
     private static final int EXCLUSIVE_MESSAGE_STORE_SIZE = 128;
@@ -47,14 +55,14 @@ final class ExclusiveMessageHandler {
      * @param p_messageReceivers
      *         Provides all registered message receivers
      */
-    ExclusiveMessageHandler(final MessageReceiverStore p_messageReceivers, final MessageHeaderPool p_messageHeaderPool, final boolean p_overprovisioning) {
+    ExclusiveMessageHandler(final MessageReceiverStore p_messageReceivers, final MessageHeaderPool p_messageHeaderPool,
+            final boolean p_overprovisioning) {
         m_exclusiveMessageHeaders = new MessageHeaderStore(EXCLUSIVE_MESSAGE_STORE_SIZE);
 
-        // #if LOGGER >= INFO
         LOGGER.info("Network: ExclusiveMessageHandler: Initialising thread");
-        // #endif /* LOGGER >= INFO */
 
-        m_exclusiveMessageHandler = new MessageHandler(p_messageReceivers, m_exclusiveMessageHeaders, p_messageHeaderPool, p_overprovisioning);
+        m_exclusiveMessageHandler = new MessageHandler(p_messageReceivers, m_exclusiveMessageHeaders,
+                p_messageHeaderPool, p_overprovisioning);
         m_exclusiveMessageHandler.setName("Network: ExclusiveMessageHandler");
         m_exclusiveMessageHandler.start();
     }
@@ -69,13 +77,9 @@ final class ExclusiveMessageHandler {
 
         try {
             m_exclusiveMessageHandler.join();
-            // #if LOGGER >= INFO
             LOGGER.info("Shutdown of ExclusiveMessageHandler successful");
-            // #endif /* LOGGER >= INFO */
         } catch (final InterruptedException e) {
-            // #if LOGGER >= WARN
             LOGGER.warn("Could not wait for exclusive message handler to finish. Interrupted");
-            // #endif /* LOGGER >= WARN */
         }
     }
 
@@ -87,6 +91,18 @@ final class ExclusiveMessageHandler {
     }
 
     /**
+     * Registers a special receive message type
+     *
+     * @param p_type
+     *         the unique type
+     * @param p_subtype
+     *         the unique subtype
+     */
+    void registerSpecialReceiveMessageType(final byte p_type, final byte p_subtype) {
+        m_exclusiveMessageHandler.registerSpecialReceiveMessageType(p_type, p_subtype);
+    }
+
+    /**
      * Enqueue a batch of message headers
      *
      * @param p_headers
@@ -95,30 +111,22 @@ final class ExclusiveMessageHandler {
      *         the number of used entries in array
      */
     void newHeaders(final MessageHeader[] p_headers, final int p_messages) {
-        // #ifdef STATISTICS
-        SOP_PUSH.enter();
-        // #endif /* STATISTICS */
+        SOP_PUSH.startDebug();
 
         if (!m_exclusiveMessageHeaders.pushMessageHeaders(p_headers, p_messages)) {
             for (int i = 0; i < p_messages; i++) {
                 if (!m_exclusiveMessageHeaders.pushMessageHeader(p_headers[i])) {
-                    // #ifdef STATISTICS
-                    SOP_WAIT.enter();
-                    // #endif /* STATISTICS */
+                    SOP_WAIT.start();
 
                     while (!m_exclusiveMessageHeaders.pushMessageHeader(p_headers[i])) {
                         LockSupport.parkNanos(100);
                     }
 
-                    // #ifdef STATISTICS
-                    SOP_WAIT.leave();
-                    // #endif /* STATISTICS */
+                    SOP_WAIT.stop();
                 }
             }
         }
 
-        // #ifdef STATISTICS
-        SOP_PUSH.leave();
-        // #endif /* STATISTICS */
+        SOP_PUSH.stopDebug();
     }
 }

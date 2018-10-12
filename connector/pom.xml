@@ -187,10 +187,16 @@
             <artifactId>maven-compiler-plugin</artifactId>
             <version>3.5.1</version>
             <configuration>
-                <compilerArgument>
+                <!-- compilerArgument>
                     -proc:none
-                </compilerArgument>
-                <!-- annotationProcessors/ -->
+                </compilerArgument -->
+                <!-- annotationProcessorPaths>
+                    <path>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                        <version>${lombok.version}</version>
+                    </path>
+                </annotationProcessorPaths -->
                 <source>${java.version}</source>
                 <target>${java.version}</target>
             </configuration>

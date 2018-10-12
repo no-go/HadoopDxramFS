@@ -1,13 +1,13 @@
 package de.hhu.bsinfo.app.dxramfspeer;
 
-import de.hhu.bsinfo.dxram.data.DataStructure;
+import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.app.dxramfscore.FsNode;
 import de.hhu.bsinfo.app.dxramfscore.FsNodeType;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
 import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 
-public class FsNodeChunk extends DataStructure {
+public class FsNodeChunk extends AbstractChunk {
     private FsNode _fsNode;
 
     public FsNodeChunk() {

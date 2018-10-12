@@ -17,6 +17,7 @@
 package de.hhu.bsinfo.dxnet.ib;
 
 import java.net.InetSocketAddress;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,7 +52,8 @@ import de.hhu.bsinfo.dxutils.unit.StorageUnit;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 13.06.2017
  */
 @SuppressWarnings("sunapi")
-public class IBConnectionManager extends AbstractConnectionManager implements MsgrcJNIBinding.CallbackHandler {
+public class IBConnectionManager extends AbstractConnectionManager
+        implements MsgrcJNIBinding.CallbackHandler, NodeMap.Listener {
     private static final Logger LOGGER = LogManager.getFormatterLogger(IBConnectionManager.class.getSimpleName());
 
     private static final TimePool SOP_CREATE_CON = new TimePool(IBConnectionManager.class, "CreateCon");
@@ -139,7 +141,7 @@ public class IBConnectionManager extends AbstractConnectionManager implements Ms
         m_messageHeaderPool = p_messageHeaderPool;
         m_messageHandlers = p_messageHandlers;
 
-        if (p_coreConfig.getExporterPoolType()) {
+        if (p_coreConfig.isUseStaticExporterPool()) {
             m_exporterPool = new StaticExporterPool();
         } else {
             m_exporterPool = new DynamicExporterPool();
@@ -155,37 +157,43 @@ public class IBConnectionManager extends AbstractConnectionManager implements Ms
      * library to be loaded
      */
     public void init() {
-        // can't call this in the constructor because it relies on the implemented interfaces for callbacks
-        if (!MsgrcJNIBinding.init(this, m_config.getPinSendRecvThreads(), m_config.getEnableSignalHandler(),
-                m_config.getStatisticsThreadPrintIntervalMs(), m_coreConfig.getOwnNodeId(),
-                (int) m_config.getConnectionCreationTimeout().getMs(), m_config.getMaxConnections(),
-                m_config.getSendQueueSize(), m_config.getSharedReceiveQueueSize(),
-                m_config.getSharedSendCompletionQueueSize(), m_config.getSharedReceiveCompletionQueueSize(),
-                (int) m_config.getOugoingRingBufferSize().getBytes(),
-                m_config.getIncomingBufferPoolTotalSize().getBytes(),
-                (int) m_config.getIncomingBufferSize().getBytes(), m_config.getMaxSGEs())) {
+        try {
+            // can't call this in the constructor because it relies on the implemented interfaces for callbacks
+            if (!MsgrcJNIBinding.init(this, m_config.isPinSendRecvThreads(), m_config.isEnableSignalHandler(),
+                    m_config.getStatisticsThreadPrintIntervalMs(), m_coreConfig.getOwnNodeId(),
+                    (int) m_config.getConnectionCreationTimeout().getMs(), m_config.getMaxConnections(),
+                    m_config.getSqSize(), m_config.getSrqSize(), m_config.getSharedSCQSize(),
+                    m_config.getSharedRCQSize(),
+                    (int) m_config.getOutgoingRingBufferSize().getBytes(),
+                    m_config.getIncomingBufferPoolTotalSize().getBytes(),
+                    (int) m_config.getIncomingBufferSize().getBytes(), m_config.getMaxSGEs())) {
 
-            LOGGER.debug("Initializing ibnet failed, check ibnet logs");
+                LOGGER.debug("Initializing ib transport failed, check ibnet logs");
 
-            throw new NetworkRuntimeException("Initializing ibnet failed");
+                throw new NetworkRuntimeException("Initializing ib transport failed");
+            }
+        } catch (UnsatisfiedLinkError ignored) {
+            throw new NetworkRuntimeException("Initializing ib transport failed, could not find init method. It's " +
+                    "likely that the native library couldn't be loaded because it's not available.");
         }
 
-        // this is an ugly way of figuring out which nodes are available on startup. the ib subsystem needs that kind
-        // of information to contact the nodes using an ethernet connection to exchange ib connection information
-        // if you know a better/faster way of doing this here, be my guest and fix it
-        for (int i = 0; i < NodeID.MAX_ID; i++) {
-            if (i == (m_coreConfig.getOwnNodeId() & 0xFFFF)) {
-                continue;
-            }
+        // register listener first
+        m_nodeMap.registerListener(this);
 
-            InetSocketAddress addr = m_nodeMap.getAddress((short) i);
+        // wait a moment to ensure the list is up to date
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException ignored) {
+        }
 
-            if (!"/255.255.255.255".equals(addr.getAddress().toString())) {
-                byte[] bytes = addr.getAddress().getAddress();
-                int val = (int) (((long) bytes[0] & 0xFF) << 24 | ((long) bytes[1] & 0xFF) << 16 |
-                        ((long) bytes[2] & 0xFF) << 8 | bytes[3] & 0xFF);
-                MsgrcJNIBinding.addNode(val);
-            }
+        // now get all nodes that were reported before we had the listener registered
+        List<NodeMap.Mapping> nodes = m_nodeMap.getAvailableMappings();
+
+        for (NodeMap.Mapping node : nodes) {
+            byte[] bytes = node.getAddress().getAddress().getAddress();
+            int val = (int) (((long) bytes[0] & 0xFF) << 24 | ((long) bytes[1] & 0xFF) << 16 |
+                    ((long) bytes[2] & 0xFF) << 8 | bytes[3] & 0xFF);
+            MsgrcJNIBinding.addNode(val);
         }
 
         // wait a little to allow brief initial node discovery
@@ -253,7 +261,7 @@ public class IBConnectionManager extends AbstractConnectionManager implements Ms
         LOGGER.debug("Node connected 0x%X, ORB native addr 0x%X", p_destination, sendBufferAddr);
 
         connection = new IBConnection(m_coreConfig.getOwnNodeId(), p_destination, sendBufferAddr,
-                (int) m_config.getOugoingRingBufferSize().getBytes(), (int) m_config.getFlowControlWindow().getBytes(),
+                (int) m_config.getOutgoingRingBufferSize().getBytes(), (int) m_config.getFlowControlWindow().getBytes(),
                 m_config.getFlowControlWindowThreshold(), m_messageHeaderPool, m_messageDirectory, m_requestMap,
                 m_exporterPool, m_messageHandlers, m_writeInterestManager, m_coreConfig.isBenchmarkMode());
 
@@ -445,6 +453,19 @@ public class IBConnectionManager extends AbstractConnectionManager implements Ms
         }
     }
 
+    @Override
+    public void nodeMappingAdded(final short p_nodeId, final InetSocketAddress p_address) {
+        byte[] bytes = p_address.getAddress().getAddress();
+        int val = (int) (((long) bytes[0] & 0xFF) << 24 | ((long) bytes[1] & 0xFF) << 16 |
+                ((long) bytes[2] & 0xFF) << 8 | bytes[3] & 0xFF);
+        MsgrcJNIBinding.addNode(val);
+    }
+
+    @Override
+    public void nodeMappingRemoved(final short p_nodeId) {
+
+    }
+
     /**
      * Evaluate the processing results of the previous work package
      *
@@ -597,7 +618,8 @@ public class IBConnectionManager extends AbstractConnectionManager implements Ms
                 if (relPosBackRel <= relPosFrontRel) {
                     dataAvail = relPosFrontRel - relPosBackRel;
                 } else {
-                    dataAvail = (int) (m_config.getOugoingRingBufferSize().getBytes() - relPosBackRel + relPosFrontRel);
+                    dataAvail =
+                            (int) (m_config.getOutgoingRingBufferSize().getBytes() - relPosBackRel + relPosFrontRel);
                 }
 
                 SOP_SEND_DATA_AVAIL.add(dataAvail);
@@ -1121,7 +1143,8 @@ public class IBConnectionManager extends AbstractConnectionManager implements Ms
         /**
          * Record a consumed interest or if data is received
          *
-         * @param p_nodeId NodeId of consumed interest or incoming data
+         * @param p_nodeId
+         *         NodeId of consumed interest or incoming data
          */
         void sendRecvCallDebug(final short p_nodeId) {
             long curTime = System.nanoTime();

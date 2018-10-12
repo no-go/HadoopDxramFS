@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -13,14 +16,16 @@
 
 package de.hhu.bsinfo.dxnet.core;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import de.hhu.bsinfo.dxutils.stats.StatisticsOperation;
-import de.hhu.bsinfo.dxutils.stats.StatisticsRecorderManager;
+import de.hhu.bsinfo.dxutils.NodeID;
+import de.hhu.bsinfo.dxutils.stats.AbstractState;
+import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
+import de.hhu.bsinfo.dxutils.stats.TimePool;
 
 /**
  * Software flow control. Avoids that the sender is flooding the receiver if the receiver can't
@@ -32,16 +37,18 @@ import de.hhu.bsinfo.dxutils.stats.StatisticsRecorderManager;
  */
 public abstract class AbstractFlowControl {
     private static final Logger LOGGER = LogManager.getFormatterLogger(AbstractFlowControl.class.getSimpleName());
-    private static final StatisticsOperation SOP_WAIT = StatisticsRecorderManager.getOperation("DXNet-FlowControl", "Wait");
 
     protected final short m_destinationNodeID;
 
-    private final int m_flowControlWindowSize;
+    protected final int m_flowControlWindowSize;
     private final float m_flowControlWindowThreshold;
     protected final int m_flowControlWindowSizeThreshold;
 
-    private AtomicInteger m_unconfirmedBytes;
-    protected AtomicInteger m_receivedBytes;
+    private AtomicLong m_unconfirmedBytes;
+    protected AtomicLong m_receivedBytes;
+
+    private final TimePool m_sopWait;
+    private StateStatistics m_stateStats;
 
     /**
      * Constructor
@@ -53,30 +60,54 @@ public abstract class AbstractFlowControl {
      * @param p_flowControlWindowThreshold
      *         Threshold parameter to adjust the FC window to control when a flow control message is sent
      */
-    protected AbstractFlowControl(final short p_destinationNodeID, final int p_flowControlWindowSize, final float p_flowControlWindowThreshold) {
+    protected AbstractFlowControl(final short p_destinationNodeID, final int p_flowControlWindowSize,
+            final float p_flowControlWindowThreshold) {
         m_destinationNodeID = p_destinationNodeID;
-        m_flowControlWindowSize = p_flowControlWindowSize;
-        m_flowControlWindowThreshold = p_flowControlWindowThreshold;
+
+        if (p_flowControlWindowSize == 0 || p_flowControlWindowThreshold == 0.0f) {
+            m_flowControlWindowSize = 0;
+            m_flowControlWindowThreshold = 0.0f;
+
+            LOGGER.warn("Flow control disabled");
+        } else {
+            m_flowControlWindowSize = p_flowControlWindowSize;
+            m_flowControlWindowThreshold = p_flowControlWindowThreshold;
+        }
+
         m_flowControlWindowSizeThreshold = (int) (m_flowControlWindowSize * m_flowControlWindowThreshold);
 
-        m_unconfirmedBytes = new AtomicInteger(0);
-        m_receivedBytes = new AtomicInteger(0);
+        m_unconfirmedBytes = new AtomicLong(0);
+        m_receivedBytes = new AtomicLong(0);
 
-        // #if LOGGER >= DEBUG
-        LOGGER.debug("Flow control settings for node 0x%X: window size %d, threshold %f", p_destinationNodeID, p_flowControlWindowSize,
+        m_sopWait = new TimePool(AbstractFlowControl.class, "Wait-" + NodeID.toHexStringShort(m_destinationNodeID));
+        m_stateStats = new StateStatistics();
+
+        StatisticsManager.get().registerOperation(AbstractFlowControl.class, m_sopWait);
+        StatisticsManager.get().registerOperation(AbstractFlowControl.class, m_stateStats);
+
+        LOGGER.debug("Flow control settings for node 0x%X: window size %d, threshold %f", p_destinationNodeID,
+                p_flowControlWindowSize,
                 p_flowControlWindowThreshold);
-        // #endif /* LOGGER >= DEBUG */
+    }
+
+    @Override
+    protected void finalize() {
+        StatisticsManager.get().deregisterOperation(AbstractFlowControl.class, m_sopWait);
+        StatisticsManager.get().deregisterOperation(AbstractFlowControl.class, m_stateStats);
     }
 
     /**
      * Get the destination node id the flow control is connected to
+     *
+     * @return Node id
      */
     protected short getDestinationNodeId() {
         return m_destinationNodeID;
     }
 
     /**
-     * Writes flow control data to the destination ASAP (really, do it ASAP or you risk running into ugly deadlocking issues)
+     * Writes flow control data to the destination ASAP (really, do it ASAP or you risk running into ugly deadlocking
+     * issues)
      *
      * @throws NetworkException
      *         If writing the flow control data failed
@@ -100,22 +131,27 @@ public abstract class AbstractFlowControl {
      *         Number of bytes that were written to the destination
      */
     void dataToSend(final int p_writtenBytes) {
-        // #if LOGGER >= TRACE
         LOGGER.trace("flowControlDataToSend (%X): %d", m_destinationNodeID, p_writtenBytes);
-        // #endif /* LOGGER >= TRACE */
 
-        if (m_unconfirmedBytes.get() > m_flowControlWindowSize) {
-            // #ifdef STATISTICS
-            SOP_WAIT.enter();
-            // #endif /* STATISTICS */
+        if (m_flowControlWindowSize != 0 && m_unconfirmedBytes.get() > m_flowControlWindowSize) {
+            m_sopWait.start();
+
+            long start = System.nanoTime();
+            long counter = 0;
 
             while (m_unconfirmedBytes.get() > m_flowControlWindowSize) {
+                long cur = System.nanoTime();
+
+                if (cur - start > 2000 * 1000 * 1000L) {
+                    counter++;
+                    LOGGER.warn("Waiting for flow control for %d seconds", counter * 2);
+                    start = cur;
+                }
+
                 LockSupport.parkNanos(100);
             }
 
-            // #ifdef STATISTICS
-            SOP_WAIT.leave();
-            // #endif /* STATISTICS */
+            m_sopWait.stop();
         }
 
         m_unconfirmedBytes.addAndGet(p_writtenBytes);
@@ -130,18 +166,13 @@ public abstract class AbstractFlowControl {
      *         Number of bytes received
      */
     void dataReceived(final int p_receivedBytes) {
-        // #if LOGGER >= TRACE
-        LOGGER.trace("flowControlDataReceived (%X): %d", m_destinationNodeID, p_receivedBytes);
-        // #endif /* LOGGER >= TRACE */
+        long receivedBytes = m_receivedBytes.addAndGet(p_receivedBytes);
 
-        int receivedBytes = m_receivedBytes.addAndGet(p_receivedBytes);
-        if (receivedBytes >= m_flowControlWindowSizeThreshold) {
+        if (m_flowControlWindowSizeThreshold != 0.0f && receivedBytes >= m_flowControlWindowSizeThreshold) {
             try {
                 flowControlWrite();
             } catch (final NetworkException e) {
-                // #if LOGGER >= ERROR
                 LOGGER.error("Could not send flow control message", e);
-                // #endif /* LOGGER >= ERROR */
             }
         }
     }
@@ -152,21 +183,59 @@ public abstract class AbstractFlowControl {
      * @param p_confirmedWindows
      *         Number of windows confirmed by the remote
      */
-    public void handleFlowControlData(final byte p_confirmedWindows) {
-        // #if LOGGER >= TRACE
-        LOGGER.trace("handleFlowControlData (%X): %d", m_destinationNodeID, p_confirmedWindows * m_flowControlWindowSizeThreshold);
-        // #endif /* LOGGER >= TRACE */
+    public void handleFlowControlData(final int p_confirmedWindows) {
+        LOGGER.trace("handleFlowControlData (%X): %d", m_destinationNodeID,
+                p_confirmedWindows * m_flowControlWindowSizeThreshold);
 
-        m_unconfirmedBytes.addAndGet(-(p_confirmedWindows * m_flowControlWindowSizeThreshold));
+        long curState = m_unconfirmedBytes.addAndGet(-(p_confirmedWindows * m_flowControlWindowSizeThreshold));
+
+        if (curState < 0) {
+            throw new IllegalStateException("Flow control underflow: " + curState);
+        }
     }
 
     @Override
     public String toString() {
         String str;
 
-        str = "FlowControl[m_flowControlWindowSize " + m_flowControlWindowSize + ", m_unconfirmedBytes " + m_unconfirmedBytes + ", m_receivedBytes " +
-                m_receivedBytes + ']';
+        str = "FlowControl[m_flowControlWindowSize " + m_flowControlWindowSize + ", m_unconfirmedBytes " +
+                m_unconfirmedBytes + ", m_receivedBytes " + m_receivedBytes + ']';
 
         return str;
+    }
+
+    /**
+     * State statistics implementation for debugging
+     */
+    private class StateStatistics extends AbstractState {
+        /**
+         * Constructor
+         */
+        StateStatistics() {
+            super(AbstractFlowControl.class, "State-" + NodeID.toHexStringShort(m_destinationNodeID));
+        }
+
+        @Override
+        public String dataToString(final String p_indent, final boolean p_extended) {
+            return p_indent + "m_destinationNodeID " + NodeID.toHexStringShort(m_destinationNodeID) +
+                    ";m_flowControlWindowSize " + m_flowControlWindowSize + ";m_flowControlWindowThreshold " +
+                    m_flowControlWindowThreshold + ";m_flowControlWindowSizeThreshold " +
+                    m_flowControlWindowSizeThreshold + ";m_unconfirmedBytes " + m_unconfirmedBytes.get() +
+                    ";m_receivedBytes " + m_receivedBytes.get();
+        }
+
+        @Override
+        public String generateCSVHeader(final char p_delim) {
+            return "m_destinationNodeID " + p_delim + "m_flowControlWindowSize" + p_delim +
+                    "m_flowControlWindowThreshold" + p_delim + "m_flowControlWindowSizeThreshold" + p_delim +
+                    "m_unconfirmedBytes" + p_delim + "m_receivedBytes";
+        }
+
+        @Override
+        public String toCSV(final char p_delim) {
+            return NodeID.toHexStringShort(m_destinationNodeID) + p_delim + m_flowControlWindowSize + p_delim +
+                    m_flowControlWindowThreshold + p_delim + m_flowControlWindowSizeThreshold + p_delim +
+                    m_unconfirmedBytes.get() + p_delim + m_receivedBytes.get();
+        }
     }
 }

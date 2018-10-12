@@ -241,6 +241,48 @@ todo: test alles auf cluster/hilbert
 -----------------------------------------------------------------------------------------------
 
 
+todo: auf basis von
+  https://github.com/hhu-bsinfo/dxapps/blob/development/dxa-terminal/server/src/main/java/de/hhu/bsinfo/dxterm/server/cmd/TcmdChunkcreate.java
+  ein eigenes create machen
+
+todo2: eignene dxramfsConfig machen!
+todo3: anonService ansehn
+
+## notiz 2018-10-12
+
+10:30 - 11:45   Besprechung Thema: Neue Leute, übergabe DXnet (Verklemmungen durch in-handler sending)
+                - DXnet: config neuerungen
+13:45 -         Test neues DXnet, Umbau meines Codes auf neues DXnet, umstellung auf neues dxnet
+15:15 - 18:30   probleme die mit lombok und m_ erzeugten getter() in dxnet als code in mein maven/hadoop code ein zu bauen.
+
+- ChunkRemoveService gibt es nicht mehr. Mit ChunkService.remove().remove(chunkid) geht das nun.
+- .dxram.data.ChunkID gibt es nicht mehr. Ist nun in .dxmem.data.ChunkID
+- .dxram.data.DataStructure ist scheinbar nun .dxmem.data.AbstractChunk
+
+- für put() git es ein AnonService, der Chunks unbekannter größe verarbeiten kann
+- ChunkService.get(...) ist zu ChunkService.get().get(...) geworden
+- beim create().create(...) muss man angeben:
+  - nicht mehr nur den Chunk
+  - den node, wo er erstellt werden soll
+  - 
+- Aus der 
+    @Override
+    public void main() {
+    
+    wurde:
+    
+    @Override
+    public void main(final String[] p_args) {
+  
+  daher kommt der hinweis, dass man "@Override" nicht braucht
+
+-gibt es nicht mehr: public boolean useConfigurationFile()
+
+
+## notiz 2018-10-11
+
+todo: analyse FsNode holen mit non-hadoop client
+
 
 ## notiz 2018-10-08
 

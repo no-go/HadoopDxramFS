@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -13,6 +16,7 @@
 
 package de.hhu.bsinfo.dxnet.core;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import de.hhu.bsinfo.dxutils.UnsafeMemory;
@@ -44,8 +48,9 @@ class MessageImporterUnderflow extends AbstractMessageImporter {
 
     @Override
     public String toString() {
-        return "m_usedCounter " + getUsedCounter() + ", m_bufferAddress 0x" + Long.toHexString(m_bufferAddress) + ", m_currentPosition " + m_currentPosition +
-                ", m_skipBytes " + m_skipBytes + ", m_skippedBytes " + m_skippedBytes + ", m_unfinishedOperation (" + m_unfinishedOperation + ')';
+        return "m_usedCounter " + getUsedCounter() + ", m_bufferAddress 0x" + Long.toHexString(m_bufferAddress) +
+                ", m_currentPosition " + m_currentPosition + ", m_skipBytes " + m_skipBytes + ", m_skippedBytes " +
+                m_skippedBytes + ", m_unfinishedOperation (" + m_unfinishedOperation + ')';
     }
 
     @Override
@@ -130,6 +135,38 @@ class MessageImporterUnderflow extends AbstractMessageImporter {
             // Read short normally as all previously read bytes have been skipped already
             short ret = 0;
             for (int i = 0; i < Short.BYTES; i++) {
+                // read little endian byte order to big endian
+                ret |= (UnsafeMemory.readByte(m_bufferAddress + m_currentPosition) & 0xFF) << i * 8;
+                m_currentPosition++;
+            }
+            return ret;
+        }
+    }
+
+    @Override
+    public char readChar(final char p_char) {
+        if (m_skippedBytes < m_skipBytes) {
+            // Number of bytes to skip might be larger than Character.Bytes if this short was read before
+            int count = 0;
+            char ret = (char) m_unfinishedOperation.getPrimitive();
+            for (int i = m_skipBytes - m_skippedBytes; i < Character.BYTES; i++) {
+                // read little endian byte order to big endian
+                ret |= (UnsafeMemory.readByte(m_bufferAddress + m_currentPosition) & 0xFF) << i * 8;
+                m_currentPosition++;
+                count++;
+            }
+            m_skippedBytes += Character.BYTES - count;
+
+            if (count == 0) {
+                // char was read before, return passed value
+                return p_char;
+            } else {
+                return ret;
+            }
+        } else {
+            // Read short normally as all previously read bytes have been skipped already
+            char ret = 0;
+            for (int i = 0; i < Character.BYTES; i++) {
                 // read little endian byte order to big endian
                 ret |= (UnsafeMemory.readByte(m_bufferAddress + m_currentPosition) & 0xFF) << i * 8;
                 m_currentPosition++;
@@ -264,7 +301,11 @@ class MessageImporterUnderflow extends AbstractMessageImporter {
 
     @Override
     public String readString(final String p_string) {
-        return new String(readByteArray(p_string.getBytes(StandardCharsets.US_ASCII)));
+        if (p_string != null) {
+            return new String(readByteArray(p_string.getBytes(StandardCharsets.US_ASCII)), Charset.forName("US-ASCII"));
+        } else {
+            return new String(readByteArray(null), Charset.forName("US-ASCII"));
+        }
     }
 
     @Override
@@ -275,6 +316,11 @@ class MessageImporterUnderflow extends AbstractMessageImporter {
     @Override
     public int readShorts(short[] p_array) {
         return readShorts(p_array, 0, p_array.length);
+    }
+
+    @Override
+    public int readChars(final char[] p_array) {
+        return readChars(p_array, 0, p_array.length);
     }
 
     @Override
@@ -295,7 +341,8 @@ class MessageImporterUnderflow extends AbstractMessageImporter {
         } else if (m_skippedBytes < m_skipBytes) {
             // Bytes were partly de-serialized -> continue
             int bytesCopied = m_skipBytes - m_skippedBytes;
-            UnsafeMemory.readBytes(m_bufferAddress + m_currentPosition, p_array, p_offset + bytesCopied, p_length - bytesCopied);
+            UnsafeMemory.readBytes(m_bufferAddress + m_currentPosition, p_array, p_offset + bytesCopied,
+                    p_length - bytesCopied);
             m_currentPosition += p_length - bytesCopied;
             m_skippedBytes = m_skipBytes;
         } else {
@@ -308,8 +355,35 @@ class MessageImporterUnderflow extends AbstractMessageImporter {
     }
 
     @Override
+    public int readBytes(final long p_byteBufferAddress, final int p_offset, final int p_length) {
+        if (m_skippedBytes < m_unfinishedOperation.getIndex()) {
+            // Full skip, bytes were read before
+            m_skippedBytes += p_length;
+        } else if (m_skippedBytes < m_skipBytes) {
+            // Bytes were partly de-serialized -> continue
+            int bytesCopied = m_skipBytes - m_skippedBytes;
+            UnsafeMemory.copyBytes(m_bufferAddress + m_currentPosition, p_byteBufferAddress + p_offset + bytesCopied,
+                    p_length - bytesCopied);
+            m_currentPosition += p_length - bytesCopied;
+            m_skippedBytes = m_skipBytes;
+        } else {
+            // Read bytes normally as all previously read bytes have been skipped already
+            UnsafeMemory.copyBytes(m_bufferAddress + m_currentPosition, p_byteBufferAddress + p_offset, p_length);
+            m_currentPosition += p_length;
+        }
+
+        return p_length;
+    }
+
+    @Override
     public int readShorts(short[] p_array, int p_offset, int p_length) {
-        for (int i = 0; i < p_length; i++) {
+        int shortsToSkip = 0;
+        if (m_skippedBytes < m_skipBytes) {
+            shortsToSkip = (m_skipBytes - m_skippedBytes) / Short.BYTES;
+            m_skippedBytes = m_skipBytes - (m_skipBytes - m_skippedBytes) % Short.BYTES;
+        }
+
+        for (int i = shortsToSkip; i < p_length; i++) {
             p_array[p_offset + i] = readShort(p_array[p_offset + i]);
         }
 
@@ -317,8 +391,29 @@ class MessageImporterUnderflow extends AbstractMessageImporter {
     }
 
     @Override
+    public int readChars(final char[] p_array, final int p_offset, final int p_length) {
+        int charsToSkip = 0;
+        if (m_skippedBytes < m_skipBytes) {
+            charsToSkip = (m_skipBytes - m_skippedBytes) / Character.BYTES;
+            m_skippedBytes = m_skipBytes - (m_skipBytes - m_skippedBytes) % Character.BYTES;
+        }
+
+        for (int i = charsToSkip; i < p_length; i++) {
+            p_array[p_offset + i] = readChar(p_array[p_offset + i]);
+        }
+
+        return p_length;
+    }
+
+    @Override
     public int readInts(int[] p_array, int p_offset, int p_length) {
-        for (int i = 0; i < p_length; i++) {
+        int intsToSkip = 0;
+        if (m_skippedBytes < m_skipBytes) {
+            intsToSkip = (m_skipBytes - m_skippedBytes) / Integer.BYTES;
+            m_skippedBytes = m_skipBytes - (m_skipBytes - m_skippedBytes) % Integer.BYTES;
+        }
+
+        for (int i = intsToSkip; i < p_length; i++) {
             p_array[p_offset + i] = readInt(p_array[p_offset + i]);
         }
 
@@ -327,7 +422,13 @@ class MessageImporterUnderflow extends AbstractMessageImporter {
 
     @Override
     public int readLongs(long[] p_array, int p_offset, int p_length) {
-        for (int i = 0; i < p_length; i++) {
+        int longsToSkip = 0;
+        if (m_skippedBytes < m_skipBytes) {
+            longsToSkip = (m_skipBytes - m_skippedBytes) / Long.BYTES;
+            m_skippedBytes = m_skipBytes - (m_skipBytes - m_skippedBytes) % Long.BYTES;
+        }
+
+        for (int i = longsToSkip; i < p_length; i++) {
             p_array[p_offset + i] = readLong(p_array[p_offset + i]);
         }
 
@@ -384,6 +485,33 @@ class MessageImporterUnderflow extends AbstractMessageImporter {
             // Read shorts normally as all previously read bytes have been skipped already
             short[] arr = new short[readCompactNumber(0)];
             readShorts(arr);
+            return arr;
+        }
+    }
+
+    @Override
+    public char[] readCharArray(final char[] p_array) {
+        if (m_skippedBytes < m_unfinishedOperation.getIndex()) {
+            // Array length and array were read before, return passed array
+            m_skippedBytes += ObjectSizeUtil.sizeofCompactedNumber(p_array.length) + p_array.length * Character.BYTES;
+            return p_array;
+        } else if (m_skippedBytes < m_skipBytes) {
+            // Short array was partly de-serialized -> continue
+            char[] arr;
+            if (m_unfinishedOperation.getObject() == null) {
+                // Array length has not been read completely
+                arr = new char[readCompactNumber(0)];
+            } else {
+                // Array was created before but is incomplete
+                arr = (char[]) m_unfinishedOperation.getObject();
+                m_skippedBytes += ObjectSizeUtil.sizeofCompactedNumber(arr.length);
+            }
+            readChars(arr);
+            return arr;
+        } else {
+            // Read shorts normally as all previously read bytes have been skipped already
+            char[] arr = new char[readCompactNumber(0)];
+            readChars(arr);
             return arr;
         }
     }

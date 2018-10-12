@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -50,6 +53,8 @@ public abstract class AbstractConnectionManager {
      *
      * @param p_maxConnections
      *         Max number of connections to keep active simultaneously
+     * @param p_overprovisioning
+     *         True if overprovisioning is enabled
      */
     protected AbstractConnectionManager(final int p_maxConnections, final boolean p_overprovisioning) {
         m_maxConnections = p_maxConnections;
@@ -63,6 +68,9 @@ public abstract class AbstractConnectionManager {
 
     /**
      * Set connection manager listener to receive callbacks when a node connected or disconnected
+     *
+     * @param p_listener
+     *         Listener to set
      */
     public void setListener(final ConnectionManagerListener p_listener) {
         m_listener = p_listener;
@@ -84,11 +92,13 @@ public abstract class AbstractConnectionManager {
         StringBuilder ret = new StringBuilder();
 
         m_connectionCreationLock.lock();
+
         for (int i = 0; i < 65536; i++) {
             if (m_connections[i] != null) {
                 ret.append(m_connections[i]);
             }
         }
+
         m_connectionCreationLock.unlock();
 
         return ret.toString();
@@ -110,13 +120,12 @@ public abstract class AbstractConnectionManager {
         assert p_destination != NodeID.INVALID_ID;
 
         ret = m_connections[p_destination & 0xFFFF];
+
         if (ret == null || !ret.getPipeOut().isConnected()) {
             connectionLock = getConnectionLock(p_destination);
             connectionLock.lock();
 
-            // #if LOGGER >= DEBUG
             LOGGER.debug("Active create connection to: 0x%X", p_destination);
-            // #endif /* LOGGER >= DEBUG */
 
             ret = m_connections[p_destination & 0xFFFF];
             if (ret == null || !ret.getPipeOut().isConnected()) {
@@ -129,17 +138,14 @@ public abstract class AbstractConnectionManager {
                 }
 
                 if (ret != null) {
-                    // #if LOGGER >= DEBUG
                     LOGGER.debug("Connection created: 0x%X", p_destination);
-                    // #endif /* LOGGER >= DEBUG */
 
                     m_connections[p_destination & 0xFFFF] = ret;
                 } else {
-                    // #if LOGGER >= ERROR
                     LOGGER.warn("Connection creation was aborted!");
-                    // #endif /* LOGGER >= ERROR */
                 }
             }
+
             connectionLock.unlock();
         }
 
@@ -169,10 +175,12 @@ public abstract class AbstractConnectionManager {
 
         m_connectionCreationLock.lock();
         connectionLock = m_connectionLocks[p_destination & 0xFFFF];
+
         if (connectionLock == null) {
             connectionLock = new ReentrantLock(false);
             m_connectionLocks[p_destination & 0xFFFF] = connectionLock;
         }
+
         m_connectionCreationLock.unlock();
 
         return connectionLock;
@@ -189,7 +197,8 @@ public abstract class AbstractConnectionManager {
      * @throws NetworkException
      *         If the connection could not be created
      */
-    protected abstract AbstractConnection createConnection(final short p_destination, final AbstractConnection p_existingConnection) throws NetworkException;
+    protected abstract AbstractConnection createConnection(final short p_destination,
+            final AbstractConnection p_existingConnection) throws NetworkException;
 
     /**
      * Close an active connection
@@ -197,7 +206,8 @@ public abstract class AbstractConnectionManager {
      * @param p_connection
      *         Connection to close
      * @param p_removeConnection
-     *         True to remove the connection resources currently allocated as well or false to keep them to allow re-opening the connection quickly
+     *         True to remove the connection resources currently allocated as well or false to keep them to allow
+     *         re-opening the connection quickly
      */
     protected abstract void closeConnection(final AbstractConnection p_connection, final boolean p_removeConnection);
 
@@ -208,6 +218,7 @@ public abstract class AbstractConnectionManager {
         AbstractConnection connection;
 
         m_connectionCreationLock.lock();
+
         for (int i = 0; i < 65536; i++) {
             if (m_connections[i] != null) {
                 connection = m_connections[i & 0xFFFF];
@@ -216,6 +227,7 @@ public abstract class AbstractConnectionManager {
                 closeConnection(connection, false);
             }
         }
+
         m_openConnections = 0;
         m_connectionCreationLock.unlock();
     }
@@ -229,13 +241,13 @@ public abstract class AbstractConnectionManager {
         Random rand;
 
         rand = new Random();
+
         while (dismiss == null) {
             random = rand.nextInt(m_connections.length);
             dismiss = m_connections[random & 0xFFFF];
         }
-        // #if LOGGER >= WARN
+
         LOGGER.warn("Removing randomly selected connection 0x%X", (short) random);
-        // #endif /* LOGGER >= WARN */
 
         m_connections[random & 0xFFFF] = null;
         UnsafeHandler.getInstance().getUnsafe().storeFence();

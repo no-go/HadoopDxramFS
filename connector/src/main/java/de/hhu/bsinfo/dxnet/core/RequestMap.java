@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -84,9 +87,8 @@ public final class RequestMap {
         // if two threads access the same index, e.g. one having a message
         // id of 0 and the other thread with the first overflowed message id
         if (m_pendingRequests[index] != null) {
-            // #if LOGGER >= ERROR
-            LOGGER.error("Request %s for idx=%d still registered! Request Map might be too small", m_pendingRequests[index], index);
-            // #endif /* LOGGER >= ERROR */
+            LOGGER.error("Request %s for idx=%d still registered! Request Map might be too small",
+                    m_pendingRequests[index], index);
         }
 
         m_pendingRequests[index] = p_request;
@@ -130,6 +132,7 @@ public final class RequestMap {
             UnsafeHandler.getInstance().getUnsafe().loadFence();
 
             request = m_pendingRequests[i];
+
             if (request != null && request.getDestination() == p_nodeID) {
                 request.abort();
                 m_pendingRequests[i] = null;

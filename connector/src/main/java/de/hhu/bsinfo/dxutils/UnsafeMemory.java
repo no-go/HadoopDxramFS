@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -17,9 +20,10 @@ package de.hhu.bsinfo.dxutils;
  * Access and (manually) manage memory on the non-jvm heap (unsafe)
  *
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 11.07.2017
+ * @author Florian Hucke, florian.hucke@hhu.de, 08.02.2018
  */
 public final class UnsafeMemory {
-    private static final UnsafeHandler ms_unsafeHandler = UnsafeHandler.getInstance();
+    private static final UnsafeHandler MS_UNSAFE_HANDLER = UnsafeHandler.getInstance();
 
     /**
      * Static class
@@ -37,7 +41,7 @@ public final class UnsafeMemory {
      */
     public static long allocate(final long p_size) {
         try {
-            return ms_unsafeHandler.getUnsafe().allocateMemory(p_size);
+            return MS_UNSAFE_HANDLER.getUnsafe().allocateMemory(p_size);
         } catch (final Throwable ignored) {
             throw new RuntimeException("Could not allocate unsafe memory (size: " + p_size + ')');
         }
@@ -51,7 +55,7 @@ public final class UnsafeMemory {
      */
     public static void free(final long p_address) {
         try {
-            ms_unsafeHandler.getUnsafe().freeMemory(p_address);
+            MS_UNSAFE_HANDLER.getUnsafe().freeMemory(p_address);
         } catch (final Throwable ignored) {
             throw new RuntimeException("Could not free unsafe memory, address 0x" + Long.toHexString(p_address));
         }
@@ -68,7 +72,21 @@ public final class UnsafeMemory {
      *         Value to set for specified range.
      */
     public static void set(final long p_ptr, final long p_size, final byte p_value) {
-        ms_unsafeHandler.getUnsafe().setMemory(p_ptr, p_size, p_value);
+        MS_UNSAFE_HANDLER.getUnsafe().setMemory(p_ptr, p_size, p_value);
+    }
+
+    /**
+     * Read data from one native memory address to another native memory address.
+     *
+     * @param p_address1
+     *         Source address in memory.
+     * @param p_address2
+     *         Destination address in memory.
+     * @param p_length
+     *         Number of bytes to read from specified start.
+     */
+    public static void copyBytes(final long p_address1, final long p_address2, final int p_length) {
+        MS_UNSAFE_HANDLER.getUnsafe().copyMemory(null, p_address1, null, p_address2, p_length);
     }
 
     /**
@@ -85,7 +103,8 @@ public final class UnsafeMemory {
      * @return Number of read elements.
      */
     public static int readBytes(final long p_ptr, final byte[] p_array, final int p_arrayOffset, final int p_length) {
-        ms_unsafeHandler.getUnsafe().copyMemory(null, p_ptr, p_array, UnsafeHandler.getArrayByteOffset() + p_arrayOffset, p_length);
+        MS_UNSAFE_HANDLER.getUnsafe().copyMemory(null, p_ptr, p_array,
+                UnsafeHandler.getArrayByteOffset() + p_arrayOffset, p_length);
 
         return p_length;
     }
@@ -105,7 +124,28 @@ public final class UnsafeMemory {
      */
     public static int readShorts(final long p_ptr, final short[] p_array, final int p_arrayOffset, final int p_length) {
         for (int i = 0; i < p_length; i++) {
-            p_array[i + p_arrayOffset] = ms_unsafeHandler.getUnsafe().getShort(p_ptr + i * Short.BYTES);
+            p_array[i + p_arrayOffset] = MS_UNSAFE_HANDLER.getUnsafe().getShort(p_ptr + i * Short.BYTES);
+        }
+
+        return p_length;
+    }
+
+    /**
+     * Read data from memory into a char array.
+     *
+     * @param p_ptr
+     *         Start position in memory.
+     * @param p_array
+     *         Array to read the data into.
+     * @param p_arrayOffset
+     *         Start offset in array to start writing the shorts to.
+     * @param p_length
+     *         Number of chars to read from specified start.
+     * @return Number of read elements.
+     */
+    public static int readChars(final long p_ptr, final char[] p_array, final int p_arrayOffset, final int p_length) {
+        for (int i = 0; i < p_length; i++) {
+            p_array[i + p_arrayOffset] = MS_UNSAFE_HANDLER.getUnsafe().getChar(p_ptr + i * Character.BYTES);
         }
 
         return p_length;
@@ -126,7 +166,7 @@ public final class UnsafeMemory {
      */
     public static int readInts(final long p_ptr, final int[] p_array, final int p_arrayOffset, final int p_length) {
         for (int i = 0; i < p_length; i++) {
-            p_array[i + p_arrayOffset] = ms_unsafeHandler.getUnsafe().getInt(p_ptr + i * Integer.BYTES);
+            p_array[i + p_arrayOffset] = MS_UNSAFE_HANDLER.getUnsafe().getInt(p_ptr + i * Integer.BYTES);
         }
 
         return p_length;
@@ -147,7 +187,7 @@ public final class UnsafeMemory {
      */
     public static int readLongs(final long p_ptr, final long[] p_array, final int p_arrayOffset, final int p_length) {
         for (int i = 0; i < p_length; i++) {
-            p_array[i + p_arrayOffset] = ms_unsafeHandler.getUnsafe().getLong(p_ptr + i * Long.BYTES);
+            p_array[i + p_arrayOffset] = MS_UNSAFE_HANDLER.getUnsafe().getLong(p_ptr + i * Long.BYTES);
         }
 
         return p_length;
@@ -168,7 +208,7 @@ public final class UnsafeMemory {
      */
     public static int readFloats(final long p_ptr, final float[] p_array, final int p_arrayOffset, final int p_length) {
         for (int i = 0; i < p_length; i++) {
-            p_array[i + p_arrayOffset] = ms_unsafeHandler.getUnsafe().getFloat(p_ptr + i * Float.BYTES);
+            p_array[i + p_arrayOffset] = MS_UNSAFE_HANDLER.getUnsafe().getFloat(p_ptr + i * Float.BYTES);
         }
 
         return p_length;
@@ -187,9 +227,10 @@ public final class UnsafeMemory {
      *         Number of doubles to read from specified start.
      * @return Number of read elements.
      */
-    public static int readDoubles(final long p_ptr, final double[] p_array, final int p_arrayOffset, final int p_length) {
+    public static int readDoubles(final long p_ptr, final double[] p_array, final int p_arrayOffset,
+            final int p_length) {
         for (int i = 0; i < p_length; i++) {
-            p_array[i + p_arrayOffset] = ms_unsafeHandler.getUnsafe().getDouble(p_ptr + i * Double.BYTES);
+            p_array[i + p_arrayOffset] = MS_UNSAFE_HANDLER.getUnsafe().getDouble(p_ptr + i * Double.BYTES);
         }
 
         return p_length;
@@ -203,7 +244,7 @@ public final class UnsafeMemory {
      * @return Byte read.
      */
     public static byte readByte(final long p_ptr) {
-        return ms_unsafeHandler.getUnsafe().getByte(p_ptr);
+        return MS_UNSAFE_HANDLER.getUnsafe().getByte(p_ptr);
     }
 
     /**
@@ -214,7 +255,18 @@ public final class UnsafeMemory {
      * @return Short read.
      */
     public static short readShort(final long p_ptr) {
-        return ms_unsafeHandler.getUnsafe().getShort(p_ptr);
+        return MS_UNSAFE_HANDLER.getUnsafe().getShort(p_ptr);
+    }
+
+    /**
+     * Read a single char value.
+     *
+     * @param p_ptr
+     *         Memory position to read from.
+     * @return Char read.
+     */
+    public static char readChar(final long p_ptr) {
+        return MS_UNSAFE_HANDLER.getUnsafe().getChar(p_ptr);
     }
 
     /**
@@ -225,7 +277,7 @@ public final class UnsafeMemory {
      * @return Int read.
      */
     public static int readInt(final long p_ptr) {
-        return ms_unsafeHandler.getUnsafe().getInt(p_ptr);
+        return MS_UNSAFE_HANDLER.getUnsafe().getInt(p_ptr);
     }
 
     /**
@@ -236,7 +288,7 @@ public final class UnsafeMemory {
      * @return Long read.
      */
     public static long readLong(final long p_ptr) {
-        return ms_unsafeHandler.getUnsafe().getLong(p_ptr);
+        return MS_UNSAFE_HANDLER.getUnsafe().getLong(p_ptr);
     }
 
     /**
@@ -247,7 +299,7 @@ public final class UnsafeMemory {
      * @return Float read.
      */
     public static float readFloat(final long p_ptr) {
-        return ms_unsafeHandler.getUnsafe().getFloat(p_ptr);
+        return MS_UNSAFE_HANDLER.getUnsafe().getFloat(p_ptr);
     }
 
     /**
@@ -258,7 +310,7 @@ public final class UnsafeMemory {
      * @return Double read.
      */
     public static double readDouble(final long p_ptr) {
-        return ms_unsafeHandler.getUnsafe().getDouble(p_ptr);
+        return MS_UNSAFE_HANDLER.getUnsafe().getDouble(p_ptr);
     }
 
     /**
@@ -275,7 +327,8 @@ public final class UnsafeMemory {
      * @return Number of written elements
      */
     public static int writeBytes(final long p_ptr, final byte[] p_array, final int p_arrayOffset, final int p_length) {
-        ms_unsafeHandler.getUnsafe().copyMemory(p_array, UnsafeHandler.getArrayByteOffset() + p_arrayOffset, null, p_ptr, p_length);
+        MS_UNSAFE_HANDLER.getUnsafe().copyMemory(p_array, UnsafeHandler.getArrayByteOffset() + p_arrayOffset, null,
+                p_ptr, p_length);
 
         return p_length;
     }
@@ -293,9 +346,32 @@ public final class UnsafeMemory {
      *         Number of elements to write.
      * @return Number of written elements
      */
-    public static int writeShorts(final long p_ptr, final short[] p_array, final int p_arrayOffset, final int p_length) {
+    public static int writeShorts(final long p_ptr, final short[] p_array, final int p_arrayOffset,
+            final int p_length) {
         for (int i = 0; i < p_length; i++) {
-            ms_unsafeHandler.getUnsafe().putShort(p_ptr + i * Short.BYTES, p_array[i + p_arrayOffset]);
+            MS_UNSAFE_HANDLER.getUnsafe().putShort(p_ptr + i * Short.BYTES, p_array[i + p_arrayOffset]);
+        }
+
+        return p_length;
+    }
+
+    /**
+     * Write an array of chars to memory.
+     *
+     * @param p_ptr
+     *         Start address to write to.
+     * @param p_array
+     *         Array with data to write.
+     * @param p_arrayOffset
+     *         Offset in array to start reading the data from.
+     * @param p_length
+     *         Number of elements to write.
+     * @return Number of written elements
+     */
+    public static int writeChars(final long p_ptr, final char[] p_array, final int p_arrayOffset,
+            final int p_length) {
+        for (int i = 0; i < p_length; i++) {
+            MS_UNSAFE_HANDLER.getUnsafe().putChar(p_ptr + i * Character.BYTES, p_array[i + p_arrayOffset]);
         }
 
         return p_length;
@@ -316,7 +392,7 @@ public final class UnsafeMemory {
      */
     public static int writeInts(final long p_ptr, final int[] p_array, final int p_arrayOffset, final int p_length) {
         for (int i = 0; i < p_length; i++) {
-            ms_unsafeHandler.getUnsafe().putInt(p_ptr + i * Integer.BYTES, p_array[i + p_arrayOffset]);
+            MS_UNSAFE_HANDLER.getUnsafe().putInt(p_ptr + i * Integer.BYTES, p_array[i + p_arrayOffset]);
         }
 
         return p_length;
@@ -337,7 +413,7 @@ public final class UnsafeMemory {
      */
     public static int writeLongs(final long p_ptr, final long[] p_array, final int p_arrayOffset, final int p_length) {
         for (int i = 0; i < p_length; i++) {
-            ms_unsafeHandler.getUnsafe().putLong(p_ptr + i * Long.BYTES, p_array[i + p_arrayOffset]);
+            MS_UNSAFE_HANDLER.getUnsafe().putLong(p_ptr + i * Long.BYTES, p_array[i + p_arrayOffset]);
         }
 
         return p_length;
@@ -356,9 +432,10 @@ public final class UnsafeMemory {
      *         Number of elements to write.
      * @return Number of written elements
      */
-    public static int writeFloats(final long p_ptr, final float[] p_array, final int p_arrayOffset, final int p_length) {
+    public static int writeFloats(final long p_ptr, final float[] p_array, final int p_arrayOffset,
+            final int p_length) {
         for (int i = 0; i < p_length; i++) {
-            ms_unsafeHandler.getUnsafe().putFloat(p_ptr + i * Float.BYTES, p_array[i + p_arrayOffset]);
+            MS_UNSAFE_HANDLER.getUnsafe().putFloat(p_ptr + i * Float.BYTES, p_array[i + p_arrayOffset]);
         }
 
         return p_length;
@@ -377,9 +454,10 @@ public final class UnsafeMemory {
      *         Number of elements to write.
      * @return Number of written elements
      */
-    public static int writeDoubles(final long p_ptr, final double[] p_array, final int p_arrayOffset, final int p_length) {
+    public static int writeDoubles(final long p_ptr, final double[] p_array, final int p_arrayOffset,
+            final int p_length) {
         for (int i = 0; i < p_length; i++) {
-            ms_unsafeHandler.getUnsafe().putDouble(p_ptr + i * Double.BYTES, p_array[i + p_arrayOffset]);
+            MS_UNSAFE_HANDLER.getUnsafe().putDouble(p_ptr + i * Double.BYTES, p_array[i + p_arrayOffset]);
         }
 
         return p_length;
@@ -394,7 +472,7 @@ public final class UnsafeMemory {
      *         Value to write.
      */
     public static void writeByte(final long p_ptr, final byte p_value) {
-        ms_unsafeHandler.getUnsafe().putByte(p_ptr, p_value);
+        MS_UNSAFE_HANDLER.getUnsafe().putByte(p_ptr, p_value);
     }
 
     /**
@@ -406,7 +484,19 @@ public final class UnsafeMemory {
      *         Value to write.
      */
     public static void writeShort(final long p_ptr, final short p_value) {
-        ms_unsafeHandler.getUnsafe().putShort(p_ptr, p_value);
+        MS_UNSAFE_HANDLER.getUnsafe().putShort(p_ptr, p_value);
+    }
+
+    /**
+     * Write a single short value to memory.
+     *
+     * @param p_ptr
+     *         Address to write to.
+     * @param p_value
+     *         Value to write.
+     */
+    public static void writeChar(final long p_ptr, final char p_value) {
+        MS_UNSAFE_HANDLER.getUnsafe().putChar(p_ptr, p_value);
     }
 
     /**
@@ -418,7 +508,7 @@ public final class UnsafeMemory {
      *         Value to write.
      */
     public static void writeInt(final long p_ptr, final int p_value) {
-        ms_unsafeHandler.getUnsafe().putInt(p_ptr, p_value);
+        MS_UNSAFE_HANDLER.getUnsafe().putInt(p_ptr, p_value);
     }
 
     /**
@@ -430,7 +520,7 @@ public final class UnsafeMemory {
      *         Value to write.
      */
     public static void writeLong(final long p_ptr, final long p_value) {
-        ms_unsafeHandler.getUnsafe().putLong(p_ptr, p_value);
+        MS_UNSAFE_HANDLER.getUnsafe().putLong(p_ptr, p_value);
     }
 
     /**
@@ -442,7 +532,7 @@ public final class UnsafeMemory {
      *         Value to write.
      */
     public static void writeFloat(final long p_ptr, final float p_value) {
-        ms_unsafeHandler.getUnsafe().putFloat(p_ptr, p_value);
+        MS_UNSAFE_HANDLER.getUnsafe().putFloat(p_ptr, p_value);
     }
 
     /**
@@ -454,6 +544,36 @@ public final class UnsafeMemory {
      *         Value to write.
      */
     public static void writeDouble(final long p_ptr, final double p_value) {
-        ms_unsafeHandler.getUnsafe().putDouble(p_ptr, p_value);
+        MS_UNSAFE_HANDLER.getUnsafe().putDouble(p_ptr, p_value);
+    }
+
+    /**
+     * Compare and Swap operation on a int value
+     *
+     * @param p_ptr
+     *         Address of the int value
+     * @param p_expectedValue
+     *         Expected value
+     * @param p_newValue
+     *         New value
+     * @return true if int is replaced else false
+     */
+    public static boolean compareAndSwapInt(final long p_ptr, final int p_expectedValue, final int p_newValue) {
+        return MS_UNSAFE_HANDLER.getUnsafe().compareAndSwapInt(null, p_ptr, p_expectedValue, p_newValue);
+    }
+
+    /**
+     * Compare and Swap operation on a long value
+     *
+     * @param p_ptr
+     *         Address of the long value
+     * @param p_expectedValue
+     *         Expected value
+     * @param p_newValue
+     *         New value
+     * @return true if int is replaced else false
+     */
+    public static boolean compareAndSwapLong(final long p_ptr, final long p_expectedValue, final long p_newValue) {
+        return MS_UNSAFE_HANDLER.getUnsafe().compareAndSwapLong(null, p_ptr, p_expectedValue, p_newValue);
     }
 }

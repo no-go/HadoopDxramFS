@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -34,7 +37,7 @@ public final class BloomFilter {
     static {
         try {
             ms_digestFunction = java.security.MessageDigest.getInstance("MD5");
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (final NoSuchAlgorithmException ignored) {
             ms_digestFunction = null;
         }
     }
@@ -45,9 +48,9 @@ public final class BloomFilter {
      * Creates an instance of BloomFilter
      *
      * @param p_sizeOfBitset
-     *     defines how many bytes should be used in total for the filter
+     *         defines how many bytes should be used in total for the filter
      * @param p_expectedNumberOfElements
-     *     defines the maximum number of elements the filter is expected to contain
+     *         defines the maximum number of elements the filter is expected to contain
      */
     public BloomFilter(final int p_sizeOfBitset, final int p_expectedNumberOfElements) {
         final int sizeInBits = p_sizeOfBitset * 8;
@@ -70,9 +73,9 @@ public final class BloomFilter {
      * each call to digest a salt is prepended to the data. The salt is increased by 1 for each call
      *
      * @param p_data
-     *     specifies input data
+     *         specifies input data
      * @param p_hashes
-     *     number of hashes/int's to produce
+     *         number of hashes/int's to produce
      * @return array of int-sized hashes
      */
     private static int[] createHashes(final byte[] p_data, final int p_hashes) {
@@ -108,7 +111,7 @@ public final class BloomFilter {
      * Adds an object to the bloom filter
      *
      * @param p_element
-     *     is an element (short) to register in the bloom filter
+     *         is an element (short) to register in the bloom filter
      */
     public void add(final Short p_element) {
         byte[] bytes;
@@ -128,7 +131,7 @@ public final class BloomFilter {
      * Verifies if given element is in bloom filter
      *
      * @param p_element
-     *     element to check
+     *         element to check
      * @return true if the element could have been inserted into the bloom filter (false positives possible)
      */
     public boolean contains(final Short p_element) {

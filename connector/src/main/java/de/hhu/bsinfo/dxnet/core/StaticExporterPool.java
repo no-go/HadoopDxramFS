@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -46,22 +49,23 @@ public final class StaticExporterPool extends AbstractExporterPool {
 
         if (threadID >= m_exporters.length) {
             m_lock.lock();
+
             if (threadID >= m_exporters.length) {
                 if (m_exporters.length >= 10 * SLOT_SIZE) {
-                    // #if LOGGER >= WARN
-                    LOGGER.warn("Many threads actively sending messages (>%d). You might consider switching to dynamic exporter pool (configuration).",
-                            m_exporters.length);
-                    // #endif /* LOGGER >= WARN */
+                    LOGGER.warn("Many threads actively sending messages (>%d). You might consider switching to " +
+                            "dynamic exporter pool (configuration).", m_exporters.length);
                 }
                 // Copying without lock might result in lost allocations but this can be ignored
                 MessageExporterCollection[] tmp = new MessageExporterCollection[m_exporters.length + SLOT_SIZE];
                 System.arraycopy(m_exporters, 0, tmp, 0, m_exporters.length);
                 m_exporters = tmp;
             }
+
             m_lock.unlock();
         }
 
         ret = m_exporters[(int) threadID];
+
         if (ret == null) {
             ret = new MessageExporterCollection();
 

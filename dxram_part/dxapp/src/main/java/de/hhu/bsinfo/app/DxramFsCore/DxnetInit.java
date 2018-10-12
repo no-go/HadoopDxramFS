@@ -36,7 +36,7 @@ public class DxnetInit {
         DXNetNodeMap nodeMap = null;
 
         conf.getCoreConfig().setOwnNodeId(myNodeId);
-        nodeMap = new DXNetNodeMap(myNodeId);
+        nodeMap = new DXNetNodeMap(conf.getCoreConfig().getOwnNodeId());
 
         // the haddoop node, who wants to access to the dxram peers
         nodeMap.addNode(
@@ -53,8 +53,8 @@ public class DxnetInit {
 
         _dxNet = new DXNet(
                 conf.getCoreConfig(),
-                conf.getNIOConfig(),
-                conf.getIBConfig(),
+                conf.getNioConfig(),
+                conf.getIbConfig(),
                 conf.getLoopbackConfig(),
                 nodeMap
         );

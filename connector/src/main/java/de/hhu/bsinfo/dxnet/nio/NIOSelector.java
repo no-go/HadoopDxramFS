@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -29,15 +32,25 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.hhu.bsinfo.dxutils.NodeID;
+import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
+import de.hhu.bsinfo.dxutils.stats.Time;
 
 /**
- * Manages the whole communication over socket channels like selecting channels, reading and writing data to/from channels, creating/connecting channels, ...
+ * Manages the whole communication over socket channels like selecting channels, reading and writing data to/from
+ * channels, creating/connecting channels, ...
  *
  * @author Kevin Beineke, kevin.beineke@hhu.de, 18.03.2017
  */
 class NIOSelector extends Thread {
-
     private static final Logger LOGGER = LogManager.getFormatterLogger(NIOSelector.class.getSimpleName());
+
+    private static final Time SOP_ACTION = new Time(NIOSelector.class, "Action");
+    private static final Time SOP_SLEEP = new Time(NIOSelector.class, "Sleep");
+
+    static {
+        StatisticsManager.get().registerOperation(NIOSelector.class, SOP_ACTION);
+        StatisticsManager.get().registerOperation(NIOSelector.class, SOP_SLEEP);
+    }
 
     // Attributes
     private ServerSocketChannel m_serverChannel;
@@ -63,7 +76,8 @@ class NIOSelector extends Thread {
      * @param p_osBufferSize
      *         the size of incoming and outgoing buffers
      */
-    NIOSelector(final NIOConnectionManager p_connectionManager, final int p_port, final int p_connectionTimeout, final int p_osBufferSize) {
+    NIOSelector(final NIOConnectionManager p_connectionManager, final int p_port, final int p_connectionTimeout,
+            final int p_osBufferSize) {
         m_serverChannel = null;
         m_selector = null;
 
@@ -85,9 +99,9 @@ class NIOSelector extends Thread {
                 m_serverChannel.socket().setReceiveBufferSize(m_osBufferSize);
                 int receiveBufferSize = m_serverChannel.socket().getReceiveBufferSize();
                 if (receiveBufferSize < m_osBufferSize) {
-                    // #if LOGGER >= WARN
-                    LOGGER.warn("Receive buffer could not be set properly. Check OS settings! Requested: %d, actual: %d", m_osBufferSize, receiveBufferSize);
-                    // #endif /* LOGGER >= WARN */
+                    LOGGER.warn(
+                            "Receive buffer could not be set properly. Check OS settings! Requested: %d, actual: %d",
+                            m_osBufferSize, receiveBufferSize);
                 }
                 m_serverChannel.socket().bind(new InetSocketAddress(p_port));
                 m_serverChannel.register(m_selector, SelectionKey.OP_ACCEPT);
@@ -99,9 +113,7 @@ class NIOSelector extends Thread {
             } catch (final IOException e) {
                 exception = e;
 
-                // #if LOGGER >= ERROR
                 LOGGER.error("Could not bind network address. Retry in 1s");
-                // #endif /* LOGGER >= ERROR */
 
                 try {
                     Thread.sleep(1000);
@@ -111,9 +123,7 @@ class NIOSelector extends Thread {
         }
 
         if (exception != null) {
-            // #if LOGGER >= ERROR
             LOGGER.error("Could not create network channel!");
-            // #endif /* LOGGER >= ERROR */
         }
     }
 
@@ -124,9 +134,7 @@ class NIOSelector extends Thread {
         try {
             m_serverChannel.close();
         } catch (final IOException ignore) {
-            // #if LOGGER >= ERROR
             LOGGER.error("Unable to shutdown server channel!");
-            // #endif /* LOGGER >= ERROR */
         }
 
         m_running = false;
@@ -134,24 +142,18 @@ class NIOSelector extends Thread {
         try {
             m_serverChannel.close();
         } catch (final IOException e) {
-            // #if LOGGER >= ERROR
             LOGGER.error("Unable to close channel!");
-            // #endif /* LOGGER >= ERROR */
         }
-        // #if LOGGER >= INFO
+
         LOGGER.info("Closing ServerSocketChannel successful");
-        // #endif /* LOGGER >= INFO */
 
         try {
             m_selector.close();
         } catch (final IOException e) {
-            // #if LOGGER >= ERROR
             LOGGER.error("Unable to shutdown selector!");
-            // #endif /* LOGGER >= ERROR */
         }
-        // #if LOGGER >= INFO
+
         LOGGER.info("Shutdown of Selector successful");
-        // #endif /* LOGGER >= INFO */
     }
 
     /**
@@ -199,8 +201,16 @@ class NIOSelector extends Thread {
             m_interestQueue.processInterests(m_selector, m_connectionManager, m_connectionTimeout);
 
             try {
+                SOP_SLEEP.startDebug();
+
+                int actionsAvail = m_selector.select();
+
+                SOP_SLEEP.stopDebug();
+
                 // Wait for network action
-                if (m_selector.select() > 0 && m_selector.isOpen()) {
+                if (actionsAvail > 0 && m_selector.isOpen()) {
+                    SOP_ACTION.startDebug();
+
                     selected = m_selector.selectedKeys();
                     iterator = selected.iterator();
 
@@ -214,18 +224,16 @@ class NIOSelector extends Thread {
                                 dispatch(key);
                             }
                         } else {
-                            // #if LOGGER >= WARN
                             LOGGER.warn("Selected key is invalid: %s", key);
-                            // #endif /* LOGGER >= WARN */
                         }
                     }
+
+                    SOP_ACTION.stopDebug();
                 }
             } catch (final ClosedSelectorException e) {
                 // Ignore
             } catch (final IOException e) {
-                // #if LOGGER >= ERROR
                 LOGGER.error("Key selection failed!");
-                // #endif /* LOGGER >= ERROR */
             }
         }
 
@@ -251,7 +259,8 @@ class NIOSelector extends Thread {
 
     /**
      * Create a connection.
-     * The channel was created by a remote node and already accepted. Now the NodeID must be read and the connection object attached.
+     * The channel was created by a remote node and already accepted. Now the NodeID must be read and the connection
+     * object attached.
      *
      * @param p_key
      *         the selected key
@@ -261,9 +270,7 @@ class NIOSelector extends Thread {
         try {
             m_connectionManager.createIncomingConnection((SocketChannel) p_key.channel());
         } catch (final IOException e) {
-            // #if LOGGER >= ERROR
             LOGGER.error("Connection could not be created!");
-            // #endif /* LOGGER >= ERROR */
         }
     }
 
@@ -291,9 +298,7 @@ class NIOSelector extends Thread {
                 successful = false;
             }
             if (!successful) {
-                // #if LOGGER >= DEBUG
                 LOGGER.debug("Could not read from channel (0x%X)!", p_connection.getDestinationNodeID());
-                // #endif /* LOGGER >= DEBUG */
 
                 m_connectionManager.closeConnection(p_connection, true);
             }
@@ -302,9 +307,7 @@ class NIOSelector extends Thread {
             try {
                 p_connection.getPipeOut().readFlowControlBytes();
             } catch (final IOException e) {
-                // #if LOGGER >= WARN
                 LOGGER.warn("Failed to read flow control data!");
-                // #endif /* LOGGER >= WARN */
             }
         }
     }
@@ -321,9 +324,7 @@ class NIOSelector extends Thread {
         boolean complete;
 
         if (p_connection == null) {
-            // #if LOGGER >= ERROR
             LOGGER.error("Key is writable, but connection is null!");
-            // #endif /* LOGGER >= ERROR */
             return;
         }
 
@@ -332,9 +333,7 @@ class NIOSelector extends Thread {
             try {
                 complete = p_connection.getPipeOut().write();
             } catch (final IOException ignored) {
-                // #if LOGGER >= DEBUG
                 LOGGER.debug("Could not write to channel (0x%X)!", p_connection.getDestinationNodeID());
-                // #endif /* LOGGER >= DEBUG */
 
                 m_connectionManager.closeConnection(p_connection, true);
                 return;
@@ -356,9 +355,7 @@ class NIOSelector extends Thread {
             try {
                 p_connection.getPipeIn().writeFlowControlBytes();
             } catch (final IOException e) {
-                // #if LOGGER >= WARN
                 LOGGER.warn("Failed to write flow control data!");
-                // #endif /* LOGGER >= WARN */
             }
             try {
                 // Set interest to READ after writing
@@ -388,9 +385,7 @@ class NIOSelector extends Thread {
                 try {
                     connection.connect(p_key);
                 } catch (final Exception e) {
-                    // #if LOGGER >= ERROR
                     LOGGER.error("Establishing connection to %s failed", connection);
-                    // #endif /* LOGGER >= ERROR */
                 }
             }
         }
@@ -407,16 +402,15 @@ class NIOSelector extends Thread {
                 while (iterator.hasNext()) {
                     SelectionKey key = iterator.next();
                     if (key.isValid() && key.attachment() != null) {
-                        ret.append("\t [").append(NodeID.toHexString(((NIOConnection) key.attachment()).getDestinationNodeID())).append(", ")
-                                .append(Integer.toBinaryString(key.interestOps())).append("]\n");
+                        ret.append("\t [")
+                                .append(NodeID.toHexString(((NIOConnection) key.attachment()).getDestinationNodeID()))
+                                .append(", ").append(Integer.toBinaryString(key.interestOps())).append("]\n");
                         ret.append("\t\t").append(key.attachment()).append('\n');
                     }
                 }
             }
         } catch (final ConcurrentModificationException e) {
-            // #if LOGGER >= DEBUG
             LOGGER.debug("Unable to print selector status.");
-            // #endif /* LOGGER >= DEBUG */
         }
 
         return ret.toString();

@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -27,7 +30,6 @@ import de.hhu.bsinfo.dxnet.core.DynamicExporterPool;
 import de.hhu.bsinfo.dxnet.core.IncomingBufferQueue;
 import de.hhu.bsinfo.dxnet.core.LocalMessageHeaderPool;
 import de.hhu.bsinfo.dxnet.core.MessageDirectory;
-import de.hhu.bsinfo.dxnet.core.NetworkException;
 import de.hhu.bsinfo.dxnet.core.RequestMap;
 import de.hhu.bsinfo.dxnet.core.StaticExporterPool;
 
@@ -54,9 +56,10 @@ public class LoopbackConnectionManager extends AbstractConnectionManager {
 
     private AbstractExporterPool m_exporterPool;
 
-    public LoopbackConnectionManager(final CoreConfig p_coreConfig, final LoopbackConfig p_nioConfig, final NodeMap p_nodeMap,
-            final MessageDirectory p_messageDirectory, final RequestMap p_requestMap, final IncomingBufferQueue p_incomingBufferQueue,
-            final LocalMessageHeaderPool p_messageHeaderPool, final MessageHandlers p_messageHandlers, final boolean p_overprovisioning) {
+    public LoopbackConnectionManager(final CoreConfig p_coreConfig, final LoopbackConfig p_nioConfig,
+            final NodeMap p_nodeMap, final MessageDirectory p_messageDirectory, final RequestMap p_requestMap,
+            final IncomingBufferQueue p_incomingBufferQueue, final LocalMessageHeaderPool p_messageHeaderPool,
+            final MessageHandlers p_messageHandlers, final boolean p_overprovisioning) {
         super(2, p_overprovisioning);
 
         m_coreConfig = p_coreConfig;
@@ -69,20 +72,18 @@ public class LoopbackConnectionManager extends AbstractConnectionManager {
         m_messageHeaderPool = p_messageHeaderPool;
         m_messageHandlers = p_messageHandlers;
 
-        // #if LOGGER >= INFO
         LOGGER.info("Starting LoopbackSendThread...");
-        // #endif /* LOGGER >= INFO */
 
-        m_bufferPool = new BufferPool((int) m_loopbackConfig.getOugoingRingBufferSize().getBytes());
-        if (m_coreConfig.getExporterPoolType()) {
+        m_bufferPool = new BufferPool((int) m_loopbackConfig.getOutgoingRingBufferSize().getBytes());
+        if (m_coreConfig.isUseStaticExporterPool()) {
             m_exporterPool = new StaticExporterPool();
         } else {
             m_exporterPool = new DynamicExporterPool();
         }
 
         m_loopbackSendThread =
-                new LoopbackSendThread(this, (int) p_nioConfig.getConnectionTimeOut().getMs(), (int) m_loopbackConfig.getOugoingRingBufferSize().getBytes(),
-                        p_overprovisioning);
+                new LoopbackSendThread(this, (int) p_nioConfig.getConnectionTimeOut().getMs(),
+                        (int) m_loopbackConfig.getOutgoingRingBufferSize().getBytes(), p_overprovisioning);
         m_loopbackSendThread.setName("Network-LoopbackSendThread");
         m_loopbackSendThread.start();
     }
@@ -99,22 +100,17 @@ public class LoopbackConnectionManager extends AbstractConnectionManager {
         m_loopbackSendThread.activateParking();
     }
 
-    /**
-     * Creates a new connection to the given destination
-     *
-     * @param p_destination
-     *         the destination
-     * @return a new connection
-     * @throws NetworkException
-     *         if the connection could not be created
-     */
     @Override
-    public AbstractConnection createConnection(final short p_destination, final AbstractConnection p_existingConnection) throws NetworkException {
+    public AbstractConnection createConnection(final short p_destination,
+            final AbstractConnection p_existingConnection) {
         LoopbackConnection ret;
 
-        ret = new LoopbackConnection(m_coreConfig.getOwnNodeId(), p_destination, (int) m_loopbackConfig.getOugoingRingBufferSize().getBytes(),
-                (int) m_loopbackConfig.getFlowControlWindow().getBytes(), m_loopbackConfig.getFlowControlWindowThreshold(), m_incomingBufferQueue,
-                m_messageHeaderPool, m_messageDirectory, m_requestMap, m_messageHandlers, m_bufferPool, m_exporterPool, m_loopbackSendThread, m_nodeMap);
+        ret = new LoopbackConnection(m_coreConfig.getOwnNodeId(), p_destination,
+                (int) m_loopbackConfig.getOutgoingRingBufferSize().getBytes(),
+                (int) m_loopbackConfig.getFlowControlWindow().getBytes(),
+                m_loopbackConfig.getFlowControlWindowThreshold(), m_incomingBufferQueue, m_messageHeaderPool,
+                m_messageDirectory, m_requestMap, m_messageHandlers, m_bufferPool, m_exporterPool,
+                m_loopbackSendThread, m_nodeMap, m_coreConfig.isBenchmarkMode());
 
         return ret;
     }

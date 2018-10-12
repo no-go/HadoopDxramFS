@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -40,6 +43,7 @@ public class MessageHeader implements Importable {
     private int m_currentPosition;
     private int m_bytesAvailable;
     private int m_slot;
+    private boolean m_aborted = false;
 
     // Constructors
 
@@ -51,8 +55,8 @@ public class MessageHeader implements Importable {
 
     @Override
     public String toString() {
-        return "m_messageID " + m_messageID + ", m_messageTypeExc " + m_messageTypeExc + ", m_type " + m_type + ", m_subtype " + m_subtype +
-                ", m_payloadSize " + m_payloadSize;
+        return "m_messageID " + m_messageID + ", m_messageTypeExc " + m_messageTypeExc + ", m_type " + m_type +
+                ", m_subtype " + m_subtype + ", m_payloadSize " + m_payloadSize;
     }
 
     /**
@@ -64,6 +68,8 @@ public class MessageHeader implements Importable {
 
     /**
      * Message type
+     *
+     * @return Type
      */
     public byte getType() {
         return m_type;
@@ -71,13 +77,26 @@ public class MessageHeader implements Importable {
 
     /**
      * Message subtype
+     *
+     * @return Subtype
      */
     public byte getSubtype() {
         return m_subtype;
     }
 
     /**
+     * Returns the source node ID
+     *
+     * @return the source node ID
+     */
+    public short getSource() {
+        return m_pipeIn.getDestinationNodeID();
+    }
+
+    /**
      * Type of message (normal message or request)
+     *
+     * @return Message type
      */
     byte getMessageType() {
         return (byte) (m_messageTypeExc >> 4);
@@ -85,6 +104,8 @@ public class MessageHeader implements Importable {
 
     /**
      * Check if message is exclusive
+     *
+     * @return True if exclusive
      */
     public boolean isExclusive() {
         return (m_messageTypeExc & 0xF) == 1;
@@ -95,6 +116,53 @@ public class MessageHeader implements Importable {
      */
     int getPayloadSize() {
         return m_payloadSize;
+    }
+
+    /**
+     * Was the deserialization started by the MessageCreationCoordinator because the message is split to more than
+     * one buffer?
+     *
+     * @return whether this message is split or not
+     */
+    public boolean isIncomplete() {
+        return !m_unfinishedOperation.isEmpty();
+    }
+
+    /**
+     * Abort the deserialization of the response because the request was already removed (delayed)
+     */
+    void abort() {
+        m_aborted = true;
+    }
+
+    /**
+     * Check if the response deserialization was aborted
+     *
+     * @return whether the response is delayed (and thus aborted) or not
+     */
+    boolean isAborted() {
+        return m_aborted;
+    }
+
+    /**
+     * Initializes an external message importer.
+     *
+     * @param p_importer
+     *         the external importer
+     */
+    public void initExternalImporter(final MessageImporterDefault p_importer) {
+        p_importer.setBuffer(m_address, m_bytesAvailable, m_currentPosition);
+        p_importer.setNumberOfReadBytes(0);
+    }
+
+    /**
+     * Finish header if message was deserialized externally.
+     *
+     * @param p_messageHeaderPool
+     *         the local message header pool
+     */
+    public void finishHeader(final LocalMessageHeaderPool p_messageHeaderPool) {
+        m_pipeIn.finishHeader(this, m_slot, p_messageHeaderPool);
     }
 
     /**
@@ -126,8 +194,8 @@ public class MessageHeader implements Importable {
      * @param p_slot
      *         the buffer slot in pipe
      */
-    void setMessageInformation(final AbstractPipeIn p_pipeIn, final UnfinishedImExporterOperation p_unfinishedOperation, final long p_address,
-            final int p_currentPosition, final int p_bytesAvailable, final int p_slot) {
+    void setMessageInformation(final AbstractPipeIn p_pipeIn, final UnfinishedImExporterOperation p_unfinishedOperation,
+            final long p_address, final int p_currentPosition, final int p_bytesAvailable, final int p_slot) {
         m_pipeIn = p_pipeIn;
         m_unfinishedOperation = p_unfinishedOperation;
         m_address = p_address;
@@ -141,15 +209,17 @@ public class MessageHeader implements Importable {
      *
      * @param p_importerCollection
      *         the importer collection
+     * @param p_messageHeaderPool
+     *         Message handler pool
      * @return the completed message
      * @throws NetworkException
      *         it the message type/subtype is invalid
      */
-    public Message createAndImportMessage(final MessageImporterCollection p_importerCollection, final LocalMessageHeaderPool p_messageHeaderPool)
-            throws NetworkException {
+    public Message createAndImportMessage(final MessageImporterCollection p_importerCollection,
+            final LocalMessageHeaderPool p_messageHeaderPool) throws NetworkException {
         return m_pipeIn
-                .createAndImportMessage(this, m_address, m_currentPosition, m_bytesAvailable, m_unfinishedOperation, p_importerCollection, p_messageHeaderPool,
-                        m_slot);
+                .createAndImportMessage(this, m_address, m_currentPosition, m_bytesAvailable, m_unfinishedOperation,
+                        p_importerCollection, p_messageHeaderPool, m_slot);
     }
 
     @Override

@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -39,17 +42,15 @@ class IBPipeOut extends AbstractPipeOut {
      * @param p_writeInterestManager
      *         Write interest manager instance
      */
-    IBPipeOut(final short p_ownNodeId, final short p_destinationNodeId, final AbstractFlowControl p_flowControl, final OutgoingRingBuffer p_outgoingBuffer,
-            final IBWriteInterestManager p_writeInterestManager) {
+    IBPipeOut(final short p_ownNodeId, final short p_destinationNodeId, final AbstractFlowControl p_flowControl,
+            final OutgoingRingBuffer p_outgoingBuffer, final IBWriteInterestManager p_writeInterestManager) {
         super(p_ownNodeId, p_destinationNodeId, p_flowControl, p_outgoingBuffer);
         m_writeInterestManager = p_writeInterestManager;
     }
 
-    // TODO adjust doc, this returns pointers which can wrap around the ring buffer
-    // which needs to be handled in the native SendThread
-
     /**
-     * Get the next available buffer/chunk of data to write to the connection
+     * Get the next available buffer/chunk of data to write to the connection. This returns two pointers which
+     * can wrap around the ring buffer. This is handled by the native send thread to increase performance.
      *
      * @return Long holding the current relative position of the front pointer
      * (lower 32-bit) and the relative position of the back pointer
@@ -59,25 +60,47 @@ class IBPipeOut extends AbstractPipeOut {
         return ((IBOutgoingRingBuffer) getOutgoingQueue()).popBack();
     }
 
+    /**
+     * Posted but NOT processed: we have to introduce another back pointer
+     * which marks this position so we don't send data from the ORB twice.
+     * The callback, once the data is actually sent (which has to move the
+     * ORBs real back pointer), comes way later
+     *
+     * @param p_numBytesPosted
+     *         Number of bytes posted but NOT confirmed to be sent out
+     */
     void dataSendPosted(final int p_numBytesPosted) {
         ((IBOutgoingRingBuffer) getOutgoingQueue()).dataSendPosted(p_numBytesPosted);
     }
 
-    // TODO doc wrapper for outgoing ring buffer method
-    void dataSendConfirmed(final int p_numBytesPosted) {
-        getOutgoingQueue().shiftBack(p_numBytesPosted);
+    /**
+     * Call shift back on the ORB once the data is actually confirmed that it was sent
+     *
+     * @param p_numBytesConfirmed
+     *         Number of bytes confirmed sent
+     */
+    void dataSendConfirmed(final int p_numBytesConfirmed) {
+        getOutgoingQueue().shiftBack(p_numBytesConfirmed);
     }
 
-    byte getFlowControlData() {
+    /**
+     * Get but don't remove flow control data before it is confirmed posted.
+     *
+     * @return The number of flow control windows to confirm
+     */
+    int getFlowControlData() {
         return ((IBFlowControl) getFlowControl()).getFlowControlData();
     }
 
-    void flowControlDataSendPosted(final byte p_fcDataPosted) {
+    /**
+     * Call, once flow control data is posted. We don't have to consider when it is confirmed sent
+     * because there are no buffers or state we have to keep until then
+     *
+     * @param p_fcDataPosted
+     *         Fc data posted
+     */
+    void flowControlDataSendPosted(final int p_fcDataPosted) {
         ((IBFlowControl) getFlowControl()).flowControlDataSendPosted(p_fcDataPosted);
-    }
-
-    void flowControlDataSendConfirmed(final byte p_fcData) {
-        ((IBFlowControl) getFlowControl()).flowControlDataSendConfirmed(p_fcData);
     }
 
     @Override

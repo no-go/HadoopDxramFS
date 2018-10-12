@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -49,8 +52,8 @@ public abstract class AbstractPipeOut {
      * @param p_outgoingBuffer
      *         OutgoingRingBuffer instance of the connection
      */
-    protected AbstractPipeOut(final short p_ownNodeId, final short p_destinationNodeId, final AbstractFlowControl p_flowControl,
-            final OutgoingRingBuffer p_outgoingBuffer) {
+    protected AbstractPipeOut(final short p_ownNodeId, final short p_destinationNodeId,
+            final AbstractFlowControl p_flowControl, final OutgoingRingBuffer p_outgoingBuffer) {
         m_ownNodeID = p_ownNodeId;
         m_destinationNodeID = p_destinationNodeId;
 
@@ -63,6 +66,8 @@ public abstract class AbstractPipeOut {
 
     /**
      * Get the node id of the destination receiving sent data
+     *
+     * @return Node id
      */
     public short getDestinationNodeID() {
         return m_destinationNodeID;
@@ -70,6 +75,8 @@ public abstract class AbstractPipeOut {
 
     /**
      * Check if the pipe is connected to the remote
+     *
+     * @return True if connected
      */
     public boolean isConnected() {
         return m_isConnected;
@@ -77,15 +84,20 @@ public abstract class AbstractPipeOut {
 
     /**
      * Set the pipe connected to the remote
+     *
+     * @param p_connected
+     *         True for connected, false disconnected
      */
     public void setConnected(final boolean p_connected) {
         m_isConnected = p_connected;
-        UnsafeHandler.getInstance().getUnsafe()
-                .storeFence(); // m_isConnected is not volatile as it is read often without changing value -> use store fence here
+        // m_isConnected is not volatile as it is read often without changing value -> use store fence here
+        UnsafeHandler.getInstance().getUnsafe().storeFence();
     }
 
     /**
      * Get the FlowControl instance connected to the pipe
+     *
+     * @return FlowControl
      */
     protected AbstractFlowControl getFlowControl() {
         return m_flowControl;
@@ -126,17 +138,14 @@ public abstract class AbstractPipeOut {
      *         If deserializing the message to the buffer or posting a write request failed
      */
     void postMessage(final Message p_message) throws NetworkException {
-        // #if LOGGER >= TRACE
         LOGGER.trace("Writing message %s to pipe out of dest 0x%X", p_message, m_destinationNodeID);
-        // #endif /* LOGGER >= TRACE */
 
         int messageTotalSize = p_message.getTotalSize();
 
         if (messageTotalSize > 1024 * 1024 * 128) {
-            // #if LOGGER >= WARN
-            LOGGER.warn("Performance warning: Sending very large (%d bytes) message. Consider splitting your data to send if possible to benefit from " +
-                    "parallelism when messages are received and processed", messageTotalSize);
-            // #endif /* LOGGER >= WARN */
+            LOGGER.warn("Performance warning: Sending very large (%d bytes) message. Consider splitting your data to " +
+                            "send if possible to benefit from parallelism when messages are received and processed",
+                    messageTotalSize);
         }
         m_flowControl.dataToSend(messageTotalSize);
 
@@ -151,6 +160,8 @@ public abstract class AbstractPipeOut {
 
     /**
      * Check if the pipe is opened
+     *
+     * @return True if open
      */
     protected abstract boolean isOpen();
 
@@ -165,6 +176,8 @@ public abstract class AbstractPipeOut {
 
     /**
      * Get the OutgoingRingBuffer of this pipe/connection
+     *
+     * @return OutgoingRingBuffer
      */
     protected OutgoingRingBuffer getOutgoingQueue() {
         return m_outgoing;

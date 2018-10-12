@@ -1,17 +1,23 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
 package de.hhu.bsinfo.dxutils;
+
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import de.hhu.bsinfo.dxutils.unit.StorageUnit;
 
@@ -64,7 +70,7 @@ public final class RandomUtils {
      * @return Random int
      */
     public static int getRandomValue(final int p_start, final int p_end) {
-        return (int) (Math.random() * (p_end - p_start + 1) + p_start);
+        return (int) (ThreadLocalRandom.current().nextDouble() * (p_end - p_start + 1) + p_start);
     }
 
     /**
@@ -77,7 +83,7 @@ public final class RandomUtils {
      * @return Random int
      */
     public static int getRandomValueExclEnd(final int p_start, final int p_end) {
-        return (int) (Math.random() * (p_end - p_start) + p_start);
+        return (int) (ThreadLocalRandom.current().nextDouble() * (p_end - p_start) + p_start);
     }
 
     /**
@@ -90,6 +96,24 @@ public final class RandomUtils {
      * @return Random int
      */
     public static long getRandomValue(final long p_start, final long p_end) {
-        return (long) (Math.random() * (p_end - p_start + 1) + p_start);
+        return (long) (ThreadLocalRandom.current().nextDouble() * (p_end - p_start + 1) + p_start);
+    }
+
+    /**
+     * Create a random string from a given charset with a specific length
+     *
+     * @param p_charset Charset for random string. Multiple occurrences of the same char increase the probability
+     * @param p_length Length of the random output string
+     * @return Random output string
+     */
+    public static String getRandomString(final String p_charset, final int p_length) {
+        StringBuilder builder = new StringBuilder();
+        Random rand = new Random();
+
+        for (int i = 0; i < p_length; i++) {
+            builder.append(p_charset.charAt(rand.nextInt(p_length)));
+        }
+
+        return builder.toString();
     }
 }

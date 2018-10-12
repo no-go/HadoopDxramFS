@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -13,11 +16,7 @@
 
 package de.hhu.bsinfo.dxnet.ib;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import de.hhu.bsinfo.dxnet.core.AbstractFlowControl;
-import de.hhu.bsinfo.dxnet.core.NetworkException;
 
 /**
  * Flow control implementation for IB
@@ -25,11 +24,7 @@ import de.hhu.bsinfo.dxnet.core.NetworkException;
  * @author Stefan Nothaas, stefan.nothaas@hhu.de, 13.06.2017
  */
 class IBFlowControl extends AbstractFlowControl {
-    private static final Logger LOGGER = LogManager.getFormatterLogger(IBFlowControl.class.getSimpleName());
-
     private final IBWriteInterestManager m_writeInterestManager;
-
-    private int m_fcDataPosted;
 
     /**
      * Constructor
@@ -43,61 +38,63 @@ class IBFlowControl extends AbstractFlowControl {
      * @param p_writeInterestManager
      *         Write interest manager instance
      */
-    IBFlowControl(final short p_destinationNodeId, final int p_flowControlWindowSize, final float p_flowControlWindowThreshold,
-            final IBWriteInterestManager p_writeInterestManager) {
+    IBFlowControl(final short p_destinationNodeId, final int p_flowControlWindowSize,
+            final float p_flowControlWindowThreshold, final IBWriteInterestManager p_writeInterestManager) {
         super(p_destinationNodeId, p_flowControlWindowSize, p_flowControlWindowThreshold);
         m_writeInterestManager = p_writeInterestManager;
     }
 
-    // get but don't remove flow control data before not confirmed sent
-    // get the number of windows to confirm
-    public byte getFlowControlData() {
-        byte ret;
+    /**
+     * Get but don't remove flow control data before it is confirmed posted
+     *
+     * @return The number of flow control windows to confirm
+     */
+    public int getFlowControlData() {
+        if (m_flowControlWindowSize != 0) {
+            // not using CAS here requires this to be called by a single thread, only
+            int ret = (int) (m_receivedBytes.get() / m_flowControlWindowSizeThreshold);
 
-        // not using CAS here requires this to be called by a single thread, only
-        ret = (byte) (m_receivedBytes.get() / m_flowControlWindowSizeThreshold);
-        if (ret == 0) {
-            if (m_fcDataPosted > 0) {
-                throw new IllegalStateException("No fc data available but said to be posted");
+            if (ret == 0) {
+                return ret;
             }
 
+            if (ret < 0) {
+                throw new IllegalStateException("Flow control minus posted negative: " + ret);
+            }
+
+            // happens if fc is smaller threshold and a very large chunk is posted
+            // this might exceed the available range of a uint8_t in the native code
+            if (ret > 255) {
+                ret = 255;
+            }
+
+            return ret;
+        } else {
             return 0;
         }
-
-        // #if LOGGER >= TRACE
-        LOGGER.trace("getFlowControlData (%X): %d", m_destinationNodeID, ret);
-        // #endif /* LOGGER >= TRACE */
-
-        return (byte) (ret - m_fcDataPosted);
     }
 
-    public void flowControlDataSendPosted(final byte p_fcData) {
-        m_fcDataPosted += p_fcData;
-    }
+    /**
+     * Call, once flow control data is posted. We don't have to consider when it is confirmed sent
+     * because there are no buffers or state we have to keep until then
+     *
+     * @param p_fcData
+     *         Fc data posted
+     */
+    public void flowControlDataSendPosted(final int p_fcData) {
+        long bytesLeft;
 
-    // confirm that fc data was confirmed posted/sent
-    public void flowControlDataSendConfirmed(final byte p_fcData) {
-        int bytesLeft;
+        if (m_flowControlWindowSize != 0) {
+            bytesLeft = m_receivedBytes.addAndGet(-(m_flowControlWindowSizeThreshold * p_fcData));
 
-        bytesLeft = m_receivedBytes.addAndGet(-(m_flowControlWindowSizeThreshold * p_fcData));
-
-        if (bytesLeft < 0) {
-            throw new IllegalStateException("Negative flow control");
+            if (bytesLeft < 0) {
+                throw new IllegalStateException("Negative flow control");
+            }
         }
-
-        m_fcDataPosted -= p_fcData;
-
-        if (m_fcDataPosted < 0) {
-            throw new IllegalStateException("FC data posted state negative");
-        }
-
-        // #if LOGGER >= TRACE
-        LOGGER.trace("flowControlDataSendConfirmed (%X): state fc left %d", m_destinationNodeID, bytesLeft);
-        // #endif /* LOGGER >= TRACE */
     }
 
     @Override
-    public void flowControlWrite() throws NetworkException {
+    public void flowControlWrite() {
         m_writeInterestManager.pushBackFcInterest(getDestinationNodeId());
     }
 

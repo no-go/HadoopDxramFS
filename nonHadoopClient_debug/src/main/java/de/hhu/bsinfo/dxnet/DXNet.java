@@ -103,6 +103,8 @@ public final class DXNet {
      *         Configuration parameters for NIO
      * @param p_ibConfig
      *         Configuration parameters for InfiniBand
+     * @param p_loopbackConfig
+     *         Configuration parameters for Loopback
      * @param p_nodeMap
      *         NodeMap implementation to lookup node ids
      */
@@ -113,21 +115,31 @@ public final class DXNet {
         m_ibConfig = p_ibConfig;
         m_loopbackConfig = p_loopbackConfig;
 
-        if ("Ethernet".equals(m_coreConfig.getDevice())) {
-            m_loopbackDeviceActive = false;
-            m_messageReceivers = new MessageReceiverStore((int) m_nioConfig.getRequestTimeOut().getMs());
-        } else if ("Infiniband".equals(m_coreConfig.getDevice())) {
-            m_loopbackDeviceActive = false;
-            m_messageReceivers = new MessageReceiverStore((int) m_ibConfig.getRequestTimeOut().getMs());
-        } else {
-            m_loopbackDeviceActive = true;
-            m_messageReceivers = new MessageReceiverStore((int) m_loopbackConfig.getRequestTimeOut().getMs());
+        switch (m_coreConfig.getDevice()) {
+            case ETHERNET:
+                m_loopbackDeviceActive = false;
+                m_messageReceivers = new MessageReceiverStore((int) m_nioConfig.getRequestTimeOut().getMs());
+                break;
+
+            case INFINIBAND:
+                m_loopbackDeviceActive = false;
+                m_messageReceivers = new MessageReceiverStore((int) m_ibConfig.getRequestTimeOut().getMs());
+                break;
+
+            case LOOPBACK:
+                m_loopbackDeviceActive = true;
+                m_messageReceivers = new MessageReceiverStore((int) m_loopbackConfig.getRequestTimeOut().getMs());
+                break;
+
+            default:
+                throw new IllegalStateException();
         }
 
         m_availableCores =
                 Runtime.getRuntime().availableProcessors() + OVERPROVISIONING_OFFSET -
                         m_coreConfig.getNumMessageHandlerThreads() - 1 /*SendReceive thread*/ -
                         1 /*MessageCreationCoordinator*/;
+
         if (m_availableCores <= 0) {
             m_overprovisioning = true;
 
@@ -142,30 +154,46 @@ public final class DXNet {
         m_messageHandlers = new MessageHandlers(m_coreConfig.getNumMessageHandlerThreads(), m_overprovisioning,
                 m_messageReceivers, globalHeaderPool);
 
-        if ("Ethernet".equals(m_coreConfig.getDevice())) {
-            m_messageDirectory = new MessageDirectory((int) m_nioConfig.getRequestTimeOut().getMs());
-        } else if ("Infiniband".equals(m_coreConfig.getDevice())) {
-            m_messageDirectory = new MessageDirectory((int) m_ibConfig.getRequestTimeOut().getMs());
-        } else {
-            m_messageDirectory = new MessageDirectory((int) m_loopbackConfig.getRequestTimeOut().getMs());
+        switch (m_coreConfig.getDevice()) {
+            case ETHERNET:
+                m_messageDirectory = new MessageDirectory((int) m_nioConfig.getRequestTimeOut().getMs());
+                break;
+
+            case INFINIBAND:
+                m_messageDirectory = new MessageDirectory((int) m_ibConfig.getRequestTimeOut().getMs());
+                break;
+
+            case LOOPBACK:
+                m_messageDirectory = new MessageDirectory((int) m_loopbackConfig.getRequestTimeOut().getMs());
+                break;
+
+            default:
+                throw new IllegalStateException();
         }
 
         m_messageDirectory.register(Messages.DEFAULT_MESSAGES_TYPE, Messages.SUBTYPE_DEFAULT_MESSAGE,
                 DefaultMessage.class);
 
-        LOGGER.info("Network: MessageCreationCoordinator");
+        switch (m_coreConfig.getDevice()) {
+            case ETHERNET:
+                m_messageCreationCoordinator = new MessageCreationCoordinator(2 * 2 * 1024,
+                        (int) m_nioConfig.getOutgoingRingBufferSize().getBytes() * 8,
+                        m_overprovisioning);
+                break;
 
-        if ("Ethernet".equals(m_coreConfig.getDevice())) {
-            m_messageCreationCoordinator = new MessageCreationCoordinator(2 * 2 * 1024,
-                    (int) m_nioConfig.getOugoingRingBufferSize().getBytes() * 8,
-                    m_overprovisioning);
-        } else if ("Infiniband".equals(m_coreConfig.getDevice())) {
-            m_messageCreationCoordinator = new MessageCreationCoordinator(m_ibConfig.getIbqMaxCapacityBufferCount(),
-                    (int) m_ibConfig.getIbqMaxCapacitySize().getBytes(), m_overprovisioning);
-        } else {
-            m_messageCreationCoordinator = new MessageCreationCoordinator(2 * 2 * 1024,
-                    (int) m_loopbackConfig.getOugoingRingBufferSize().getBytes() * 8,
-                    m_overprovisioning);
+            case INFINIBAND:
+                m_messageCreationCoordinator = new MessageCreationCoordinator(m_ibConfig.getIbqMaxCapacityBufferCount(),
+                        (int) m_ibConfig.getIbqMaxCapacitySize().getBytes(), m_overprovisioning);
+                break;
+
+            case LOOPBACK:
+                m_messageCreationCoordinator = new MessageCreationCoordinator(2 * 2 * 1024,
+                        (int) m_loopbackConfig.getOutgoingRingBufferSize().getBytes() * 8,
+                        m_overprovisioning);
+                break;
+
+            default:
+                throw new IllegalStateException();
         }
 
         m_messageCreationCoordinator.setName("Network: MessageCreationCoordinator");
@@ -175,35 +203,41 @@ public final class DXNet {
 
         m_requestMap = new RequestMap(m_coreConfig.getRequestMapSize());
 
-        if ("Ethernet".equals(m_coreConfig.getDevice())) {
-            m_timeOut = (int) m_nioConfig.getRequestTimeOut().getMs();
-        } else if ("Infiniband".equals(m_coreConfig.getDevice())) {
-            m_timeOut = (int) m_ibConfig.getRequestTimeOut().getMs();
-        } else {
-            m_timeOut = (int) m_loopbackConfig.getRequestTimeOut().getMs();
-        }
+        switch (m_coreConfig.getDevice()) {
+            case ETHERNET:
+                m_timeOut = (int) m_nioConfig.getRequestTimeOut().getMs();
+                m_connectionManager = new NIOConnectionManager(m_coreConfig, m_nioConfig, p_nodeMap, m_messageDirectory,
+                        m_requestMap,
+                        m_messageCreationCoordinator.getIncomingBufferQueue(), localHeaderPool, m_messageHandlers,
+                        m_overprovisioning);
+                break;
 
-        if ("Ethernet".equals(m_coreConfig.getDevice())) {
-            m_connectionManager = new NIOConnectionManager(m_coreConfig, m_nioConfig, p_nodeMap, m_messageDirectory,
-                    m_requestMap,
-                    m_messageCreationCoordinator.getIncomingBufferQueue(), localHeaderPool, m_messageHandlers,
-                    m_overprovisioning);
-        } else if ("Infiniband".equals(m_coreConfig.getDevice())) {
-            m_connectionManager = new IBConnectionManager(m_coreConfig, m_ibConfig, p_nodeMap, m_messageDirectory,
-                    m_requestMap,
-                    m_messageCreationCoordinator.getIncomingBufferQueue(), localHeaderPool, m_messageHandlers,
-                    m_overprovisioning);
-            ((IBConnectionManager) m_connectionManager).init();
-        } else {
-            m_connectionManager = new LoopbackConnectionManager(m_coreConfig, m_loopbackConfig, p_nodeMap,
-                    m_messageDirectory, m_requestMap,
-                    m_messageCreationCoordinator.getIncomingBufferQueue(), localHeaderPool, m_messageHandlers,
-                    m_overprovisioning);
+            case INFINIBAND:
+                m_timeOut = (int) m_ibConfig.getRequestTimeOut().getMs();
+                m_connectionManager = new IBConnectionManager(m_coreConfig, m_ibConfig, p_nodeMap, m_messageDirectory,
+                        m_requestMap,
+                        m_messageCreationCoordinator.getIncomingBufferQueue(), localHeaderPool, m_messageHandlers,
+                        m_overprovisioning);
+                ((IBConnectionManager) m_connectionManager).init();
+                break;
+
+            case LOOPBACK:
+                m_timeOut = (int) m_loopbackConfig.getRequestTimeOut().getMs();
+                m_connectionManager = new LoopbackConnectionManager(m_coreConfig, m_loopbackConfig, p_nodeMap,
+                        m_messageDirectory, m_requestMap,
+                        m_messageCreationCoordinator.getIncomingBufferQueue(), localHeaderPool, m_messageHandlers,
+                        m_overprovisioning);
+                break;
+
+            default:
+                throw new IllegalStateException();
         }
     }
 
     /**
      * Get the status of the network system (debug string)
+     *
+     * @return Status as string
      */
     public String getStatus() {
         String str = "";
@@ -225,6 +259,9 @@ public final class DXNet {
 
     /**
      * Set the ConnectionManager listener
+     *
+     * @param p_listener
+     *         Listener to set
      */
     public void setConnectionManagerListener(final ConnectionManagerListener p_listener) {
         m_connectionManager.setListener(p_listener);
@@ -382,7 +419,7 @@ public final class DXNet {
                     }
                 }
             } catch (final NetworkException e) {
-                LOGGER.debug("Sending data failed: %s", e.getMessage());
+                LOGGER.warn("Sending data failed: %s", e.getMessage());
                 throw new NetworkException("Sending data failed ", e);
             }
         }

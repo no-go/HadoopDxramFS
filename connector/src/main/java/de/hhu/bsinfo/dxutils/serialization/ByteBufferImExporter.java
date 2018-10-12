@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -14,6 +17,7 @@
 package de.hhu.bsinfo.dxutils.serialization;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Implementation of an Importer/Exporter for ByteBuffers.
@@ -54,6 +58,11 @@ public class ByteBufferImExporter implements Importer, Exporter {
     }
 
     @Override
+    public void writeChar(final char p_v) {
+        m_byteBuffer.putChar(p_v);
+    }
+
+    @Override
     public void writeInt(final int p_v) {
         m_byteBuffer.putInt(p_v);
     }
@@ -81,7 +90,7 @@ public class ByteBufferImExporter implements Importer, Exporter {
 
     @Override
     public void writeString(final String p_str) {
-        writeByteArray(p_str.getBytes());
+        writeByteArray(p_str.getBytes(StandardCharsets.US_ASCII));
     }
 
     @Override
@@ -113,6 +122,11 @@ public class ByteBufferImExporter implements Importer, Exporter {
     @Override
     public short readShort(final short p_short) {
         return m_byteBuffer.getShort();
+    }
+
+    @Override
+    public char readChar(final char p_char) {
+        return m_byteBuffer.getChar();
     }
 
     @Override
@@ -172,6 +186,11 @@ public class ByteBufferImExporter implements Importer, Exporter {
     }
 
     @Override
+    public int writeChars(final char[] p_array) {
+        return writeChars(p_array, 0, p_array.length);
+    }
+
+    @Override
     public int writeInts(final int[] p_array) {
         return writeInts(p_array, 0, p_array.length);
     }
@@ -185,6 +204,15 @@ public class ByteBufferImExporter implements Importer, Exporter {
     public int writeShorts(final short[] p_array, final int p_offset, final int p_length) {
         for (int i = 0; i < p_length; i++) {
             m_byteBuffer.putShort(p_array[p_offset + i]);
+        }
+
+        return p_length;
+    }
+
+    @Override
+    public int writeChars(final char[] p_array, final int p_offset, final int p_length) {
+        for (int i = 0; i < p_length; i++) {
+            m_byteBuffer.putChar(p_array[p_offset + i]);
         }
 
         return p_length;
@@ -221,6 +249,12 @@ public class ByteBufferImExporter implements Importer, Exporter {
     }
 
     @Override
+    public void writeCharArray(final char[] p_array) {
+        writeCompactNumber(p_array.length);
+        writeChars(p_array);
+    }
+
+    @Override
     public void writeIntArray(final int[] p_array) {
         writeCompactNumber(p_array.length);
         writeInts(p_array);
@@ -238,6 +272,11 @@ public class ByteBufferImExporter implements Importer, Exporter {
     }
 
     @Override
+    public int readChars(final char[] p_array) {
+        return readChars(p_array, 0, p_array.length);
+    }
+
+    @Override
     public int readInts(final int[] p_array) {
         return readInts(p_array, 0, p_array.length);
     }
@@ -251,6 +290,15 @@ public class ByteBufferImExporter implements Importer, Exporter {
     public int readShorts(final short[] p_array, final int p_offset, final int p_length) {
         for (int i = 0; i < p_length; i++) {
             p_array[p_offset + i] = m_byteBuffer.getShort();
+        }
+
+        return p_length;
+    }
+
+    @Override
+    public int readChars(final char[] p_array, final int p_offset, final int p_length) {
+        for (int i = 0; i < p_length; i++) {
+            p_array[p_offset + i] = m_byteBuffer.getChar();
         }
 
         return p_length;
@@ -285,6 +333,13 @@ public class ByteBufferImExporter implements Importer, Exporter {
     public short[] readShortArray(final short[] p_array) {
         short[] arr = new short[readCompactNumber(0)];
         readShorts(arr);
+        return arr;
+    }
+
+    @Override
+    public char[] readCharArray(final char[] p_array) {
+        char[] arr = new char[readCompactNumber(0)];
+        readChars(arr);
         return arr;
     }
 

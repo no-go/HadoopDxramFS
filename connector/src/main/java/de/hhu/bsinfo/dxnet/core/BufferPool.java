@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -67,10 +70,12 @@ public final class BufferPool {
         if ((LARGE_BUFFER_POOL_SIZE & LARGE_BUFFER_POOL_SIZE - 1) != 0) {
             throw new NetworkRuntimeException("Large buffer pool size must be a power of 2!");
         }
+
         m_posFrontLarge = 0;
         m_posBackProducerLarge = new AtomicInteger(0);
         m_posBackConsumerLarge = new AtomicInteger(0);
         m_largeBufferPool = new DirectBufferWrapper[LARGE_BUFFER_POOL_SIZE];
+
         for (int i = 0; i < LARGE_BUFFER_POOL_SIZE; i++) {
             m_largeBufferPool[i] = new DirectBufferWrapper(p_osBufferSize / LARGE_BUFFER_POOL_FACTOR);
         }
@@ -79,10 +84,12 @@ public final class BufferPool {
         if ((MEDIUM_BUFFER_POOL_SIZE & MEDIUM_BUFFER_POOL_SIZE - 1) != 0) {
             throw new NetworkRuntimeException("Medium buffer pool size must be a power of 2!");
         }
+
         m_posFrontMedium = 0;
         m_posBackProducerMedium = new AtomicInteger(0);
         m_posBackConsumerMedium = new AtomicInteger(0);
         m_mediumBufferPool = new DirectBufferWrapper[MEDIUM_BUFFER_POOL_SIZE];
+
         for (int i = 0; i < MEDIUM_BUFFER_POOL_SIZE; i++) {
             m_mediumBufferPool[i] = new DirectBufferWrapper(p_osBufferSize / MEDIUM_BUFFER_POOL_FACTOR);
         }
@@ -91,10 +98,12 @@ public final class BufferPool {
         if ((SMALL_BUFFER_POOL_SIZE & SMALL_BUFFER_POOL_SIZE - 1) != 0) {
             throw new NetworkRuntimeException("Small buffer pool size must be a power of 2!");
         }
+
         m_posFrontSmall = 0;
         m_posBackProducerSmall = new AtomicInteger(0);
         m_posBackConsumerSmall = new AtomicInteger(0);
         m_smallBufferPool = new DirectBufferWrapper[SMALL_BUFFER_POOL_SIZE];
+
         for (int i = 0; i < SMALL_BUFFER_POOL_SIZE; i++) {
             m_smallBufferPool[i] = new DirectBufferWrapper(p_osBufferSize / SMALL_BUFFER_POOL_FACTOR);
         }
@@ -119,6 +128,7 @@ public final class BufferPool {
         int posFront;
 
         posFront = m_posFrontLarge & 0x7FFFFFFF;
+
         if ((m_posBackConsumerLarge.get() + LARGE_BUFFER_POOL_SIZE & 0x7FFFFFFF) != posFront) {
             // Not empty
             ret = m_largeBufferPool[posFront % LARGE_BUFFER_POOL_SIZE];
@@ -127,6 +137,7 @@ public final class BufferPool {
         }
 
         posFront = m_posFrontMedium & 0x7FFFFFFF;
+
         if ((m_posBackConsumerMedium.get() + MEDIUM_BUFFER_POOL_SIZE & 0x7FFFFFFF) != posFront) {
             // Not empty
             ret = m_mediumBufferPool[posFront % MEDIUM_BUFFER_POOL_SIZE];
@@ -135,6 +146,7 @@ public final class BufferPool {
         }
 
         posFront = m_posFrontSmall & 0x7FFFFFFF;
+
         if ((m_posBackConsumerSmall.get() + SMALL_BUFFER_POOL_SIZE & 0x7FFFFFFF) != posFront) {
             // Not empty
             ret = m_smallBufferPool[posFront % SMALL_BUFFER_POOL_SIZE];
@@ -143,9 +155,7 @@ public final class BufferPool {
         }
 
         // All buffer pools are empty
-        // #if LOGGER >= WARN
         LOGGER.warn("Insufficient pooled incoming buffers. Allocating temporary buffer with size %d.", m_osBufferSize);
-        // #endif /* LOGGER >= WARN */
 
         return new DirectBufferWrapper(m_osBufferSize);
     }
@@ -162,13 +172,16 @@ public final class BufferPool {
         int posFront;
 
         p_directBufferWrapper.getBuffer().clear();
+
         if (p_directBufferWrapper.getBuffer().capacity() == m_osBufferSize / LARGE_BUFFER_POOL_FACTOR) {
             // Buffer fits in large buffer pool
             while (true) {
-                // PosFront must be read before posBack to avoid missing a posBack update and thus having posBack % BUFFER_SIZE == posFront % BUFFER_SIZE
+                // PosFront must be read before posBack to avoid missing a posBack update and thus having
+                // posBack % BUFFER_SIZE == posFront % BUFFER_SIZE
                 posFront = m_posFrontLarge & 0x7FFFFFFF;
                 posBackSigned = m_posBackProducerLarge.get();
                 posBack = posBackSigned & 0x7FFFFFFF;
+
                 if (posBack == posFront) {
                     // Looks like we missed an posFront update because this queue cannot be full at this point
                     continue;
@@ -177,7 +190,8 @@ public final class BufferPool {
                 if (m_posBackProducerLarge.compareAndSet(posBackSigned, posBackSigned + 1)) {
                     m_largeBufferPool[posBack % LARGE_BUFFER_POOL_SIZE] = p_directBufferWrapper;
 
-                    // First atomic is necessary to synchronize producers, second to inform consumer after message header has been added
+                    // First atomic is necessary to synchronize producers, second to inform consumer after
+                    // message header has been added
                     while (!m_posBackConsumerLarge.compareAndSet(posBackSigned, posBackSigned + 1)) {
                         // Producer needs to wait for all other submissions prior to this one
                         // (this thread overtook at least one other producer since updating posBackProducer)
@@ -190,10 +204,12 @@ public final class BufferPool {
         if (p_directBufferWrapper.getBuffer().capacity() == m_osBufferSize / MEDIUM_BUFFER_POOL_FACTOR) {
             // Buffer fits in medium buffer pool
             while (true) {
-                // PosFront must be read before posBack to avoid missing a posBack update and thus having posBack % BUFFER_SIZE == posFront % BUFFER_SIZE
+                // PosFront must be read before posBack to avoid missing a posBack update and thus having
+                // posBack % BUFFER_SIZE == posFront % BUFFER_SIZE
                 posFront = m_posFrontMedium & 0x7FFFFFFF;
                 posBackSigned = m_posBackProducerMedium.get();
                 posBack = posBackSigned & 0x7FFFFFFF;
+
                 if (posBack == posFront) {
                     // Looks like we missed an posFront update because this queue cannot be full at this point
                     continue;
@@ -202,7 +218,8 @@ public final class BufferPool {
                 if (m_posBackProducerMedium.compareAndSet(posBackSigned, posBackSigned + 1)) {
                     m_mediumBufferPool[posBack % MEDIUM_BUFFER_POOL_SIZE] = p_directBufferWrapper;
 
-                    // First atomic is necessary to synchronize producers, second to inform consumer after message header has been added
+                    // First atomic is necessary to synchronize producers, second to inform consumer after message
+                    // header has been added
                     while (!m_posBackConsumerMedium.compareAndSet(posBackSigned, posBackSigned + 1)) {
                         // Producer needs to wait for all other submissions prior to this one
                         // (this thread overtook at least one other producer since updating posBackProducer)
@@ -215,10 +232,12 @@ public final class BufferPool {
         if (p_directBufferWrapper.getBuffer().capacity() == m_osBufferSize / SMALL_BUFFER_POOL_FACTOR) {
             // Buffer fits in small buffer pool
             while (true) {
-                // PosFront must be read before posBack to avoid missing a posBack update and thus having posBack % BUFFER_SIZE == posFront % BUFFER_SIZE
+                // PosFront must be read before posBack to avoid missing a posBack update and thus having
+                // posBack % BUFFER_SIZE == posFront % BUFFER_SIZE
                 posFront = m_posFrontSmall & 0x7FFFFFFF;
                 posBackSigned = m_posBackProducerSmall.get();
                 posBack = posBackSigned & 0x7FFFFFFF;
+
                 if (posBack == posFront) {
                     // Looks like we missed an posFront update because this queue cannot be full at this point
                     continue;
@@ -227,7 +246,8 @@ public final class BufferPool {
                 if (m_posBackProducerSmall.compareAndSet(posBackSigned, posBackSigned + 1)) {
                     m_smallBufferPool[posBack % SMALL_BUFFER_POOL_SIZE] = p_directBufferWrapper;
 
-                    // First atomic is necessary to synchronize producers, second to inform consumer after message header has been added
+                    // First atomic is necessary to synchronize producers, second to inform consumer after message
+                    // header has been added
                     while (!m_posBackConsumerSmall.compareAndSet(posBackSigned, posBackSigned + 1)) {
                         // Producer needs to wait for all other submissions prior to this one
                         // (this thread overtook at least one other producer since updating posBackProducer)
@@ -238,10 +258,10 @@ public final class BufferPool {
             }
         }
 
-        // Return without adding the incoming buffer if pool is full or buffer size is incompatible (was created after initialization)
-        // #if LOGGER >= WARN
-        LOGGER.warn("Could not add incoming buffer because size (%d) does not match!", p_directBufferWrapper.getBuffer().capacity());
-        // #endif /* LOGGER >= WARN */
+        // Return without adding the incoming buffer if pool is full or buffer size is incompatible (was created
+        // after initialization)
+        LOGGER.warn("Could not add incoming buffer because size (%d) does not match!",
+                p_directBufferWrapper.getBuffer().capacity());
     }
 
     /**

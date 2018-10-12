@@ -1,12 +1,12 @@
 package de.hhu.bsinfo.app.dxramfspeer;
 
-import de.hhu.bsinfo.dxram.data.DataStructure;
+import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 import de.hhu.bsinfo.app.dxramfscore.Blockinfo;
 import de.hhu.bsinfo.dxutils.serialization.Exporter;
 import de.hhu.bsinfo.dxutils.serialization.Importer;
 import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 
-public class BlockinfoChunk extends DataStructure {
+public class BlockinfoChunk extends AbstractChunk {
     private Blockinfo _blockinfo;
 
     public BlockinfoChunk() {

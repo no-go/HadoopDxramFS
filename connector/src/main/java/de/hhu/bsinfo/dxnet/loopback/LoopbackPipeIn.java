@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -14,6 +17,7 @@
 package de.hhu.bsinfo.dxnet.loopback;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.locks.LockSupport;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,16 +30,23 @@ import de.hhu.bsinfo.dxnet.core.IncomingBufferQueue;
 import de.hhu.bsinfo.dxnet.core.LocalMessageHeaderPool;
 import de.hhu.bsinfo.dxnet.core.MessageDirectory;
 import de.hhu.bsinfo.dxnet.core.RequestMap;
-import de.hhu.bsinfo.dxutils.stats.StatisticsOperation;
-import de.hhu.bsinfo.dxutils.stats.StatisticsRecorderManager;
+import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
+import de.hhu.bsinfo.dxutils.stats.Time;
+import de.hhu.bsinfo.dxutils.stats.TimePool;
 
 /**
  * Created by nothaas on 6/9/17.
  */
 public class LoopbackPipeIn extends AbstractPipeIn {
-    private static final StatisticsOperation SOP_COPY = StatisticsRecorderManager.getOperation("DXNet-Loopback", "Copy");
+    private static final Logger LOGGER = LogManager.getFormatterLogger(LoopbackPipeIn.class.getSimpleName());
 
-    private static final Logger LOGGER = LogManager.getFormatterLogger(AbstractPipeIn.class.getSimpleName());
+    private static final TimePool SOP_COPY = new TimePool(LoopbackPipeIn.class, "Copy");
+    private static final Time SOP_IBQ_WAIT_PUSH = new Time(IncomingBufferQueue.class, "WaitPush");
+
+    static {
+        StatisticsManager.get().registerOperation(LoopbackPipeIn.class, SOP_COPY);
+        StatisticsManager.get().registerOperation(LoopbackPipeIn.class, SOP_IBQ_WAIT_PUSH);
+    }
 
     private final BufferPool m_bufferPool;
     private IncomingBufferQueue m_incomingBufferQueue;
@@ -43,11 +54,16 @@ public class LoopbackPipeIn extends AbstractPipeIn {
 
     private final ByteBuffer m_flowControlByte;
 
-    LoopbackPipeIn(final short p_ownNodeId, final short p_destinationNodeId, final LocalMessageHeaderPool p_messageHeaderPool,
-            final AbstractFlowControl p_flowControl, final MessageDirectory p_messageDirectory, final RequestMap p_requestMap,
-            final MessageHandlers p_messageHandlers, final BufferPool p_bufferPool, final IncomingBufferQueue p_incomingBufferQueue,
-            final LoopbackConnection p_parentConnection) {
-        super(p_ownNodeId, p_destinationNodeId, p_messageHeaderPool, p_flowControl, p_messageDirectory, p_requestMap, p_messageHandlers);
+    private long m_queueFullCounter;
+
+    LoopbackPipeIn(final short p_ownNodeId, final short p_destinationNodeId,
+            final LocalMessageHeaderPool p_messageHeaderPool, final AbstractFlowControl p_flowControl,
+            final MessageDirectory p_messageDirectory, final RequestMap p_requestMap,
+            final MessageHandlers p_messageHandlers, final BufferPool p_bufferPool,
+            final IncomingBufferQueue p_incomingBufferQueue, final LoopbackConnection p_parentConnection,
+            final boolean p_benchmarkMode) {
+        super(p_ownNodeId, p_destinationNodeId, p_messageHeaderPool, p_flowControl, p_messageDirectory, p_requestMap,
+                p_messageHandlers, p_benchmarkMode);
 
         m_bufferPool = p_bufferPool;
         m_incomingBufferQueue = p_incomingBufferQueue;
@@ -62,7 +78,8 @@ public class LoopbackPipeIn extends AbstractPipeIn {
         int ret;
 
         if (m_incomingBufferQueue.isFull()) {
-            // Abort to avoid deadlock when sending requests/responses as responses cannot be sent if send thread locks down below
+            // Abort to avoid deadlock when sending requests/responses as responses cannot be sent if send thread
+            // locks down below
             return 0;
         }
 
@@ -72,9 +89,7 @@ public class LoopbackPipeIn extends AbstractPipeIn {
         directBufferWrapper = m_bufferPool.getBuffer();
         buffer = directBufferWrapper.getBuffer();
 
-        // #ifdef STATISTICS
-        SOP_COPY.enter();
-        // #endif /* STATISTICS */
+        SOP_COPY.startDebug();
 
         if (buffer.remaining() >= p_buffer.remaining()) {
             ret = p_buffer.remaining();
@@ -89,11 +104,29 @@ public class LoopbackPipeIn extends AbstractPipeIn {
         }
         buffer.flip();
 
-        // #ifdef STATISTICS
-        SOP_COPY.leave();
-        // #endif /* STATISTICS */
+        SOP_COPY.stopDebug();
 
-        m_incomingBufferQueue.pushBuffer(m_parentConnection, directBufferWrapper, 0, directBufferWrapper.getAddress(), ret);
+        if (!m_incomingBufferQueue.pushBuffer(m_parentConnection, directBufferWrapper, 0,
+                directBufferWrapper.getAddress(), ret)) {
+            SOP_IBQ_WAIT_PUSH.start();
+
+            do {
+                m_queueFullCounter++;
+
+                // avoid flooding the log
+                if (m_queueFullCounter % 100000 == 0) {
+                    LOGGER.warn("IBQ is full count: %d. If this message appears often (with a high counter) you " +
+                            "should consider increasing the number message handlers to avoid performance " +
+                            "penalties", m_queueFullCounter);
+                }
+
+                LockSupport.parkNanos(100);
+
+            } while (!m_incomingBufferQueue.pushBuffer(m_parentConnection, directBufferWrapper, 0,
+                    directBufferWrapper.getAddress(), ret));
+
+            SOP_IBQ_WAIT_PUSH.stop();
+        }
 
         return ret;
     }

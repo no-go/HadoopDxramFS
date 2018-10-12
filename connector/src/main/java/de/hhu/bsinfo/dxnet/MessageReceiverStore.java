@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -59,10 +62,9 @@ class MessageReceiverStore {
 
         // Try again in a loop, if receivers were not registered. Stop if request timeout is reached as answering later has no effect
         if (messageReceiver == null) {
-            // #if LOGGER >= WARN
             LOGGER.warn("Message receiver null for %d, %d! Waiting...", p_type, p_subtype);
-            // #endif /* LOGGER >= WARN */
             deadline = System.currentTimeMillis() + m_requestTimeOut;
+
             while (messageReceiver == null && System.currentTimeMillis() < deadline) {
                 m_receiversLock.lock();
                 messageReceiver = m_receivers[p_type][p_subtype];
@@ -86,6 +88,7 @@ class MessageReceiverStore {
     void register(final byte p_type, final byte p_subtype, final MessageReceiver p_receiver) {
         if (p_receiver != null) {
             m_receiversLock.lock();
+
             // enlarge array
             if (m_receivers.length <= p_type) {
                 final MessageReceiver[][] newArray = new MessageReceiver[p_type + 1][];
@@ -106,15 +109,12 @@ class MessageReceiverStore {
             }
 
             if (m_receivers[p_type][p_subtype] != null) {
-                // #if LOGGER >= WARN
                 LOGGER.warn("Receiver for %d %d is already registered", p_type, p_subtype);
-                // #endif /* LOGGER >= WARN */
             }
             m_receivers[p_type][p_subtype] = p_receiver;
 
-            // #if LOGGER >= TRACE
-            LOGGER.trace("Added new MessageReceiver %s for %d %d", p_receiver.getClass(), p_type, p_subtype);
-            // #endif /* LOGGER >= TRACE */
+            LOGGER.debug("Added new MessageReceiver %s for %d %d", p_receiver.getClass(), p_type, p_subtype);
+
             m_receiversLock.unlock();
         }
     }

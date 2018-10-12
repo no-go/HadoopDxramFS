@@ -1,17 +1,22 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
 package de.hhu.bsinfo.dxnet.core;
+
+import java.nio.charset.Charset;
 
 import de.hhu.bsinfo.dxutils.UnsafeMemory;
 import de.hhu.bsinfo.dxutils.serialization.Importable;
@@ -40,8 +45,9 @@ class MessageImporterOverflow extends AbstractMessageImporter {
 
     @Override
     public String toString() {
-        return "m_usedCounter " + getUsedCounter() + ", m_bufferAddress 0x" + Long.toHexString(m_bufferAddress) + ", m_bufferSize " + m_bufferSize +
-                ", m_currentPosition " + m_currentPosition + ", m_startPosition " + m_startPosition + ", m_unfinishedOperation (" + m_unfinishedOperation + ')';
+        return "m_usedCounter " + getUsedCounter() + ", m_bufferAddress 0x" + Long.toHexString(m_bufferAddress) +
+                ", m_bufferSize " + m_bufferSize + ", m_currentPosition " + m_currentPosition + ", m_startPosition " +
+                m_startPosition + ", m_unfinishedOperation (" + m_unfinishedOperation + ')';
     }
 
     @Override
@@ -55,6 +61,11 @@ class MessageImporterOverflow extends AbstractMessageImporter {
     }
 
     @Override
+    public void setNumberOfReadBytes(int p_numberOfReadBytes) {
+        // Not relevant for this importer
+    }
+
+    @Override
     public void setBuffer(final long p_addr, final int p_size, final int p_position) {
         m_bufferAddress = p_addr;
         m_bufferSize = p_size;
@@ -65,11 +76,6 @@ class MessageImporterOverflow extends AbstractMessageImporter {
     @Override
     public void setUnfinishedOperation(final UnfinishedImExporterOperation p_unfinishedOperation) {
         m_unfinishedOperation = p_unfinishedOperation;
-    }
-
-    @Override
-    public void setNumberOfReadBytes(int p_numberOfReadBytes) {
-        // Not relevant for this importer
     }
 
     @Override
@@ -111,6 +117,31 @@ class MessageImporterOverflow extends AbstractMessageImporter {
         }
 
         for (int i = 0; i < Short.BYTES; i++) {
+            if (m_currentPosition == m_bufferSize) {
+                // Store unfinished short and throw exception to continue later
+                m_unfinishedOperation.setIndex(m_currentPosition - m_startPosition - i);
+                m_unfinishedOperation.setPrimitive(ret);
+                throw m_exception;
+            }
+
+            // read little endian byte order to big endian
+            ret |= (UnsafeMemory.readByte(m_bufferAddress + m_currentPosition) & 0xFF) << i * 8;
+            m_currentPosition++;
+        }
+
+        return ret;
+    }
+
+    @Override
+    public char readChar(final char p_char) {
+        char ret = 0;
+
+        if (m_currentPosition == m_bufferSize) {
+            m_unfinishedOperation.setIndex(m_currentPosition - m_startPosition);
+            throw m_exception;
+        }
+
+        for (int i = 0; i < Character.BYTES; i++) {
             if (m_currentPosition == m_bufferSize) {
                 // Store unfinished short and throw exception to continue later
                 m_unfinishedOperation.setIndex(m_currentPosition - m_startPosition - i);
@@ -197,7 +228,8 @@ class MessageImporterOverflow extends AbstractMessageImporter {
 
         for (int i = 0; i < Integer.BYTES; i++) {
             if (m_currentPosition == m_bufferSize) {
-                // Store unfinished compact number and start index of unfinished compact number (needed in underflow importer)
+                // Store unfinished compact number and start index of unfinished compact number
+                // (needed in underflow importer)
                 // Throw exception to continue later
                 m_unfinishedOperation.setIndex(m_currentPosition - m_startPosition - i);
                 m_unfinishedOperation.setPrimitive(ret);
@@ -219,7 +251,7 @@ class MessageImporterOverflow extends AbstractMessageImporter {
 
     @Override
     public String readString(final String p_string) {
-        return new String(readByteArray(null));
+        return new String(readByteArray(null), Charset.forName("US-ASCII"));
     }
 
     @Override
@@ -241,6 +273,17 @@ class MessageImporterOverflow extends AbstractMessageImporter {
         // Exception might be thrown in readShorts
         // Do not store unfinished operation as partly de-serialized array will be passed anyway
         return readShorts(p_array, 0, p_array.length);
+    }
+
+    @Override
+    public int readChars(final char[] p_array) {
+        if (m_currentPosition == m_bufferSize) {
+            m_unfinishedOperation.setIndex(m_currentPosition - m_startPosition);
+            throw m_exception;
+        }
+        // Exception might be thrown in readShorts
+        // Do not store unfinished operation as partly de-serialized array will be passed anyway
+        return readChars(p_array, 0, p_array.length);
     }
 
     @Override
@@ -274,8 +317,9 @@ class MessageImporterOverflow extends AbstractMessageImporter {
             throw m_exception;
         }
 
-        if (m_currentPosition + p_length >= m_bufferSize) {
-            UnsafeMemory.readBytes(m_bufferAddress + m_currentPosition, p_array, p_offset, m_bufferSize - m_currentPosition);
+        if (m_currentPosition + p_length > m_bufferSize) {
+            UnsafeMemory.readBytes(m_bufferAddress + m_currentPosition, p_array, p_offset,
+                    m_bufferSize - m_currentPosition);
 
             // Do not store unfinished operation as partly de-serialized array will be passed anyway
             m_unfinishedOperation.setIndex(m_currentPosition - m_startPosition);
@@ -285,6 +329,30 @@ class MessageImporterOverflow extends AbstractMessageImporter {
         }
 
         UnsafeMemory.readBytes(m_bufferAddress + m_currentPosition, p_array, p_offset, p_length);
+        m_currentPosition += p_length;
+
+        return p_length;
+    }
+
+    @Override
+    public int readBytes(final long p_byteBufferAddress, final int p_offset, final int p_length) {
+        if (m_currentPosition == m_bufferSize) {
+            m_unfinishedOperation.setIndex(m_currentPosition - m_startPosition);
+            throw m_exception;
+        }
+
+        if (m_currentPosition + p_length > m_bufferSize) {
+            UnsafeMemory.copyBytes(m_bufferAddress + m_currentPosition, p_byteBufferAddress + p_offset,
+                    m_bufferSize - m_currentPosition);
+
+            // Do not store unfinished operation as partly de-serialized array will be passed anyway
+            m_unfinishedOperation.setIndex(m_currentPosition - m_startPosition);
+
+            m_currentPosition = m_bufferSize;
+            throw m_exception;
+        }
+
+        UnsafeMemory.copyBytes(m_bufferAddress + m_currentPosition, p_byteBufferAddress + p_offset, p_length);
         m_currentPosition += p_length;
 
         return p_length;
@@ -301,6 +369,22 @@ class MessageImporterOverflow extends AbstractMessageImporter {
             // Exception might be thrown in readShort
             // Do not store unfinished operation as partly de-serialized array will be passed anyway
             p_array[p_offset + i] = readShort((short) 0);
+        }
+
+        return p_length;
+    }
+
+    @Override
+    public int readChars(final char[] p_array, final int p_offset, final int p_length) {
+        if (m_currentPosition == m_bufferSize) {
+            m_unfinishedOperation.setIndex(m_currentPosition - m_startPosition);
+            throw m_exception;
+        }
+
+        for (int i = 0; i < p_length; i++) {
+            // Exception might be thrown in readShort
+            // Do not store unfinished operation as partly de-serialized array will be passed anyway
+            p_array[p_offset + i] = readChar((char) 0);
         }
 
         return p_length;
@@ -369,6 +453,27 @@ class MessageImporterOverflow extends AbstractMessageImporter {
         short[] arr = new short[readCompactNumber(0)];
         try {
             readShorts(arr);
+        } catch (final ArrayIndexOutOfBoundsException e) {
+            // Store partly de-serialized array to be finished later
+            m_unfinishedOperation.setIndex(startPosition - m_startPosition);
+            m_unfinishedOperation.setObject(arr);
+            throw e;
+        }
+
+        return arr;
+    }
+
+    @Override
+    public char[] readCharArray(final char[] p_array) {
+        if (m_currentPosition == m_bufferSize) {
+            m_unfinishedOperation.setIndex(m_currentPosition - m_startPosition);
+            throw m_exception;
+        }
+
+        int startPosition = m_currentPosition;
+        char[] arr = new char[readCompactNumber(0)];
+        try {
+            readChars(arr);
         } catch (final ArrayIndexOutOfBoundsException e) {
             // Store partly de-serialized array to be finished later
             m_unfinishedOperation.setIndex(startPosition - m_startPosition);

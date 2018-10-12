@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -15,17 +18,16 @@ package de.hhu.bsinfo.dxnet.core;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.LockSupport;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import de.hhu.bsinfo.dxutils.UnsafeHandler;
-import de.hhu.bsinfo.dxutils.stats.StatisticsOperation;
-import de.hhu.bsinfo.dxutils.stats.StatisticsRecorderManager;
+import de.hhu.bsinfo.dxutils.stats.AbstractState;
+import de.hhu.bsinfo.dxutils.stats.StatisticsManager;
+import de.hhu.bsinfo.dxutils.stats.Value;
 
 /**
- * The IncomingBufferQueue stored incoming buffers from all connections.
+ * The IncomingBufferQueue stores incoming buffers from all connections.
  * Uses a ring-buffer implementation for incoming buffers.
  * One producer (network thread) and one consumer (message creation coordinator).
  *
@@ -34,8 +36,15 @@ import de.hhu.bsinfo.dxutils.stats.StatisticsRecorderManager;
 public class IncomingBufferQueue {
     private static final Logger LOGGER = LogManager.getFormatterLogger(IncomingBufferQueue.class.getSimpleName());
 
-    private static final String RECORDER = "DXNet-IBQ";
-    private static final StatisticsOperation SOP_WAIT_PUSH = StatisticsRecorderManager.getOperation(RECORDER, "WaitPush");
+    private static final Value SOP_PUSH_FULL_COUNT = new Value(IncomingBufferQueue.class, "PushFullCount");
+    private static final Value SOP_PUSH_FULL_SIZE = new Value(IncomingBufferQueue.class, "PushFullSize");
+    private static final Value SOP_POP_EMPTY = new Value(IncomingBufferQueue.class, "PopEmpty");
+
+    static {
+        StatisticsManager.get().registerOperation(IncomingBufferQueue.class, SOP_PUSH_FULL_COUNT);
+        StatisticsManager.get().registerOperation(IncomingBufferQueue.class, SOP_PUSH_FULL_SIZE);
+        StatisticsManager.get().registerOperation(IncomingBufferQueue.class, SOP_POP_EMPTY);
+    }
 
     private AbstractConnection[] m_connectionBuffer;
     private BufferPool.DirectBufferWrapper[] m_directBuffers;
@@ -49,11 +58,14 @@ public class IncomingBufferQueue {
 
     private AtomicInteger m_currentBytes;
 
-    // single producer, single consumer lock free queue (posBack and posFront are synchronized with fences and byte counter)
-    private int m_posBack; // 31 bits used (see incrementation)
-    private int m_posFront; // 31 bits used (see incrementation)
+    // single producer, single consumer lock free queue (posBack and posFront are synchronized with fences and byte
+    // counter)
+    private volatile int m_posBack; // 31 bits used (see incrementation)
+    private volatile int m_posFront; // 31 bits used (see incrementation)
 
     private AtomicLong m_queueFullCounter;
+
+    private final StateStatistics m_stateStats;
 
     /**
      * Creates an instance of IncomingBufferQueue
@@ -86,28 +98,40 @@ public class IncomingBufferQueue {
         m_incomingBuffer = new IncomingBuffer();
 
         m_queueFullCounter = new AtomicLong(0);
+
+        m_stateStats = new StateStatistics();
+
+        StatisticsManager.get().registerOperation(IncomingBufferQueue.class, m_stateStats);
+    }
+
+    @Override
+    protected void finalize() {
+        StatisticsManager.get().deregisterOperation(IncomingBufferQueue.class, m_stateStats);
     }
 
     /**
      * Returns whether the ring-buffer is full or not.
+     *
+     * @return True if full
      */
     public boolean isFull() {
-        return m_currentBytes.get() >= m_maxCapacitySize || (m_posBack + m_maxCapacityBufferCount & 0x7FFFFFFF) == m_posFront;
+        return m_currentBytes.get() >= m_maxCapacitySize ||
+                (m_posBack + m_maxCapacityBufferCount & 0x7FFFFFFF) == m_posFront;
     }
 
     /**
      * Removes one buffer from queue.
      */
     IncomingBuffer popBuffer() {
-        UnsafeHandler.getInstance().getUnsafe().loadFence();
         if (m_posBack == m_posFront) {
-            // Empty
+            SOP_POP_EMPTY.inc();
             return null;
         }
 
         int back = m_posBack % m_maxCapacityBufferCount;
         int size = m_sizeBuffer[back];
-        m_incomingBuffer.set(m_connectionBuffer[back].getPipeIn(), m_directBuffers[back], m_bufferHandleBuffer[back], m_addrBuffer[back], size);
+        m_incomingBuffer.set(m_connectionBuffer[back].getPipeIn(), m_directBuffers[back], m_bufferHandleBuffer[back],
+                m_addrBuffer[back], size);
 
         // & 0x7FFFFFFF kill sign
         m_posBack = m_posBack + 1 & 0x7FFFFFFF;
@@ -129,46 +153,28 @@ public class IncomingBufferQueue {
      *         (Unsafe) address to the incoming buffer
      * @param p_size
      *         Size of the incoming buffer
+     * @return True if pushing the buffer to the queue was successful, false on full or limit exceeded
      */
-    public void pushBuffer(final AbstractConnection p_connection, final BufferPool.DirectBufferWrapper p_directBufferWrapper, final long p_bufferHandle,
+    public boolean pushBuffer(final AbstractConnection p_connection,
+            final BufferPool.DirectBufferWrapper p_directBufferWrapper, final long p_bufferHandle,
             final long p_addr, final int p_size) {
         int front;
 
         if (p_size == 0) {
-            // #if LOGGER >= WARN
             LOGGER.warn("Buffer size must not be 0. Incoming buffer is discarded.");
-            // #endif /* LOGGER >= WARN */
-
-            return;
+            return true;
         }
 
-        int curBytes = m_currentBytes.get();
-        int posBack = m_posBack;
-        int posFront = m_posFront;
+        // Avoid congestion by not allowing more than a predefined number of buffers to be cached for importing
 
-        if (curBytes >= m_maxCapacitySize || (posBack + m_maxCapacityBufferCount & 0x7FFFFFFF) == posFront) {
-            // Avoid congestion by not allowing more than a predefined number of buffers to be cached for importing
+        if (m_currentBytes.get() >= m_maxCapacitySize) {
+            SOP_PUSH_FULL_SIZE.inc();
+            return false;
+        }
 
-            // avoid flooding the log
-            if (m_queueFullCounter.getAndIncrement() % 100000 == 0) {
-                // #if LOGGER == WARN
-                LOGGER.warn("IBQ is full (curBytes %d, posBack %d, posFront %d), count: %d. If this message appears often (with a high counter) you should " +
-                                "consider increasing the number message handlers to avoid performance penalties", curBytes, posBack, posFront,
-                        m_queueFullCounter.get());
-                // #endif /* LOGGER == WARN */
-            }
-
-            // #ifdef STATISTICS
-            SOP_WAIT_PUSH.enter();
-            // #endif /* STATISTICS */
-
-            while (m_currentBytes.get() >= m_maxCapacitySize || (m_posBack + m_maxCapacityBufferCount & 0x7FFFFFFF) == m_posFront) {
-                LockSupport.parkNanos(100);
-            }
-
-            // #ifdef STATISTICS
-            SOP_WAIT_PUSH.leave();
-            // #endif /* STATISTICS */
+        if ((m_posBack + m_maxCapacityBufferCount & 0x7FFFFFFF) == m_posFront) {
+            SOP_PUSH_FULL_COUNT.inc();
+            return false;
         }
 
         front = m_posFront % m_maxCapacityBufferCount;
@@ -181,6 +187,8 @@ public class IncomingBufferQueue {
         // & 0x7FFFFFFF kill sign
         m_posFront = m_posFront + 1 & 0x7FFFFFFF;
         m_currentBytes.addAndGet(p_size); // Includes storeFence()
+
+        return true;
     }
 
     /**
@@ -261,13 +269,46 @@ public class IncomingBufferQueue {
          * @param p_bufferSize
          *         the buffer size
          */
-        private void set(final AbstractPipeIn p_pipeIn, final BufferPool.DirectBufferWrapper p_buffer, final long p_bufferHandle, final long p_bufferAddress,
+        private void set(final AbstractPipeIn p_pipeIn, final BufferPool.DirectBufferWrapper p_buffer,
+                final long p_bufferHandle, final long p_bufferAddress,
                 final int p_bufferSize) {
             m_pipeIn = p_pipeIn;
             m_buffer = p_buffer;
             m_bufferHandle = p_bufferHandle;
             m_bufferAddress = p_bufferAddress;
             m_bufferSize = p_bufferSize;
+        }
+    }
+
+    /**
+     * State statistics implementation for debugging
+     */
+    private class StateStatistics extends AbstractState {
+        /**
+         * Constructor
+         */
+        StateStatistics() {
+            super(IncomingBufferQueue.class, "State");
+        }
+
+        @Override
+        public String dataToString(final String p_indent, final boolean p_extended) {
+            return p_indent + "m_maxCapacityBufferCount " + m_maxCapacityBufferCount + ";m_maxCapacitySize " +
+                    m_maxCapacitySize + ";m_currentBytes " + m_currentBytes.get() + ";m_posBack " + m_posBack +
+                    ";m_posFront " + m_posFront + ";m_queueFullCounter " + m_queueFullCounter.get();
+        }
+
+        @Override
+        public String generateCSVHeader(final char p_delim) {
+            return "m_maxCapacityBufferCount" + p_delim + "m_maxCapacitySize" + p_delim + "m_currentBytes" + p_delim +
+                    "m_posBack" + p_delim + "m_posFront" + p_delim + "m_queueFullCounter";
+        }
+
+        @Override
+        public String toCSV(final char p_delim) {
+            return Integer.toString(m_maxCapacityBufferCount) + p_delim + m_maxCapacitySize + p_delim +
+                    m_currentBytes.get() + p_delim + m_posBack + p_delim + m_posFront + p_delim +
+                    m_queueFullCounter.get();
         }
     }
 }

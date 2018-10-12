@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -133,7 +136,8 @@ public class Message {
      * @param p_exclusivity
      *         whether this is an exclusive message or not
      */
-    private Message(final int p_messageID, final short p_destination, final byte p_type, final byte p_subtype, final boolean p_exclusivity) {
+    private Message(final int p_messageID, final short p_destination, final byte p_type, final byte p_subtype,
+            final boolean p_exclusivity) {
         assert p_destination != NodeID.INVALID_ID;
 
         m_messageID = p_messageID;
@@ -230,14 +234,16 @@ public class Message {
      * @throws NetworkException
      *         if message could not be serialized
      */
-    public final void serialize(final AbstractMessageExporter p_exporter, final int p_messageSize) throws NetworkException {
+    public final void serialize(final AbstractMessageExporter p_exporter, final int p_messageSize)
+            throws NetworkException {
         writeMessage(p_exporter, p_messageSize - HEADER_SIZE);
     }
 
     @Override
     public final String toString() {
         if (m_source != -1) {
-            return getClass().getSimpleName() + '[' + m_messageID + ", " + NodeID.toHexString(m_source) + ", " + NodeID.toHexString(m_destination) + ']';
+            return getClass().getSimpleName() + '[' + m_messageID + ", " + NodeID.toHexString(m_source) + ", " +
+                    NodeID.toHexString(m_destination) + ']';
         } else {
             return getClass().getSimpleName() + '[' + m_messageID + ", " + NodeID.toHexString(m_destination) + ']';
         }
@@ -275,10 +281,11 @@ public class Message {
 
     /**
      * Reads the message payload
-     * This method might be interrupted on every operation as payload can be scattered over several packets (this is always
-     * the case for messages larger than network buffer size). As a consequence, this method might be called several times
-     * for one single message. Thus, every operation in overwritten methods must be idempotent (same result for repeated
-     * execution). All available import methods from importer guarantee idempotence and work atomically (read all or nothing).
+     * This method might be interrupted on every operation as payload can be scattered over several packets
+     * (this is always the case for messages larger than network buffer size). As a consequence, this method might be
+     * called several times for one single message. Thus, every operation in overwritten methods must be idempotent
+     * (same result for repeated execution). All available import methods from importer guarantee idempotence and work
+     * atomically (read all or nothing).
      * Spare other I/O accesses and prints.
      * Example implementation for data structures (importable, exportable objects):
      * if (m_obj == null) {
@@ -289,9 +296,9 @@ public class Message {
      * m_size = p_importer.readInt(m_size);
      * if (m_arrayList == null) {
      * // Do not overwrite array list after overflow
-     * m_arrayList = new ArrayList<>(m_size);
+     * m_arrayList = new ArrayList&lt;&gt;(m_size);
      * }
-     * for (int i = 0; i < m_size; i++) {
+     * for (int i = 0; i &lt; m_size; i++) {
      * long l = p_importer.readLong(0);
      * if (m_arrayList.size() == i) {
      * m_arrayList.add(l);
@@ -388,7 +395,8 @@ public class Message {
      * @throws NetworkException
      *         If writing the message failed
      */
-    private void writeMessage(final AbstractMessageExporter p_exporter, final int p_payloadSize) throws NetworkException {
+    private void writeMessage(final AbstractMessageExporter p_exporter, final int p_payloadSize)
+            throws NetworkException {
         try {
             // Message reused (probably pooled)
             if (m_messageID == m_oldMessageID) {
@@ -399,6 +407,7 @@ public class Message {
             for (int i = 0; i < Message.MESSAGE_ID_LENGTH; i++) {
                 p_exporter.writeByte((byte) (m_messageID >> (Message.MESSAGE_ID_LENGTH - 1 - i) * 8 & 0xFF));
             }
+
             p_exporter.writeByte(m_type);
             p_exporter.writeByte(m_subtype);
             p_exporter.writeByte((byte) ((m_messageType << 4) + (m_exclusivity ? 1 : 0)));
@@ -407,16 +416,17 @@ public class Message {
             writePayload(p_exporter);
         } catch (final BufferOverflowException e) {
             throw new NetworkException(
-                    "Could not create message " + this + ", because message buffer is too small, payload size " + p_payloadSize + "\nExporterState:\n" +
-                            p_exporter, e);
+                    "Could not create message " + this + ", because message buffer is too small, payload size " +
+                            p_payloadSize + "\nExporterState:\n" + p_exporter, e);
         }
 
         int numberOfWrittenBytes = p_exporter.getNumberOfWrittenBytes();
         int messageSize = p_payloadSize + HEADER_SIZE;
+
         if (numberOfWrittenBytes < messageSize) {
-            throw new NetworkException(
-                    "Did not create message " + this + ", because message contents are smaller than expected payload size: " + numberOfWrittenBytes + " < " +
-                            messageSize + "\nExporterState:\n" + p_exporter);
+            throw new NetworkException("Did not create message " + this +
+                    ", because message contents are smaller than expected payload size: " + numberOfWrittenBytes +
+                    " < " + messageSize + "\nExporterState:\n" + p_exporter);
         }
 
         m_oldMessageID = m_messageID;

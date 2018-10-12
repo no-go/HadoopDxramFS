@@ -11,14 +11,13 @@ import de.hhu.bsinfo.dxram.app.AbstractApplication;
 import de.hhu.bsinfo.dxram.boot.BootService;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
 import de.hhu.bsinfo.dxram.lookup.LookupService;
-import de.hhu.bsinfo.dxram.chunk.ChunkRemoveService;
 import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
 import de.hhu.bsinfo.dxram.engine.DXRAMVersion;
 import de.hhu.bsinfo.app.dxramfspeer.*;
 import de.hhu.bsinfo.app.dxramfscore.*;
 import de.hhu.bsinfo.app.dxramfscore.rpc.*;
 import de.hhu.bsinfo.dxutils.NodeID;
-import de.hhu.bsinfo.dxram.data.ChunkID;
+import de.hhu.bsinfo.dxmem.data.ChunkID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import de.hhu.bsinfo.dxram.generated.BuildConfig;
@@ -50,7 +49,6 @@ public class DxramFsApp extends AbstractApplication {
     private BootService bootS;
     private ChunkService chunkS;
     private LookupService lookS;
-    private ChunkRemoveService removeS;
     private NameserviceService nameS;
 
     private FsNodeChunk ROOTN;
@@ -79,18 +77,24 @@ public class DxramFsApp extends AbstractApplication {
         return "DxramFsApp";
     }
 
-    @Override
+    // @todo das geht so nicht mehr !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    
     public boolean useConfigurationFile() {
         return true;
     }
+    
+    
+    // @todo https://github.com/hhu-bsinfo/dxapps/blob/development/dxa-terminal/server/src/main/java/de/hhu/bsinfo/dxterm/server/cmd/TcmdChunkcreate.java
+    // ich muss mir ein eigenes create machen !!!
+    
+    
 
     @Override
-    public void main() {
+    public void main(final String[] p_args) {
         bootS = getService(BootService.class);
         lookS = getService(LookupService.class);
         chunkS = getService(ChunkService.class);
         nameS = getService(NameserviceService.class);
-        removeS = getService(ChunkRemoveService.class);
         
         System.out.println(
                 "application " + getApplicationName() + " on a peer" +
@@ -130,12 +134,12 @@ public class DxramFsApp extends AbstractApplication {
             
             // initial, if root does not exists
             ROOTN.get().init();
-            ROOT_CID = chunkS.create(ROOTN.sizeofObject(), 1)[0];
+            ROOT_CID = chunkS.create().create(ROOTN.sizeofObject(), 1)[0];
             nameS.register(ROOT_CID, ROOT_Chunk);
             // maybe a new chunkid after register chunk with string in ROOT_Chunk
             ROOT_CID = nameS.getChunkID(ROOT_Chunk, 10);
             ROOTN.setID(ROOT_CID);
-            chunkS.get(ROOTN);
+            chunkS.get().get(ROOTN);
             ROOTN.get().init();
             ROOTN.get().type = FsNodeType.FOLDER;
             ROOTN.get().name = "/";
@@ -143,13 +147,13 @@ public class DxramFsApp extends AbstractApplication {
             ROOTN.get().refSize = 0;
             ROOTN.get().backId = ROOT_CID;
             ROOTN.get().forwardId = ROOT_CID;
-            chunkS.put(ROOTN);
+            chunkS.put().put(ROOTN);
             LOG.debug("Create Root / on Chunk [%s]", String.format("0x%X", ROOTN.getID()));
 
         } else {
             ROOT_CID = nameS.getChunkID(ROOT_Chunk, 10);
             ROOTN.setID(ROOT_CID);
-            chunkS.get(ROOTN);
+            chunkS.get().get(ROOTN);
         }
         
         while (doEndlessLoop) {
@@ -236,7 +240,7 @@ public class DxramFsApp extends AbstractApplication {
                 short dest = dxnetInit.askBlockmh.askMsg.getSource();
                 dxnetInit.askBlockmh.askMsg = null;
                 BlockChunk blockChunk = new BlockChunk(askId);
-                chunkS.get(blockChunk);
+                chunkS.get().get(blockChunk);
                 GetBlockMessage response = null;
                 if (blockChunk.getID() == ChunkID.INVALID_ID) {
                     response = new GetBlockMessage(dest);
@@ -319,19 +323,19 @@ public class DxramFsApp extends AbstractApplication {
                 // @todo handle EXT ----------------------- !!
                 
                 FsNodeChunk fsnodeChunk = new FsNodeChunk(fsnode.ID);
-                chunkS.get(fsnodeChunk);
+                chunkS.get().get(fsnodeChunk);
                 fsnodeChunk.get().size = fsnode.size;
                 
                 BlockinfoChunk bliChunk = new BlockinfoChunk(bli.ID);
-                chunkS.get(bliChunk);
+                chunkS.get().get(bliChunk);
                 bliChunk.get().length = bli.length;
                 
                 BlockChunk blChunk = new BlockChunk(bl.ID);
-                chunkS.get(blChunk);
+                chunkS.get().get(blChunk);
                 blChunk.get()._data = bl._data; // @todo clone() ?
                 
                 // @todo handle more possible fails better
-                chunkS.put(fsnodeChunk, bliChunk, blChunk);
+                chunkS.put().put(fsnodeChunk, bliChunk, blChunk);
 
                 // if Blockinfo offset not equal fsnode.size/DxramFsConfig.file_blocksize -> add a new block
                 
@@ -372,10 +376,10 @@ public class DxramFsApp extends AbstractApplication {
 
             // @todo: andere Message Handler beifügen - ggf array oder so machen?
 
-            //chunkS.get(ROOTN);
+            //chunkS.get().get(ROOTN);
             //LOG.debug(String.valueOf(ROOTN.get().refSize));
             //ROOTN.get().refSize += myNodePeerConfig.nodeId;
-            //chunkS.put(ROOTN);
+            //chunkS.put().put(ROOTN);
         }
     }
 
@@ -404,14 +408,14 @@ public class DxramFsApp extends AbstractApplication {
         // @todo: handles EXT
         BlockinfoChunk binch = new BlockinfoChunk();
         binch.get().init();
-        chunkS.create(binch);
+        chunkS.create().create(binch);
         LOG.debug("Create Blockinfo on Chunk [%s]", String.format("0x%X", binch.getID()));
         
         // @todo: handles EXT
         int refSize = nodeChunk.get().refSize;
         nodeChunk.get().refIds[refSize] = binch.getID(); // add the single Blockinfo as chunkid
         nodeChunk.get().refSize++;
-        chunkS.put(nodeChunk);
+        chunkS.put().put(nodeChunk);
         
         binch.get().offset = (int)(nodeChunk.get().size/(long)DxramFsConfig.file_blocksize);
         binch.get().length = 0; // store how many byte did we need from this block? INT -> 2GB int limit!?
@@ -419,7 +423,7 @@ public class DxramFsApp extends AbstractApplication {
 
         BlockChunk bloch = new BlockChunk();
         bloch.get().init();
-        chunkS.create(bloch);
+        chunkS.create().create(bloch);
         LOG.debug("Create Block on Chunk [%s]", String.format("0x%X", bloch.getID()));
 
         binch.get().storageId = bloch.getID();
@@ -442,7 +446,7 @@ public class DxramFsApp extends AbstractApplication {
             binch.get().port
         );
         
-        chunkS.put(binch);
+        chunkS.put().put(binch);
     }
 
     /**
@@ -471,7 +475,7 @@ public class DxramFsApp extends AbstractApplication {
             if (indexInExt < DxramFsConfig.ref_ids_each_fsnode) {
                 long entryChunkId = getRefsIn.get().refIds[indexInExt];
                 FsNodeChunk entryChunk = new FsNodeChunk(entryChunkId);
-                chunkS.get(entryChunk);
+                chunkS.get().get(entryChunk);
                 LOG.debug("getIn: is '" + entryChunk.get().name + "' == '" + nname + "' ?");
                 
                 if (nname.equals(entryChunk.get().name)) {
@@ -479,7 +483,7 @@ public class DxramFsApp extends AbstractApplication {
                 }
             } else {
                 getRefsIn = new FsNodeChunk(getRefsIn.get().forwardId);
-                chunkS.get(getRefsIn);
+                chunkS.get().get(getRefsIn);
                 LOG.debug("getIn: Need Chunk [%s] as EXT FsNode", String.format("0x%X", getRefsIn.getID()));
                 extCount++;
                 i--;
@@ -498,7 +502,7 @@ public class DxramFsApp extends AbstractApplication {
         String[] pathparts = path.split("/");
         FsNodeChunk subNode = ROOTN;
         long subChunkId = ROOT_CID;
-        chunkS.get(subNode);
+        chunkS.get().get(subNode);
         if (subNode.get().size < 1) { // FS is empty
             return null;
         } else {
@@ -509,7 +513,7 @@ public class DxramFsApp extends AbstractApplication {
                     return null;
                 }
                 subNode = new FsNodeChunk(subChunkId);
-                chunkS.get(subNode);
+                chunkS.get().get(subNode);
             }
             return list(subNode, startidx, maxJoinChars);
         }
@@ -537,7 +541,7 @@ public class DxramFsApp extends AbstractApplication {
             if (indexInExt < DxramFsConfig.ref_ids_each_fsnode) {
                 long entryChunkId = getRefsIn.get().refIds[indexInExt];
                 FsNodeChunk entryChunk = new FsNodeChunk(entryChunkId);
-                chunkS.get(entryChunk);
+                chunkS.get().get(entryChunk);
                 if (maxJoinChars > 0) {
                     charCount += entryChunk.get().name.length() +1; // +1 for "/" in "join()"
                     if (charCount > maxJoinChars) break;
@@ -546,7 +550,7 @@ public class DxramFsApp extends AbstractApplication {
 
             } else {
                 getRefsIn = new FsNodeChunk(getRefsIn.get().forwardId);
-                chunkS.get(getRefsIn);
+                chunkS.get().get(getRefsIn);
                 LOG.debug("list: Need Chunk [%s] as EXT FsNode", String.format("0x%X", getRefsIn.getID()));
                 extCount++;
                 i--;
@@ -563,7 +567,7 @@ public class DxramFsApp extends AbstractApplication {
 
         String[] pathparts = path.split("/");
         LOG.debug(String.join(" , ", pathparts));
-        chunkS.get(ROOTN);
+        chunkS.get().get(ROOTN);
         if (path.length() == 0) {
             back = "OK / exists";
         } else if (ROOTN.get().size < 1) {
@@ -574,7 +578,7 @@ public class DxramFsApp extends AbstractApplication {
                 long subChunkId = getIn(pathparts[i], subNode);
                 if (subChunkId == ChunkID.INVALID_ID) return "no";
                 subNode = new FsNodeChunk(subChunkId);
-                chunkS.get(subNode);
+                chunkS.get().get(subNode);
             }
             // for ended without return: thus the path+file must exists!
         }
@@ -586,7 +590,7 @@ public class DxramFsApp extends AbstractApplication {
         String[] pathparts = path.split("/");
         LOG.debug(String.join(" , ", pathparts));
         FsNodeChunk subNode = ROOTN;
-        chunkS.get(subNode);
+        chunkS.get().get(subNode);
         if (path.length() == 0) {
             return null;
         } else if (ROOTN.get().size < 1) {
@@ -596,7 +600,7 @@ public class DxramFsApp extends AbstractApplication {
                 long subChunkId = getIn(pathparts[i], subNode);
                 if (subChunkId == ChunkID.INVALID_ID) return null;
                 subNode = new FsNodeChunk(subChunkId);
-                chunkS.get(subNode);
+                chunkS.get().get(subNode);
             }
             // for ended without return: thus the path+file must exists!
         }
@@ -608,7 +612,7 @@ public class DxramFsApp extends AbstractApplication {
 
         String[] pathparts = path.split("/");
         LOG.debug(String.join(" , ", pathparts));
-        chunkS.get(ROOTN);
+        chunkS.get().get(ROOTN);
         if (ROOTN.get().size < 1) {
             return "OK / is still empty";
         } else {
@@ -619,7 +623,7 @@ public class DxramFsApp extends AbstractApplication {
                 subChunkId = getIn(pathparts[i], subNode);
                 if (subChunkId == ChunkID.INVALID_ID) return "no";
                 subNode = new FsNodeChunk(subChunkId);
-                chunkS.get(subNode);
+                chunkS.get().get(subNode);
                 LOG.debug("Found " + subNode.get().name);
                 parentId = subNode.get().backId;
             }
@@ -627,7 +631,7 @@ public class DxramFsApp extends AbstractApplication {
                 back = "no. fail on " + path;
             } else {
                 subNode = new FsNodeChunk(parentId);
-                chunkS.get(subNode);
+                chunkS.get().get(subNode);
                 
                 // @todo EXT to handle more than ref_ids_each_fsnode entries !!!!!
                 
@@ -643,7 +647,7 @@ public class DxramFsApp extends AbstractApplication {
                             subNode.get().refIds[j] = subNode.get().refIds[subNode.get().refSize];
                             // overwrite last array entry with INVALID to set it free
                             subNode.get().refIds[subNode.get().refSize] = ChunkID.INVALID_ID;
-                            chunkS.put(subNode);
+                            chunkS.put().put(subNode);
                             return "OK";
                         }
                     }
@@ -669,14 +673,14 @@ public class DxramFsApp extends AbstractApplication {
             
             // we are root? - we do not want to delete root here
             if (nodeChunk.getID() == ROOT_CID) return false;
-            if (removeS.remove(nodeChunk.getID()) != 1) return false;
+            if (chunkS.remove().remove(nodeChunk.getID()) != 1) return false;
             return true;
         } else {
             
             // @todo !!!!!!!!!!!!!!!!!!! ------------------------------------------- IMPROVEMENT
             // @todo delete FILE and handle folder and files in EXT fsNodes
             
-            if (removeS.remove(nodeChunk.getID()) != 1) return false;
+            if (chunkS.remove().remove(nodeChunk.getID()) != 1) return false;
             return true;
         }
         //return false;
@@ -688,7 +692,7 @@ public class DxramFsApp extends AbstractApplication {
 
         String[] pathparts = path.split("/");
         LOG.debug(String.join(" , ", pathparts));
-        chunkS.get(ROOTN);
+        chunkS.get().get(ROOTN);
         if (path.length() == 0) {
             back = "OK / is a dir";
         } else if (ROOTN.get().refSize < 1) {
@@ -701,7 +705,7 @@ public class DxramFsApp extends AbstractApplication {
                     return "no it does not exist";
                 }
                 subNode = new FsNodeChunk(subChunkId);
-                chunkS.get(subNode);
+                chunkS.get().get(subNode);
                 // the complete patch must contains folders!
                 if (subNode.get().type != FsNodeType.FOLDER) {
                     return "no it is not a folder";
@@ -716,14 +720,14 @@ public class DxramFsApp extends AbstractApplication {
         newdir.get().init();
         //LOG.debug("before put " + name);
         //LOG.debug("config " + String.valueOf(DxramFsConfig.max_filenamelength_chars));
-        chunkS.create(newdir);
+        chunkS.create().create(newdir);
         newdir.get().type = FsNodeType.FOLDER;
         newdir.get().name = new String(name.getBytes(DxramFsConfig.STRING_STD_CHARSET));
         newdir.get().backId = parentNode.getID();
         newdir.get().forwardId = newdir.getID();   // to self as dummy link
         newdir.get().size = 0;
         newdir.get().refSize = 0;
-        chunkS.put(newdir);
+        chunkS.put().put(newdir);
         LOG.debug("Create %s on Chunk [%s]", name, String.format("0x%X", newdir.getID()));
         //LOG.debug("after put " + newdir.get().name);
 
@@ -737,14 +741,14 @@ public class DxramFsApp extends AbstractApplication {
         parentNode.get().refSize++;
 
         // @todo error handling
-        chunkS.put(parentNode);
+        chunkS.put().put(parentNode);
         return newdir.getID();
     }
     
     private long mkFile(String name, FsNodeChunk parentNode) {
         FsNodeChunk newf = new FsNodeChunk();
         newf.get().init();
-        chunkS.create(newf);
+        chunkS.create().create(newf);
         LOG.debug("Create %s on Chunk [%s]", name, String.format("0x%X", newf.getID()));
         
         newf.get().type = FsNodeType.FILE;
@@ -754,7 +758,7 @@ public class DxramFsApp extends AbstractApplication {
         newf.get().size = 0; // count the total bytes of the file!!
         newf.get().refSize = 0; // we create a single block with length 0
         // we increment the refSize of the file, if we need additional blocks
-        chunkS.put(newf);
+        chunkS.put().put(newf);
         enlarge(newf);
 
         // update directory entry
@@ -765,7 +769,7 @@ public class DxramFsApp extends AbstractApplication {
         parentNode.get().refSize++;
 
         // @todo error handling
-        chunkS.put(parentNode);
+        chunkS.put().put(parentNode);
         return newf.getID();
     }
 
@@ -794,22 +798,22 @@ public class DxramFsApp extends AbstractApplication {
         // get the from-chunk
         FsNodeChunk browseNode = ROOTN;
         long browseChunkId = ROOT_CID;
-        chunkS.get(browseNode);
+        chunkS.get().get(browseNode);
         for (int i=0; i < fromParts.length; i++) {
             browseChunkId = getIn(fromParts[i], browseNode);
             browseNode = new FsNodeChunk(browseChunkId);
-            chunkS.get(browseNode);
+            chunkS.get().get(browseNode);
         }
         FsNodeChunk fromChunk = browseNode;
         
         // get the parent-chunk of "from"
         FsNodeChunk oldParentChunk = new FsNodeChunk(fromChunk.get().backId);
-        chunkS.get(oldParentChunk);
+        chunkS.get().get(oldParentChunk);
         
         // may create (and get) parent folder of "to"-file (or folder)
         browseNode = ROOTN;
         browseChunkId = ROOT_CID;
-        chunkS.get(browseNode);
+        chunkS.get().get(browseNode);
         for (int i = 0; i < toParts.length -1; i++) {
             // @todo: length -1 because we need the parent! but if "to" is a folder, we have to move it into the folder!
             browseChunkId = getIn(toParts[i], browseNode);
@@ -817,7 +821,7 @@ public class DxramFsApp extends AbstractApplication {
                 browseChunkId = mkDir(toParts[i], browseNode);
             }
             browseNode = new FsNodeChunk(browseChunkId);
-            chunkS.get(browseNode);
+            chunkS.get().get(browseNode);
         }
         FsNodeChunk toParentChunk = browseNode;
         
@@ -832,7 +836,7 @@ public class DxramFsApp extends AbstractApplication {
             fromChunk.get().backId = toParentChunk.getID();
         }
         // @todo error handling
-        chunkS.put(fromChunk);
+        chunkS.put().put(fromChunk);
         
         // @todo EXT to handle more than ref_ids_each_fsnode entries !!!!!
         
@@ -842,7 +846,7 @@ public class DxramFsApp extends AbstractApplication {
         toParentChunk.get().refSize++;
 
         // @todo error handling
-        chunkS.put(toParentChunk);
+        chunkS.put().put(toParentChunk);
         
         return back;
     }
@@ -872,7 +876,7 @@ public class DxramFsApp extends AbstractApplication {
                     subChunkId = mkDir(pathparts[i], subNode);
                 }
                 subNode = new FsNodeChunk(subChunkId);
-                chunkS.get(subNode);
+                chunkS.get().get(subNode);
             }
 
             // subNode should be the folder, where we have to create a new folder
@@ -900,7 +904,7 @@ public class DxramFsApp extends AbstractApplication {
 
         String[] pathparts = path.split("/");
         LOG.debug(String.join(" , ", pathparts));
-        chunkS.get(ROOTN);
+        chunkS.get().get(ROOTN);
         if (path.length() == 0) {
             back = "OK / is a dir";
         } else if (ROOTN.get().size < 1) {
@@ -918,7 +922,7 @@ public class DxramFsApp extends AbstractApplication {
                     break;
                 } else {
                     subNode = new FsNodeChunk(subChunkId);
-                    chunkS.get(subNode);
+                    chunkS.get().get(subNode);
                     if (subNode.get().type != FsNodeType.FOLDER) {
                         back = "no: path part is not a folder";
                         failure = true;
@@ -933,7 +937,7 @@ public class DxramFsApp extends AbstractApplication {
                     back = "no: file does not exist";
                 } else {
                     subNode = new FsNodeChunk(subChunkId);
-                    chunkS.get(subNode);
+                    chunkS.get().get(subNode);
                     if (subNode.get().type == FsNodeType.FILE) {
                         fileLength = subNode.get().size;
                     } else if (subNode.get().type == FsNodeType.FOLDER) {
@@ -996,7 +1000,7 @@ public class DxramFsApp extends AbstractApplication {
                 subChunkId = getIn(pathparts[i], subNode);
                 if (subChunkId == ChunkID.INVALID_ID) break;
                 subNode = new FsNodeChunk(subChunkId);
-                chunkS.get(subNode);
+                chunkS.get().get(subNode);
             }
             
             if (subChunkId == ChunkID.INVALID_ID) {
@@ -1049,7 +1053,7 @@ public class DxramFsApp extends AbstractApplication {
         
         if (chunkidstr.length() > 0) {
             FsNodeChunk subNode = new FsNodeChunk(Long.valueOf(chunkidstr));
-            chunkS.get(subNode);
+            chunkS.get().get(subNode);
             if (subNode.getID() == ChunkID.INVALID_ID) {
                 back = "fail. id wrong.";
             } else {
@@ -1072,7 +1076,7 @@ public class DxramFsApp extends AbstractApplication {
         
         if (chunkidstr.length() > 0) {
             BlockinfoChunk biChunk = new BlockinfoChunk(Long.valueOf(chunkidstr));
-            chunkS.get(biChunk);
+            chunkS.get().get(biChunk);
             if (biChunk.getID() == ChunkID.INVALID_ID) {
                 back = "fail. id wrong.";
             } else {

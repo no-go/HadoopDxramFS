@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -13,12 +16,8 @@
 
 package de.hhu.bsinfo.dxnet.loopback;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.LockSupport;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import de.hhu.bsinfo.dxutils.UnsafeHandler;
 
@@ -28,11 +27,6 @@ import de.hhu.bsinfo.dxutils.UnsafeHandler;
  * @author Florian Klein, florian.klein@hhu.de, 18.03.2012
  */
 class LoopbackSendThread extends Thread {
-
-    // Constants
-    private static final Logger LOGGER = LogManager.getFormatterLogger(LoopbackSendThread.class.getSimpleName());
-
-    // Attributes
     private final AtomicBoolean m_send1;
     private final AtomicBoolean m_send2;
     private LoopbackConnection m_connection1;
@@ -51,8 +45,8 @@ class LoopbackSendThread extends Thread {
      * @param p_osBufferSize
      *         the size of incoming and outgoing buffers
      */
-    LoopbackSendThread(final LoopbackConnectionManager p_connectionManager, final int p_connectionTimeout, final int p_osBufferSize,
-            final boolean p_overprovisioning) {
+    LoopbackSendThread(final LoopbackConnectionManager p_connectionManager, final int p_connectionTimeout,
+            final int p_osBufferSize, final boolean p_overprovisioning) {
         m_send1 = new AtomicBoolean(false);
         m_send2 = new AtomicBoolean(false);
 
@@ -86,20 +80,12 @@ class LoopbackSendThread extends Thread {
             time = System.nanoTime();
             while (m_running) {
                 if (m_send2.compareAndSet(true, false)) {
-                    try {
-                        m_connection2.getPipeOut().write();
-                    } catch (final IOException ignore) {
-
-                    }
+                    m_connection2.getPipeOut().write();
                     sent = true;
                 }
 
                 if (m_send1.compareAndSet(true, false)) {
-                    try {
-                        m_connection1.getPipeOut().write();
-                    } catch (final IOException ignore) {
-
-                    }
+                    m_connection1.getPipeOut().write();
                     sent = true;
                 }
 
@@ -113,15 +99,11 @@ class LoopbackSendThread extends Thread {
                 }
 
                 if (System.nanoTime() - time > 1000 * 1000) {
-                    try {
-                        if (m_connection2 != null) {
-                            m_connection2.getPipeOut().write();
-                        }
-
-                        m_connection1.getPipeOut().write();
-                    } catch (final IOException ignore) {
-
+                    if (m_connection2 != null) {
+                        m_connection2.getPipeOut().write();
                     }
+
+                    m_connection1.getPipeOut().write();
                     break;
                 }
             }

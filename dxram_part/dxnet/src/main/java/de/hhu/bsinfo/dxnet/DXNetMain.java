@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -57,6 +58,7 @@ import de.hhu.bsinfo.dxnet.generated.BuildConfig;
 import de.hhu.bsinfo.dxnet.main.messages.BenchmarkMessage;
 import de.hhu.bsinfo.dxnet.main.messages.BenchmarkRequest;
 import de.hhu.bsinfo.dxnet.main.messages.BenchmarkResponse;
+import de.hhu.bsinfo.dxnet.main.messages.DynamicMessageCreator;
 import de.hhu.bsinfo.dxnet.main.messages.LoginRequest;
 import de.hhu.bsinfo.dxnet.main.messages.LoginResponse;
 import de.hhu.bsinfo.dxnet.main.messages.Messages;
@@ -116,6 +118,10 @@ public final class DXNetMain implements MessageReceiver {
     private static AtomicLong ms_messagesSent = new AtomicLong(0);
     private static AtomicLong ms_reqRespTimeouts = new AtomicLong(0);
 
+    // The following attributes are used in workload e to verify the serialization
+    private static Class<?> ms_dynamicMessageClass;
+    private static Object[] ms_parameters;
+
     /**
      * Application entry point
      *
@@ -132,10 +138,10 @@ public final class DXNetMain implements MessageReceiver {
         processArgs(p_arguments);
         commonSetup();
         setupNodeMappings();
-        deviceLoadAndCheck();
 
         // first workload, to configure remaining parameters
-        Supplier[] workloads = new Supplier[] {WorkloadA::new, WorkloadB::new, WorkloadC::new, WorkloadD::new};
+        Supplier[] workloads =
+                new Supplier[] {WorkloadA::new, WorkloadB::new, WorkloadC::new, WorkloadD::new, WorkloadE::new};
 
         Workload[] threadArray = new Workload[ms_threads];
 
@@ -235,6 +241,10 @@ public final class DXNetMain implements MessageReceiver {
 
         ms_dxnet.close();
 
+        if (ms_workload == 4) {
+            DynamicMessageCreator.cleanup();
+        }
+
         StatisticsManager.get().stopPeriodicPrinting();
         StatisticsManager.get().printStatistics(System.out, true);
         StatisticsManager.get().printStatisticTables(System.out);
@@ -312,6 +322,19 @@ public final class DXNetMain implements MessageReceiver {
                     ms_dxnet.sendMessage(response);
                 } catch (NetworkException e) {
                     e.printStackTrace();
+                }
+            }
+
+            // Workload e: compare message content with generated attributes to test DXNet's serialization
+            if (p_message.getSubtype() == Messages.SUBTYPE_DYNAMIC_MESSAGE) {
+                try {
+                    boolean ret = (boolean) p_message.getClass().getDeclaredMethod("validate", Object[].class)
+                            .invoke(p_message, new Object[] {ms_parameters});
+                    if (!ret) {
+                        LOGGER.error("Serialization error: received message differs from generated message.");
+                    }
+                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    LOGGER.error("Serialization error: validate method could not be executed. %s", e);
                 }
             }
 
@@ -421,8 +444,10 @@ public final class DXNetMain implements MessageReceiver {
             System.out.println("     2: Request-Response with pooling message objects, i.e. re-use request objects");
             System.out.println("     3: Request-Response without pooling, i.e. create a new request objects for " +
                     "every request to send");
-            System.out.println("  send count: Total number of messages to send (equally distributed to all target " +
-                    "nodes)");
+            System.out.println("     4: Dynamically created, compiled and loaded messages with pooling; " +
+                    "available for Loopback, only");
+            System.out.println(
+                    "  send count: Total number of messages to send (equally distributed to all target " + "nodes)");
             System.out.println("  recv count: Total number of messages to receive from all nodes that target " +
                     "messages to the current one");
             System.out.println("  size payload: Size of a single message (payload size)");
@@ -435,7 +460,7 @@ public final class DXNetMain implements MessageReceiver {
 
         ms_printIntervalMs = Integer.parseInt(p_args[1]);
         ms_workload = Integer.parseInt(p_args[2]);
-        if (ms_workload < 0 || ms_workload > 3) {
+        if (ms_workload < 0 || ms_workload > 4) {
             System.out.println("Invalid workload " + ms_workload + " specified");
             System.exit(-1);
         }
@@ -458,8 +483,9 @@ public final class DXNetMain implements MessageReceiver {
 
         System.out.printf("Parameters: print interval ms %d, workload %d, send count %d (per target), recv count %d " +
                         "(all), size %d (payload size %d), threads %d, own node id 0x%X, targets %s\n",
-                ms_printIntervalMs, ms_workload, ms_sendCount, ms_recvCount, ms_size, ms_messagePayloadSize, ms_threads,
-                ms_ownNodeId, targets.toString());
+                ms_printIntervalMs,
+                ms_workload, ms_sendCount, ms_recvCount, ms_size, ms_messagePayloadSize, ms_threads, ms_ownNodeId,
+                targets.toString());
     }
 
     /**
@@ -536,9 +562,9 @@ public final class DXNetMain implements MessageReceiver {
      * Setup common stuff
      */
     private static void commonSetup() {
-        LOGGER.debug("Loading jni libs: %s", ms_context.getJNIPath());
+        LOGGER.debug("Loading jni libs: %s", ms_context.getJniPath());
 
-        File jniPath = new File(ms_context.getJNIPath());
+        File jniPath = new File(ms_context.getJniPath());
         File[] files = jniPath.listFiles();
 
         if (files != null) {
@@ -562,7 +588,7 @@ public final class DXNetMain implements MessageReceiver {
         // search for own node id mapping
         boolean found = false;
 
-        for (DXNetConfig.NodeEntry entry : ms_context.getNodeList()) {
+        for (DXNetConfig.NodeEntry entry : ms_context.getNodesConfig()) {
             if (entry.getNodeId() == ms_ownNodeId) {
                 found = true;
             }
@@ -581,7 +607,7 @@ public final class DXNetMain implements MessageReceiver {
         for (Short targetNodeId : ms_targetNodeIds) {
 
             // find in node config
-            for (DXNetConfig.NodeEntry entry : ms_context.getNodeList()) {
+            for (DXNetConfig.NodeEntry entry : ms_context.getNodesConfig()) {
                 if (entry.getNodeId() == targetNodeId) {
                     found = true;
                     break;
@@ -596,26 +622,6 @@ public final class DXNetMain implements MessageReceiver {
         }
 
         ms_isLoginCoordinator = ms_nodeMap.getOwnNodeID() == 0;
-    }
-
-    /**
-     * Load a selected transport
-     */
-    private static void deviceLoadAndCheck() {
-        // init by network device
-        if ("Ethernet".equals(ms_context.getCoreConfig().getDevice())) {
-            LOGGER.debug("Loading ethernet...");
-
-            ethernetCheckSocketBound();
-        } else if ("Infiniband".equals(ms_context.getCoreConfig().getDevice())) {
-            LOGGER.debug("Loading infiniband...");
-        } else if ("Loopback".equals(ms_context.getCoreConfig().getDevice())) {
-            LOGGER.debug("Loading loopback...");
-        } else {
-            LOGGER.error("Unknown device %s. Valid options: Ethernet, Infiniband or Loopback.",
-                    ms_context.getCoreConfig().getDevice());
-            System.exit(-1);
-        }
     }
 
     /**
@@ -661,7 +667,7 @@ public final class DXNetMain implements MessageReceiver {
      * Setup DXNet for the benchmark
      */
     private static void setupDXNet() {
-        ms_dxnet = new DXNet(ms_context.getCoreConfig(), ms_context.getNIOConfig(), ms_context.getIBConfig(),
+        ms_dxnet = new DXNet(ms_context.getCoreConfig(), ms_context.getNioConfig(), ms_context.getIbConfig(),
                 ms_context.getLoopbackConfig(), ms_nodeMap);
 
         // register coordination messages
@@ -685,6 +691,22 @@ public final class DXNetMain implements MessageReceiver {
         ms_dxnet.register(Messages.DXNETMAIN_MESSAGES_TYPE, Messages.SUBTYPE_BENCHMARK_MESSAGE, new DXNetMain());
         ms_dxnet.register(Messages.DXNETMAIN_MESSAGES_TYPE, Messages.SUBTYPE_BENCHMARK_REQUEST, new DXNetMain());
         ms_dxnet.register(Messages.DXNETMAIN_MESSAGES_TYPE, Messages.SUBTYPE_BENCHMARK_RESPONSE, new DXNetMain());
+
+        // Create dynamic message for workload 4/E
+        if (ms_workload == 4) {
+            ms_parameters = DynamicMessageCreator.createWorkload(ms_targetNodeIds.get(0), ms_size);
+            DynamicMessageCreator.printWorkload(ms_parameters, ms_size <= 1024);
+
+            try {
+                ms_dynamicMessageClass = DynamicMessageCreator.createClass(ms_parameters);
+            } catch (DynamicMessageCreator.ClassCreateException e) {
+                LOGGER.error("Could not create class for benchmarking: %s", e);
+            }
+
+            ms_dxnet.registerMessageType(Messages.DXNETMAIN_MESSAGES_TYPE, Messages.SUBTYPE_DYNAMIC_MESSAGE,
+                    ms_dynamicMessageClass);
+            ms_dxnet.register(Messages.DXNETMAIN_MESSAGES_TYPE, Messages.SUBTYPE_DYNAMIC_MESSAGE, new DXNetMain());
+        }
     }
 
     /**
@@ -692,7 +714,7 @@ public final class DXNetMain implements MessageReceiver {
      */
     private static void coordinateStartupAndWait() {
         // Loopback doesn't need any startup coordination
-        if (ms_context.getCoreConfig().isDeviceLoopback()) {
+        if (ms_context.getCoreConfig().getDevice() == NetworkDeviceType.LOOPBACK) {
             return;
         }
 
@@ -721,9 +743,12 @@ public final class DXNetMain implements MessageReceiver {
             System.out.printf("I am login coordinator, waiting for %d nodes to login...\n", ms_totalNumNodes - 1);
         }
 
-        // wait until all nodes have logged in and the coordinator sent the start message
-        while (!ms_startBenchmark) {
-            LockSupport.parkNanos(100);
+        if (ms_workload != 4) {
+            // wait until all nodes have logged in and the coordinator sent the start message
+            // Do not wait if workload e is executed. This is a single instance test.
+            while (!ms_startBenchmark) {
+                LockSupport.parkNanos(100);
+            }
         }
     }
 
@@ -787,20 +812,23 @@ public final class DXNetMain implements MessageReceiver {
                 (double) p_recvTotalMessages * ms_messagePayloadSize / 1024 / 1024 / timeRecvSec : 0;
         double recvTpMMsg = p_recvTotalMessages != 0 ? (double) p_recvTotalMessages / 1000.0 / 1000.0 / timeRecvSec : 0;
 
-        System.out.printf(
-                "=========================================================================================\n" +
-                        "[RESULTS]\n" +
-                        "[RESULTS PARAMS: Workload=%d, MsgSize=%d, MsgPayloadSize=%d, Threads=%d, MsgHandlers=%d]\n" +
-                        "[RESULTS SEND: Runtime=%.3f sec, Msgs=%d, X=%.3f mb/s, XP=%.3f mb/s, XM=%.6f milmsg/s]\n" +
-                        "[RESULTS RECV: Runtime=%.3f sec, Msgs=%d, X=%.3f mb/s, XP=%.3f mb/s, XM=%.6f milmsg/s]\n" +
-                        "[RESULTS LATENCY: Msgs=%d, Avg=%.3f us, Min=%.3f us, Max=%.3f us, 95th=%.3f us, " +
-                        "99th=%.3f us, 99.9th=%.3f us]\n" + "[RESULTS ERRORS: ReqRespTimeouts=%d]\n" +
-                        "=========================================================================================\n",
-                ms_workload, ms_size, ms_messagePayloadSize, ms_threads,
-                ms_context.getCoreConfig().getNumMessageHandlerThreads(), timeSendSec, p_sendTotalMessages,
-                sendTp, sendTpPayload, sendTpMMsg, timeRecvSec, p_recvTotalMessages, recvTp, recvTpPayload,
-                recvTpMMsg, rttCount, rttAvgUs, rttMinUs, rttMaxUs, rtt95Us, rtt99Us, rtt999Us,
-                ms_reqRespTimeouts.get());
+        System.out
+                .printf("=========================================================================================\n" +
+                                "[RESULTS]\n" + "[RESULTS PARAMS: Workload=%d, MsgSize=%d, MsgPayloadSize=%d, " +
+                                "Threads=%d, " + "MsgHandlers=%d]\n" +
+                                "[RESULTS SEND: Runtime=%.3f sec, Msgs=%d, X=%.3f mb/s, XP=%.3f mb/s, XM=%.6f " +
+                                "milmsg/s]\n" +
+                                "[RESULTS RECV: Runtime=%.3f sec, Msgs=%d, X=%.3f mb/s, XP=%.3f mb/s, XM=%.6f " +
+                                "milmsg/s]\n" +
+                                "[RESULTS LATENCY: Msgs=%d, Avg=%.3f us, Min=%.3f us, Max=%.3f us, 95th=%.3f us, " +
+                                "99th=%.3f us, 99.9th=%.3f us]\n" + "[RESULTS ERRORS: ReqRespTimeouts=%d]\n" +
+                                "=============================================" +
+                                "============================================\n", ms_workload, ms_size,
+                        ms_messagePayloadSize,
+                        ms_threads, ms_context.getCoreConfig().getNumMessageHandlerThreads(), timeSendSec,
+                        p_sendTotalMessages, sendTp, sendTpPayload, sendTpMMsg, timeRecvSec, p_recvTotalMessages,
+                        recvTp, recvTpPayload, recvTpMMsg, rttCount, rttAvgUs, rttMinUs, rttMaxUs, rtt95Us, rtt99Us,
+                        rtt999Us, ms_reqRespTimeouts.get());
     }
 
     /**
@@ -1045,6 +1073,67 @@ public final class DXNetMain implements MessageReceiver {
     }
 
     /**
+     * WorkloadE: messages + pooling
+     * A new message class is created and filled with random attributes.
+     * Can be used with Loopback, only. Single instance.
+     */
+    private static class WorkloadE extends Workload {
+
+        /**
+         * Constructor
+         */
+        WorkloadE() {
+            super(false, true);
+
+            if (ms_context.getCoreConfig().getDevice() != NetworkDeviceType.LOOPBACK) {
+                LOGGER.error("Workload E can be executed with Loopback, only!");
+            }
+
+            if (ms_totalNumNodes > 2) {
+                LOGGER.warn("This is a Loopback test for a single instance.");
+            }
+        }
+
+        @Override
+        public void run() {
+            // generate random order when for sending messages to nodes for every thread
+            ArrayList<Short> destinationList = new ArrayList<>(ms_targetNodeIds);
+            Collections.shuffle(destinationList);
+
+            long messageCount = ms_sendCount / ms_threads;
+
+            if (Integer.parseInt(Thread.currentThread().getName()) == ms_threads - 1) {
+                messageCount += ms_sendCount % ms_threads;
+            }
+
+            Message[] messages = new Message[destinationList.size()];
+            for (int i = 0; i < destinationList.size(); i++) {
+                try {
+                    messages[i] = (Message) ms_dynamicMessageClass
+                            .getDeclaredConstructor(new Class[] {short.class, Object[].class})
+                            .newInstance(destinationList.get(i), ms_parameters);
+                } catch (ReflectiveOperationException e) {
+                    LOGGER.error("Could not create instance for benchmarking: %s", e);
+                    System.exit(1);
+                }
+            }
+
+            for (int i = 0; i < messageCount; i++) {
+                for (int j = 0; j < messages.length; j++) {
+                    try {
+                        ms_dxnet.sendMessage(messages[j]);
+
+                        ms_messagesSent.incrementAndGet();
+                    } catch (NetworkException e) {
+                        // repeat until successful
+                        --j;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Progress thread printing the current state/progress during the benchmark
      */
     private static class ProgressThread extends Thread {
@@ -1124,66 +1213,55 @@ public final class DXNetMain implements MessageReceiver {
                         String.format("[PROGRESS] %d sec [TOTAL: TXM %d%% (%d), RXM %d%% (%d), TXM-RXM-DELTA %d]",
                                 timeDiffSend / 1000 / 1000 / 1000, ms_sendCount != 0 ?
                                         (int) ((float) totalMessagesSent / ms_sendCount / ms_targetNodeIds.size() *
-                                                100) : 0,
-                                totalMessagesSent,
+                                                100) : 0, totalMessagesSent,
                                 ms_recvCount != 0 ? (int) ((float) totalMessagesRecv / ms_recvCount * 100) : 0,
                                 totalMessagesRecv, totalMessagesSent - totalMessagesRecv));
 
-                builder.append(
-                        String.format("[AVG: TX=%f, RX=%f, TXP=%f, RXP=%f, TXM=%f, RXM=%f]",
-                                (double) totalMessagesSent * ms_size / 1024 / 1024 /
-                                        ((double) timeDiffSend / 1000 / 1000 / 1000),
-                                (double) totalMessagesRecv * ms_size / 1024 / 1024 /
-                                        ((double) timeDiffRecv / 1000 / 1000 / 1000),
-                                (double) totalMessagesSent * ms_messagePayloadSize / 1024 / 1024 /
-                                        ((double) timeDiffSend / 1000 / 1000 / 1000),
-                                (double) totalMessagesRecv * ms_messagePayloadSize / 1024 / 1024 /
-                                        ((double) timeDiffRecv / 1000 / 1000 / 1000),
-                                (double) totalMessagesSent / ((double) timeDiffSend / 1000 / 1000 / 1000) / 1000 / 1000,
-                                (double) totalMessagesRecv / ((double) timeDiffRecv / 1000 / 1000 / 1000) / 1000 /
-                                        1000));
+                builder.append(String.format("[AVG: TX=%f, RX=%f, TXP=%f, RXP=%f, TXM=%f, RXM=%f]",
+                        (double) totalMessagesSent * ms_size / 1024 / 1024 /
+                                ((double) timeDiffSend / 1000 / 1000 / 1000),
+                        (double) totalMessagesRecv * ms_size / 1024 / 1024 /
+                                ((double) timeDiffRecv / 1000 / 1000 / 1000),
+                        (double) totalMessagesSent * ms_messagePayloadSize / 1024 / 1024 /
+                                ((double) timeDiffSend / 1000 / 1000 / 1000),
+                        (double) totalMessagesRecv * ms_messagePayloadSize / 1024 / 1024 /
+                                ((double) timeDiffRecv / 1000 / 1000 / 1000),
+                        (double) totalMessagesSent / ((double) timeDiffSend / 1000 / 1000 / 1000) / 1000 / 1000,
+                        (double) totalMessagesRecv / ((double) timeDiffRecv / 1000 / 1000 / 1000) / 1000 / 1000));
 
-                builder.append(
-                        String.format("[CUR: TX=%f, RX=%f, TXP=%f, RXP=%f, TXM=%f, RXM=%f][ReqRespTimeouts=%d]",
-                                (double) messagesSentDelta * ms_size / 1024 / 1024 /
-                                        ((double) timeDiffSendDelta / 1000 / 1000 / 1000),
-                                (double) messagesRecvDelta * ms_size / 1024 / 1024 /
-                                        ((double) timeDiffRecvDelta / 1000 / 1000 / 1000),
-                                (double) messagesSentDelta * ms_messagePayloadSize / 1024 / 1024 /
-                                        ((double) timeDiffSendDelta / 1000 / 1000 / 1000),
-                                (double) messagesRecvDelta * ms_messagePayloadSize / 1024 / 1024 /
-                                        ((double) timeDiffRecvDelta / 1000 / 1000 / 1000),
-                                (double) messagesSentDelta / ((double) timeDiffSendDelta / 1000 / 1000 / 1000) / 1000 /
-                                        1000,
-                                (double) messagesRecvDelta / ((double) timeDiffRecvDelta / 1000 / 1000 / 1000) / 1000 /
-                                        1000,
-                                ms_reqRespTimeouts.get()));
+                builder.append(String.format("[CUR: TX=%f, RX=%f, TXP=%f, RXP=%f, TXM=%f, RXM=%f][ReqRespTimeouts=%d]",
+                        (double) messagesSentDelta * ms_size / 1024 / 1024 /
+                                ((double) timeDiffSendDelta / 1000 / 1000 / 1000),
+                        (double) messagesRecvDelta * ms_size / 1024 / 1024 /
+                                ((double) timeDiffRecvDelta / 1000 / 1000 / 1000),
+                        (double) messagesSentDelta * ms_messagePayloadSize / 1024 / 1024 /
+                                ((double) timeDiffSendDelta / 1000 / 1000 / 1000),
+                        (double) messagesRecvDelta * ms_messagePayloadSize / 1024 / 1024 /
+                                ((double) timeDiffRecvDelta / 1000 / 1000 / 1000),
+                        (double) messagesSentDelta / ((double) timeDiffSendDelta / 1000 / 1000 / 1000) / 1000 / 1000,
+                        (double) messagesRecvDelta / ((double) timeDiffRecvDelta / 1000 / 1000 / 1000) / 1000 / 1000,
+                        ms_reqRespTimeouts.get()));
 
                 // we sent requests, print with rtt values and percentiles if available
                 if (AbstractPipeIn.SOP_REQ_RESP_RTT.getAvg() != 0 ||
                         AbstractPipeIn.SOP_REQ_RESP_RTT_VAL.getAvgValue() != 0) {
                     // "benchmark mode" enabled which records percentiles
                     if (AbstractPipeIn.SOP_REQ_RESP_RTT.getAvg() != 0) {
-                        builder.append(
-                                String.format("[LAT: Avg=%f, Min=%f, Max=%f]",
-                                        AbstractPipeIn.SOP_REQ_RESP_RTT.getAvg(Time.Prefix.MICRO),
-                                        AbstractPipeIn.SOP_REQ_RESP_RTT.getMin(Time.Prefix.MICRO),
-                                        AbstractPipeIn.SOP_REQ_RESP_RTT.getMax(Time.Prefix.MICRO)));
+                        builder.append(String.format("[LAT: Avg=%f, Min=%f, Max=%f]",
+                                AbstractPipeIn.SOP_REQ_RESP_RTT.getAvg(Time.Prefix.MICRO),
+                                AbstractPipeIn.SOP_REQ_RESP_RTT.getMin(Time.Prefix.MICRO),
+                                AbstractPipeIn.SOP_REQ_RESP_RTT.getMax(Time.Prefix.MICRO)));
                     } else {
-                        builder.append(
-                                String.format("[LAT: Avg=%f, Min=%f, Max=%f]",
-                                        AbstractPipeIn.SOP_REQ_RESP_RTT_VAL.getAvgValue(Value.Prefix.KILO),
-                                        AbstractPipeIn.SOP_REQ_RESP_RTT_VAL.getMinValue(Value.Prefix.KILO),
-                                        AbstractPipeIn.SOP_REQ_RESP_RTT_VAL.getMaxValue(Value.Prefix.KILO)));
+                        builder.append(String.format("[LAT: Avg=%f, Min=%f, Max=%f]",
+                                AbstractPipeIn.SOP_REQ_RESP_RTT_VAL.getAvgValue(Value.Prefix.KILO),
+                                AbstractPipeIn.SOP_REQ_RESP_RTT_VAL.getMinValue(Value.Prefix.KILO),
+                                AbstractPipeIn.SOP_REQ_RESP_RTT_VAL.getMaxValue(Value.Prefix.KILO)));
                     }
                 }
 
-                builder.append(
-                        String.format("[CPU: Cur=%f][MEM: Used=%f, UsedMB=%f, FreeMB=%f]",
-                                m_cpuProgress.getCpuUsagePercent(),
-                                m_memoryState.getUsedPercent(),
-                                m_memoryState.getUsed().getMBDouble(),
-                                m_memoryState.getFree().getMBDouble()));
+                builder.append(String.format("[CPU: Cur=%f][MEM: Used=%f, UsedMB=%f, FreeMB=%f]",
+                        m_cpuProgress.getCpuUsagePercent(), m_memoryState.getUsedPercent(),
+                        m_memoryState.getUsed().getMBDouble(), m_memoryState.getFree().getMBDouble()));
 
                 System.out.println(builder);
 

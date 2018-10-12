@@ -1,17 +1,22 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
 package de.hhu.bsinfo.dxnet.core;
+
+import java.nio.charset.Charset;
 
 import de.hhu.bsinfo.dxutils.UnsafeMemory;
 import de.hhu.bsinfo.dxutils.serialization.Importable;
@@ -21,7 +26,7 @@ import de.hhu.bsinfo.dxutils.serialization.Importable;
  *
  * @author Kevin Beineke, kevin.beineke@hhu.de, 12.07.2017
  */
-class MessageImporterDefault extends AbstractMessageImporter {
+public class MessageImporterDefault extends AbstractMessageImporter {
 
     private long m_bufferAddress;
     private int m_currentPosition;
@@ -30,14 +35,24 @@ class MessageImporterDefault extends AbstractMessageImporter {
     /**
      * Constructor
      */
-    MessageImporterDefault() {
+    public MessageImporterDefault() {
 
+    }
+
+    /**
+     * Set the position externally.
+     *
+     * @param p_position
+     *         the new position
+     */
+    public void setPosition(final int p_position) {
+        m_currentPosition = p_position;
     }
 
     @Override
     public String toString() {
-        return "m_usedCounter " + getUsedCounter() + ", m_bufferAddress 0x" + Long.toHexString(m_bufferAddress) + ", m_currentPosition " + m_currentPosition +
-                ", m_startPosition " + m_startPosition;
+        return "m_usedCounter " + getUsedCounter() + ", m_bufferAddress 0x" + Long.toHexString(m_bufferAddress) +
+                ", m_currentPosition " + m_currentPosition + ", m_startPosition " + m_startPosition;
     }
 
     @Override
@@ -95,6 +110,14 @@ class MessageImporterDefault extends AbstractMessageImporter {
     }
 
     @Override
+    public char readChar(final char p_char) {
+        char ret = UnsafeMemory.readChar(m_bufferAddress + m_currentPosition);
+        m_currentPosition += Character.BYTES;
+
+        return ret;
+    }
+
+    @Override
     public int readInt(final int p_int) {
         int ret = UnsafeMemory.readInt(m_bufferAddress + m_currentPosition);
         m_currentPosition += Integer.BYTES;
@@ -147,7 +170,7 @@ class MessageImporterDefault extends AbstractMessageImporter {
 
     @Override
     public String readString(final String p_string) {
-        return new String(readByteArray(null));
+        return new String(readByteArray(null), Charset.forName("US-ASCII"));
     }
 
     @Override
@@ -158,6 +181,11 @@ class MessageImporterDefault extends AbstractMessageImporter {
     @Override
     public int readShorts(final short[] p_array) {
         return readShorts(p_array, 0, p_array.length);
+    }
+
+    @Override
+    public int readChars(final char[] p_array) {
+        return readChars(p_array, 0, p_array.length);
     }
 
     @Override
@@ -173,15 +201,31 @@ class MessageImporterDefault extends AbstractMessageImporter {
     @Override
     public int readBytes(final byte[] p_array, final int p_offset, final int p_length) {
         int ret = UnsafeMemory.readBytes(m_bufferAddress + m_currentPosition, p_array, p_offset, p_length);
-        m_currentPosition += ret * Byte.BYTES;
+        m_currentPosition += ret;
 
         return ret;
+    }
+
+    @Override
+    public int readBytes(final long p_byteBufferAddress, final int p_offset, final int p_length) {
+        UnsafeMemory.copyBytes(m_bufferAddress + m_currentPosition, p_byteBufferAddress + p_offset, p_length);
+        m_currentPosition += p_length;
+
+        return p_length;
     }
 
     @Override
     public int readShorts(final short[] p_array, final int p_offset, final int p_length) {
         int ret = UnsafeMemory.readShorts(m_bufferAddress + m_currentPosition, p_array, p_offset, p_length);
         m_currentPosition += ret * Short.BYTES;
+
+        return ret;
+    }
+
+    @Override
+    public int readChars(final char[] p_array, final int p_offset, final int p_length) {
+        int ret = UnsafeMemory.readChars(m_bufferAddress + m_currentPosition, p_array, p_offset, p_length);
+        m_currentPosition += ret * Character.BYTES;
 
         return ret;
     }
@@ -213,6 +257,13 @@ class MessageImporterDefault extends AbstractMessageImporter {
     public short[] readShortArray(final short[] p_array) {
         short[] arr = new short[readCompactNumber(0)];
         readShorts(arr);
+        return arr;
+    }
+
+    @Override
+    public char[] readCharArray(final char[] p_array) {
+        char[] arr = new char[readCompactNumber(0)];
+        readChars(arr);
         return arr;
     }
 

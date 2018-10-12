@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2017 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science, Department Operating Systems
+ * Copyright (C) 2018 Heinrich-Heine-Universitaet Duesseldorf, Institute of Computer Science,
+ * Department Operating Systems
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
@@ -19,7 +22,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.hhu.bsinfo.dxnet.core.AbstractFlowControl;
-import de.hhu.bsinfo.dxnet.core.NetworkException;
 import de.hhu.bsinfo.dxnet.nio.NIOFlowControl;
 
 /**
@@ -33,8 +35,9 @@ public class LoopbackFlowControl extends AbstractFlowControl {
 
     private final ByteBuffer m_flowControlByte;
 
-    LoopbackFlowControl(final short p_destinationNodeId, final int p_flowControlWindowSize, final float p_flowControlWindowThreshold,
-            final LoopbackSendThread p_loopbackSendThread, final LoopbackConnection p_connection) {
+    LoopbackFlowControl(final short p_destinationNodeId, final int p_flowControlWindowSize,
+            final float p_flowControlWindowThreshold, final LoopbackSendThread p_loopbackSendThread,
+            final LoopbackConnection p_connection) {
         super(p_destinationNodeId, p_flowControlWindowSize, p_flowControlWindowThreshold);
 
         m_loopbackSendThread = p_loopbackSendThread;
@@ -44,7 +47,7 @@ public class LoopbackFlowControl extends AbstractFlowControl {
     }
 
     @Override
-    public void flowControlWrite() throws NetworkException {
+    public void flowControlWrite() {
         m_flowControlByte.rewind();
         m_flowControlByte.put(getAndResetFlowControlData());
         m_flowControlByte.rewind();
@@ -55,7 +58,7 @@ public class LoopbackFlowControl extends AbstractFlowControl {
 
     @Override
     public byte getAndResetFlowControlData() {
-        int bytesLeft;
+        long bytesLeft;
         byte ret;
 
         // not using CAS here requires this to be called by a single thread, only
@@ -70,9 +73,7 @@ public class LoopbackFlowControl extends AbstractFlowControl {
             throw new IllegalStateException("Negative flow control");
         }
 
-        // #if LOGGER >= TRACE
         LOGGER.trace("getAndResetFlowControlData (%X): %d", m_destinationNodeID, bytesLeft);
-        // #endif /* LOGGER >= TRACE */
 
         return ret;
     }
