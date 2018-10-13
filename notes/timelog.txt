@@ -244,10 +244,11 @@ todo: test alles auf cluster/hilbert
 
 ## notiz 2018-10-13
 
-14:30 - 19:45   switch auf neues dxnet und dxram, erzeugen eines neuen create auf basis der dxram peers, die online sind
+14:30 - 20:00   switch auf neues dxnet und dxram, erzeugen eines neuen create auf basis der dxram peers, die online sind
                 und einlesen der (alten) dxramApp.config datei.
 
 todo: mein chunkCreate() scheint nicht korrekt zu laufen!!
+todo: der 2. peer kracht beim lookup des root-chunks
 
 done todo: dxnet_to_dxram_peers in DxramFsConfig pflegen: auch im hadoop-Code !
 done todo: auf basis von
