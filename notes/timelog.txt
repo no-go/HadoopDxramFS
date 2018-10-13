@@ -244,8 +244,10 @@ todo: test alles auf cluster/hilbert
 
 ## notiz 2018-10-13
 
-14:30 - 18:30   switch auf neues dxnet und dxram, erzeugen eines neuen create auf basis der dxram peers, die online sind
+14:30 - 19:45   switch auf neues dxnet und dxram, erzeugen eines neuen create auf basis der dxram peers, die online sind
                 und einlesen der (alten) dxramApp.config datei.
+
+todo: mein chunkCreate() scheint nicht korrekt zu laufen!!
 
 done todo: dxnet_to_dxram_peers in DxramFsConfig pflegen: auch im hadoop-Code !
 done todo: auf basis von
@@ -256,6 +258,537 @@ done todo2: eignene dxramfsConfig machen!
 todo: debugging multipeer und config von dxram. test: funktioniert random chunk anlegen auf den peers? test: wird meine config richtig eingelesen?
 todo3: anonService ansehn
 todo4: analyse FsNode holen mit non-hadoop client
+
+
+
+
+
+
+
+Superpeer says:
+
+
+
+
+JVM arguments: -Dlog4j.configurationFile=file:/home/tux/big/gDXRAM/run/dxram/config/log4j2.xml -Dlog4j.configurationFile=config/log4j2.xml -Ddxram.config=config/dxram.json -Ddxram.m_config.m_engineConfig.m_role=Superpeer -Ddxram.m_config.m_engineConfig.m_address.m_ip=127.0.0.1 -Ddxram.m_config.m_engineConfig.m_address.m_port=22221 
+
+Cmd arguments: 
+
+
+>>> DXRAM build <<<
+DXRAMVersion 0.5.0
+Build type: debug
+Git commit: a439d1a8
+BuildDate: 2018-10-13 14:58:42
+BuildUser: tux
+
+>>> Instance <<<
+System
+  User: tux
+  Cwd: /home/tux/big/gDXRAM/run/dxram
+  PID: 1394
+  Kernel: 4.16.18-1-MANJARO
+  Distribution: Linux
+  Hostname: abook.localhost.fake
+  Uptime (sec): 238.0
+Java
+  Version: 1.8.0_181
+  VM Name: OpenJDK 64-Bit Server VM
+  VM Vendor: Oracle Corporation
+  VM Version: 25.181-b13
+Hardware
+  Memory: total 7.630 gb, free 6.689 gb, avail 6.900 gb, buffer size 59.480 mb, cache size 452.648 mb, used 451.457 mb
+  NICs: [wlp1s0, lo]
+  Disks: [mmcblk0, mmcblk0p1, mmcblk0p2, mmcblk1, mmcblk1p1, mmcblk1p2, mmcblk1p3, mmcblk1boot1, mmcblk1boot0]
+
+Starting DXRAM, version DXRAMVersion 0.5.0
+[18:37:45.934][main][INFO ][DXRAMContextCreatorFile] Loading configuration file: config/dxram.json
+[18:37:45.939][main][INFO ][DXRAMContextCreatorFile] Loading configuration 'config/dxram.json'...
+[18:37:46.244][main][DEBUG][DXRAMEngine] Created context: DXRAMContext(m_config=DXRAMContext.Config(m_engineConfig=DXRAMContext.EngineConfig(m_address=127.0.0.1:22221, m_role=superpeer, m_jniPath=jni), m_componentConfigs={ZookeeperBootComponentConfig=ZookeeperBootComponentConfig(m_path=/dxram, m_connection=127.0.0.1:2181, m_timeout=10.000 sec, m_bitfieldSize=2.000 mb, m_rack=0, m_switch=0, m_isClient=false), BackupComponentConfig=BackupComponentConfig(m_backupActive=false, m_availableForBackup=true, m_backupDirectory=./log/, m_backupRangeSize=256.000 mb, m_replicationFactor=3, m_backupPlacementStrategy=Random, m_disjunctiveFirstBackupPeer=true, m_rackAware=false, m_switchAware=false), ChunkIndexComponentConfig=ChunkIndexComponentConfig(), LookupComponentConfig=LookupComponentConfig(m_cachesEnabled=true, m_maxCacheEntries=1000, m_cacheTtl=1000.000 ms, m_stabilizationBreakTime=1000.000 ms), ApplicationComponentConfig=ApplicationComponentConfig(m_applicationPath=dxapp), NullComponentConfig=NullComponentConfig(), LogComponentConfig=LogComponentConfig(m_dxlogConfig=DXLogConfig(m_harddriveAccess=dir, m_rawDevicePath=/dev/raw/raw1, m_useChecksums=true, m_useTimestamps=false, m_flashPageSize=4.000 kb, m_logSegmentSize=8.000 mb, m_primaryLogSize=256.000 mb, m_writeBufferSize=32.000 mb, m_secondaryLogBufferSize=128.000 kb, m_utilizationActivateReorganization=60, m_utilizationPromptReorganization=75, m_coldDataThresholdInSec=9000)), ChunkComponentConfig=ChunkComponentConfig(m_keyValueStoreSize=128.000 mb, m_memDumpFolderOnError=, m_chunkLockDisabled=false, m_chunkStorageEnabled=true), EventComponentConfig=EventComponentConfig(m_threadCount=1), JobWorkStealingComponentConfig=JobWorkStealingComponentConfig(m_enabled=false, m_numWorkers=1), NetworkComponentConfig=NetworkComponentConfig(m_coreConfig=CoreConfig(m_ownNodeId=-1, m_numMessageHandlerThreads=2, m_requestMapSize=1048576, m_useStaticExporterPool=true, m_benchmarkMode=false, m_device=ETHERNET), m_nioConfig=NIOConfig(m_maxConnections=100, m_requestTimeOut=333.000 ms, m_connectionTimeOut=333.000 ms, m_flowControlWindow=512.000 kb, m_flowControlWindowThreshold=0.8, m_outgoingRingBufferSize=2.000 mb), m_ibConfig=IBConfig(m_maxConnections=100, m_connectionCreationTimeout=5.000 sec, m_requestTimeOut=100.000 ms, m_flowControlWindow=16.000 mb, m_flowControlWindowThreshold=0.1, m_outgoingRingBufferSize=4.000 mb, m_ibqMaxCapacityBufferCount=8192, m_ibqMaxCapacitySize=64.000 mb, m_incomingBufferSize=32.000 kb, m_incomingBufferPoolTotalSize=2.000 gb, m_sqSize=20, m_srqSize=2000, m_sharedSCQSize=2000, m_sharedRCQSize=2000, m_maxSGEs=4, m_enableSignalHandler=false, m_pinSendRecvThreads=false, m_statisticsThreadPrintIntervalMs=0)), ChunkMigrationComponentConfig=ChunkMigrationComponentConfig(), ChunkBackupComponentConfig=ChunkBackupComponentConfig(), NameserviceComponentConfig=NameserviceComponentConfig(m_type=NAME, m_nameserviceCacheEntries=1000000), FailureComponentConfig=FailureComponentConfig()}, m_serviceConfigs={RecoveryServiceConfig=RecoveryServiceConfig(), NullServiceConfig=NullServiceConfig(), NameserviceServiceConfig=NameserviceServiceConfig(), NetworkServiceConfig=NetworkServiceConfig(), BootServiceConfig=BootServiceConfig(), ChunkDebugServiceConfig=ChunkDebugServiceConfig(), ApplicationServiceConfig=ApplicationServiceConfig(m_autoStart=[ApplicationServiceConfig.ApplicationEntry(m_className=de.hhu.bsinfo.app.DxramFsApp, m_args=dxapp/DxramFsApp.conf, m_startOrderId=0)]), JobServiceConfig=JobServiceConfig(), MigrationServiceConfig=MigrationServiceConfig(), LoggerServiceConfig=LoggerServiceConfig(), ChunkServiceConfig=ChunkServiceConfig(m_removerQueueSize=100000), ChunkAnonServiceConfig=ChunkAnonServiceConfig(), ChunkLocalServiceConfig=ChunkLocalServiceConfig(), StatisticsServiceConfig=StatisticsServiceConfig(m_printStatsPeriodMs=0), MonitoringServiceConfig=MonitoringServiceConfig(), LookupServiceConfig=LookupServiceConfig(), SynchronizationServiceConfig=SynchronizationServiceConfig(m_maxBarriersPerSuperpeer=1000), TemporaryStorageServiceConfig=TemporaryStorageServiceConfig(m_storageMaxNumEntries=1000, m_storageMaxSize=32.000 mb), LogServiceConfig=LogServiceConfig(), MasterSlaveComputeServiceConfig=MasterSlaveComputeServiceConfig(m_role=none, m_computeGroupId=0, m_pingInterval=1000.000 ms)}), m_components={}, m_services={})
+[18:37:46.245][main][DEBUG][DXRAMContext] Verifying component configuration values of ZookeeperBootComponent...
+[18:37:46.245][main][DEBUG][DXRAMContext] Verifying component configuration values of BackupComponent...
+[18:37:46.246][main][DEBUG][DXRAMContext] Verifying component configuration values of ChunkIndexComponent...
+[18:37:46.246][main][DEBUG][DXRAMContext] Verifying component configuration values of LookupComponent...
+[18:37:46.246][main][DEBUG][DXRAMContext] Verifying component configuration values of ApplicationComponent...
+[18:37:46.246][main][DEBUG][DXRAMContext] Verifying component configuration values of NullComponent...
+[18:37:46.246][main][DEBUG][DXRAMContext] Verifying component configuration values of LogComponent...
+[18:37:46.246][main][DEBUG][DXRAMContext] Verifying component configuration values of ChunkComponent...
+[18:37:46.247][main][DEBUG][DXRAMContext] Verifying component configuration values of EventComponent...
+[18:37:46.247][main][DEBUG][DXRAMContext] Verifying component configuration values of JobWorkStealingComponent...
+[18:37:46.247][main][DEBUG][DXRAMContext] Verifying component configuration values of NetworkComponent...
+[18:37:46.247][main][DEBUG][DXRAMContext] Verifying component configuration values of ChunkMigrationComponent...
+[18:37:46.247][main][DEBUG][DXRAMContext] Verifying component configuration values of ChunkBackupComponent...
+[18:37:46.247][main][DEBUG][DXRAMContext] Verifying component configuration values of NameserviceComponent...
+[18:37:46.247][main][DEBUG][DXRAMContext] Verifying component configuration values of FailureComponent...
+[18:37:46.248][main][DEBUG][DXRAMContext] Verifying service configuration values of RecoveryService...
+[18:37:46.248][main][DEBUG][DXRAMContext] Verifying service configuration values of NullService...
+[18:37:46.248][main][DEBUG][DXRAMContext] Verifying service configuration values of NameserviceService...
+[18:37:46.248][main][DEBUG][DXRAMContext] Verifying service configuration values of NetworkService...
+[18:37:46.248][main][DEBUG][DXRAMContext] Verifying service configuration values of BootService...
+[18:37:46.248][main][DEBUG][DXRAMContext] Verifying service configuration values of ChunkDebugService...
+[18:37:46.248][main][DEBUG][DXRAMContext] Verifying service configuration values of ApplicationService...
+[18:37:46.248][main][DEBUG][DXRAMContext] Verifying service configuration values of JobService...
+[18:37:46.249][main][DEBUG][DXRAMContext] Verifying service configuration values of MigrationService...
+[18:37:46.249][main][DEBUG][DXRAMContext] Verifying service configuration values of LoggerService...
+[18:37:46.249][main][DEBUG][DXRAMContext] Verifying service configuration values of ChunkService...
+[18:37:46.249][main][DEBUG][DXRAMContext] Verifying service configuration values of ChunkAnonService...
+[18:37:46.249][main][DEBUG][DXRAMContext] Verifying service configuration values of ChunkLocalService...
+[18:37:46.249][main][DEBUG][DXRAMContext] Verifying service configuration values of StatisticsService...
+[18:37:46.249][main][DEBUG][DXRAMContext] Verifying service configuration values of MonitoringService...
+[18:37:46.250][main][DEBUG][DXRAMContext] Verifying service configuration values of LookupService...
+[18:37:46.251][main][DEBUG][DXRAMContext] Verifying service configuration values of SynchronizationService...
+[18:37:46.251][main][DEBUG][DXRAMContext] Verifying service configuration values of TemporaryStorageService...
+[18:37:46.251][main][DEBUG][DXRAMContext] Verifying service configuration values of LogService...
+[18:37:46.251][main][DEBUG][DXRAMContext] Verifying service configuration values of MasterSlaveComputeService...
+[18:37:46.282][main][INFO ][DXRAMEngine] Initializing engine (version DXRAMVersion 0.5.0)...
+[18:37:46.293][main][INFO ][DXRAMEngine] Initializing 6 components...
+[18:37:46.294][main][INFO ][NullComponent] Initializing component...
+[18:37:46.294][main][INFO ][NullComponent] Initializing component successful
+[18:37:46.294][main][INFO ][EventComponent] Initializing component...
+[18:37:46.294][main][INFO ][EventComponent] EventExecutor: Initialising 1 threads
+[18:37:46.296][main][INFO ][EventComponent] Initializing component successful
+[18:37:46.296][main][INFO ][ZookeeperBootComponent] Initializing component...
+[18:37:46.297][main][INFO ][ZookeeperBootComponent] Initializing with address 127.0.0.1:22221 and role superpeer
+[18:37:46.297][main][INFO ][ZookeeperBootComponent] Connecting to ZooKeeper at 127.0.0.1:2181
+[18:37:46.437][main][INFO ][org.apache.curator.utils.Compatibility] Running in ZooKeeper 3.4.x compatibility mode
+[18:37:46.499][main][INFO ][org.apache.curator.framework.imps.CuratorFrameworkImpl] Starting
+[18:37:46.509][main][DEBUG][org.apache.curator.CuratorZookeeperClient] Starting
+[18:37:46.509][main][DEBUG][org.apache.curator.ConnectionState] Starting
+[18:37:46.509][main][DEBUG][org.apache.curator.ConnectionState] reset
+[18:37:46.572][main][INFO ][org.apache.curator.framework.imps.CuratorFrameworkImpl] Default schema
+[18:37:46.602][main-EventThread][DEBUG][org.apache.curator.ConnectionState] Negotiated session timeout: 40000
+[18:37:46.612][main-EventThread][INFO ][org.apache.curator.framework.state.ConnectionStateManager] State change: CONNECTED
+[18:37:46.614][main-EventThread][DEBUG][org.apache.curator.framework.imps.CuratorFrameworkImpl] Clearing sleep for 0 operations
+[18:37:46.959][main][WARN ][org.apache.curator.utils.ZKPaths] The version of ZooKeeper being used doesn't support Container nodes. CreateMode.PERSISTENT will be used instead.
+[18:37:46.982][main][INFO ][ZookeeperBootComponent] Assigned counter value 1 to this node
+[18:37:46.982][main][INFO ][ZookeeperBootComponent] Starting bootstrap process
+[18:37:47.223][main][INFO ][ZookeeperBootComponent] Finished bootstrap process
+[18:37:47.223][main][INFO ][ZookeeperBootComponent] Initializing component successful
+[18:37:47.223][main][INFO ][NetworkComponent] Initializing component...
+[18:37:47.226][main][INFO ][NetworkComponent] 127.0.0.1 is bound to lo
+[18:37:48.014][main][INFO ][DefaultMessageHandlerPool] Network: DefaultMessageHandlerPool: Initialising 2 threads
+[18:37:48.030][main][INFO ][ExclusiveMessageHandler] Network: ExclusiveMessageHandler: Initialising thread
+[18:37:48.061][discovery][INFO ][de.hhu.bsinfo.dxram.boot.NodeRegistry] Service discovery cache changed
+[18:37:48.076][main][INFO ][NIOConnectionManager] Starting NIOSelector...
+[18:37:48.180][main][WARN ][NIOSelector] Receive buffer could not be set properly. Check OS settings! Requested: 2097152, actual: 212992
+[18:37:48.183][main][DEBUG][EventComponent] Registered listener de.hhu.bsinfo.dxram.net.NetworkComponent for event de.hhu.bsinfo.dxram.failure.events.NodeFailureEvent
+[18:37:48.184][main][INFO ][NetworkComponent] Initializing component successful
+[18:37:48.184][main][INFO ][LookupComponent] Initializing component...
+[18:37:48.184][main][WARN ][DXRAMEngine] Getting component 'BackupComponent', not available
+[18:37:48.184][main][WARN ][DXRAMEngine] Getting component 'ChunkComponent', not available
+[18:37:48.192][main][DEBUG][EventComponent] Registered listener de.hhu.bsinfo.dxram.lookup.LookupComponent for event de.hhu.bsinfo.dxram.failure.events.NodeFailureEvent
+[18:37:48.265][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 1
+[18:37:48.266][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 3
+[18:37:48.266][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 4
+[18:37:48.266][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 6
+[18:37:48.266][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 8
+[18:37:48.266][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 10
+[18:37:48.267][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 12
+[18:37:48.267][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 14
+[18:37:48.267][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 17
+[18:37:48.268][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 19
+[18:37:48.268][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 21
+[18:37:48.268][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 23
+[18:37:48.268][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 25
+[18:37:48.268][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 38
+[18:37:48.269][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 27
+[18:37:48.269][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 26
+[18:37:48.269][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 40
+[18:37:48.269][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 42
+[18:37:48.269][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 44
+[18:37:48.269][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 47
+[18:37:48.270][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 49
+[18:37:48.270][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 51
+[18:37:48.270][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 53
+[18:37:48.270][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 55
+[18:37:48.270][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 57
+[18:37:48.270][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 59
+[18:37:48.271][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 61
+[18:37:48.271][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 62
+[18:37:48.271][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlaySuperpeer for 2 66
+[18:37:48.273][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.SuperpeerStabilizationThread for 2 31
+[18:37:48.274][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.SuperpeerStabilizationThread for 2 33
+[18:37:48.274][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.SuperpeerStabilizationThread for 2 29
+[18:37:48.274][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.SuperpeerStabilizationThread for 2 35
+[18:37:48.274][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.SuperpeerStabilizationThread for 2 36
+[18:37:48.276][main][INFO ][LookupComponent] Initializing component successful
+[18:37:48.276][main][INFO ][FailureComponent] Initializing component...
+[18:37:48.277][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.failure.FailureComponent for 6 1
+[18:37:48.277][main][DEBUG][EventComponent] Registered listener de.hhu.bsinfo.dxram.failure.FailureComponent for event de.hhu.bsinfo.dxram.net.events.ConnectionLostEvent
+[18:37:48.277][main][DEBUG][EventComponent] Registered listener de.hhu.bsinfo.dxram.failure.FailureComponent for event de.hhu.bsinfo.dxram.net.events.ResponseDelayedEvent
+[18:37:48.277][main][INFO ][FailureComponent] Initializing component successful
+[18:37:48.277][main][INFO ][DXRAMEngine] Initializing components done
+[18:37:48.277][main][INFO ][DXRAMEngine] Starting 7 services...
+[18:37:48.277][main][INFO ][StatisticsService] Starting service...
+[18:37:48.277][main][INFO ][StatisticsService] Starting service successful
+[18:37:48.277][main][INFO ][LookupService] Starting service...
+[18:37:48.279][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.LookupService for 2 64
+[18:37:48.280][main][INFO ][LookupService] Starting service successful
+[18:37:48.280][main][INFO ][NullService] Starting service...
+[18:37:48.280][main][INFO ][NullService] Starting service successful
+[18:37:48.280][main][INFO ][NetworkService] Starting service...
+[18:37:48.280][main][INFO ][NetworkService] Starting service successful
+[18:37:48.280][main][INFO ][LoggerService] Starting service...
+[18:37:48.280][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.logger.LoggerService for 8 1
+[18:37:48.281][main][INFO ][LoggerService] Starting service successful
+[18:37:48.281][main][INFO ][BootService] Starting service...
+[18:37:48.281][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.boot.BootService for 1 1
+>>> DXRAM node <<<
+NodeID: 0xC0C1
+Role: superpeer
+Address: /127.0.0.1:22221
+
+!---ooo---!
+[18:37:48.281][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.boot.BootService for 1 2
+[18:37:48.281][main][INFO ][BootService] Starting service successful
+[18:37:48.282][main][INFO ][MonitoringService] Starting service...
+[18:37:48.283][main][WARN ][DXRAMEngine] Getting component 'MonitoringComponent', not available
+[18:37:48.283][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.monitoring.MonitoringService for 12 4
+[18:37:48.284][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.monitoring.MonitoringService for 12 0
+[18:37:48.284][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.monitoring.MonitoringService for 12 2
+[18:37:48.284][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.monitoring.MonitoringService for 12 3
+[18:37:48.290][main][INFO ][MonitoringService] Starting service successful
+[18:37:48.290][main][INFO ][DXRAMEngine] Starting services done
+[18:37:48.290][main][INFO ][DXRAMEngine] Finishing initialization of components
+[18:37:48.290][main][INFO ][DXRAMEngine] Initializing engine done
+[18:37:49.277][SuperpeerStabilizationThread for LookupComponent][INFO ][SuperpeerStabilizationThread] Superpeers:  '0xC0C1'
+[18:38:47.742][discovery][INFO ][de.hhu.bsinfo.dxram.boot.NodeRegistry] Service discovery cache changed
+[18:38:47.771][discovery][INFO ][de.hhu.bsinfo.dxram.boot.NodeRegistry] Node [P|B1BD](127.0.0.1:22222) with capabilities [STORAGE] joined the network
+[18:38:48.855][Network-NIOSelector][DEBUG][NIOConnectionManager] Passive create new connection to 0xB1BD
+[18:38:48.866][Network-NIOConnectionCreatorHelper][DEBUG][AbstractFlowControl] Flow control settings for node 0xB1BD: window size 524288, threshold 0.800000
+[18:38:48.898][Network: MessageHandler 1][INFO ][OverlaySuperpeer] Received JoinRequest from 0xB1BD
+[18:38:48.901][Network: MessageHandler 1][DEBUG][AbstractConnectionManager] Active create connection to: 0xB1BD
+[18:38:48.901][Network: MessageHandler 1][WARN ][NIOPipeOut] Send buffer size could not be set properly. Check OS settings! Requested: 2097152, actual: 212992
+[18:38:48.919][Network: MessageHandler 1][DEBUG][AbstractConnectionManager] Connection created: 0xB1BD
+[18:38:49.299][SuperpeerStabilizationThread for LookupComponent][INFO ][SuperpeerStabilizationThread] Superpeers:  '0xC0C1'
+[18:38:49.299][SuperpeerStabilizationThread for LookupComponent][INFO ][SuperpeerStabilizationThread] Peers:  0xB1BD
+[18:39:42.479][discovery][INFO ][de.hhu.bsinfo.dxram.boot.NodeRegistry] Service discovery cache changed
+[18:39:42.480][discovery][INFO ][de.hhu.bsinfo.dxram.boot.NodeRegistry] Node [P|FA35](127.0.0.1:22223) with capabilities [STORAGE] joined the network
+[18:39:44.168][Network-NIOSelector][DEBUG][NIOConnectionManager] Passive create new connection to 0xFA35
+[18:39:44.168][Network-NIOConnectionCreatorHelper][DEBUG][AbstractFlowControl] Flow control settings for node 0xFA35: window size 524288, threshold 0.800000
+[18:39:44.207][Network: MessageHandler 1][INFO ][OverlaySuperpeer] Received JoinRequest from 0xFA35
+[18:39:44.207][Network: MessageHandler 1][DEBUG][AbstractConnectionManager] Active create connection to: 0xFA35
+[18:39:44.207][Network: MessageHandler 1][WARN ][NIOPipeOut] Send buffer size could not be set properly. Check OS settings! Requested: 2097152, actual: 212992
+[18:39:44.214][Network: MessageHandler 1][DEBUG][AbstractConnectionManager] Connection created: 0xFA35
+[18:39:44.326][SuperpeerStabilizationThread for LookupComponent][INFO ][SuperpeerStabilizationThread] Superpeers:  '0xC0C1'
+[18:39:44.326][SuperpeerStabilizationThread for LookupComponent][INFO ][SuperpeerStabilizationThread] Peers:  0xB1BD 0xFA35
+
+
+
+
+
+
+
+
+
+
+
+
+fail 2nd peer:
+
+
+
+JVM arguments: -Dlog4j.configurationFile=file:/home/tux/big/gDXRAM/run/dxram/config/log4j2.xml -Dlog4j.configurationFile=config/log4j2.xml -Ddxram.config=config/dxram.json -Ddxram.m_config.m_engineConfig.m_role=Peer -Ddxram.m_config.m_engineConfig.m_address.m_ip=127.0.0.1 -Ddxram.m_config.m_engineConfig.m_address.m_port=22223 
+
+Cmd arguments: 
+
+
+>>> DXRAM build <<<
+DXRAMVersion 0.5.0
+Build type: debug
+Git commit: a439d1a8
+BuildDate: 2018-10-13 14:58:42
+BuildUser: tux
+
+>>> Instance <<<
+System
+  User: tux
+  Cwd: /home/tux/big/gDXRAM/run/dxram
+  PID: 1498
+  Kernel: 4.16.18-1-MANJARO
+  Distribution: Linux
+  Hostname: abook.localhost.fake
+  Uptime (sec): 352.5
+Java
+  Version: 1.8.0_181
+  VM Name: OpenJDK 64-Bit Server VM
+  VM Vendor: Oracle Corporation
+  VM Version: 25.181-b13
+Hardware
+  Memory: total 7.630 gb, free 6.011 gb, avail 6.230 gb, buffer size 59.582 mb, cache size 449.609 mb, used 1.122 gb
+  NICs: [wlp1s0, lo]
+  Disks: [mmcblk0, mmcblk0p1, mmcblk0p2, mmcblk1, mmcblk1p1, mmcblk1p2, mmcblk1p3, mmcblk1boot1, mmcblk1boot0]
+
+Starting DXRAM, version DXRAMVersion 0.5.0
+[18:39:40.763][main][INFO ][DXRAMContextCreatorFile] Loading configuration file: config/dxram.json
+[18:39:40.772][main][INFO ][DXRAMContextCreatorFile] Loading configuration 'config/dxram.json'...
+[18:39:41.127][main][DEBUG][DXRAMEngine] Created context: DXRAMContext(m_config=DXRAMContext.Config(m_engineConfig=DXRAMContext.EngineConfig(m_address=127.0.0.1:22223, m_role=peer, m_jniPath=jni), m_componentConfigs={ZookeeperBootComponentConfig=ZookeeperBootComponentConfig(m_path=/dxram, m_connection=127.0.0.1:2181, m_timeout=10.000 sec, m_bitfieldSize=2.000 mb, m_rack=0, m_switch=0, m_isClient=false), BackupComponentConfig=BackupComponentConfig(m_backupActive=false, m_availableForBackup=true, m_backupDirectory=./log/, m_backupRangeSize=256.000 mb, m_replicationFactor=3, m_backupPlacementStrategy=Random, m_disjunctiveFirstBackupPeer=true, m_rackAware=false, m_switchAware=false), ChunkIndexComponentConfig=ChunkIndexComponentConfig(), LookupComponentConfig=LookupComponentConfig(m_cachesEnabled=true, m_maxCacheEntries=1000, m_cacheTtl=1000.000 ms, m_stabilizationBreakTime=1000.000 ms), ApplicationComponentConfig=ApplicationComponentConfig(m_applicationPath=dxapp), NullComponentConfig=NullComponentConfig(), LogComponentConfig=LogComponentConfig(m_dxlogConfig=DXLogConfig(m_harddriveAccess=dir, m_rawDevicePath=/dev/raw/raw1, m_useChecksums=true, m_useTimestamps=false, m_flashPageSize=4.000 kb, m_logSegmentSize=8.000 mb, m_primaryLogSize=256.000 mb, m_writeBufferSize=32.000 mb, m_secondaryLogBufferSize=128.000 kb, m_utilizationActivateReorganization=60, m_utilizationPromptReorganization=75, m_coldDataThresholdInSec=9000)), ChunkComponentConfig=ChunkComponentConfig(m_keyValueStoreSize=128.000 mb, m_memDumpFolderOnError=, m_chunkLockDisabled=false, m_chunkStorageEnabled=true), EventComponentConfig=EventComponentConfig(m_threadCount=1), JobWorkStealingComponentConfig=JobWorkStealingComponentConfig(m_enabled=false, m_numWorkers=1), NetworkComponentConfig=NetworkComponentConfig(m_coreConfig=CoreConfig(m_ownNodeId=-1, m_numMessageHandlerThreads=2, m_requestMapSize=1048576, m_useStaticExporterPool=true, m_benchmarkMode=false, m_device=ETHERNET), m_nioConfig=NIOConfig(m_maxConnections=100, m_requestTimeOut=333.000 ms, m_connectionTimeOut=333.000 ms, m_flowControlWindow=512.000 kb, m_flowControlWindowThreshold=0.8, m_outgoingRingBufferSize=2.000 mb), m_ibConfig=IBConfig(m_maxConnections=100, m_connectionCreationTimeout=5.000 sec, m_requestTimeOut=100.000 ms, m_flowControlWindow=16.000 mb, m_flowControlWindowThreshold=0.1, m_outgoingRingBufferSize=4.000 mb, m_ibqMaxCapacityBufferCount=8192, m_ibqMaxCapacitySize=64.000 mb, m_incomingBufferSize=32.000 kb, m_incomingBufferPoolTotalSize=2.000 gb, m_sqSize=20, m_srqSize=2000, m_sharedSCQSize=2000, m_sharedRCQSize=2000, m_maxSGEs=4, m_enableSignalHandler=false, m_pinSendRecvThreads=false, m_statisticsThreadPrintIntervalMs=0)), ChunkMigrationComponentConfig=ChunkMigrationComponentConfig(), ChunkBackupComponentConfig=ChunkBackupComponentConfig(), NameserviceComponentConfig=NameserviceComponentConfig(m_type=NAME, m_nameserviceCacheEntries=1000000), FailureComponentConfig=FailureComponentConfig()}, m_serviceConfigs={RecoveryServiceConfig=RecoveryServiceConfig(), NullServiceConfig=NullServiceConfig(), NameserviceServiceConfig=NameserviceServiceConfig(), NetworkServiceConfig=NetworkServiceConfig(), BootServiceConfig=BootServiceConfig(), ChunkDebugServiceConfig=ChunkDebugServiceConfig(), ApplicationServiceConfig=ApplicationServiceConfig(m_autoStart=[ApplicationServiceConfig.ApplicationEntry(m_className=de.hhu.bsinfo.app.DxramFsApp, m_args=dxapp/DxramFsApp.conf, m_startOrderId=0)]), JobServiceConfig=JobServiceConfig(), MigrationServiceConfig=MigrationServiceConfig(), LoggerServiceConfig=LoggerServiceConfig(), ChunkServiceConfig=ChunkServiceConfig(m_removerQueueSize=100000), ChunkAnonServiceConfig=ChunkAnonServiceConfig(), ChunkLocalServiceConfig=ChunkLocalServiceConfig(), StatisticsServiceConfig=StatisticsServiceConfig(m_printStatsPeriodMs=0), MonitoringServiceConfig=MonitoringServiceConfig(), LookupServiceConfig=LookupServiceConfig(), SynchronizationServiceConfig=SynchronizationServiceConfig(m_maxBarriersPerSuperpeer=1000), TemporaryStorageServiceConfig=TemporaryStorageServiceConfig(m_storageMaxNumEntries=1000, m_storageMaxSize=32.000 mb), LogServiceConfig=LogServiceConfig(), MasterSlaveComputeServiceConfig=MasterSlaveComputeServiceConfig(m_role=none, m_computeGroupId=0, m_pingInterval=1000.000 ms)}), m_components={}, m_services={})
+[18:39:41.128][main][DEBUG][DXRAMContext] Verifying component configuration values of ZookeeperBootComponent...
+[18:39:41.128][main][DEBUG][DXRAMContext] Verifying component configuration values of BackupComponent...
+[18:39:41.129][main][DEBUG][DXRAMContext] Verifying component configuration values of ChunkIndexComponent...
+[18:39:41.129][main][DEBUG][DXRAMContext] Verifying component configuration values of LookupComponent...
+[18:39:41.129][main][DEBUG][DXRAMContext] Verifying component configuration values of ApplicationComponent...
+[18:39:41.129][main][DEBUG][DXRAMContext] Verifying component configuration values of NullComponent...
+[18:39:41.129][main][DEBUG][DXRAMContext] Verifying component configuration values of LogComponent...
+[18:39:41.129][main][DEBUG][DXRAMContext] Verifying component configuration values of ChunkComponent...
+[18:39:41.130][main][DEBUG][DXRAMContext] Verifying component configuration values of EventComponent...
+[18:39:41.130][main][DEBUG][DXRAMContext] Verifying component configuration values of JobWorkStealingComponent...
+[18:39:41.130][main][DEBUG][DXRAMContext] Verifying component configuration values of NetworkComponent...
+[18:39:41.130][main][DEBUG][DXRAMContext] Verifying component configuration values of ChunkMigrationComponent...
+[18:39:41.130][main][DEBUG][DXRAMContext] Verifying component configuration values of ChunkBackupComponent...
+[18:39:41.130][main][DEBUG][DXRAMContext] Verifying component configuration values of NameserviceComponent...
+[18:39:41.131][main][DEBUG][DXRAMContext] Verifying component configuration values of FailureComponent...
+[18:39:41.131][main][DEBUG][DXRAMContext] Verifying service configuration values of RecoveryService...
+[18:39:41.131][main][DEBUG][DXRAMContext] Verifying service configuration values of NullService...
+[18:39:41.131][main][DEBUG][DXRAMContext] Verifying service configuration values of NameserviceService...
+[18:39:41.131][main][DEBUG][DXRAMContext] Verifying service configuration values of NetworkService...
+[18:39:41.131][main][DEBUG][DXRAMContext] Verifying service configuration values of BootService...
+[18:39:41.131][main][DEBUG][DXRAMContext] Verifying service configuration values of ChunkDebugService...
+[18:39:41.132][main][DEBUG][DXRAMContext] Verifying service configuration values of ApplicationService...
+[18:39:41.132][main][DEBUG][DXRAMContext] Verifying service configuration values of JobService...
+[18:39:41.132][main][DEBUG][DXRAMContext] Verifying service configuration values of MigrationService...
+[18:39:41.132][main][DEBUG][DXRAMContext] Verifying service configuration values of LoggerService...
+[18:39:41.132][main][DEBUG][DXRAMContext] Verifying service configuration values of ChunkService...
+[18:39:41.132][main][DEBUG][DXRAMContext] Verifying service configuration values of ChunkAnonService...
+[18:39:41.132][main][DEBUG][DXRAMContext] Verifying service configuration values of ChunkLocalService...
+[18:39:41.132][main][DEBUG][DXRAMContext] Verifying service configuration values of StatisticsService...
+[18:39:41.133][main][DEBUG][DXRAMContext] Verifying service configuration values of MonitoringService...
+[18:39:41.134][main][DEBUG][DXRAMContext] Verifying service configuration values of LookupService...
+[18:39:41.134][main][DEBUG][DXRAMContext] Verifying service configuration values of SynchronizationService...
+[18:39:41.134][main][DEBUG][DXRAMContext] Verifying service configuration values of TemporaryStorageService...
+[18:39:41.134][main][DEBUG][DXRAMContext] Verifying service configuration values of LogService...
+[18:39:41.134][main][DEBUG][DXRAMContext] Verifying service configuration values of MasterSlaveComputeService...
+[18:39:41.225][main][INFO ][DXRAMEngine] Initializing engine (version DXRAMVersion 0.5.0)...
+[18:39:41.238][main][INFO ][DXRAMEngine] Initializing 15 components...
+[18:39:41.238][main][INFO ][NullComponent] Initializing component...
+[18:39:41.238][main][INFO ][NullComponent] Initializing component successful
+[18:39:41.238][main][INFO ][EventComponent] Initializing component...
+[18:39:41.239][main][INFO ][EventComponent] EventExecutor: Initialising 1 threads
+[18:39:41.241][main][INFO ][EventComponent] Initializing component successful
+[18:39:41.241][main][INFO ][ZookeeperBootComponent] Initializing component...
+[18:39:41.241][main][INFO ][ZookeeperBootComponent] Initializing with address 127.0.0.1:22223 and role peer
+[18:39:41.242][main][INFO ][ZookeeperBootComponent] Connecting to ZooKeeper at 127.0.0.1:2181
+[18:39:41.414][main][INFO ][org.apache.curator.utils.Compatibility] Running in ZooKeeper 3.4.x compatibility mode
+[18:39:41.480][main][INFO ][org.apache.curator.framework.imps.CuratorFrameworkImpl] Starting
+[18:39:41.486][main][DEBUG][org.apache.curator.CuratorZookeeperClient] Starting
+[18:39:41.487][main][DEBUG][org.apache.curator.ConnectionState] Starting
+[18:39:41.487][main][DEBUG][org.apache.curator.ConnectionState] reset
+[18:39:41.548][main][INFO ][org.apache.curator.framework.imps.CuratorFrameworkImpl] Default schema
+[18:39:41.664][main-EventThread][DEBUG][org.apache.curator.ConnectionState] Negotiated session timeout: 40000
+[18:39:41.710][main-EventThread][INFO ][org.apache.curator.framework.state.ConnectionStateManager] State change: CONNECTED
+[18:39:41.719][main-EventThread][DEBUG][org.apache.curator.framework.imps.CuratorFrameworkImpl] Clearing sleep for 0 operations
+[18:39:41.894][main][INFO ][ZookeeperBootComponent] Waiting on bootstrap node to finish initialization
+[18:39:41.960][main][INFO ][ZookeeperBootComponent] Bootstrap node is ready
+[18:39:42.001][main][INFO ][ZookeeperBootComponent] Assigned counter value 3 to this node
+[18:39:42.016][main][INFO ][ZookeeperBootComponent] Detected capabilities [STORAGE]
+[18:39:42.486][main][INFO ][ZookeeperBootComponent] Initializing component successful
+[18:39:42.487][main][INFO ][NetworkComponent] Initializing component...
+[18:39:42.490][main][INFO ][NetworkComponent] 127.0.0.1 is bound to lo
+[18:39:42.504][discovery][INFO ][de.hhu.bsinfo.dxram.boot.NodeRegistry] Service discovery cache changed
+[18:39:43.629][main][INFO ][DefaultMessageHandlerPool] Network: DefaultMessageHandlerPool: Initialising 2 threads
+[18:39:43.639][main][INFO ][ExclusiveMessageHandler] Network: ExclusiveMessageHandler: Initialising thread
+[18:39:43.649][discovery][INFO ][de.hhu.bsinfo.dxram.boot.NodeRegistry] Node [P|B1BD](127.0.0.1:22222) with capabilities [STORAGE] joined the network
+[18:39:43.651][discovery][INFO ][de.hhu.bsinfo.dxram.boot.NodeRegistry] Node [S|C0C1](127.0.0.1:22221) with capabilities [] joined the network
+[18:39:43.721][main][INFO ][NIOConnectionManager] Starting NIOSelector...
+[18:39:43.900][main][WARN ][NIOSelector] Receive buffer could not be set properly. Check OS settings! Requested: 2097152, actual: 212992
+[18:39:43.908][main][DEBUG][EventComponent] Registered listener de.hhu.bsinfo.dxram.net.NetworkComponent for event de.hhu.bsinfo.dxram.failure.events.NodeFailureEvent
+[18:39:43.909][main][INFO ][NetworkComponent] Initializing component successful
+[18:39:43.911][main][INFO ][LookupComponent] Initializing component...
+[18:39:43.935][main][DEBUG][EventComponent] Registered listener de.hhu.bsinfo.dxram.lookup.LookupComponent for event de.hhu.bsinfo.dxram.failure.events.NodeFailureEvent
+[18:39:44.011][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlayPeer for 2 30
+[18:39:44.012][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlayPeer for 2 16
+[18:39:44.012][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.overlay.OverlayPeer for 2 27
+[18:39:44.021][main][DEBUG][AbstractConnectionManager] Active create connection to: 0xC0C1
+[18:39:44.074][main][DEBUG][AbstractFlowControl] Flow control settings for node 0xC0C1: window size 524288, threshold 0.800000
+[18:39:44.160][main][WARN ][NIOPipeOut] Send buffer size could not be set properly. Check OS settings! Requested: 2097152, actual: 212992
+[18:39:44.180][main][DEBUG][AbstractConnectionManager] Connection created: 0xC0C1
+[18:39:44.217][Network-NIOSelector][DEBUG][NIOConnectionManager] Passive create new connection to 0xC0C1
+[18:39:44.232][main][DEBUG][EventComponent] Registered listener de.hhu.bsinfo.dxram.lookup.LookupComponent for event de.hhu.bsinfo.dxram.lookup.events.NameserviceCacheEntryUpdateEvent
+[18:39:44.233][main][INFO ][LookupComponent] Initializing component successful
+[18:39:44.234][main][INFO ][FailureComponent] Initializing component...
+[18:39:44.237][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.failure.FailureComponent for 6 1
+[18:39:44.238][main][DEBUG][EventComponent] Registered listener de.hhu.bsinfo.dxram.failure.FailureComponent for event de.hhu.bsinfo.dxram.net.events.ConnectionLostEvent
+[18:39:44.239][main][DEBUG][EventComponent] Registered listener de.hhu.bsinfo.dxram.failure.FailureComponent for event de.hhu.bsinfo.dxram.net.events.ResponseDelayedEvent
+[18:39:44.240][main][INFO ][FailureComponent] Initializing component successful
+[18:39:44.241][main][INFO ][ChunkBackupComponent] Initializing component...
+[18:39:44.242][main][INFO ][ChunkBackupComponent] Initializing component successful
+[18:39:44.243][main][INFO ][ChunkMigrationComponent] Initializing component...
+[18:39:44.244][main][INFO ][ChunkMigrationComponent] Initializing component successful
+[18:39:44.244][main][INFO ][ChunkComponent] Initializing component...
+[18:39:44.247][main][INFO ][ChunkComponent] Allocating native memory (128 mb). This may take a while...
+[18:39:44.301][main][INFO ][Heap] Creating Heap, size 134217728 bytes
+[18:39:44.524][main][DEBUG][Heap] Created free block lists, m_freeBlocksListCount 25, m_freeBlocksListSize 150,  m_baseFreeBlockList 134217578
+[18:39:44.531][main][INFO ][CIDTable] CIDTable: init success (page directory at: 0x1)
+[18:39:44.556][main][INFO ][ChunkComponent] Initializing component successful
+[18:39:44.556][main][INFO ][LogComponent] Initializing component...
+[18:39:44.557][main][INFO ][LogComponent] Initializing component successful
+[18:39:44.557][main][INFO ][BackupComponent] Initializing component...
+[18:39:44.558][main][INFO ][BackupComponent] Initializing component successful
+[18:39:44.558][main][INFO ][ChunkIndexComponent] Initializing component...
+[18:39:44.559][main][INFO ][ChunkIndexComponent] Initializing component successful
+[18:39:44.559][main][INFO ][NameserviceComponent] Initializing component...
+[18:39:44.565][main][INFO ][NameserviceComponent] Initializing component successful
+[18:39:44.565][main][INFO ][JobWorkStealingComponent] Initializing component...
+[18:39:44.566][main][INFO ][JobWorkStealingComponent] Initializing component successful
+[18:39:44.566][main][INFO ][ApplicationComponent] Initializing component...
+[18:39:44.568][main][INFO ][ApplicationLoader] Scanning for applications in dxapp
+[18:39:44.608][main][INFO ][ApplicationLoader] Found application de.hhu.bsinfo.app.DxramFsApp
+[18:39:44.664][main][INFO ][ApplicationLoader] Found application de.hhu.bsinfo.app.DxramFsApp
+[18:39:44.666][main][INFO ][ApplicationComponent] Initializing component successful
+[18:39:44.667][main][INFO ][DXRAMEngine] Initializing components done
+[18:39:44.667][main][INFO ][DXRAMEngine] Starting 20 services...
+[18:39:44.668][main][INFO ][StatisticsService] Starting service...
+[18:39:44.668][main][INFO ][StatisticsService] Starting service successful
+[18:39:44.669][main][INFO ][TemporaryStorageService] Starting service...
+[18:39:44.669][main][INFO ][TemporaryStorageService] Starting service successful
+[18:39:44.669][main][INFO ][RecoveryService] Starting service...
+[18:39:44.672][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.recovery.RecoveryService for 7 1
+[18:39:44.673][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.recovery.RecoveryService for 7 3
+[18:39:44.673][main][WARN ][RecoveryService] Backup is not activated/available. Recovery service will not work!
+[18:39:44.674][main][INFO ][RecoveryService] Starting service successful
+[18:39:44.674][main][INFO ][MigrationService] Starting service...
+[18:39:44.691][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.migration.MigrationManager for 4 4
+[18:39:44.694][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.migration.MigrationManager for 4 5
+[18:39:44.695][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.migration.MigrationService for 4 1
+[18:39:44.696][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.migration.MigrationService for 4 3
+[18:39:44.697][main][INFO ][MigrationService] Starting service successful
+[18:39:44.697][main][INFO ][JobService] Starting service...
+[18:39:44.700][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.job.JobService for 9 1
+[18:39:44.701][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.job.JobService for 9 2
+[18:39:44.701][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.job.JobService for 9 4
+[18:39:44.703][main][DEBUG][JobService] Registering job type 0 for class class de.hhu.bsinfo.dxram.job.JobNull
+[18:39:44.704][main][INFO ][JobService] Starting service successful
+[18:39:44.704][main][INFO ][ChunkService] Starting service...
+[18:39:44.709][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.chunk.operation.Status for 3 15
+[18:39:44.720][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.chunk.operation.CIDStatus for 3 17
+[18:39:44.732][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.chunk.operation.CIDStatus for 3 19
+[18:39:44.742][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.chunk.operation.Create for 3 13
+[18:39:44.752][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.chunk.operation.Get for 3 1
+[18:39:44.760][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.chunk.operation.Put for 3 5
+[18:39:44.771][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.chunk.operation.Remove for 3 11
+[18:39:44.772][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.chunk.operation.Remove for 3 12
+[18:39:44.779][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.chunk.operation.Resize for 3 23
+[18:39:44.780][main][INFO ][ChunkService] Starting service successful
+[18:39:44.780][main][INFO ][ChunkLocalService] Starting service...
+[18:39:44.786][main][INFO ][ChunkLocalService] Starting service successful
+[18:39:44.786][main][INFO ][SynchronizationService] Starting service...
+[18:39:44.787][main][INFO ][SynchronizationService] Starting service successful
+[18:39:44.787][main][INFO ][LookupService] Starting service...
+[18:39:44.794][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.lookup.LookupService for 2 64
+[18:39:44.795][main][INFO ][LookupService] Starting service successful
+[18:39:44.795][main][INFO ][NameserviceService] Starting service...
+[18:39:44.796][main][INFO ][NameserviceService] Starting service successful
+[18:39:44.796][main][INFO ][NullService] Starting service...
+[18:39:44.797][main][INFO ][NullService] Starting service successful
+[18:39:44.797][main][INFO ][ChunkAnonService] Starting service...
+[18:39:44.822][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.chunk.operation.GetAnon for 3 3
+[18:39:44.829][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.chunk.operation.PutAnon for 3 7
+[18:39:44.829][main][INFO ][ChunkAnonService] Starting service successful
+[18:39:44.830][main][INFO ][NetworkService] Starting service...
+[18:39:44.830][main][INFO ][NetworkService] Starting service successful
+[18:39:44.831][main][INFO ][LoggerService] Starting service...
+[18:39:44.831][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.logger.LoggerService for 8 1
+[18:39:44.837][main][INFO ][LoggerService] Starting service successful
+[18:39:44.837][main][INFO ][ChunkDebugService] Starting service...
+[18:39:44.840][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.chunk.operation.Dump for 3 21
+[18:39:44.846][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.chunk.operation.Reset for 3 22
+[18:39:44.847][main][INFO ][ChunkDebugService] Starting service successful
+[18:39:44.847][main][INFO ][MasterSlaveComputeService] Starting service...
+[18:39:44.850][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.ms.MasterSlaveComputeService for 10 5
+[18:39:44.854][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.ms.MasterSlaveComputeService for 10 7
+[18:39:44.854][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.ms.MasterSlaveComputeService for 10 10
+[18:39:44.856][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.ms.MasterSlaveComputeService for 10 9
+[18:39:44.873][main][INFO ][MasterSlaveComputeService] Started compute node type 'none' with compute group id 0
+[18:39:44.873][main][INFO ][MasterSlaveComputeService] Starting service successful
+[18:39:44.874][main][INFO ][BootService] Starting service...
+[18:39:44.875][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.boot.BootService for 1 1
+[18:39:44.876][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.boot.BootService for 1 2
+[18:39:44.876][main][INFO ][BootService] Starting service successful
+[18:39:44.877][main][INFO ][MonitoringService] Starting service...
+[18:39:44.878][main][WARN ][DXRAMEngine] Getting component 'MonitoringComponent', not available
+[18:39:44.888][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.monitoring.MonitoringService for 12 4
+[18:39:44.889][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.monitoring.MonitoringService for 12 0
+[18:39:44.889][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.monitoring.MonitoringService for 12 2
+[18:39:44.890][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.monitoring.MonitoringService for 12 3
+[18:39:44.894][main][INFO ][MonitoringService] Starting service successful
+[18:39:44.895][main][INFO ][LogService] Starting service...
+[18:39:44.897][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.log.LogService for 5 1
+[18:39:44.898][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.log.LogService for 5 2
+[18:39:44.904][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.log.LogService for 5 3
+[18:39:44.904][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.log.LogService for 5 4
+[18:39:44.905][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.log.LogService for 5 5
+[18:39:44.906][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.log.LogService for 5 7
+[18:39:44.907][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.log.LogService for 5 9
+[18:39:44.908][main][INFO ][LogService] Starting service successful
+[18:39:44.908][main][INFO ][ApplicationService] Starting service...
+[18:39:44.909][main][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.dxram.app.ApplicationService for 13 1
+[18:39:44.910][main][INFO ][ApplicationService] Starting service successful
+[18:39:44.910][main][INFO ][DXRAMEngine] Starting services done
+[18:39:44.911][main][INFO ][DXRAMEngine] Finishing initialization of components
+[18:39:44.921][main][INFO ][DXRAMEngine] Initializing engine done
+>>> DXRAM node <<<
+NodeID: 0xFA35
+Role: peer
+Address: /127.0.0.1:22223
+
+!---ooo---!
+[18:39:44.946][DxramFsApp][DEBUG][ApplicationRunner] Application started: Thread[DxramFsApp,5,main]
+[18:39:44.948][DxramFsApp][INFO ][AbstractApplication] Starting 'DxramFsApp' with arguments (1): [dxapp/DxramFsApp.conf]
+application DxramFsApp on a peer and my dxram node id is 0xFA35
+How Hadoop DxramFs can contact me:
+DXNET dxnet peer_id  : 2
+DXNET dxnet peer_addr: 127.0.0.1
+DXNET dxnet peer_port: 65222
+[18:39:46.065][DxramFsApp][INFO ][DefaultMessageHandlerPool] Network: DefaultMessageHandlerPool: Initialising 2 threads
+[18:39:46.067][DxramFsApp][INFO ][ExclusiveMessageHandler] Network: ExclusiveMessageHandler: Initialising thread
+[18:39:46.092][DxramFsApp][INFO ][NIOConnectionManager] Starting NIOSelector...
+[18:39:46.244][DxramFsApp][WARN ][NIOSelector] Receive buffer could not be set properly. Check OS settings! Requested: 2097152, actual: 212992
+[18:39:46.246][DxramFsApp][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.app.dxramfscore.rpc.BlockinfoMessage$InHandler for 42 10
+[18:39:46.246][DxramFsApp][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.app.dxramfscore.rpc.CreateMessage$InHandler for 42 11
+[18:39:46.246][DxramFsApp][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.app.dxramfscore.rpc.DeleteMessage$InHandler for 42 12
+[18:39:46.247][DxramFsApp][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.app.dxramfscore.rpc.ExistsMessage$InHandler for 42 13
+[18:39:46.247][DxramFsApp][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.app.dxramfscore.rpc.FileLengthMessage$InHandler for 42 14
+[18:39:46.254][DxramFsApp][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.app.dxramfscore.rpc.IsDirectoryMessage$InHandler for 42 15
+[18:39:46.255][DxramFsApp][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.app.dxramfscore.rpc.ListMessage$InHandler for 42 16
+[18:39:46.255][DxramFsApp][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.app.dxramfscore.rpc.MkDirsMessage$InHandler for 42 17
+[18:39:46.255][DxramFsApp][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.app.dxramfscore.rpc.RenameToMessage$InHandler for 42 19
+[18:39:46.255][DxramFsApp][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.app.dxramfscore.rpc.GetBlockMessage$InHandler for 42 18
+[18:39:46.255][DxramFsApp][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.app.dxramfscore.rpc.AskBlockMessage$InHandler for 42 20
+[18:39:46.255][DxramFsApp][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.app.dxramfscore.rpc.FsNodeMessage$InHandler for 42 21
+[18:39:46.256][DxramFsApp][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.app.dxramfscore.rpc.FsNodeByIdMessage$InHandler for 42 22
+[18:39:46.256][DxramFsApp][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.app.dxramfscore.rpc.FlushMessage$InHandler for 42 23
+[18:39:46.256][DxramFsApp][DEBUG][MessageHandlers] Added new MessageReceiver class de.hhu.bsinfo.app.dxramfscore.rpc.FlushOkMessage$InHandler for 42 24
+[18:39:46.334][DxramFsApp][DEBUG][AbstractConnectionManager] Active create connection to: 0xB1BD
+[18:39:46.337][DxramFsApp][DEBUG][AbstractFlowControl] Flow control settings for node 0xB1BD: window size 524288, threshold 0.800000
+[18:39:46.351][DxramFsApp][WARN ][NIOPipeOut] Send buffer size could not be set properly. Check OS settings! Requested: 2097152, actual: 212992
+[18:39:46.383][DxramFsApp][DEBUG][AbstractConnectionManager] Connection created: 0xB1BD
+[18:39:46.412][Network-NIOSelector][DEBUG][NIOConnectionManager] Passive create new connection to 0xB1BD
+de.hhu.bsinfo.dxnet.core.NetworkException: Message deserialization finished too early (without overflow): 1198 (payload size) > 1070 (deserialized bytes), current Message: de.hhu.bsinfo.dxram.chunk.messages.GetResponse, importer type: MessageImporterDefault, importer detail: m_usedCounter 3, m_bufferAddress 0x7f8ea4831b00, m_currentPosition 1080, m_startPosition 10
+ImporterCollectionState:
+m_importer [m_usedCounter 3, m_bufferAddress 0x7f8ea4831b00, m_currentPosition 1080, m_startPosition 10]
+m_importerOverflow [m_usedCounter 0, m_bufferAddress 0x0, m_bufferSize 0, m_currentPosition 0, m_startPosition 0, m_unfinishedOperation (null)]
+m_importerUnderflow [m_usedCounter 0, m_bufferAddress 0x0, m_currentPosition 0, m_skipBytes 0, m_skippedBytes 0, m_unfinishedOperation (null)]
+m_importerUnderOverflow [m_usedCounter 0, m_bufferAddress 0x0, m_bufferSize 0, m_currentPosition 0, m_skipBytes 0, m_skippedBytes 0, m_unfinishedOperation (null)]
+Current used (MessageImporterDefault) [m_usedCounter 3, m_bufferAddress 0x7f8ea4831b00, m_currentPosition 1080, m_startPosition 10]
+Prev used (MessageImporterDefault) [m_usedCounter 3, m_bufferAddress 0x7f8ea4831b00, m_currentPosition 1080, m_startPosition 10]
+	at de.hhu.bsinfo.dxnet.core.AbstractPipeIn.readPayload(AbstractPipeIn.java:697)
+	at de.hhu.bsinfo.dxnet.core.AbstractPipeIn.createAndImportMessage(AbstractPipeIn.java:468)
+	at de.hhu.bsinfo.dxnet.core.MessageHeader.createAndImportMessage(MessageHeader.java:221)
+	at de.hhu.bsinfo.dxnet.MessageHandler.run(MessageHandler.java:184)
+[18:39:46.718][DxramFsApp][DEBUG][Request] Response for request GetRequest[5, 0xB1BD] , delayed, latency 333.579151 ms
+[18:39:46.720][DxramFsApp][WARN ][DXNet] Sending sync, waiting for responses to GetRequest[5, 0xB1BD] failed, timeout: 333 ms
+[18:39:46.724][EventExecutor-thread-1][DEBUG][FailureComponent] ResponseDelayedEvent triggered: 0xB1BD. Sending default message and return.
+
+
+
+
+
+
+
+
+
+
+
 
 
 

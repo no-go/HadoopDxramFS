@@ -121,7 +121,10 @@ public class DxramFsApp extends AbstractApplication {
             LOG.error("Chunk creation failed");
             System.exit(-1);
         }
-
+        // @todo did we need this realy?
+        chu.setID(chunkIDs[0]);
+        chunkS.get().get(chu);
+        
         LOG.debug("Created chunk of size %d on peer 0x%X: 0x%X", chu.sizeofObject(), peerId, chunkIDs[0]);
         return chunkIDs[0];
     }
