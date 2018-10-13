@@ -201,7 +201,9 @@ bis hier: 372,5
 |               |                                           |              | flush() realisiert mit anlegen neuer blöcke. Test des Codes scheitert mal
 |               |                                           |              | wieder an dxnet und der übertragung von array daten.
 +---------------+-------------------------------------------+--------------+-----------------------
-|  2018-10-05   |                                           |              | 
+|  2018-10-05   |  Thema Besprechung (12.10.) dxnet übergabe|       9,00   | dxnet non-hadoop cleint gemacht zum debuggen. Anfang des wechsels auf neue dxram und dxnet version (0.5.0)
++---------------+-------------------------------------------+--------------+-----------------------
+| 2018-10-13(sa)|                                           |              | 
 
 
 
@@ -240,13 +242,29 @@ todo: test alles auf cluster/hilbert
 
 -----------------------------------------------------------------------------------------------
 
+## notiz 2018-10-13
+
+14:30 -         switch auf neues dxnet und dxram, erzeugen eines neuen create auf basis der dxram peers, die online sind
+                und einlesen der (alten) dxramApp.config datei.
+
+todo: dxnet_to_dxram_peers in DxramFsConfig pflegen: auch im hadoop-Code !
 
 todo: auf basis von
   https://github.com/hhu-bsinfo/dxapps/blob/development/dxa-terminal/server/src/main/java/de/hhu/bsinfo/dxterm/server/cmd/TcmdChunkcreate.java
   ein eigenes create machen
-
 todo2: eignene dxramfsConfig machen!
+
 todo3: anonService ansehn
+todo4: analyse FsNode holen mit non-hadoop client
+
+
+
+
+
+
+
+
+
 
 ## notiz 2018-10-12
 
@@ -254,6 +272,8 @@ todo3: anonService ansehn
                 - DXnet: config neuerungen
 13:45 -         Test neues DXnet, Umbau meines Codes auf neues DXnet, umstellung auf neues dxnet
 15:15 - 18:30   probleme die mit lombok und m_ erzeugten getter() in dxnet als code in mein maven/hadoop code ein zu bauen.
+
+6
 
 - ChunkRemoveService gibt es nicht mehr. Mit ChunkService.remove().remove(chunkid) geht das nun.
 - .dxram.data.ChunkID gibt es nicht mehr. Ist nun in .dxmem.data.ChunkID
@@ -291,6 +311,7 @@ todo: analyse FsNode holen mit non-hadoop client
 
 todo: debug and test rename() und delete() bei Dateien (zur zeit datei delete inkomplett)
 
+3
 
 
 

@@ -1,0 +1,459 @@
+{
+  "m_config": {
+    "m_engineConfig": {
+      "m_address": {
+        "m_ip": "127.0.0.1",
+        "m_port": 22222
+      },
+      "m_role": "Peer",
+      "m_jniPath": "jni"
+    },
+    "m_componentConfigs": {
+      "ZookeeperBootComponentConfig": {
+        "m_path": "/dxram",
+        "m_connection": {
+          "m_ip": "127.0.0.1",
+          "m_port": 2181
+        },
+        "m_timeout": {
+          "m_value": 10000,
+          "m_unit": "ms"
+        },
+        "m_bitfieldSize": {
+          "m_value": 2097152,
+          "m_unit": "b"
+        },
+        "m_nodesConfig": [
+          {
+            "m_address": {
+              "m_ip": "127.0.0.1",
+              "m_port": 22221
+            },
+            "m_role": "SUPERPEER",
+            "m_rack": 0,
+            "m_switch": 0,
+            "m_readFromFile": 1
+          },
+          {
+            "m_address": {
+              "m_ip": "127.0.0.1",
+              "m_port": 22222
+            },
+            "m_role": "PEER",
+            "m_rack": 0,
+            "m_switch": 0,
+            "m_readFromFile": 1
+          },
+          {
+            "m_address": {
+              "m_ip": "127.0.0.1",
+              "m_port": 22223
+            },
+            "m_role": "PEER",
+            "m_rack": 0,
+            "m_switch": 0,
+            "m_readFromFile": 1
+          }
+        ],
+        "m_rack": 0,
+        "m_switch": 0,
+        "m_class": "de.hhu.bsinfo.dxram.boot.ZookeeperBootComponentConfig",
+        "m_componentClass": "ZookeeperBootComponent",
+        "m_enabledForSuperpeer": true,
+        "m_enabledForPeer": true
+      },
+      "BackupComponentConfig": {
+        "m_backupActive": false,
+        "m_availableForBackup": true,
+        "m_backupDirectory": "./log/",
+        "m_backupRangeSize": {
+          "m_value": 268435456,
+          "m_unit": "b"
+        },
+        "m_replicationFactor": 3,
+        "m_backupPlacementStrategy": "Random",
+        "m_disjunctiveFirstBackupPeer": true,
+        "m_rackAware": false,
+        "m_switchAware": false,
+        "m_class": "de.hhu.bsinfo.dxram.backup.BackupComponentConfig",
+        "m_componentClass": "BackupComponent",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "MemoryManagerComponentConfig": {
+        "m_keyValueStoreSize": {
+          "m_value": 134217728,
+          "m_unit": "b"
+        },
+        "m_keyValueStoreMaxBlockSize": {
+          "m_value": 8388608,
+          "m_unit": "b"
+        },
+        "m_memDumpFolderOnError": "",
+        "m_class": "de.hhu.bsinfo.dxram.mem.MemoryManagerComponentConfig",
+        "m_componentClass": "MemoryManagerComponent",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "PeerLockComponentConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.lock.PeerLockComponentConfig",
+        "m_componentClass": "PeerLockComponent",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "LookupComponentConfig": {
+        "m_cachesEnabled": true,
+        "m_maxCacheEntries": 1000,
+        "m_cacheTtl": {
+          "m_value": 1000,
+          "m_unit": "ms"
+        },
+        "m_stabilizationBreakTime": {
+          "m_value": 1000,
+          "m_unit": "ms"
+        },
+        "m_class": "de.hhu.bsinfo.dxram.lookup.LookupComponentConfig",
+        "m_componentClass": "LookupComponent",
+        "m_enabledForSuperpeer": true,
+        "m_enabledForPeer": true
+      },
+      "ApplicationComponentConfig": {
+        "m_applicationPath": "dxapp",
+        "m_class": "de.hhu.bsinfo.dxram.app.ApplicationComponentConfig",
+        "m_componentClass": "ApplicationComponent",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "NullComponentConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.engine.NullComponentConfig",
+        "m_componentClass": "NullComponent",
+        "m_enabledForSuperpeer": true,
+        "m_enabledForPeer": true
+      },
+      "LogComponentConfig": {
+        "m_harddriveAccess": "raf",
+        "m_rawDevicePath": "/dev/raw/raw1",
+        "m_useChecksums": true,
+        "m_useTimestamps": true,
+        "m_flashPageSize": {
+          "m_value": 4096,
+          "m_unit": "b"
+        },
+        "m_logSegmentSize": {
+          "m_value": 8388608,
+          "m_unit": "b"
+        },
+        "m_primaryLogSize": {
+          "m_value": 268435456,
+          "m_unit": "b"
+        },
+        "m_writeBufferSize": {
+          "m_value": 33554432,
+          "m_unit": "b"
+        },
+        "m_secondaryLogBufferSize": {
+          "m_value": 131072,
+          "m_unit": "b"
+        },
+        "m_utilizationActivateReorganization": 60,
+        "m_utilizationPromptReorganization": 75,
+        "m_coldDataThresholdInSec": 9000,
+        "m_class": "de.hhu.bsinfo.dxram.log.LogComponentConfig",
+        "m_componentClass": "LogComponent",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "ChunkComponentConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.chunk.ChunkComponentConfig",
+        "m_componentClass": "ChunkComponent",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "EventComponentConfig": {
+        "m_threadCount": 1,
+        "m_class": "de.hhu.bsinfo.dxram.event.EventComponentConfig",
+        "m_componentClass": "EventComponent",
+        "m_enabledForSuperpeer": true,
+        "m_enabledForPeer": true
+      },
+      "MonitoringComponentConfig": {
+        "m_monitoringActive": false,
+        "m_nic": "",
+        "m_disk": "",
+        "m_timeWindow": {
+          "m_value": 2000,
+          "m_unit": "ms"
+        },
+        "m_collectsPerWindow": 10,
+        "m_monitoringFolder": "./mon",
+        "m_class": "de.hhu.bsinfo.dxram.monitoring.MonitoringComponentConfig",
+        "m_componentClass": "MonitoringComponent",
+        "m_enabledForSuperpeer": true,
+        "m_enabledForPeer": true
+      },
+      "JobWorkStealingComponentConfig": {
+        "m_numWorkers": 1,
+        "m_class": "de.hhu.bsinfo.dxram.job.JobWorkStealingComponentConfig",
+        "m_componentClass": "JobWorkStealingComponent",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "NetworkComponentConfig": {
+        "m_core": {
+          "m_numMessageHandlerThreads": 2,
+          "m_requestMapSize": 1048576,
+          "m_useStaticExporterPool": true,
+          "m_benchmarkMode": false,
+          "m_device": "Ethernet"
+        },
+        "m_nio": {
+          "m_maxConnections": 100,
+          "m_requestTimeOut": {
+            "m_value": 333,
+            "m_unit": "ms"
+          },
+          "m_connectionTimeOut": {
+            "m_value": 333,
+            "m_unit": "ms"
+          },
+          "m_flowControlWindow": {
+            "m_value": 524288,
+            "m_unit": "b"
+          },
+          "m_flowControlWindowThreshold": 0.8,
+          "m_outgoingRingBufferSize": {
+            "m_value": 2097152,
+            "m_unit": "b"
+          }
+        },
+        "m_ib": {
+          "m_maxConnections": 100,
+          "m_connectionCreationTimeout": {
+            "m_value": 5000,
+            "m_unit": "ms"
+          },
+          "m_requestTimeOut": {
+            "m_value": 100,
+            "m_unit": "ms"
+          },
+          "m_flowControlWindow": {
+            "m_value": 16777216,
+            "m_unit": "b"
+          },
+          "m_flowControlWindowThreshold": 0.1,
+          "m_outgoingRingBufferSize": {
+            "m_value": 4194304,
+            "m_unit": "b"
+          },
+          "m_ibqMaxCapacityBufferCount": 8192,
+          "m_ibqMaxCapacitySize": {
+            "m_value": 67108864,
+            "m_unit": "b"
+          },
+          "m_incomingBufferSize": {
+            "m_value": 32768,
+            "m_unit": "b"
+          },
+          "m_incomingBufferPoolTotalSize": {
+            "m_value": 2147483648,
+            "m_unit": "b"
+          },
+          "m_sqSize": 20,
+          "m_srqSize": 2000,
+          "m_sharedSCQSize": 2000,
+          "m_sharedRCQSize": 2000,
+          "m_maxSGEs": 4,
+          "m_enableSignalHandler": false,
+          "m_pinSendRecvThreads": false,
+          "m_statisticsThreadPrintIntervalMs": 0
+        },
+        "m_class": "de.hhu.bsinfo.dxram.net.NetworkComponentConfig",
+        "m_componentClass": "NetworkComponent",
+        "m_enabledForSuperpeer": true,
+        "m_enabledForPeer": true
+      },
+      "ChunkMigrationComponentConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.chunk.ChunkMigrationComponentConfig",
+        "m_componentClass": "ChunkMigrationComponent",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "ChunkBackupComponentConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.chunk.ChunkBackupComponentConfig",
+        "m_componentClass": "ChunkBackupComponent",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "NameserviceComponentConfig": {
+        "m_type": "NAME",
+        "m_nameserviceCacheEntries": 1000000,
+        "m_class": "de.hhu.bsinfo.dxram.nameservice.NameserviceComponentConfig",
+        "m_componentClass": "NameserviceComponent",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "FailureComponentConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.failure.FailureComponentConfig",
+        "m_componentClass": "FailureComponent",
+        "m_enabledForSuperpeer": true,
+        "m_enabledForPeer": true
+      }
+    },
+    "m_serviceConfigs": {
+      "RecoveryServiceConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.recovery.RecoveryServiceConfig",
+        "m_serviceClass": "RecoveryService",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "NullServiceConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.engine.NullServiceConfig",
+        "m_serviceClass": "NullService",
+        "m_enabledForSuperpeer": true,
+        "m_enabledForPeer": true
+      },
+      "NameserviceServiceConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.nameservice.NameserviceServiceConfig",
+        "m_serviceClass": "NameserviceService",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "ChunkRemoveServiceConfig": {
+        "m_removerQueueSize": 100000,
+        "m_class": "de.hhu.bsinfo.dxram.chunk.ChunkRemoveServiceConfig",
+        "m_serviceClass": "ChunkRemoveService",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "NetworkServiceConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.net.NetworkServiceConfig",
+        "m_serviceClass": "NetworkService",
+        "m_enabledForSuperpeer": true,
+        "m_enabledForPeer": true
+      },
+      "BootServiceConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.boot.BootServiceConfig",
+        "m_serviceClass": "BootService",
+        "m_enabledForSuperpeer": true,
+        "m_enabledForPeer": true
+      },
+      "ApplicationServiceConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.app.ApplicationServiceConfig",
+        "m_serviceClass": "ApplicationService",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "JobServiceConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.job.JobServiceConfig",
+        "m_serviceClass": "JobService",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "MigrationServiceConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.migration.MigrationServiceConfig",
+        "m_serviceClass": "MigrationService",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "LoggerServiceConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.logger.LoggerServiceConfig",
+        "m_serviceClass": "LoggerService",
+        "m_enabledForSuperpeer": true,
+        "m_enabledForPeer": true
+      },
+      "ChunkServiceConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.chunk.ChunkServiceConfig",
+        "m_serviceClass": "ChunkService",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "ChunkAnonServiceConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.chunk.ChunkAnonServiceConfig",
+        "m_serviceClass": "ChunkAnonService",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "PeerLockServiceConfig": {
+        "m_remoteLockSendInterval": {
+          "m_value": 10,
+          "m_unit": "ms"
+        },
+        "m_remoteLockTryTimeout": {
+          "m_value": 100,
+          "m_unit": "ms"
+        },
+        "m_class": "de.hhu.bsinfo.dxram.lock.PeerLockServiceConfig",
+        "m_serviceClass": "PeerLockService",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "StatisticsServiceConfig": {
+        "m_printStatsPeriodMs": 0,
+        "m_class": "de.hhu.bsinfo.dxram.stats.StatisticsServiceConfig",
+        "m_serviceClass": "StatisticsService",
+        "m_enabledForSuperpeer": true,
+        "m_enabledForPeer": true
+      },
+      "MonitoringServiceConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.monitoring.MonitoringServiceConfig",
+        "m_serviceClass": "MonitoringService",
+        "m_enabledForSuperpeer": true,
+        "m_enabledForPeer": true
+      },
+      "ChunkAsyncServiceConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.chunk.ChunkAsyncServiceConfig",
+        "m_serviceClass": "ChunkAsyncService",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "LookupServiceConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.lookup.LookupServiceConfig",
+        "m_serviceClass": "LookupService",
+        "m_enabledForSuperpeer": true,
+        "m_enabledForPeer": true
+      },
+      "SynchronizationServiceConfig": {
+        "m_maxBarriersPerSuperpeer": 1000,
+        "m_class": "de.hhu.bsinfo.dxram.sync.SynchronizationServiceConfig",
+        "m_serviceClass": "SynchronizationService",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "TemporaryStorageServiceConfig": {
+        "m_storageMaxNumEntries": 1000,
+        "m_storageMaxSize": {
+          "m_value": 33554432,
+          "m_unit": "b"
+        },
+        "m_class": "de.hhu.bsinfo.dxram.tmp.TemporaryStorageServiceConfig",
+        "m_serviceClass": "TemporaryStorageService",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "LogServiceConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.log.LogServiceConfig",
+        "m_serviceClass": "LogService",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "ChunkMemoryServiceConfig": {
+        "m_class": "de.hhu.bsinfo.dxram.chunk.ChunkMemoryServiceConfig",
+        "m_serviceClass": "ChunkMemoryService",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      },
+      "MasterSlaveComputeServiceConfig": {
+        "m_role": "none",
+        "m_computeGroupId": 0,
+        "m_pingInterval": {
+          "m_value": 1000,
+          "m_unit": "ms"
+        },
+        "m_class": "de.hhu.bsinfo.dxram.ms.MasterSlaveComputeServiceConfig",
+        "m_serviceClass": "MasterSlaveComputeService",
+        "m_enabledForSuperpeer": false,
+        "m_enabledForPeer": true
+      }
+    }
+  }
+}
