@@ -59,11 +59,7 @@ public class DxramFileSystem extends FileSystem {
 
     private DXNet connect() {
 
-        nopeConfig = NodePeerConfig.factory(
-                Short.valueOf(getConf().get("dxnet.me")),
-                getConf().getStrings("dxnet.to_dxram_peers")
-        );
-
+        nopeConfig = NodePeerConfig.factory(Short.valueOf(getConf().get("dxnet.me")), DxramFsConfig.dxnet_to_dxram_peers.split(","));
         DxnetInit dxini = new DxnetInit(nopeConfig, nopeConfig.nodeId);
         return dxini.getDxNet();
     }
@@ -86,6 +82,7 @@ public class DxramFileSystem extends FileSystem {
         DxramFsConfig.max_filenamelength_chars = Integer.valueOf(conf.get("dxram.max_filenamelength_chars"));
         DxramFsConfig.max_hostlength_chars = Integer.valueOf(conf.get("dxram.max_hostlength_chars"));
         DxramFsConfig.max_addrlength_chars = Integer.valueOf(conf.get("dxram.max_addrlength_chars"));
+        DxramFsConfig.dxnet_to_dxram_peers = conf.get("dxnet.to_dxram_peers");
 
         LOG.info(Thread.currentThread().getStackTrace()[1].getMethodName()+"({}, {})", theUri, conf);
         String authority = theUri.getAuthority();
