@@ -251,7 +251,18 @@ todo: test alles auf cluster/hilbert
                    fehlt mir ein beispiel, was auch chunks nutzt.
 13:15 - 15:45   test einer 1peer config mit meinem code (ok)
 
--> vermutung: Anlegen der chunks ist nicht korrekt und vermutlich ist die size angabe nicht richtig.
+16:15 - 19:30   suche in anderen projekten nach Chunks, die einen ähnlichen aufbau haben wie die,
+                die ich brauche. Auch Anon ansehn.
+                -> bei create vermutlich nur "put" vergessen. trotzdem weiterhin fehler
+                   bei start eines 2. peers, der chunk holen will.
+
+todo: ChunkByteArray probehalber benutzen und alles damit testen.
+
+
+
+
+
+done vermutung: Anlegen der chunks ist nicht korrekt und vermutlich ist die size angabe nicht richtig.
 todo: ein beispiel finden, (ChunkByteArray oder Anon) wo im Constructor mehr auch ein byte array
 gefüllt wird.
 

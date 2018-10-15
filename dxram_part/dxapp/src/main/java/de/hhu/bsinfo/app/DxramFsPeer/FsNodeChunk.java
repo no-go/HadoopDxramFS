@@ -12,11 +12,13 @@ public class FsNodeChunk extends AbstractChunk {
 
     public FsNodeChunk() {
         _fsNode = new FsNode();
+        //_fsNode.init(); //xx
     }
 
     public FsNodeChunk(final long p_id) {
         super(p_id);
         _fsNode = new FsNode();
+        //_fsNode.init(); //xx
         setID(p_id);
     }
 
@@ -69,6 +71,6 @@ public class FsNodeChunk extends AbstractChunk {
         size += ObjectSizeUtil.sizeofLongArray(_fsNode.refIds);
 //        size += Long.BYTES * DxramFsConfig.ref_ids_each_fsnode;
         size += Long.BYTES; // extID forwardId
-        return size;
+        return size; // it should be 1064 + sizeof string ascii encoded (""=1) + CompactNumber.getSizeOfNumber(_fsNode.refIds.length)
     }
 };

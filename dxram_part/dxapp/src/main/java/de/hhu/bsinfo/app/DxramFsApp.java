@@ -18,7 +18,9 @@ import de.hhu.bsinfo.dxram.DXRAM;
 import de.hhu.bsinfo.dxram.util.NodeRole;
 import de.hhu.bsinfo.dxram.app.AbstractApplication;
 
+import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil; //xx
 import de.hhu.bsinfo.dxutils.NodeID;
+
 import de.hhu.bsinfo.dxram.util.NodeRole;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
 import de.hhu.bsinfo.dxmem.data.AbstractChunk;
@@ -198,17 +200,32 @@ public class DxramFsApp extends AbstractApplication {
         
         
         ROOTN = new FsNodeChunk();
+        LOG.debug("FsNode refIds lentgh %d", ROOTN.get().refIds.length); //xx
+        LOG.debug("FsNode refIds size %d", ObjectSizeUtil.sizeofLongArray(ROOTN.get().refIds)); //xx
+        
+        
         if (nameS.getChunkID(DxramFsConfig.ROOT_Chunk, 100) == ChunkID.INVALID_ID) {
             
             // initial, if root does not exists
-            ROOTN.get().init();
-            ROOT_CID = chunkCreate(ROOTN);
+            ROOTN.get().init(); //xx
+            
+            
+            
+            
+            //ROOT_CID = chunkCreate(ROOTN); //xx
+            chunkLS.createLocal().create(ROOTN);
+            chunkS.put().put(ROOTN);
+
+            LOG.debug("FsNode refIds length after get %d", ROOTN.get().refIds.length); //xx
+            ROOT_CID = ROOTN.getID();
+            
             nameS.register(ROOT_CID, DxramFsConfig.ROOT_Chunk);
             // maybe a new chunkid after register chunk with string in ROOT_Chunk
             ROOT_CID = nameS.getChunkID(DxramFsConfig.ROOT_Chunk, 100);
             ROOTN.setID(ROOT_CID);
             chunkS.get().get(ROOTN);
-            ROOTN.get().init();
+            
+            ROOTN.get().init(); //xx
             ROOTN.get().type = FsNodeType.FOLDER;
             ROOTN.get().name = "/";
             ROOTN.get().size = 0;
@@ -216,13 +233,13 @@ public class DxramFsApp extends AbstractApplication {
             ROOTN.get().backId = ROOT_CID;
             ROOTN.get().forwardId = ROOT_CID;
             chunkS.put().put(ROOTN);
-            LOG.debug("Create Root / on Chunk [%s]", String.format("0x%X", ROOTN.getID()));
+            LOG.debug("Create Root / on Chunk [%s] with size %d", String.format("0x%X", ROOTN.getID()), ROOTN.sizeofObject());
 
         } else {
             LOG.debug("doing nameService.getChunkID() with '%s'", DxramFsConfig.ROOT_Chunk);
             ROOT_CID = nameS.getChunkID(DxramFsConfig.ROOT_Chunk, 100);
             ROOTN.setID(ROOT_CID);
-            LOG.debug("doing nameService.get().get([%s])", String.format("0x%X", ROOTN.getID()));
+            LOG.debug("doing chunkService.get().get([%s])", String.format("0x%X", ROOTN.getID()));
             chunkS.get().get(ROOTN);
         }
         
