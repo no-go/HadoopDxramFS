@@ -96,24 +96,18 @@ public class DxramFsApp extends AbstractApplication {
         } 
     }
     
-    private long chunkCreate(AbstractChunk chu) {
+    /*
+    private long chunkCreate___OLD(AbstractChunk chu) {
         long[] chunkIDs = new long[1];
         int numChunks = 0;
-        
-        // It is a bit ugly, that we call the dxram storeage/processing endpoints PEERS, but all function etc. use "Node".
-        
-        short peerId = 1; // get random someone of online peers!
-        List<Short> peerIds = bootS.getOnlineNodeIDs();
-        ArrayList<Short> candidates = new ArrayList<>();
-        for (short pid : peerIds) {
-            NodeRole nr = bootS.getNodeRole(pid);
-            if (nr.toString().equals(NodeRole.PEER_STR)) candidates.add(pid);
-        }
-        peerId = candidates.get(randomizer.nextInt(candidates.size()));
 
+        short peerId = bootS.getNodeID(); // me
+        
         if (bootS.getNodeID() == peerId) {
+            LOG.debug("doing chunk createLocal()");
             numChunks = chunkLS.createLocal().create(chunkIDs, 1, chu.sizeofObject());
         } else {
+            LOG.debug("doing chunk create()");
             numChunks = chunkS.create().create(peerId, chunkIDs, 1, chu.sizeofObject());
         }
 
@@ -122,11 +116,47 @@ public class DxramFsApp extends AbstractApplication {
             System.exit(-1);
         }
         // @todo did we need this realy?
+        LOG.debug("doing setID() on new chunk");
         chu.setID(chunkIDs[0]);
+        LOG.debug("doing chunkService.get().get(newChunk)");
         chunkS.get().get(chu);
         
         LOG.debug("Created chunk of size %d on peer 0x%X: 0x%X", chu.sizeofObject(), peerId, chunkIDs[0]);
         return chunkIDs[0];
+    }
+    */
+    
+    private long chunkCreate(AbstractChunk chu) {
+        // It is a bit ugly, that we call the dxram storage/processing endpoints "PEERS", but all function etc. use "Node".
+        
+        LOG.debug("doing bootService.getNodeID()");
+        
+        short peerId = bootS.getNodeID(); // me
+        
+        // get random someone of online peers!
+        /*
+        List<Short> peerIds = bootS.getOnlineNodeIDs();
+        ArrayList<Short> candidates = new ArrayList<>();
+        for (short pid : peerIds) {
+            NodeRole nr = bootS.getNodeRole(pid);
+            if (nr.toString().equals(NodeRole.PEER_STR)) candidates.add(pid);
+        }
+        peerId = candidates.get(randomizer.nextInt(candidates.size()));
+        */
+
+        if (bootS.getNodeID() == peerId) {
+            LOG.debug("doing chunk createLocal()");
+            chunkLS.createLocal().create(chu);
+        } else {
+            LOG.debug("doing chunk create()");
+            chunkS.create().create(peerId, chu);
+        }
+        
+        LOG.debug("doing chunkService.get().get(newChunk)");
+        chunkS.get().get(chu);
+        
+        LOG.debug("Created chunk of size %d on peer 0x%X: 0x%X", chu.sizeofObject(), peerId, chu.getID());
+        return chu.getID();
     }
     
     
@@ -168,14 +198,14 @@ public class DxramFsApp extends AbstractApplication {
         
         
         ROOTN = new FsNodeChunk();
-        if (nameS.getChunkID(DxramFsConfig.ROOT_Chunk, 10) == ChunkID.INVALID_ID) {
+        if (nameS.getChunkID(DxramFsConfig.ROOT_Chunk, 100) == ChunkID.INVALID_ID) {
             
             // initial, if root does not exists
             ROOTN.get().init();
             ROOT_CID = chunkCreate(ROOTN);
             nameS.register(ROOT_CID, DxramFsConfig.ROOT_Chunk);
             // maybe a new chunkid after register chunk with string in ROOT_Chunk
-            ROOT_CID = nameS.getChunkID(DxramFsConfig.ROOT_Chunk, 10);
+            ROOT_CID = nameS.getChunkID(DxramFsConfig.ROOT_Chunk, 100);
             ROOTN.setID(ROOT_CID);
             chunkS.get().get(ROOTN);
             ROOTN.get().init();
@@ -189,8 +219,10 @@ public class DxramFsApp extends AbstractApplication {
             LOG.debug("Create Root / on Chunk [%s]", String.format("0x%X", ROOTN.getID()));
 
         } else {
-            ROOT_CID = nameS.getChunkID(DxramFsConfig.ROOT_Chunk, 10);
+            LOG.debug("doing nameService.getChunkID() with '%s'", DxramFsConfig.ROOT_Chunk);
+            ROOT_CID = nameS.getChunkID(DxramFsConfig.ROOT_Chunk, 100);
             ROOTN.setID(ROOT_CID);
+            LOG.debug("doing nameService.get().get([%s])", String.format("0x%X", ROOTN.getID()));
             chunkS.get().get(ROOTN);
         }
         

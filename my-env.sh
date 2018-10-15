@@ -100,7 +100,7 @@ updateHDFS() {
        ${HADOOP_HOME}/share/hadoop/hdfs/lib/
 }
 
-alias copiNst="cdconn; mvn clean; mvn package; instnode; cdapp; ./build.sh; instpeer;"
+alias compiNst="cdconn; mvn clean; mvn package; instnode; cdapp; ./build.sh; instpeer;"
 
 #startDxnetPeer() {
     #java \

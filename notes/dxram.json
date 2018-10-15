@@ -23,38 +23,6 @@
           "m_value": 212992,
           "m_unit": "b"
         },
-        "m_nodesConfig": [
-          {
-            "m_address": {
-              "m_ip": "127.0.0.1",
-              "m_port": 22221
-            },
-            "m_role": "SUPERPEER",
-            "m_rack": 0,
-            "m_switch": 0,
-            "m_readFromFile": 1
-          },
-          {
-            "m_address": {
-              "m_ip": "127.0.0.1",
-              "m_port": 22222
-            },
-            "m_role": "PEER",
-            "m_rack": 0,
-            "m_switch": 0,
-            "m_readFromFile": 1
-          },
-          {
-            "m_address": {
-              "m_ip": "127.0.0.1",
-              "m_port": 22223
-            },
-            "m_role": "PEER",
-            "m_rack": 0,
-            "m_switch": 0,
-            "m_readFromFile": 1
-          }
-        ],
         "m_rack": 0,
         "m_switch": 0,
         "m_isClient": false,
