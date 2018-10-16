@@ -6,7 +6,6 @@ import de.hhu.bsinfo.dxnet.core.NetworkException;
 import de.hhu.bsinfo.dxram.DXRAM;
 import de.hhu.bsinfo.dxram.app.AbstractApplication;
 
-import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil;
 import de.hhu.bsinfo.dxutils.NodeID;
 
 import de.hhu.bsinfo.dxmem.data.ChunkID;
@@ -52,6 +51,19 @@ public class HalloChunkApp extends AbstractApplication {
         return "HalloChunkApp";
     }
     
+    public static byte[] fis(String str, int limit) {
+        byte[] bu = new byte[limit];
+        byte[] src = str.getBytes(StandardCharsets.US_ASCII);
+        for(int i = 0; i<limit; i++) {
+            if (i < src.length) {
+                bu[i] = src[i];
+            } else {
+                i=limit;
+            }
+        }
+        return bu;
+    }
+    
     @Override
     public void main(final String[] p_args) {
         bootService = getService(BootService.class);
@@ -66,8 +78,6 @@ public class HalloChunkApp extends AbstractApplication {
         
         halloChunk = new HalloChunk(128);
         LOG.debug("lentgh: %d", halloChunk.get()._data.length);
-        LOG.debug("ObjectSizeUtil.sizeofByteArray: %d", ObjectSizeUtil.sizeofByteArray(halloChunk.get()._data));
-        
         
         if (nameService.getChunkID(MARC, 100) == ChunkID.INVALID_ID) {
             
@@ -82,8 +92,9 @@ public class HalloChunkApp extends AbstractApplication {
             
             // put data in chunk
             Hallo hallo = new Hallo();
-            hallo._data = "i am root".getBytes(StandardCharsets.US_ASCII);
-            hallo._port = 42;
+            hallo._data = fis("i am root", 128);
+            hallo._host = "dxram.io";
+            hallo._port = 80;
             LOG.debug("halloChunk.get()._data.length: %d", halloChunk.get()._data.length);
             halloChunk.set(hallo);
             

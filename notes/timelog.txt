@@ -245,7 +245,10 @@ todo: test alles auf cluster/hilbert
 ## notiz 2018-10-16
 
 11:15 -         code verkleinerung zwecks test 2nd peer, einbau und test ChunkByteArray
-13:30 -         Start einer HalloChunkApp
+13:30 - 15:45   Start einer HalloChunkApp
+
+18:00 -         erstellen eines test improvement ohne ein "Transfer" objekt
+
 
 ## notiz 2018-10-15
 
