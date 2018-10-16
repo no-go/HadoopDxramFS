@@ -1,0 +1,10 @@
+      "ApplicationServiceConfig": {
+        "m_autoStart": [
+            {
+                "m_className": "de.hhu.bsinfo.dxapp.HalloChunkApp",
+                "m_args": "nothing",
+                "m_startOrderId": 0
+            }
+        ],
+        "m_classConfig": "de.hhu.bsinfo.dxram.app.ApplicationServiceConfig"
+      },

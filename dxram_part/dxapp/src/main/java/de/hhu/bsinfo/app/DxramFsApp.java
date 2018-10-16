@@ -1,16 +1,6 @@
 package de.hhu.bsinfo.app;
 
-//import com.google.gson.annotations.Expose;
-
-import java.io.FileReader;
-import java.io.FileNotFoundException;
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Random;
-import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 
 import de.hhu.bsinfo.dxnet.core.NetworkException;
 
@@ -21,9 +11,7 @@ import de.hhu.bsinfo.dxram.app.AbstractApplication;
 import de.hhu.bsinfo.dxutils.serialization.ObjectSizeUtil; //xx
 import de.hhu.bsinfo.dxutils.NodeID;
 
-import de.hhu.bsinfo.dxram.util.NodeRole;
 import de.hhu.bsinfo.dxmem.data.ChunkID;
-//import de.hhu.bsinfo.dxmem.data.AbstractChunk;
 
 import de.hhu.bsinfo.dxram.boot.BootService;
 import de.hhu.bsinfo.dxram.chunk.ChunkService;
@@ -33,7 +21,6 @@ import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
 
 import de.hhu.bsinfo.app.dxramfspeer.*;
 import de.hhu.bsinfo.app.dxramfscore.*;
-//import de.hhu.bsinfo.app.dxramfscore.rpc.*;
 
 import de.hhu.bsinfo.dxram.engine.DXRAMVersion;
 import org.apache.logging.log4j.LogManager;
@@ -41,9 +28,9 @@ import org.apache.logging.log4j.Logger;
 import de.hhu.bsinfo.dxram.generated.BuildConfig;
 
 public class DxramFsApp extends AbstractApplication {
+    private static String ROOT_MARC = "ROOT";
 
     private static final Logger LOG = LogManager.getFormatterLogger(DxramFsApp.class.getSimpleName());
-    private static Random randomizer = new Random();
 
     private long ROOT_CID;
     private BootService bootS;
@@ -53,9 +40,6 @@ public class DxramFsApp extends AbstractApplication {
     private ChunkLocalService chunkLS;
 
     private BytesChunk ROOTN;
-    private DxnetInit dxnetInit;
-    
-    public static NodePeerConfig nopeConfig;
     
     private boolean doEndlessLoop = true;
 
@@ -77,28 +61,6 @@ public class DxramFsApp extends AbstractApplication {
         return "DxramFsApp";
     }
     
-    public void readConfigurationFile(String path) {
-        
-        try {
-            Gson gson = new Gson();
-            JsonReader reader = new JsonReader(new FileReader(path));
-            DxramFsConfig.GsonFiller d = gson.fromJson(reader, DxramFsConfig.GsonFiller.class);
-            // @todo this is ugly. needs refactoring
-            DxramFsConfig.dxnet_to_dxram_peers = d.dxnet_to_dxram_peers;
-            DxramFsConfig.ROOT_Chunk = d.ROOT_Chunk;
-            DxramFsConfig.file_blocksize = d.file_blocksize;
-            DxramFsConfig.ref_ids_each_fsnode = d.ref_ids_each_fsnode;
-            DxramFsConfig.max_pathlength_chars = d.max_pathlength_chars;
-            DxramFsConfig.max_filenamelength_chars = d.max_filenamelength_chars;
-            DxramFsConfig.max_hostlength_chars = d.max_hostlength_chars;
-            DxramFsConfig.max_addrlength_chars = d.max_addrlength_chars;
-        } catch (FileNotFoundException e) {
-            LOG.error("read config file %s failed because it does not exist.", e.getMessage());
-            System.exit(-1);
-        } 
-    }
-    
-    
     @Override
     public void main(final String[] p_args) {
         bootS = getService(BootService.class);
@@ -112,55 +74,30 @@ public class DxramFsApp extends AbstractApplication {
                 " and my dxram node id is " + NodeID.toHexString(bootS.getNodeID())
         );
         
-        readConfigurationFile(p_args[0]);
-
-        // if my dxram peer port and ip is ... I have to search a mapped dxnet ip and port from the config!
-        // we submit it to the NodePeerConfig factory to match it
-
-        short dxramNodeMeId = bootS.getNodeID();
-        InetSocketAddress nodeDetail = bootS.getNodeAddress(dxramNodeMeId);
-
-        nopeConfig = NodePeerConfig.factory(
-            nodeDetail.getHostString(),
-            nodeDetail.getAddress().getHostAddress(),
-            nodeDetail.getPort(),
-            DxramFsConfig.dxnet_to_dxram_peers.split(",")
-        );
-
-        System.out.println("How Hadoop DxramFs can contact me:");
-        System.out.println("DXNET dxnet peer_id  : " + nopeConfig.nodeId);
-        System.out.println("DXNET dxnet peer_addr: " + nopeConfig.dxnet_addr);
-        System.out.println("DXNET dxnet peer_port: " + nopeConfig.dxnet_port);
-        
-        dxnetInit = new DxnetInit(nopeConfig, nopeConfig.nodeId);
-        
-        
         ROOTN = new BytesChunk(128);
         LOG.debug("FsNode refIds lentgh %d", ROOTN.get()._data.length);
         LOG.debug("FsNode refIds size %d", ObjectSizeUtil.sizeofByteArray(ROOTN.get()._data));
         
         
-        if (nameS.getChunkID(DxramFsConfig.ROOT_Chunk, 100) == ChunkID.INVALID_ID) {
-            
-            // initial, if root does not exists
-            //ROOTN.get().init();
+        if (nameS.getChunkID(ROOT_MARC, 100) == ChunkID.INVALID_ID) {
             
             chunkLS.createLocal().create(ROOTN);
             chunkS.put().put(ROOTN);
 
-            LOG.debug("FsNode refIds length after get %d", ROOTN.get()._data.length);
             ROOT_CID = ROOTN.getID();
             
-            nameS.register(ROOT_CID, DxramFsConfig.ROOT_Chunk);
+            nameS.register(ROOT_CID, ROOT_MARC);
             // maybe a new chunkid after register chunk with string in ROOT_Chunk
-            ROOT_CID = nameS.getChunkID(DxramFsConfig.ROOT_Chunk, 100);
+            ROOT_CID = nameS.getChunkID(ROOT_MARC, 100);
             ROOTN.setID(ROOT_CID);
             chunkS.get().get(ROOTN);
             
             Door doo = new Door();
-            doo._data = "/".getBytes(DxramFsConfig.STRING_STD_CHARSET);
-            doo._addr = "hurra !";
+            doo._data = "i am root".getBytes(StandardCharsets.US_ASCII);
+            //doo._addr = "hurra !";
             doo._port = 42;
+
+            LOG.debug("data length after set %d", ROOTN.get()._data.length);
             
             ROOTN.set(doo);
             chunkS.put().put(ROOTN);
@@ -168,8 +105,9 @@ public class DxramFsApp extends AbstractApplication {
             LOG.debug(ROOTN);
 
         } else {
-            LOG.debug("doing nameService.getChunkID() with '%s'", DxramFsConfig.ROOT_Chunk);
-            ROOT_CID = nameS.getChunkID(DxramFsConfig.ROOT_Chunk, 100);
+            LOG.debug("doing nameService.getChunkID() with '%s'", ROOT_MARC);
+            
+            ROOT_CID = nameS.getChunkID(ROOT_MARC, 100);
             ROOTN.setID(ROOT_CID);
             LOG.debug("doing chunkService.get().get([%s])", String.format("0x%X", ROOTN.getID()));
             chunkS.get().get(ROOTN);

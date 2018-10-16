@@ -13,7 +13,7 @@ export JAVA_HOME=/usr
 export HADOOP_CONF_DIR="${HADOOPSRC}hadoop-dist/target/hadoop-${HVERS}/etc/hadoop/"
 export HADOOP_HOME="${HADOOPSRC}hadoop-dist/target/hadoop-${HVERS}/"
 
-export DATADIRECOTRY="${ZOOKEEPER_ROOT}/zooData"
+export DATADIRECTORY="/tmp/zookeeper"
 
 export PATH=$JAVA_HOME/bin:$HADOOP_HOME/bin/:$HADOOP_HOME/sbin/:$PATH
 
@@ -46,8 +46,8 @@ echo cdsrc............... cd ${HADOOPSRC}
 alias cdsrc="cd ${HADOOPSRC}"
 
 zook() {
-    if [ -d "${DATADIRECOTRY}" ]; then
-        rm -r ${DATADIRECOTRY}/*;
+    if [ -d "${DATADIRECTORY}" ]; then
+        rm -r ${DATADIRECTORY}/*;
     fi
     ${ZOOKEEPER_ROOT}/bin/zkEnv.sh
     ${ZOOKEEPER_ROOT}/bin/zkServer.sh start

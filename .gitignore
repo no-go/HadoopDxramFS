@@ -2,6 +2,9 @@ connector/.idea/**/*
 connector/target/**/*
 connector/out/**/*
 
+HalloDatas/dxapp/build/**/*
+HalloDatas/dxapp/.gradle/**/*
+
 dxram_part/dxapp/build/**/*
 dxram_part/dxapp/.idea/**/*
 dxram_part/dxapp/.gradle/**/*
