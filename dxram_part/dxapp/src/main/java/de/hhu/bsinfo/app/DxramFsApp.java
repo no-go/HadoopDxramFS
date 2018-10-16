@@ -136,8 +136,8 @@ public class DxramFsApp extends AbstractApplication {
         
         
         ROOTN = new BytesChunk(128);
-        LOG.debug("FsNode refIds lentgh %d", ROOTN.get().length);
-        LOG.debug("FsNode refIds size %d", ObjectSizeUtil.sizeofByteArray(ROOTN.get()));
+        LOG.debug("FsNode refIds lentgh %d", ROOTN.get()._data.length);
+        LOG.debug("FsNode refIds size %d", ObjectSizeUtil.sizeofByteArray(ROOTN.get()._data));
         
         
         if (nameS.getChunkID(DxramFsConfig.ROOT_Chunk, 100) == ChunkID.INVALID_ID) {
@@ -148,7 +148,7 @@ public class DxramFsApp extends AbstractApplication {
             chunkLS.createLocal().create(ROOTN);
             chunkS.put().put(ROOTN);
 
-            LOG.debug("FsNode refIds length after get %d", ROOTN.get().length);
+            LOG.debug("FsNode refIds length after get %d", ROOTN.get()._data.length);
             ROOT_CID = ROOTN.getID();
             
             nameS.register(ROOT_CID, DxramFsConfig.ROOT_Chunk);
@@ -157,9 +157,15 @@ public class DxramFsApp extends AbstractApplication {
             ROOTN.setID(ROOT_CID);
             chunkS.get().get(ROOTN);
             
-            ROOTN.set("/".getBytes(DxramFsConfig.STRING_STD_CHARSET));
+            Door doo = new Door();
+            doo._data = "/".getBytes(DxramFsConfig.STRING_STD_CHARSET);
+            doo._addr = "hurra !";
+            doo._port = 42;
+            
+            ROOTN.set(doo);
             chunkS.put().put(ROOTN);
             LOG.debug("Create Root / on Chunk [%s] with size %d", String.format("0x%X", ROOTN.getID()), ROOTN.sizeofObject());
+            LOG.debug(ROOTN);
 
         } else {
             LOG.debug("doing nameService.getChunkID() with '%s'", DxramFsConfig.ROOT_Chunk);
@@ -167,6 +173,7 @@ public class DxramFsApp extends AbstractApplication {
             ROOTN.setID(ROOT_CID);
             LOG.debug("doing chunkService.get().get([%s])", String.format("0x%X", ROOTN.getID()));
             chunkS.get().get(ROOTN);
+            LOG.debug(ROOTN);
         }
         
         while (doEndlessLoop) {
