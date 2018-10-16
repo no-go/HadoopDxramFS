@@ -52,7 +52,7 @@ public class DxramFsApp extends AbstractApplication {
     private NameserviceService nameS;
     private ChunkLocalService chunkLS;
 
-    private FsNodeChunk ROOTN;
+    private BytesChunk ROOTN;
     private DxnetInit dxnetInit;
     
     public static NodePeerConfig nopeConfig;
@@ -135,20 +135,20 @@ public class DxramFsApp extends AbstractApplication {
         dxnetInit = new DxnetInit(nopeConfig, nopeConfig.nodeId);
         
         
-        ROOTN = new FsNodeChunk();
-        LOG.debug("FsNode refIds lentgh %d", ROOTN.get().refIds.length); //xx
-        LOG.debug("FsNode refIds size %d", ObjectSizeUtil.sizeofLongArray(ROOTN.get().refIds)); //xx
+        ROOTN = new BytesChunk(128);
+        LOG.debug("FsNode refIds lentgh %d", ROOTN.get().length);
+        LOG.debug("FsNode refIds size %d", ObjectSizeUtil.sizeofByteArray(ROOTN.get()));
         
         
         if (nameS.getChunkID(DxramFsConfig.ROOT_Chunk, 100) == ChunkID.INVALID_ID) {
             
             // initial, if root does not exists
-            ROOTN.get().init();
+            //ROOTN.get().init();
             
             chunkLS.createLocal().create(ROOTN);
             chunkS.put().put(ROOTN);
 
-            LOG.debug("FsNode refIds length after get %d", ROOTN.get().refIds.length);
+            LOG.debug("FsNode refIds length after get %d", ROOTN.get().length);
             ROOT_CID = ROOTN.getID();
             
             nameS.register(ROOT_CID, DxramFsConfig.ROOT_Chunk);
@@ -157,13 +157,7 @@ public class DxramFsApp extends AbstractApplication {
             ROOTN.setID(ROOT_CID);
             chunkS.get().get(ROOTN);
             
-            ROOTN.get().init(); //xx
-            ROOTN.get().type = FsNodeType.FOLDER;
-            ROOTN.get().name = "/";
-            ROOTN.get().size = 0;
-            ROOTN.get().refSize = 0;
-            ROOTN.get().backId = ROOT_CID;
-            ROOTN.get().forwardId = ROOT_CID;
+            ROOTN.set("/".getBytes(DxramFsConfig.STRING_STD_CHARSET));
             chunkS.put().put(ROOTN);
             LOG.debug("Create Root / on Chunk [%s] with size %d", String.format("0x%X", ROOTN.getID()), ROOTN.sizeofObject());
 

@@ -28,8 +28,12 @@ public final class BytesChunk extends AbstractChunk {
         m_data = p_buffer;
     }
 
-    public byte[] getData() {
+    public byte[] get() {
         return m_data;
+    }
+    
+    public void set(byte[] dat) {
+        m_data = dat;
     }
 
     public int getSize() {
