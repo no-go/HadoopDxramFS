@@ -242,6 +242,11 @@ todo: test alles auf cluster/hilbert
 
 -----------------------------------------------------------------------------------------------
 
+## notiz 2018-10-16
+
+11:15 -         code verkleinerung zwecks test 2nd peer, einbau und test ChunkByteArray
+
+
 ## notiz 2018-10-15
 
 12:00 - 13:15   deploy scripte durchsuchen, um raus zu bekommen, wie man zookeeper
