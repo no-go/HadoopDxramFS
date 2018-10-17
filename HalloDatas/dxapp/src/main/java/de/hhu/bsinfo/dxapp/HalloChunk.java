@@ -14,42 +14,19 @@ public class HalloChunk extends AbstractChunk {
     private String _host;
     private int _port;
     
-    public HalloChunk() {
+    public HalloChunk(int size) {
         super();
-        _data = new byte[128];
-        _host = "dummy";
+        _data = new byte[size];
+        _host = "              x    ";
         _port = 60815;
     }
 
-    /*
-    public HalloChunk(final long p_id, final int p_bufferSize) {
-        super(p_id);
-        _hallo = new Hallo();
-        _hallo._data = new byte[p_bufferSize];
-        _hallo._port = 60815;
-    }
-
-    public HalloChunk(final byte[] p_buffer) {
-        super();
-        _hallo = new Hallo();
-        _hallo._data = p_buffer;
-        _hallo._port = 60815;
-    }
-
-    public HalloChunk(final long p_id, final byte[] p_buffer) {
-        super(p_id);
-        _hallo = new Hallo();
-        _hallo._data = p_buffer;
-        _hallo._port = 60815;
-    }
-    */
-
     public Hallo get() {
-        Hallo h = new Hallo();
-        h._data = _data;
-        h._host = _host;
-        h._port = _port;
-        return h;
+        Hallo dat = new Hallo();
+        dat._data = _data;
+        dat._host = _host;
+        dat._port = _port;
+        return dat;
     }
     
     public void set(Hallo dat) {

@@ -28,5 +28,6 @@ Ordner eintragen. Config Dateien von DXRAM muss man selber anpassen:
 
 ## Bugs
 
-- derzeit scheint ein 2. Peer den CHunk nicht korrekt holen zu können
-
+- derzeit scheint ein 2. Peer den Chunk nicht korrekt holen zu können
+- String und dessen initiale länge IST ein problem, das von `readString`, `writeString`
+  und `ObjectSizeUtil.sizeofString` nicht brauchbar gehandelt wird!

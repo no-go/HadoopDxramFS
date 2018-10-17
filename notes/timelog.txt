@@ -242,11 +242,19 @@ todo: test alles auf cluster/hilbert
 
 -----------------------------------------------------------------------------------------------
 
+## notiz 2018-10-17
 
-11:30 -         test ohne private HAllo sondern dessen attribute im CHunk hinterlegt.
+11:30 - 14:45   test ohne private HAllo sondern dessen attribute im CHunk hinterlegt.
                 Hallo wird bei get() neu erstellt. Test gestern ergab, dass nur das
                 byte array und nicht die anderen attribute gefüllt wurden, nachdem
                 Hallo() im constructor default werte setzt.
+                Fazit: bei strings und arrays bleibt immer das problem bestehen,
+                dass ein normaler Chunk der von AbstractChunk abgeleitet wird,
+                beim Aufruf von sizeofObject() nicht die korrekte größe zurückgibt.
+                Als Workaround sollte man wirklich mit byteArrays und int werten
+                sich etwas eigenes bauen, bei dem die größen bekannt sind.
+                
+                ALTERNATIV: AnonChunk ansehen !!!
 
 
 ## notiz 2018-10-16
