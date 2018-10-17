@@ -76,7 +76,7 @@ public class HalloChunkApp extends AbstractApplication {
                 " and my dxram node id is " + NodeID.toHexString(bootService.getNodeID())
         );
         
-        halloChunk = new HalloChunk(128);
+        halloChunk = new HalloChunk();
         LOG.debug("lentgh: %d", halloChunk.get()._data.length);
         
         if (nameService.getChunkID(MARC, 100) == ChunkID.INVALID_ID) {
@@ -101,6 +101,7 @@ public class HalloChunkApp extends AbstractApplication {
             // submit to dxram
             chunkService.put().put(halloChunk);
             LOG.debug("Create MARC on Chunk [%s] with size %d", String.format("0x%X", halloChunk.getID()), halloChunk.sizeofObject());
+            chunkService.get().get(halloChunk);
             LOG.debug(halloChunk);
 
         } else {

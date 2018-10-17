@@ -242,12 +242,21 @@ todo: test alles auf cluster/hilbert
 
 -----------------------------------------------------------------------------------------------
 
+
+11:30 -         test ohne private HAllo sondern dessen attribute im CHunk hinterlegt.
+                Hallo wird bei get() neu erstellt. Test gestern ergab, dass nur das
+                byte array und nicht die anderen attribute gefüllt wurden, nachdem
+                Hallo() im constructor default werte setzt.
+
+
 ## notiz 2018-10-16
 
 11:15 -         code verkleinerung zwecks test 2nd peer, einbau und test ChunkByteArray
 13:30 - 15:45   Start einer HalloChunkApp
 
-18:00 -         erstellen eines test improvement ohne ein "Transfer" objekt
+18:00 - 19:45   erstellen eines test improvement ohne ein "Transfer" objekt
+                (ergebnis: genau so ein problem. allerdings macht initialisierung weniger probleme - UNBEDINGT 
+                NOCHMAL TESTEN statt nur private Hallo im HalloChunk)
 
 
 ## notiz 2018-10-15

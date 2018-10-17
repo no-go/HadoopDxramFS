@@ -7,7 +7,7 @@ public class Hallo {
     
     public Hallo() {
         _data = new byte[0];
-        _host = "dummy";
-        _port = 60815;
+        _host = "dummy hallo";
+        _port = 666;
     }
 }
