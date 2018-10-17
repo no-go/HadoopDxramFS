@@ -255,6 +255,18 @@ todo: test alles auf cluster/hilbert
                 sich etwas eigenes bauen, bei dem die größen bekannt sind.
                 
                 ALTERNATIV: AnonChunk ansehen !!!
+15:30 - 16:00   dxterm durchsuchen und anonChunk verstehen
+17:30 - 18:15   einbau AnonChunk... nicht
+
+AnonChunk ist auch nur ein byte Array, mit dem ich mir selber etwas einfallen lassen muss, wie ich
+3 untersch. Typen mit ggf. 2 untersch. längen dort anspeichern kann. Da kann ich fast direkt
+alles in einem byte-buffer von fester länge (statt string) abspeichern und/oder mit json
+arbeiten. Fragwürdig, ob dass dann noch der gewohnte DXRAM speed da ist.
+
+todo:
+Besser als ByteBuffer und AnonChunk: Vor chunk Create die daten (max size!) einfüllen (kein String! nur byte
+Array mit eigenem length parameter), so dass angelegter Chunk eine echte, fixe länge hat. Diese 
+gibt man dann auch fest überall an.
 
 
 ## notiz 2018-10-16

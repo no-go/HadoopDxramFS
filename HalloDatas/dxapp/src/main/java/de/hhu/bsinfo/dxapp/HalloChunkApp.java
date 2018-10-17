@@ -20,6 +20,7 @@ import de.hhu.bsinfo.dxram.chunk.ChunkService;
 import de.hhu.bsinfo.dxram.chunk.ChunkLocalService;
 import de.hhu.bsinfo.dxram.nameservice.NameserviceService;
 import de.hhu.bsinfo.dxram.lookup.LookupService;
+import de.hhu.bsinfo.dxram.chunk.ChunkAnonService;
 
 import de.hhu.bsinfo.dxram.engine.DXRAMVersion;
 import org.apache.logging.log4j.LogManager;
@@ -40,6 +41,7 @@ public class HalloChunkApp extends AbstractApplication {
     private NameserviceService nameService;
     private ChunkLocalService chunkLocalService;
     private LookupService lookupService;
+    private ChunkAnonService chunkAnonService;
 
     private HalloChunk halloChunk;
     
@@ -93,6 +95,7 @@ public class HalloChunkApp extends AbstractApplication {
         nameService = getService(NameserviceService.class);
         chunkLocalService = getService(ChunkLocalService.class);
         lookupService = getService(LookupService.class);
+        chunkAnonService = getService(ChunkAnonService.class);
         
         System.out.println(
                 "application " + getApplicationName() + " on a peer" +
@@ -110,7 +113,21 @@ public class HalloChunkApp extends AbstractApplication {
             nameService.register(HALLO_CID, MARC);
             HALLO_CID = nameService.getChunkID(MARC, 100);
             halloChunk.setID(HALLO_CID);
+
+            int offset = 0;
+            int length = 0;
+            
+            ChunkAnon[] chunks = new ChunkAnon[1];
+            chunkAnonService.getAnon().get(chunks, HALLO_CID);
+            ...
+
+
+
             chunkService.get().get(halloChunk);
+            
+            
+            
+            
             
             // set data in chunk
             Hallo hallo = new Hallo(DATASIZE);
