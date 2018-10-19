@@ -1,7 +1,7 @@
 package de.hhu.bsinfo.dxramfs.connector;
 
 import de.hhu.bsinfo.dxnet.DXNet;
-import de.hhu.bsinfo.app.dxramfscore.*;
+import de.hhu.bsinfo.dxapp.dxramfscore.*;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.fs.permission.FsPermission;

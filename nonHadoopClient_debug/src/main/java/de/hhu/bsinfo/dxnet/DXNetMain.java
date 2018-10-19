@@ -12,9 +12,9 @@ import org.apache.logging.log4j.Logger;
 import de.hhu.bsinfo.dxnet.core.Message;
 import de.hhu.bsinfo.dxnet.core.NetworkException;
 
-import de.hhu.bsinfo.app.dxramfscore.DxramFsConfig;
-import de.hhu.bsinfo.app.dxramfscore.*;
-import de.hhu.bsinfo.app.dxramfscore.rpc.*;
+import de.hhu.bsinfo.dxapp.dxramfscore.DxramFsConfig;
+import de.hhu.bsinfo.dxapp.dxramfscore.*;
+import de.hhu.bsinfo.dxapp.dxramfscore.rpc.*;
 
 public final class DXNetMain {
     private static final Logger LOG = LogManager.getFormatterLogger(DXNetMain.class.getSimpleName());

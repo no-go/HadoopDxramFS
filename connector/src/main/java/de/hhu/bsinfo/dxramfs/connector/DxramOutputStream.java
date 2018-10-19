@@ -1,9 +1,10 @@
 package de.hhu.bsinfo.dxramfs.connector;
-import de.hhu.bsinfo.app.dxramfscore.Block;
-import de.hhu.bsinfo.app.dxramfscore.Blockinfo;
-import de.hhu.bsinfo.app.dxramfscore.DxramFsConfig;
-import de.hhu.bsinfo.app.dxramfscore.FsNode;
-import de.hhu.bsinfo.app.dxramfscore.rpc.*;
+
+import de.hhu.bsinfo.dxapp.dxramfscore.Block;
+import de.hhu.bsinfo.dxapp.dxramfscore.Blockinfo;
+import de.hhu.bsinfo.dxapp.dxramfscore.DxramFsConfig;
+import de.hhu.bsinfo.dxapp.dxramfscore.FsNode;
+import de.hhu.bsinfo.dxapp.dxramfscore.rpc.*;
 import de.hhu.bsinfo.dxnet.DXNet;
 
 import java.io.IOException;

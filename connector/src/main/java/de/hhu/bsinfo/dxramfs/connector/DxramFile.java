@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import de.hhu.bsinfo.app.dxramfscore.DxramFsConfig;
-import de.hhu.bsinfo.app.dxramfscore.rpc.*;
+import de.hhu.bsinfo.dxapp.dxramfscore.DxramFsConfig;
+import de.hhu.bsinfo.dxapp.dxramfscore.rpc.*;
 
 public class DxramFile {
     /// @todo File OP

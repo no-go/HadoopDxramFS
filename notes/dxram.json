@@ -225,7 +225,7 @@
       "ApplicationServiceConfig": {
         "m_autoStart": [
             {
-                "m_className": "de.hhu.bsinfo.app.DxramFsApp",
+                "m_className": "de.hhu.bsinfo.dxapp.DxramFsApp",
                 "m_args": "dxapp/DxramFsApp.conf",
                 "m_startOrderId": 0
             }

@@ -242,6 +242,55 @@ todo: test alles auf cluster/hilbert
 
 -----------------------------------------------------------------------------------------------
 
+## notiz 2018-10-19
+
+13:15 - 17:00   umbau der Chunks in bytes Arrays statt String (erstmal nur in FsNode+Chunk sowie der dxram app)
+
+refactoring nach .dxapp. statt .app. fertig.
+leider hat der umbau von FsNodeChunk noch probleme (hier: bin/hadoop fs -mkdir /abcde)
+
+
+
+[16:57:35.861][Network: MessageHandler 2][INFO ][de.hhu.bsinfo.dxapp.dxramfscore.rpc.MkDirsMessage] abcde
+[16:57:35.884][DxramFsApp][DEBUG][DxramFsApp] abcde
+[16:57:35.885][DxramFsApp][DEBUG][DxramFsApp] doing bootService.getNodeID()
+[16:57:35.885][DxramFsApp][DEBUG][DxramFsApp] doing chunk createLocal()
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGSEGV (0xb) at pc=0x00007f8d05427e1e, pid=5020, tid=0x00007f8cce5f1700
+#
+# JRE version: OpenJDK Runtime Environment (8.0_181-b13) (build 1.8.0_181-b13)
+# Java VM: OpenJDK 64-Bit Server VM (25.181-b13 mixed mode linux-amd64 compressed oops)
+# Problematic frame:
+# J 1342 C1 de.hhu.bsinfo.dxutils.UnsafeMemory.writeByte(JB)V (12 bytes) @ 0x00007f8d05427e1e [0x00007f8d05427d40+0xde]
+#
+# Core dump written. Default location: /home/tux/big/gDXRAM/run/dxram/core or core.5020
+#
+# An error report file with more information is saved as:
+# /home/tux/big/gDXRAM/run/dxram/hs_err_pid5020.log
+Compiled method (c1)   68891 1342       3       de.hhu.bsinfo.dxutils.UnsafeMemory::writeByte (12 bytes)
+ total in heap  [0x00007f8d05427bd0,0x00007f8d05427ff0] = 1056
+ relocation     [0x00007f8d05427cf8,0x00007f8d05427d28] = 48
+ main code      [0x00007f8d05427d40,0x00007f8d05427ea0] = 352
+ stub code      [0x00007f8d05427ea0,0x00007f8d05427f30] = 144
+ oops           [0x00007f8d05427f30,0x00007f8d05427f38] = 8
+ metadata       [0x00007f8d05427f38,0x00007f8d05427f48] = 16
+ scopes data    [0x00007f8d05427f48,0x00007f8d05427f80] = 56
+ scopes pcs     [0x00007f8d05427f80,0x00007f8d05427fd0] = 80
+ dependencies   [0x00007f8d05427fd0,0x00007f8d05427fd8] = 8
+ nul chk table  [0x00007f8d05427fd8,0x00007f8d05427ff0] = 24
+#
+# If you would like to submit a bug report, please visit:
+#   http://bugreport.java.com/bugreport/crash.jsp
+#
+Abgebrochen (Speicherabzug geschrieben)
+
+
+
+
+
+
 ## notiz 2018-10-17
 
 11:30 - 14:45   test ohne private HAllo sondern dessen attribute im CHunk hinterlegt.
