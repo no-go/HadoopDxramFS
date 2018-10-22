@@ -4,13 +4,41 @@ This DXRAM connector lets you run [Apache Hadoop](http://hadoop.apache.org)
 or [HBASE](https://hbase.apache.org/) jobs directly on data in [DXRAM](https://dxram.io/)
 instead of HDFS.
 
-**It is still in pre Alpha state!** and is still working in a `/tmp/myfs/` folder instead of dxram!
+**It is still in pre Alpha state!** and is still working in a `/tmp/myfs/` folder instead of dxram only!
 
 **since 6. Sep. 2018**: `exists`, `mkdir`, `list`, `isdir`, `size`, `delete` and `rename` works in DXRAM,
 but `mkdir`, `delete` and `rename` does not with more than `ref_ids_each_fsnode` entries.
 UTF8/16 chars or a path with more than `max_pathlength_chars` are a problem, too.
 
 ![logo](notes/logo.png)
+
+
+# State: 22. Oct. 2018
+
+**Stop Codeing Part of the Project**.
+
+-   last:
+    -   implementing a non-hadoop dxnet Application to test my rpc-like API
+    -   `DxramFile.create()` in hadoop
+    -   `DxramOutputStream` in hadoop
+        -   getting FsNode, Blockinfos, Block from a file
+        -   read the last `BlockChunk` into buffer
+        -   modify FsNode, Blockinfos, Block from a file local
+        -   doing a `flush()` of local data, to transfer to DxramFsApp and (may) enlarge refIds in FsNode
+        -   not yet tested, because creating initial FsNode fails
+-   fail on:
+    -   1 create FsNode for a new file
+    -   2 delete, rename `Not supporting remove operation if chunk locks are disable`
+    -   3 transfer complete FsNode "ROOT" initial to a new (2nd) peer
+-   next: `DxramFile.open()` and `DxramInputStream` in hadoop, to get bytes from file
+-   other TODOs:
+    -   `DxramFile.getFileBlockLocations()`
+    -   using EXT-type in FsNode to store more things in folders and long files
+    -   using chunk locks and a kind of atomar procedures in the filesystem
+    -   try hadoop unit-tests on dxramfs
+-   far away: testing mapreduce and HBASE examples (multi node)
+
+# Old Hints and Doc
 
 ## Links
 
@@ -109,29 +137,22 @@ use hadoop fs CLI to access `dxram://namenode:9000` from `core-site.xml`
 
 ## other stuff
 
-alpha works on /tmp/ folder and not in dxram!!!
-
-ok:
+ok with dxram + /tmp/myfs folder:
 
     bin/hadoop fs -mkdir /user
     bin/hadoop fs -mkdir /user/tux
     bin/hadoop fs -ls /user
-    cp example /tmp/user/tux/
-    bin/hadoop fs -rm -f /user/tux
-    bin/hadoop fs -rm -f /user/tux
-    -> /user/tux not exists!
-    bin/hadoop fs -put example.txt /user/ex.txt
-    bin/hadoop fs -put example.* /user/
-    bin/hadoop fs -rm example.txt /user/
-    bin/hadoop fs -mv /user/example.txt abc.a
-    -> /user/tux/abc.a
-    bin/hadoop fs -mkdir -p /a/b/c
-    bin/hadoop fs -cat /user/example.txt
-    bin/hadoop fs -cp /user/example.txt /user/tux/ex.txt
-
-working with hack (bad uri, path, localpath handling):
-
+    bin/hadoop fs -mv /user/tux /user/other
+    bin/hadoop fs -rm -f /user/other
     bin/hadoop fs -ls /
+
+because `Not supporting remove operation if chunk locks are disabled` a `mv` creates two folders with same new name!
+
+not working:
+
+-   utf8 chars
+-   storing/deleting/renameing files
+-   move/store a file or folder into / or move or rename something in /
 
 ### core-site.xml
 

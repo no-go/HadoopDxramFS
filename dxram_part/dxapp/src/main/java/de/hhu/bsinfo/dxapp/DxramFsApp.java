@@ -130,7 +130,6 @@ public class DxramFsApp extends AbstractApplication {
         // It is a bit ugly, that we call the dxram storage/processing endpoints "PEERS", but all function etc. use "Node".
         
         LOG.debug("doing bootService.getNodeID()");
-        
         short peerId = bootS.getNodeID(); // me
         
         // get random someone of online peers!
@@ -152,7 +151,8 @@ public class DxramFsApp extends AbstractApplication {
             chunkS.create().create(peerId, chu);
         }
         
-        LOG.debug("doing chunkService.get().get(newChunk)");
+        LOG.debug("doing put and chunkService.get().get(newChunk)");
+        chunkS.put().put(chu);
         chunkS.get().get(chu);
         
         LOG.debug("Created chunk of size %d on peer 0x%X: 0x%X", chu.sizeofObject(), peerId, chu.getID());
@@ -198,19 +198,14 @@ public class DxramFsApp extends AbstractApplication {
         
         
         ROOTN = new FsNodeChunk();
+        ROOTN.get().init();
         LOG.debug("FsNode refIds lentgh %d", ROOTN.get().refIds.length);
         LOG.debug("FsNode refIds size %d", ObjectSizeUtil.sizeofLongArray(ROOTN.get().refIds));
         
         
         if (nameS.getChunkID(DxramFsConfig.ROOT_Chunk, 100) == ChunkID.INVALID_ID) {
             
-            
-            //ROOT_CID = chunkCreate(ROOTN); //xx
-            chunkLS.createLocal().create(ROOTN);
-            chunkS.put().put(ROOTN);
-
-            LOG.debug("FsNode refIds length after get %d", ROOTN.get().refIds.length);
-            ROOT_CID = ROOTN.getID();
+            ROOT_CID = chunkCreate(ROOTN);
             
             nameS.register(ROOT_CID, DxramFsConfig.ROOT_Chunk);
             // maybe a new chunkid after register chunk with string in ROOT_Chunk
@@ -228,6 +223,8 @@ public class DxramFsApp extends AbstractApplication {
             ROOTN.set(r);
             chunkS.put().put(ROOTN);
             LOG.debug("Create Root / on Chunk [%s] with size %d", String.format("0x%X", ROOTN.getID()), ROOTN.sizeofObject());
+            chunkS.get().get(ROOTN);
+            LOG.debug(ROOTN);
 
         } else {
             LOG.debug("doing nameService.getChunkID() with '%s'", DxramFsConfig.ROOT_Chunk);
@@ -235,6 +232,7 @@ public class DxramFsApp extends AbstractApplication {
             ROOTN.setID(ROOT_CID);
             LOG.debug("doing chunkService.get().get([%s])", String.format("0x%X", ROOTN.getID()));
             chunkS.get().get(ROOTN);
+            LOG.debug(ROOTN);
         }
         
         while (doEndlessLoop) {
@@ -810,6 +808,7 @@ public class DxramFsApp extends AbstractApplication {
 
     private long mkDir(String name, FsNodeChunk parentNode) {
         FsNodeChunk newdir = new FsNodeChunk();
+        newdir.get().init();
         chunkCreate(newdir);
         FsNode f = newdir.get();
         f.type = FsNodeType.FOLDER;
@@ -840,6 +839,7 @@ public class DxramFsApp extends AbstractApplication {
     
     private long mkFile(String name, FsNodeChunk parentNode) {
         FsNodeChunk newf = new FsNodeChunk();
+        newf.get().init();
         chunkCreate(newf);
         FsNode f = newf.get();
         LOG.debug("Create %s on Chunk [%s]", name, String.format("0x%X", newf.getID()));

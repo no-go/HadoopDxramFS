@@ -65,4 +65,31 @@ public class FsNode {
         this.name = new String(dummy);
         this.refIds = new long[DxramFsConfig.ref_ids_each_fsnode];
     }
+    
+    @Override
+    public String toString() {
+        String refIdStr = "";
+        for (int i = 0; i < refSize; i++) {
+            refIdStr += "    " + String.format("0x%X", refIds[i]) + "\n";
+        } 
+        
+        return "FsNode[" + 
+        "ID: " +
+        String.format("0x%X", ID) + ", " + 
+        "backId: " +
+        String.format("0x%X", backId) + ", " + 
+        "forwardId: " +
+        String.format("0x%X", forwardId) + ", " + 
+        "name: '" +
+        name + "', " + 
+        "type: " +
+        Integer.toString(type) + ", " + 
+        "size: " +
+        Long.toString(size) + ", " + 
+        "refSize: " +
+        Integer.toString(refSize) + ", " + 
+        "refIds[" + Integer.toString(refIds.length) + "]: \n" +
+        refIdStr + 
+        ']';
+    }
 };
