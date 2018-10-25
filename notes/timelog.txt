@@ -27,6 +27,7 @@ hier meine Basis.
 
 - test: muss ich (speziell für HBASE) eine append() implementieren?
  - > ja! (eingebaut seit 4.10.2018)
+- Frage: wird corrupt aktive von Hadoop und HBASE genutzt?
 
 - ...
 - test: muss ich -f (force) z.B. bei "rename" implementieren?
@@ -210,7 +211,7 @@ bis hier: 372,5
 +---------------+-------------------------------------------+--------------+-----------------------
 |               |                                           |              | 
 
-
+bis hier: 426,75
 
 +---------------+-------------------------------------------+--------------+-----------------------
 |               |                                           |              | 
@@ -269,7 +270,7 @@ geholt zu werden: auch dort: mehr logging machen!
 
 AB JETZT: Bericht über Projekt!
 
-
+16:45 - doku
 
 
 ## notiz 2018-10-19
@@ -3173,7 +3174,7 @@ org.apache.zookeeper.KeeperException$ConnectionLossException: KeeperErrorCode = 
 ## kurzzeitnotizen am 2018-03-02
 
 10:00 - 11:15 besprechung
-11:45 - 12:30 analyse hbas loggs
+11:45 - 12:30 analyse hbase loggs
 14:45 - 16:15 test in vm/debian: vermutlich geht "Jetty bound to port 16010" nicht. warum?
       -> laut log läuft SelectChannelConnector() auf 36951 ?! Variiert!
 Ungelogen: hbase-1.4.0 und hadoop-2.8.2 und HadoopDxramFS runterladen und entpacken
