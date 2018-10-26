@@ -1,0 +1,688 @@
+% \iffalse meta-comment
+%
+% bsymb.dtx
+%
+% Copyright (C) 2004-09 by Laurent Voisin <laurent.voisin at systerel dot fr>
+% ---------------------------------------------------------------------------
+% 
+% This file may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in:
+%
+%    http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of LaTeX 
+% version 2003/12/01 or later.
+%
+% This work has the LPPL maintenance status "author-maintained".
+% 
+% This work consists of the files bsymb.dtx, bsymb.ins and refcard.tex
+% and the derived file bsymb.sty.
+%
+% \fi
+%
+% \iffalse
+%<package>\NeedsTeXFormat{LaTeX2e}[1999/06/01]
+%<package>\ProvidesPackage{bsymb}
+%<package>   [2009/09/16 v1.9 Symbols for the B language] 
+%
+%<*driver>
+\documentclass[a4paper]{ltxdoc}
+\usepackage{bsymb}
+\EnableCrossrefs         
+% ^^A \CodelineIndex
+\RecordChanges
+
+% The following code was taken from symbols.tex (the Comprehensive
+% LaTeX Symbol List) and simplified afterwards.
+\makeatletter
+\def\fnum@table{\textsc{\tablename}~\thetable}
+\newenvironment{symtable}[1]{%
+  \noindent%
+  \begin{minipage}[t]{\linewidth}    % Prevent page breaks
+    \begin{center}
+      \addtocounter{table}{1}%
+      \protected@edef\@currentlabel{\thetable}%
+      \addcontentsline{toc}{subsection}{%
+        \protect\numberline{T\thetable}{#1}}%
+      \@makecaption{\fnum@table}{#1}
+      \begin{displaymath}
+        \begin{array}{c@{\qquad\quad}l@{\qquad\quad}l}
+% ^^A     \T{Symbol} & \T{Command} & \T{Example}\\\hline
+}{%
+        \end{array}
+      \end{displaymath}
+    \end{center}
+  \end{minipage}
+  \vskip 8ex minus 2ex
+}
+\makeatother
+
+% ^^A \newcommand{\T}[1]{\multicolumn{1}{c}{\textbf{#1}}}
+\newcommand{\X}[1]{#1 &\texttt{\string#1}}
+\newcommand{\W}[1]{\X#1 & #1(x)}
+\newcommand{\Y}[1]{\X#1 & x #1 y}
+\newcommand{\Yn}[1]{\not#1 &\texttt{\string\not\string#1}& x\not #1 y}
+\begin{document}
+  \DocInput{bsymb.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \CheckSum{253}
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+%
+% \changes{v1.0}{2004/04/22}{Initial version}
+% \changes{v1.1}{2004/04/30}{Minor updates}
+% \changes{v1.2}{2004/05/14}{Minor updates}
+% \changes{v1.3}{2004/07/29}{Minor updates}
+% \changes{v1.4}{2004/08/03}{Minor updates}
+% \changes{v1.5}{2005/04/27}{Minor updates}
+% \changes{v1.6}{2005/05/11}{Minor updates}
+% \changes{v1.8}{2009/03/26}{Version 2 of mathematical language}
+% \changes{v1.9}{2009/09/16}{Minor updates}
+%
+% \GetFileInfo{bsymb.sty}
+%
+% \DoNotIndex{\newcommand,\renewcommand}
+% \DoNotIndex{\mathord,\mathop,\mathrel,\mathbin,\nolimits}
+% \DoNotIndex{\bsymb@deford,\bsymb@defop,\bsymb@partial}
+% \DoNotIndex{\bigcap,\bigcup,\cap,\cup}
+%
+% \title{The \textsf{bsymb} package\thanks{This document
+%   corresponds to \textsf{bsymb}~\fileversion, dated \filedate.}}
+% \author{Laurent Voisin \\ Systerel}
+% \date{September 16, 2009}
+%
+% \maketitle
+%
+% \begin{abstract}
+%   This package provides macros for typesetting the operators of
+%   the Event-B language.  It was developed at the Swiss Federal
+%   Institute of Technology Zurich.
+% \end{abstract}
+% 
+% \tableofcontents
+%
+% \section{Introduction}
+%
+% 
+% This package was developed in order to ease the typesetting of Event-B
+% formulas in \LaTeX{}.  Particular care has been taken to provide
+% macros that fit well into \TeX{} algorithm for typesetting
+% mathematical formulas, so that the user seldom needs to correct the
+% spacing computed by \TeX{} (using thin spaces or the like).
+% 
+% A former package with the same objectives was provided with Atelier B
+% (a support tool for the \textsf{B} language distributed by
+% \textsf{ClearSy}), but that package is now quite obsolete (it was
+% designed to work with \LaTeX{}~$2.09$) and has never been upgraded since.
+% 
+%
+% \section{Usage}
+%
+% Just like any other package, you need to request this package with a
+% |\usepackage| command in the preamble.  This package doesn't take any
+% option per se.  However, it internally uses package
+% |amssymb|.  So if one needs to
+% pass special options to that latter package, one has to either
+% request that package before requesting |bsymb| or otherwise, and
+% in a more simpler way, pass those options directly to the |bsymb|
+% package, which will in turn pass them to |amssymb|.
+%
+% So, in the simpler case, one just types
+%
+% \indent |\usepackage{bsymb}|
+%
+% \noindent and when one wants to use the |psamsfonts| option
+% of |amssymb|, one uses
+%
+% \indent |\usepackage[psamsfonts]{bsymb}|
+%
+% The rest of this section presents the macros to use for typesetting
+% B formulas.  Those macros are either defined by \LaTeX{},
+% by |amssymb| or by this package.  The macros are sorted by
+% context, so that it's easier to seek the name of a macro when
+% knowing the corresponding operator usage.
+% ^^A Also, the index at the end of this document gives
+% ^^A them sorted in lexicographic order.
+%
+% Each table contains three columns.  The first one displays the
+% symbol obtained from the macro, the second one the macro name.
+% Finally, the third column displays a usage example of the macro.
+%
+% \begin{symtable}{Predicate operators}
+%     \X\bfalse  & \bfalse\\
+%     \X\btrue   & \btrue\\
+%     \X\lnot    & \lnot P\\
+%     \X\land    & P\land Q\\
+%     \X\lor     & P\lor Q\\
+%     \X\limp    & P\limp Q\\
+%     \X\leqv    & P\leqv Q\\
+%     \X\forall  & \forall x\qdot P\limp Q\\
+%     \X\qdot    & \forall x\qdot P\limp Q\\
+%     \X\exists  & \exists x\qdot P
+% \end{symtable}
+% 
+% \begin{symtable}{Set relations}
+%     \Y\in\\
+%     \Y\notin\\
+%     \Y\subseteq\\
+%     \Yn\subseteq\\
+%     \Y\subset\\
+%     \Yn\subset\\
+%     \X\partition&\partition(S, s_1, s_2)
+% \end{symtable}
+%
+% \begin{symtable}{Definition}
+%     \Y\defi\\
+% \end{symtable}
+%
+% \begin{symtable}{Equality and arithmetic relations}
+%     \Y=\\
+%     \Y\ne\\
+%     \Y<\\
+%     \Y\le\\
+%     \Y>\\
+%     \Y\ge
+% \end{symtable}
+%
+% \begin{symtable}{Basic set constructs}
+%     \Y\mapsto\\
+%     \Y\cprod\\
+%     \W\pow\\
+% \end{symtable}
+%
+% \begin{symtable}{Derived set constructs}
+%     \Y\bunion\\
+%     \Y\binter\\
+%     \Y\setminus\\
+%     \X\{       & \{ x, y, z \}\\
+%     \X\}       & \{ x, y, z \}\\
+%     \X,        & \{ x, y, z \}\\
+%     \X\mid     & \{ x\qdot P\mid E \}\\
+%     \X\emptyset& \emptyset\\
+%     \W\pown\\
+%     \W\inter\\
+%     \W\union\\
+%     \X\Inter   & \Inter x\qdot P\mid E\\
+%     \X\Union   & \Union x\qdot P\mid E
+% \end{symtable}
+%
+% \begin{symtable}{Binary relation constructs (first series)}
+%     \Y\rel\\
+%     \Y\trel\\
+%     \Y\srel\\
+%     \Y\strel\\
+%     \W\dom\\
+%     \W\ran\\
+%     \Y\fcomp\\
+%     \Y\bcomp\\
+%     \W\id\\
+%     \Y\domres\\
+%     \Y\domsub\\
+%     \Y\ranres\\
+%     \Y\ransub
+% \end{symtable}
+%
+% \begin{symtable}{Binary relation constructs (second series)}
+%     \X[ & r[s]\\
+%     \X] & r[s]\\
+%     \Y\ovl\\
+%     \Y\dprod\\
+%     \X\prjone & \prjone(x, y)\\
+%     \X\prjtwo & \prjtwo(x, y)\\
+%     \Y\pprod
+% \end{symtable}
+%
+% \begin{symtable}{Function constructs (first series)}
+%     \Y\pfun\\
+%     \Y\tfun\\
+%     \Y\pinj\\
+%     \Y\tinj\\
+%     \Y\psur\\
+%     \Y\tsur\\
+%     \Y\tbij\\
+% \end{symtable}
+%
+% \begin{symtable}{Function constructs (second series)}
+%     \X\lambda & \lambda x\qdot P\mid E\\
+%     \X(       & f(x)\\
+%     \X)       & f(x)\\
+% \end{symtable}
+%
+% \begin{symtable}{Integer constructs}
+%     \X\nat   & \nat\\
+%     \X\natn  & \natn\\
+%     \X\intg  & \intg\\
+%     \Y\upto\\
+%     \W\finite\\
+%     \W\card
+% \end{symtable}
+%
+% \begin{symtable}{Arithmetic operators}
+%     \W\upred\\
+%     \W\usucc\\
+%     \Y+\\
+%     \Y-\\
+%     \Y *\\
+% \changes{v1.7}{2006/02/06}{Changed division operator}
+%     \Y\div\\
+%     \Y\bmod\\
+%     \Y\expn
+% \end{symtable}
+%
+% \begin{symtable}{Boolean operators}
+%     \X\Bool  & \Bool\\
+%     \X\True  & \True\\
+%     \X\False & \False\\
+%     \X\bool  & \bool(P)
+% \end{symtable}
+%
+% \begin{symtable}{Substitutions}
+%     \Y\bcmeq\\
+%     \Y\bcmin\\
+%     \Y\bcmsuch\\
+% ^^A %     \X\sbegin & \sbegin S \send\\
+% ^^A %     \X\select & \select P \then S \send\\
+% ^^A %     \X\any    & \any x \where P \then S \send\\
+% ^^A %     \X\where  & \any x \where P \then S \send\\
+% ^^A %     \X\then   & \select P \then S \send\\
+% ^^A %     \X\post   & \sbegin S \post P \send\\
+% ^^A %     \X\send   & \sbegin S \send\\
+% \end{symtable}
+%
+% \begin{symtable}{Typing operator}
+%     \X\oftype&(\emptyset\oftype\pow(S))
+% \end{symtable}
+%
+% ^^A \StopEventually{\PrintChanges\PrintIndex}
+% \StopEventually{\PrintChanges}
+%
+% \section{Implementation}
+%
+% The implementation is quite straightforward.  It's just a matter of
+% loading the |amssymb| package and then defining new macros for each
+% symbol.  In some rare cases, we need to define a new name just to
+% change the category of a mathematical symbol (for example, to
+% transform a relation symbol into a binary symbol).
+%
+% So, let's start by requesting the |amssymb| package.
+%    \begin{macrocode}
+\RequirePackageWithOptions{amssymb}
+%    \end{macrocode}
+%
+% Then, we define some little helper macros to factor repetitive
+% parts.  The first macro allows us to define a new named operator,
+% like $\usucc$ or $\card$.  The second one is used to defined an
+% ordinary symbol such as $\nat$ or $\bfalse$.
+%    \begin{macrocode}
+\newcommand\bsymb@defop[2]{
+  \newcommand{#1}{\mathop{#2}\nolimits}
+}
+\newcommand\bsymb@deford[2]{
+  \newcommand{#1}{\mathord{#2}}
+}
+%    \end{macrocode}
+%
+% \begin{macro}{\bfalse}
+% \changes{v1.2}{2004/05/14}{Removed leading `b'}
+% \changes{v1.4}{2004/08/03}{Changed to bottom symbol}
+% \begin{macro}{\btrue}
+% \changes{v1.2}{2004/05/14}{Removed leading `b'}
+% \changes{v1.4}{2004/08/03}{Changed to top symbol}
+% Now, let's start with the predicate operators.  Those are really
+% easy, most of them are already defined by \LaTeX{}.  We just need to
+% complement.
+%    \begin{macrocode}
+\bsymb@deford{\bfalse}{\bot}
+\bsymb@deford{\btrue}{\top}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\limp}
+% \begin{macro}{\leqv}
+% An important point here is that the |\implies| and |\iff| commands of
+% \LaTeX{} are inappropriate.  The associated glyph is too large and,
+% moreover, those symbols are defined as relations and we need binary
+% operators here.  Hence, we define those two macros to replace them.
+%    \begin{macrocode}
+\newcommand{\limp}{\mathbin\Rightarrow}
+\newcommand{\leqv}{\mathbin\Leftrightarrow}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\qdot}
+% \changes{v1.2}{2004/05/07}{Macro added}
+% Another fine point is that the |\cdot| command of \LaTeX{} produces
+% a binary operator which is not appropriate for typesetting
+% quantified formula (there is too much space around the dot).  So, we
+% define a new command for typesetting those dots, tuning finely the
+% space to put around it.
+%    \begin{macrocode}
+\bsymb@deford{\qdot}{\mkern1mu\cdot\mkern1mu}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\partition}
+% \changes{v1.8}{2009/03/26}{Macro added}
+% The $\partition$ operator is straightforward.
+%    \begin{macrocode}
+\bsymb@defop{\partition}{\mathrm{partition}}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+% \begin{macro}{\defi}
+% \changes{v1.5}{2005/04/27}{Macro added}
+% The definition operator is entered as a relation in order to have
+% correct spacing around it.
+%    \begin{macrocode}
+\newcommand\defi{\mathrel{\widehat=}}
+%    \end{macrocode}
+% \end{macro}
+%
+% For equality, set and arithmetic relations, things are even easier,
+% all macros are already defined by \LaTeX{}.  No need to add anything.
+%
+% \changes{v1.2}{2004/05/14}{Removed macro `choice'}
+% \changes{v1.5}{2005/04/27}{Removed macro `set'}
+% \begin{macro}{\pow}
+% \changes{v1.3}{2004/07/29}{Operator now on the baseline}
+% \begin{macro}{\pown}
+% \changes{v1.4}{2004/08/03}{Macro added}
+% \begin{macro}{\cprod}
+% \begin{macro}{\bunion}
+% \begin{macro}{\binter}
+% \begin{macro}{\union}
+% \begin{macro}{\inter}
+% \begin{macro}{\Union}
+% \begin{macro}{\Inter}
+
+% Let's proceed now to set constructs.  There is just one little trick
+% here:  I added a |\hbox{}| to the |\pow| macro so that the operator
+% doesn't appear to \TeX{} as a single letter.  Without that empty box,
+% the powerset operator is drawn a little below the baseline, which is
+% quite ugly.
+%    \begin{macrocode}
+\bsymb@defop{\pow}{\mathbb P\hbox{}}
+\bsymb@defop{\pown}{\mathbb P_1}
+\newcommand{\cprod}{\mathbin\times}
+\newcommand{\bunion}{\mathbin{\mkern1mu\cup\mkern1mu}}
+\newcommand{\binter}{\mathbin{\mkern1mu\cap\mkern1mu}}
+\bsymb@defop{\union}{\mathrm{union}}
+\bsymb@defop{\inter}{\mathrm{inter}}
+\newcommand{\Union}{\bigcup\nolimits}
+\newcommand{\Inter}{\bigcap\nolimits}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\emptyset}
+% There is one symbol which case is special: the empty set symbol.
+% It's already defined in \LaTeX{}, but the glyph used looks ugly to
+% most people.  So, we just redefine the \LaTeX{} command associating
+% an alternative glyph to the symbol.
+%    \begin{macrocode}
+\renewcommand{\emptyset}{\mathord\varnothing}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\rel}
+% We now proceed to binary relation constructs.  The first one is easy
+%    \begin{macrocode}
+\newcommand{\rel}{\mathbin\leftrightarrow}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\trel}
+% \begin{macro}{\srel}
+% \begin{macro}{\strel}
+% \changes{v1.1}{2004/04/29}{Macro added}
+% Then, for the next ones, we need to do some trickery to build new
+% symbols.  The idea is quite simple, just draw two symbols that
+% overlap in order to build the new symbol.  The overlapping is done
+% using some negative glue.  There are nevertheless some important
+% points to consider, otherwise things will turn bad.  First,
+% dimensions must be expressed using the |mu| unit, otherwise they won't
+% scale correctly when one changes the font size.  The second point
+% is to take care of the apparent edges of our new symbol.  As we use
+% negative glue, we can easily drive \TeX{} into messing things up.
+% Just try to invert the two symbols in the definitions below and
+% look at the result.
+%    \begin{macrocode}
+\newcommand{\trel}{\mathbin{\leftarrow\mkern-14mu\leftrightarrow}}
+\newcommand{\srel}{\mathbin{\leftrightarrow\mkern-14mu\rightarrow}}
+\newcommand{\strel}{\mathbin{\leftrightarrow\mkern-14mu\leftrightarrow}}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\dom}
+% \begin{macro}{\ran}
+% \begin{macro}{\fcomp}
+% \begin{macro}{\bcomp}
+% \begin{macro}{\id}
+% Then, a batch of some quite easy symbols.
+%    \begin{macrocode}
+\bsymb@defop{\dom}{\mathrm{dom}}
+\bsymb@defop{\ran}{\mathrm{ran}}
+\newcommand{\fcomp}{\mathbin;}
+\newcommand{\bcomp}{\circ}
+\bsymb@defop{\id}{\mathrm{id}}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\domres}
+% \begin{macro}{\domsub}
+% \begin{macro}{\ranres}
+% \begin{macro}{\ransub}
+% Here, we also use the same trick to build the subtraction symbols.
+%    \begin{macrocode}
+\newcommand{\domres}{\mathbin\lhd}
+\newcommand{\domsub}{\mathbin{\lhd\mkern-14mu-}}
+\newcommand{\ranres}{\mathbin\rhd}
+\newcommand{\ransub}{\mathbin{\rhd\mkern-14mu-}}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\ovl}
+% \begin{macro}{\dprod}
+% \begin{macro}{\prjone}
+% \begin{macro}{\prjtwo}
+% \begin{macro}{\pprod}
+% And we continue with some more binary relation constructs.
+%    \begin{macrocode}
+\newcommand{\ovl}{\mathbin{\lhd\mkern-9mu-}}
+\newcommand{\dprod}{\mathbin\otimes}
+\bsymb@defop{\prjone}{\mathrm{prj}_1}
+\bsymb@defop{\prjtwo}{\mathrm{prj}_2}
+\newcommand{\pprod}{\mathbin\|}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% We now proceed with the symbols used to define function sets.  We
+% still use a similar trick to build the symbols that are not native in
+% the fonts from |amssymb|.  To ease thing, we first define a helper
+% macro to typeset sets of partial function.
+%    \begin{macrocode}
+\newcommand{\bsymb@partial}[2]{
+  \mathbin{\mkern#2mu\mapstochar\mkern-#2mu#1}
+}
+%    \end{macrocode}
+%
+% \changes{v1.1}{2004/04/29}{Suppressed the `pbij' macro}
+% \begin{macro}{\pfun}
+% \begin{macro}{\tfun}
+% \begin{macro}{\pinj}
+% \begin{macro}{\tinj}
+% \begin{macro}{\psur}
+% \begin{macro}{\tsur}
+% \begin{macro}{\tbij}
+% Then we can proceed with the symbols
+%    \begin{macrocode}
+\newcommand{\pfun}{\bsymb@partial\rightarrow6}
+\newcommand{\tfun}{\mathbin\rightarrow}
+\newcommand{\pinj}{\bsymb@partial\rightarrowtail9}
+\newcommand{\tinj}{\mathbin\rightarrowtail}
+\newcommand{\psur}{\bsymb@partial\twoheadrightarrow6}
+\newcommand{\tsur}{\mathbin\twoheadrightarrow}
+\newcommand{\tbij}{\mathbin{
+      \rightarrowtail
+      \mkern-18mu\twoheadrightarrow}
+}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \changes{v1.6}{2005/05/11}{Suppressed the `fin' and `finn' macros}
+% \begin{macro}{\nat}
+% \begin{macro}{\natn}
+% \begin{macro}{\intg}
+% \begin{macro}{\upto}
+% \begin{macro}{\finite}
+% \changes{v1.6}{2005/05/11}{Macro added}
+% \begin{macro}{\card}
+% We're almost finished, some more new operators and integer sets.
+%    \begin{macrocode}
+\bsymb@deford{\nat}{\mathbb N}
+\bsymb@deford{\natn}{\mathbb N_1}
+\bsymb@deford{\intg}{\mathbb Z}
+\newcommand{\upto}{\mathbin{.\mkern1mu.}}
+\bsymb@defop{\finite}{\mathrm{finite}}
+\bsymb@defop{\card}{\mathrm{card}}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\upred}
+% \begin{macro}{\usucc}
+% Now, the $\upred$ and $\usucc$ operators.  Here, the
+% name |\pred| and |\succ| are already defined, with a different
+% meaning in \LaTeX{}, so we add a |u| prefix (meaning unary).
+%    \begin{macrocode}
+\bsymb@defop{\upred}{\mathrm{pred}}
+\bsymb@defop{\usucc}{\mathrm{succ}}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\expn}
+% \changes{v1.5}{2005/04/27}{Macro added}
+% The exponentiation operator is a simple binary operator.  The fine
+% point is to find the adequate width of the hat and overall width of
+% the operator.
+%    \begin{macrocode}
+\newcommand\expn{\mathbin{\widehat{\enskip}}}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\Bool}
+% \changes{v1.3}{2004/07/29}{Macro added}
+% \begin{macro}{\True}
+% \changes{v1.2}{2004/05/07}{Macro added}
+% \begin{macro}{\False}
+% \changes{v1.2}{2004/05/07}{Macro added}
+% \begin{macro}{\bool}
+% \changes{v1.2}{2004/05/07}{Macro added}
+% Then, the boolean operators.
+%    \begin{macrocode}
+\bsymb@deford{\Bool}{\mathrm{BOOL}}
+\bsymb@deford{\True}{\mathrm{TRUE}}
+\bsymb@deford{\False}{\mathrm{FALSE}}
+\bsymb@defop{\bool}{\mathrm{bool}}
+%    \end{macrocode}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\bcmeq}
+% \changes{v1.1}{2004/04/30}{Macro added}
+% \begin{macro}{\bcmin}
+% \changes{v1.1}{2004/04/29}{Macro added}
+% \begin{macro}{\bcmsuch}
+% \changes{v1.1}{2004/04/29}{Macro added}
+% And here we are.  We just need to define the generalised
+% substitutions.
+% ^^A Of course, as |\begin| and |\end| are already used
+% ^^A by \LaTeX{}, we chose to prefix them with the |s| letter (meaning
+% ^^A substitution).
+%    \begin{macrocode}
+\newcommand{\bcmeq}{\mathrel{:\mkern1mu=}}
+\newcommand{\bcmin}{\mathrel{:\mkern1mu\in}}
+\newcommand{\bcmsuch}{\mathrel{:\mkern1mu\mid}}
+%    \end{macrocode}
+% ^^A \newcommand{\sbegin}{\mathopen{\mathbf{begin}\;}}
+% ^^A \newcommand{\select}{\mathopen{\mathbf{select}\;}}
+% ^^A \newcommand{\any}{\mathopen{\mathbf{any}\;}}
+% ^^A \newcommand{\where}{\mathrel{\;\mathbf{where}\;}}
+% ^^A \newcommand{\then}{\mathrel{\;\mathbf{then}\;}}
+% ^^A \newcommand{\post}{\mathrel{\;\mathbf{then}\;}}
+% ^^A \newcommand{\send}{\mathclose{\;\mathbf{end}}}
+% \end{macro}
+% \end{macro}
+% \end{macro}
+%
+% \begin{macro}{\oftype}
+% \changes{v1.9}{2009/09/16}{Macro added}
+% Finally, the |\oftype| operator is defined by stacking on top of each other
+% two instances of the |\circ| operator in the smallest available font.
+%    \begin{macrocode}
+\newcommand{\oftype}{\mathrel{%
+  \ooalign{$\scriptstyle^\circ$\cr%
+           $\scriptscriptstyle\circ$\cr}}}
+%    \end{macrocode}
+% \end{macro}
+%
+
+% \Finale
+% \PrintChanges
+\endinput

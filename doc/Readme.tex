@@ -1,0 +1,79 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage{bsymb}
+\usepackage[T1]{fontenc} % utf8
+\usepackage[utf8]{inputenc} % utf8
+\usepackage[german]{babel} % deutsche silbentrennung
+
+\title{__OUTFILE_TITLE__}
+\author{Jochen Peters}
+
+\usepackage[
+ pdftitle={__OUTFILE_TITLE__},
+ pdfauthor={Jochen Peters}
+]{hyperref}
+
+\date{\today}
+
+\usepackage{cite}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{url}
+
+\usepackage{graphicx}
+\usepackage{color,xcolor,colortbl}
+\usepackage{picture}
+
+% start - scale image if needed
+\makeatletter
+\def\ScaleIfNeeded{%
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+\setkeys{Gin}{width=\ScaleIfNeeded}
+% end - scale image if needed
+
+% code einbinden / hightlight
+\usepackage{minted}
+
+% macht aus \begin{minted}{cpp} -> \begin{cppcode}  bzw \end
+\newminted{cpp}{
+% frame=lines,
+% framesep=2mm,
+ baselinestretch=1.2,
+ fontsize=\footnotesize,
+ linenos}
+\newminted{bash}{
+% frame=lines,
+% framesep=2mm,
+ baselinestretch=1.2,
+ fontsize=\footnotesize,
+ linenos}
+
+\usepackage[cm]{fullpage}  % mit 1,5cm rand
+
+\usepackage{longtable}
+\usepackage{booktabs} % enhance the quality of tables
+
+\parskip3pt{}
+\parindent0mm{} % einrueckung absatzanfang
+\textheight24cm{}
+\textwidth16cm{}
+\oddsidemargin0mm{}
+\topmargin-10mm{}
+
+\providecommand{\tightlist}{%
+   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\begin{document}
+
+\maketitle
+%\tableofcontents
+
+\input{temp.tex}
+
+\end{document}
