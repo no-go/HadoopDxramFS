@@ -7,6 +7,7 @@ all:
 	# png ist in Markdown gut, aber eps ist in LaTeX besser (use GIMP!). Beide Bilddateien noetig
 	sed -i -e 's:\.png):\.pdf):g' temp.md
 	sed -i -e 's:~~~java:\\begin{minted}{java}:g' temp.md
+	sed -i -e 's:~~~json:\\begin{minted}{json}:g' temp.md
 	sed -i -e 's:~~~cpp:\\begin{minted}{cpp}:g' temp.md
 	sed -i -e 's:~~~xml:\\begin{minted}{xml}:g' temp.md
 	sed -i -e 's:~~~:\\end{minted}:g' temp.md

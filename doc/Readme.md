@@ -494,8 +494,14 @@ Aufruf von `getFileBlocklocations()` gebraucht wird. Darunter ist auch eine
 Referenznummer auf den `Block`, der den Teil der Daten einer Datei trägt. Sollte
 das Dateisystem mit dem Array nicht mehr auskommen, so gibt es für `FsNode` noch
 den Typ `EXT` (neben `FILE` und `FOLDER`). Die Referenznummer eines solchen `FsNode` wird dann in `forwardId` beim
-vollen `FsNode` eingetragen. Die Größe dieser Arrays lässt sich einmalig in der
+vollen `FsNode` eingetragen. Die Grafik *DXramFs Datamanagement* stellt ein
+Beispiel dar, wie Ordner, Metadaten und Dateien abgelegt werden können.
+Die Größe der Referenz-Arrays lässt sich einmalig in der
 Config Datei von Hadoop hinterlegen bzw. bei der `DxramFs` Applikation in DXRAM.
+Dort sind auch Angaben bzgl. maximale Pfadlänge oder maximale Länge des Dateinamens
+hinterlegt. In der Klasse `DxramFsConfig` werden diese Daten beim Programmstart
+abgelegt. Auf die gleiche Weise wird ein (Hadoop) Node zu (DXNET + DXRAM) Peer
+Mapping aus den Config-Dateien gelesen und in der `NodePeerConfig` Klasse abgelegt.
 
 ![DXramFs Datamanagement](fig/FileSystem.png)
 
@@ -522,7 +528,7 @@ als auch in einer anderen Anwendung eingesetzt werden kann. Für jeden elementar
 Datentyp einen eigenen Chunk definieren zu müssen (ist das so gewollt?) halte
 ich nicht für die beste Lösung.
 
-## Zusammenspiel der Projekt-Komponenten
+## Konfiguration der Projekt-Komponenten
 
 Die Grafik *DXramFs Sketch* stellt den eingeplanten Aufbau des Projekts dar.
 Hierbei tritt der `RegionServer` einmal als konzeptionelle Komponente in
@@ -532,14 +538,138 @@ Beispiel im Projekt verwendet habe. HDFS mit Namenode und Datanode ist in
 Grün angedeutet, um das Replacement von HDFS gegenüber DxramFs zu verdeutlichen
 und ggf. Probleme mit diesem Aufbau ansprechen zu können.
 
-
 ![DXramFs Sketch](fig/Structure.png)
 
+Das Zusammenspiel der Komponenten ist leicht erklärt: HBase nutzt Hadoop und
+gibt beim Pfad der Daten ein Scheme mit an, welches Hadoop anweist, auf DxramFs
+anstellte von HDFS zuzugreifen. Sobald z.B. nach dem Speicherort der Blöcke einer
+Datei gefragt wird, leitet der DxramFs (Connector) diese Anfrage an seinen
+zugewiesen (lokalen) DXNET Peer. Diese Verbindung läuft dann z.B. auf den Ports
+65220 und 65221 ab. Diese DXNET Peer ist auch ein DXRAM Peer (z.B. Port 22222)
+und nutzt nun den `LookupService` von DXRAM, um zu einer ChunkId (welche den BlockChunk repräsentiert)
+den passenden Host zu finden. Auf diese Weise kann ,,YARN'' eine Entscheidung
+treffen, welcher *RegionServer* zur Verarbeitung gewählt werden muss.
 
-# Vergleich und Ausblick
+Für diesen Aufbau hatte ich mir ein Node-Peer Mapping ausgedacht, mit dem
+z.B. eine gestartete DXRAM Anwendung weiß, auf welchem Port sie einen DXNET
+Peer zu starten hat. Ebenso mussten alle DXNET IDs der Peers bekannt sein.
+Da mir zu Beginn des strukturellen Aufbaufs nicht ganz klar war, welche
+Informationen (speziell: Port) bei der Blocklocation in Hadoop erwartet
+wurde, und ob/wie eine Prozessmigration statt findet, hatte ich den DXNET
+Client im Connector so ausgelegt, dass prinzipiell mit jedem Host/NodeManager/Peer
+kommunizieren kann. DXNET nur auf `localhost` zu nutzen, erschien mir
+zu eingeschränkt. **Für die Zukunft könnte man hier eine andere Lösung suchen,
+die via DXNET direkt mit DXRAM kommuniziert oder, da es sich um die selbe
+physische Hardware handelt, ein netzwerkfreier Weg gefunden wird, um auf
+Chunks des lokalen DXRAM Peers von einer anderen Anwendung aus zu zu greifen.**
+
+Das Mapping der PeerIds, Ports und Hosts bzw. IP-Adressen ist in der
+Datei `DxramFsApp.conf` unter `dxnet_to_dxram_peers` abgelegt. In Hadoop
+kann dies in der `core-site.xml` geplegt werden. Dort sind analog
+zur `DxramFsApp.conf` auch weitere Angaben zu pflegen:
+
+~~~xml
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+        <name>fs.dxram.impl</name>
+        <value>de.hhu.bsinfo.dxramfs.connector.DxramFileSystem</value>
+        <description>The FileSystem for dxram.</description>
+    </property>
+    <property>
+        <name>fs.AbstractFileSystem.dxram.impl</name>
+        <value>de.hhu.bsinfo.dxramfs.connector.DxramFs</value>
+        <description>
+            The AbstractFileSystem for dxram
+        </description>
+    </property>
+    <property>
+        <name>fs.defaultFS</name>
+        <!-- value>file:///tmp/tee/</value -->
+        <!-- value>hdfs://abook.localhost.fake:9000</value -->
+        <value>dxram://localhost:9000</value>
+    </property>
+
+    <property>
+        <name>dxram.file_blocksize</name>
+        <!-- blocksize is smaller than chunksize (dxram: jan 2018 max was 8MB) -->
+        <value>4194304</value>
+    </property>
+
+    <property>
+        <name>dxram.ref_ids_each_fsnode</name>
+        <value>128</value>
+    </property>
+    
+    <property>
+        <name>dxram.max_pathlength_chars</name>
+        <value>512</value>
+    </property>
+
+    <property>
+        <name>dxram.max_filenamelength_chars</name>
+        <value>128</value>
+    </property>
+    <property>
+        <name>dxram.max_hostlength_chars</name>
+        <value>80</value>
+    </property>
+    <property>
+        <name>dxram.max_addrlength_chars</name>
+        <value>48</value>
+    </property>
+
+    <property>
+        <name>dxnet.me</name>
+        <value>0</value>
+    </property>
+
+    <property>
+        <name>dxnet.to_dxram_peers</name>
+        <!-- me is talking to localhost:65221 or localhost:65222, and 
+        them are talking to localhost:22222 or 22223.
+        The dxnet-dxram peer mapping localhost:65221 at localhost:22222 is 
+        good, to identify the location of a block. -->
+        <value>0@127.0.0.1:65220@,1@127.0.0.1:65221@127.0.0.1:22222, 2@127.0.0.1:65222@127.0.0.1:22223,3@127.0.0.1:65223@</value>
+    </property>
+
+</configuration>
+~~~
+
+Hier sei `dxnet.me` mit dem Wert `0` besonders erwähnt, mit dem der Connector
+aus `dxnet.to_dxram_peers` sich den passenden Port als DXNET peer heraus sucht.
+Diese Angabe muss bei einem 2. Hadoop Node geändert werden (z.B. 3).
 
 
-## Andere Projekte
+Damit die DXRAM Applikation `DxramFsApp` ihre Konfigurationsdatei einlesen kann,
+muss man deren Pfad als Parameter in der `config/dxram.json` Datei mit angeben:
+
+~~~json
+    "m_autoStart": [
+        {
+            "m_className": "de.hhu.bsinfo.dxapp.DxramFsApp",
+            "m_args": "dxapp/DxramFsApp.conf",
+            "m_startOrderId": 0
+        }
+    ],
+~~~
+
+Start man z.B. so einen DXRAM Peer ...
+
+    DXRAM_OPTS="-Dlog4j.configurationFile=config/log4j2.xml \
+     -Ddxram.config=config/dxram.json -Ddxram.m_config.m_engineConfig.m_role=Peer \
+     -Ddxram.m_config.m_engineConfig.m_address.m_ip=127.0.0.1 \
+     -Ddxram.m_config.m_engineConfig.m_address.m_port=22222" ./bin/dxram
+
+... kann die Applikation im Ordner `dxapp/` die Config-Datei finden und erkennen, dass sie
+als DXRAM Peer auf Port 22222 auch einen DXNET Peer auf Port 65221 zu starten hat.
+
+
+# Vergleich und Aussicht auf Weiterentwicklung
+
+
+## Vergleich mit anderen Projekten
 
 google cloud storage, alluxio (Tachyon), ignite
 
@@ -559,19 +689,43 @@ von Hadoop umgeht.
 
 ## Aktueller Stand
 
-## Offene Punkte
+Wer an dem Projekt weiter arbeiten möchte, findet alles auf [https://github.com/no-go/HadoopDxramFS](https://github.com/no-go/HadoopDxramFS),
+wo auch dieses Dokument, Notizen, Zeiten wann ich an was gerbeitet habe sowie
+Grafiken abgelegt sind. Derzeit ist `HadoopDxramFS` nicht produktiv einsetzbar.
+Die letzten Versuche geben Mitte September 2018 dxram mit einem 2. Peer laufen zu lassen
+und eine `FsNode` Datenstruktur auf diesen zu übertragen, scheiterten.
+Mit einem einzelnen DXRAM Peer war es mir möglich, zumindest eine leeren
+Datei in einem Ordner zu hinterlegen. `rename` und `delete` auf Ordnern(!)
+hatte ebenfalls funktioniert, bis ich ein Upgrade auf DXRAM 0.5.0 machte^[Not supporting remove operation if chunk locks are disabled].
 
--   Chunk Speicherung
--   UTF-8 Datei- bzw. Ordnernamen
--   bekannte Bugs bzgl. rm, mv
--   `create` und `DxramOutputStream`
--   `open` und `DxramInputStream`
+Operationen in `DxramOutputStream.java` konnten wegen der Problematik der korrekten
+Speicherung eines `FsNode` in DXRAM nicht komplette getestet und ausgeführt werden.
+Dies gilt auch für das Laden eines `Block`s in den Buffer von `DxramOutputStream`
+sowie deren `flush()` Methode und der nötigen Änderungen, die durch die DxramFsApp
+an den Chunks gemacht werden müssen. unmittelbar offen sind daher die Punkte:
+
+-   korrekte Chunk Speicherung (speziell Arrays und String)
+-   `create()` und `DxramOutputStream`
+-   `open()` und `DxramInputStream`
 -   `DxramFile.getFileBlockLocations()`
--   Tests mit mapreduce, multinode config, hbase
--   muss das Scheme auch HBase bekannt gemacht werden?
--   YARN und dessen Nutzung des `Statistics` Objekt im FileSystem
--   Den Typ `EXT` überall umsetzen (z.B. für mehr als 128 Dateiblöcke)
--   locks (dxram, hadoop, ...) wer übernimmt das, um inkonsistente Zustände aus zu schließen?
+
+
+## Weitere offene Punkte
+
+Wie bereits (sehr weit) oben erwähnt, gibt es noch Bugs beim löschen von Chunks und somit
+auch bei `mv`. Ein Upgrade von dxmem auf 0.5.0 (?) sollten das Problem lösen. Anlegen eines
+`FsNode` vom Typ `FILE` im Root-Verzeichnis ist zur Zeit nicht möglich. Hier befindet sich wohl
+noch ein Bug der `DxramFsApp.java` Datei.
+
+Was ebenfalls fehlt:
+
+-   Den Typ `EXT` habe ich noch nicht überall umgesetzt. Es sind also nicht mehr als `ref_ids_each_fsnode` Dateiblöcke möglich oder mehr Ordnereinträge. 
+-   UTF-8 Datei- bzw. Ordnernamen werden von Hadoop verlangt. Ggf. muss man dazu einfach in DXRAM `StandardCharsets.US_ASCII` in Strings anpassen und dies in `DxramFsConfig.java` angleichen.
+-   Konkrete Tests mit MapReduce, einer Multinode Konfiguration, HBase Beispiele
+-   Zu klären: Muss das Scheme auch HBase bekannt gemacht werden?
+-   YARN und dessen Nutzung des `Statistics` Objekt im FileSystem: Gibt es noch andere Entscheidungen bei der Wahl des `NodeManagers` ?
+-   Locks (dxram, hadoop, ...) wer übernimmt das, um inkonsistente Zustände auf Blöcke aus zu schließen?
+-   Mehrere Requests an einen DXNET Peer: Mein Code in dem Punkt nicht sicher.
 -   hadoop unit tests
 
 # Anhang
@@ -586,7 +740,10 @@ Bis zum 19.10.2018 **426,75** Stunden.
 ## Notiz 2018-10-27
 
 14:00 - 15:00   Beschreibung des und beginn, das zusammenspiel der Komponenten zu beschreiben
-15:00 - 16:15   überarbeitung der Einbindung der Grafiken in das Latex Dokument
+
+15:00 - 16:30   überarbeitung der Einbindung der Grafiken in das Latex Dokument
+
+16:30 - 19:00   Fertigung Abschnitt Config, Struktur und "Aktueller Stand"
 
 ## Notiz 2018-10-26
 
@@ -595,6 +752,7 @@ Bis zum 19.10.2018 **426,75** Stunden.
 ## Notiz 2018-10-25
 
 14:00 -         Korrektur und Update des *Sketches*
+
 15:15 - 18:00   doku entscheidungsfindung fertig
 
 ## Notiz 2018-10-24
@@ -604,6 +762,7 @@ Bis zum 19.10.2018 **426,75** Stunden.
 ## Notiz 2018-10-23
 
 13:30 - 16:15 doku hdfs, hadoop, anfang hbase
+
 17:00 - 19:30 hbase abschnitt auch fertig
 
 ## Notiz 2018-10-22
