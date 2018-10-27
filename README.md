@@ -10,7 +10,7 @@ instead of HDFS.
 but `mkdir`, `delete` and `rename` does not with more than `ref_ids_each_fsnode` entries.
 UTF8/16 chars or a path with more than `max_pathlength_chars` are a problem, too.
 
-![logo](notes/logo.png)
+![logo](doc/fig/logo.png)
 
 
 # State: 22. Oct. 2018
@@ -37,6 +37,9 @@ UTF8/16 chars or a path with more than `max_pathlength_chars` are a problem, too
     -   using chunk locks and a kind of atomar procedures in the filesystem
     -   try hadoop unit-tests on dxramfs
 -   far away: testing mapreduce and HBASE examples (multi node)
+
+
+Get the final report (PDF, German) from [here](doc/Projektarbeit.pdf).
 
 # Old Hints and Doc
 
@@ -76,9 +79,9 @@ To configure the connector you have to modify `core-site.xml` of your hoadoop.
 
 ## Sketches
 
-![Schematic Sketch](notes/Structure.png)
+![Schematic Sketch](doc/fig/Structure.png)
 
-![DxramFS: between Chunks and Blocks](notes/FileSystem.png)
+![DxramFS: between Chunks and Blocks](doc/fig/FileSystem.png)
 
 To reduce confusion, here are some simple keywords to communicate over
 different project parts:

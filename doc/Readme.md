@@ -1,4 +1,4 @@
-![logo](logo.png)
+![logo](fig/logo.png)
 
 # Machbarkeit von Hbase auf DXRAM
 
@@ -21,6 +21,10 @@ durch libfuse zur Folge hatte. Nähere Details zur Software, Entscheidungsfindun
 mit Details zu besonderen Herausforderungen sind in den kommenden Kapiteln beschrieben.
 Im letzten Kapitel findet man einen Vergleich zu anderen Projekten, den aktuellen Stand
 dieses Projekts sowie Überlegungen zur zukünftigen Weiterentwicklung.
+
+Vorab: Der von mir geschriebene Code ist nicht ganz vollständig und sehr pragmatisch
+auf die Schnelle zusammen geschieben. Daher ist er primär mit kleinen Notizen oder `@todo`
+bestückt und eignete sich nicht für `javadoc`.
 
 # Beteiligte Software
 
@@ -470,6 +474,14 @@ bei diesem Connector nicht. Wie solle dies auch gehen? Die Knoten des Google Clo
 Storage sind auch weder mit ssh erreichbar, noch werden sie als Ausführende Knoten bei
 Hadoop gelistet.
 
+Prinzipiell ist im Scheme Konzept von Hadoop dieser Teil `system://[host]:[port]/` für
+den Hostname und Port des Namenodes, welcher die Metadaten wie die BlockLocations enthält,
+vorgesehen. Mein Projekt nutzt dies nicht, da ich via DXNET vor hatte, informationen
+über den Standort der BlockChunks (meine Repräsentation der HDFS File-Blocks) zu erfragen.
+Das DXRAM Superpeer-Peer Konzept sieht hier keinen einzelnen Knoten für ein Lookup
+vor.
+
+
 ## Aufbau des DxramFs
 
 Als Idee für den Aufbau des Dateisystems entschied ich mich für eine Mischung aus
@@ -478,36 +490,54 @@ gedacht, sowie dieveres Größenangaben. Mit einem Array `refIDs` aus Referenznu
 wird auf weitere Ordner oder Dateien (ebenfalls `FsNode`) gezeigt. Ist der `FsNode`
 eine Datei, so ist das Array mit Referenznummern auf `Blockinfo` gefüllt. Diese
 Datenstruktur enthält dann in etwa die Informationen, welche in Hadoop beim
-aufruf von `getFileBlocklocations()` gebraucht wird. Darunter ist auch eine
+Aufruf von `getFileBlocklocations()` gebraucht wird. Darunter ist auch eine
 Referenznummer auf den `Block`, der den Teil der Daten einer Datei trägt. Sollte
 das Dateisystem mit dem Array nicht mehr auskommen, so gibt es für `FsNode` noch
-den Typ `EXT`. Die Referenznummer eines solchen `FsNode` wird dann in `forwardId` beim
-vollen `FsNode` eingetragen. Die Größe dieses Arrays läßt sich einmalig in der
-Config Datei von Hadoop hinterlegen bzw. der `DxramFs` Applikation in DXRAM.
+den Typ `EXT` (neben `FILE` und `FOLDER`). Die Referenznummer eines solchen `FsNode` wird dann in `forwardId` beim
+vollen `FsNode` eingetragen. Die Größe dieser Arrays lässt sich einmalig in der
+Config Datei von Hadoop hinterlegen bzw. bei der `DxramFs` Applikation in DXRAM.
 
-![DXramFs Datamanagement](FileSystem.png)
+![DXramFs Datamanagement](fig/FileSystem.png)
+
+Auf der Hadoop Code Seite, also dem `connector/`, wollte ich nur mit diesen
+drei Klassen `FsNode`, `Blockinfo` & `Block` arbeiten sowie ein paar DXNET Komponenten,
+die ich sowohl im Connector als auch der DXRAM Application verwenden konnte.
+Dieser Codezweig ist in `de.hhu.bsinfo.dxapp.dxramfscore.*` hinterlegt, in dessen
+Ordner `.rpc` die DXNET Nachrichtentypen enthalten sind. Die `MessageHandler`
+dieser Nachrichten Typen sowie TAGS und andere Konstanten, befinden sich
+ebenfalls in den Klassen dieser Nachrichtentypen.
+
+Im `dxram_part/` meines Projekts ist der Code für die DXRAM Application hinterlegt.
+Im Package `de.hhu.bsinfo.dxapp.dxramfspeer` sind die Klassen für die Chunks
+hinterlegt, welche die Daten von `FsNode`, `Blockinfo` & `Block` tragen sollten.
+Wie weiter oben bereits erwähnt, war es mehr als frustrierend, dass ich
+nicht so problemlos wie erwartet meine drei ,,Attribut Klassen'' initialisiert,
+mit dxnet übertragen und gefüllt und in DXRAM als Chunk abgespeichert bekommen habe.
+Ein [Minimalbeispiel](https://github.com/no-go/HalloDatas) als DXRAM Projekt, welches ich exemplarisch in Github
+angelegt habe und die Situation beschreibt, ist bisher von der Projektgruppe
+unkommentiert geblieben. Ich finde es nichts besonderes, wenn man DXRAM in bestehende
+Projekte einbauen will, dass man einen Set unterschiedlicher Attribute in einer
+Klasse hinterlegt, welche sowohl in DXRAM zur Speicherung (und DXNET zur Übertragung)
+als auch in einer anderen Anwendung eingesetzt werden kann. Für jeden elementaren
+Datentyp einen eigenen Chunk definieren zu müssen (ist das so gewollt?) halte
+ich nicht für die beste Lösung.
+
+## Zusammenspiel der Projekt-Komponenten
+
+Die Grafik *DXramFs Sketch* stellt den eingeplanten Aufbau des Projekts dar.
+Hierbei tritt der `RegionServer` einmal als konzeptionelle Komponente in
+der *Hbase Wolke* auf, als auch als `App Master` in einem NodeManger, welcher
+Teil von YARN (Hadoop) ist. In der Grafik zeigen Nummern wichtige Ports, die ich als
+Beispiel im Projekt verwendet habe. HDFS mit Namenode und Datanode ist in
+Grün angedeutet, um das Replacement von HDFS gegenüber DxramFs zu verdeutlichen
+und ggf. Probleme mit diesem Aufbau ansprechen zu können.
 
 
-## DXNET für RPC nutzen
-
-Um Daten zwischen Hadoop und DXRAM 
-
-
-
-namenode? Lockup
-
-FTP... deprecated meldung
-
-Contract:
-- was ist mit "wie ein lokales Dateisystem" gemeint, und warum? ssh?
-
-
-## 
+![DXramFs Sketch](fig/Structure.png)
 
 
 # Vergleich und Ausblick
 
-![DXramFs Sketch](Structure.png)
 
 ## Andere Projekte
 
@@ -522,9 +552,9 @@ von Hadoop umgeht.
 
 
 
-![Ignite](ignite.png)
+![Ignite](fig/ignite.png)
 
-![Alluxio](alluxio.png)
+![Alluxio](fig/alluxio.png)
 
 
 ## Aktueller Stand
@@ -539,6 +569,7 @@ von Hadoop umgeht.
 -   `DxramFile.getFileBlockLocations()`
 -   Tests mit mapreduce, multinode config, hbase
 -   muss das Scheme auch HBase bekannt gemacht werden?
+-   YARN und dessen Nutzung des `Statistics` Objekt im FileSystem
 -   Den Typ `EXT` überall umsetzen (z.B. für mehr als 128 Dateiblöcke)
 -   locks (dxram, hadoop, ...) wer übernimmt das, um inkonsistente Zustände aus zu schließen?
 -   hadoop unit tests
@@ -551,6 +582,11 @@ zeiten + hinweise, wann ich was tat
 Bis zum 19.10.2018 **426,75** Stunden.
 
 
+
+## Notiz 2018-10-27
+
+14:00 - 15:00   Beschreibung des und beginn, das zusammenspiel der Komponenten zu beschreiben
+15:00 - 16:15   überarbeitung der Einbindung der Grafiken in das Latex Dokument
 
 ## Notiz 2018-10-26
 
