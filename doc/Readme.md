@@ -65,7 +65,7 @@ Wie auch in anderen Software-Projekten gibt es DXRAM zwei Arten von Beispielen:
 
 -   Hallo World (ohne z.B. die wichtige Funktion der Chunk-Speicherung zu zeigen)
 -   Ein Beispiel, was den kompletten Funktionsumfang abdeckt und für den Anfang zu komplex ist
--   Anwendung XY (inzwischen veraltet)
+-   konkrete Anwendung, aber inzwischen veraltet
 
 Leider hatte ich mich am letzten Punkt orientiert, was in diesem Fall speziell DxGraph in einem
 alten Repository war. Dort gab es Chunks, die meiner Vorstellung der Speicherung von
@@ -293,7 +293,7 @@ Für die Idee *DXRAM als Dateisystem in Hadoop* gab es zwei Möglichkeiten, die
 ich in Betracht zog:
 
 1.  DXRAMfs mountfähig unter Linux mit [libfuse](https://github.com/libfuse/libfuse).
-#.  DXRAMfs auf die selbe Art wie HDFS oder FTP als Dateisystem in Hadoop implementieren.
+2.  DXRAMfs auf die selbe Art wie HDFS oder FTP als Dateisystem in Hadoop implementieren.
 
 Die erste Möglichkeit baut auf der Idee auf, man könne doch in HBase und Hadoop
 als Speicher die Angabe `file:///tmp/dxrammount/` machen. Auf diese Weise würde man
