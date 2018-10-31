@@ -1,29 +1,29 @@
-![logo](fig/logo.png)
+![Logo Vorschlag für DxramFs](fig/logo.png)
 
-# Machbarkeit von Hbase auf DXRAM
+# Machbarkeit von HBase auf DXRAM
 
-Ziel dieser Projektarbeit war es, heraus zu finden, ob sich die NO-SQL Datenbank Hbase
-mit dem verteilten Key-Value-Store DXRAM verbinden lässt. Hbase nutzt Hadoop und dessen
+Ziel dieser Projektarbeit war es, heraus zu finden, ob sich die NO-SQL Datenbank [HBase](https://hbase.apache.org/)
+mit dem verteilten Key-Value-Storage [DXRAM](https://dxram.io/) verbinden lässt. HBase nutzt [Hadoop](https://hadoop.apache.org/) und dessen
 Dateisystem HDFS zur Speicherung, welches durch DXRAM abgelöst werden sollte. Ferner gab es als Ziel
 eine konkrete DXRAM-Anwendung zu entwickeln, die sich problemlos in populäre verteilte Entwicklungen
-auf Basis von Hbase oder Hadoop einbinden lässt. Dies sollte Performance-Vorteile durch
+auf Basis von HBase oder Hadoop einbinden lässt. Dies sollte Performance-Vorteile durch
 DXRAM verdeutlichen, welche durch Verwendung von Infiband und einer Speicherung
 im Arbeitsspeicher (an der Java Heap-Verwaltung vorbei) zu erwarten sind.
 Die Popularität von DXRAM sollte damit gefördert werden. Zur Umsetzung wurden drei
-mögliche Konzepte ins Auge gefasst: 1) Nachbau von Hbase mit DXRAM auf der Basis
-der Thrift Schnittstelle, die Hbase einem Client zur Verfügung stellt. 2) Mit libfuse
-DXRAM unter Linux mount-fähig machen, und Hbase mit Hadoop im lokalen Dateisystem
-laufen lassen. 3) Das ,,Scheme'' Konzept von Hadoop beim Dateizugriff nutzen,
+mögliche Konzepte ins Auge gefasst: 1) Nachbau von HBase mit DXRAM auf der Basis
+der Thrift Schnittstelle, die HBase einem Client zur Verfügung stellt. 2) Mit `libfuse`
+DXRAM unter Linux mount-fähig machen, und HBase mit Hadoop im lokalen Dateisystem
+laufen lassen. 3) Das Scheme-Konzept von Hadoop beim Dateizugriff nutzen,
 um bei Zugriffen auf `dxram://` anstelle von `hdfs://` eine Hadoop-Kompatible
 Dateisystem-Implementierung anbieten zu können. Wir entschieden uns in der Projektgruppe für
-das dritte Konzept, da es weder den Nachbau von Hbase, noch Performance-Verluste
-durch libfuse zur Folge hatte. Nähere Details zur Software, Entscheidungsfindung, Konzept zur Umsetzung
+das dritte Konzept, da es weder den Nachbau von HBase, noch Performance-Verluste
+durch `libfuse` zur Folge hatte. Nähere Details zur Software, Entscheidungsfindung, Konzept zur Umsetzung
 mit Details zu besonderen Herausforderungen sind in den kommenden Kapiteln beschrieben.
 Im letzten Kapitel findet man einen Vergleich zu anderen Projekten, den aktuellen Stand
 dieses Projekts sowie Überlegungen zur zukünftigen Weiterentwicklung.
 
 Vorab: Der von mir geschriebene Code ist nicht ganz vollständig und sehr pragmatisch
-auf die Schnelle zusammen geschieben. Daher ist er primär mit kleinen Notizen oder `@todo`
+auf die Schnelle zusammen geschrieben. Daher ist er primär mit kleinen Notizen oder `@todo`
 bestückt und eignete sich nicht für `javadoc`.
 
 # Beteiligte Software
@@ -40,7 +40,7 @@ DXRAM wird an der Heinrich-Heine Universität in Düsseldorf entwickelt und lebt
 Studenten, die diese Software unter anderem durch Projekt-, Bachelor- und Masterarbeiten
 befruchten. DXRAM ist sowohl in C als auch in Java (8) geschrieben, wobei Beispiel Anwendungen
 und Benchmarks in Java geschrieben sind. DXRAM ist inzwischen nicht nur ein verteilter
-Key-Value-Store, sondern umfasst ein ganzes ,,Ökosystem'' von Modulen, mit bzw. in welches
+Key-Value-Storage, sondern umfasst ein ganzes ,,Ökosystem'' von Modulen, mit bzw. in welches
 man seine verteilte Anwendung einfügen muss. Als Keys verwendet DXRAM
 Chunk-IDs, die auf ,,Chunks'' -- den allokierten Speicher -- zeigen. Mehrere Peers,
 die durch Superpeers verwaltet werden, sind als Speicher- und Anwendungsknoten vernetzt.
@@ -103,14 +103,9 @@ Message-Handler der `GetBlockMessage` ein statisches Objekt in der `AskBlockMess
 auf ,,nicht NULL'' setzt. Dieser unfeine Code sollte einer weniger pragmatischen
 Lösung zum Austausch von Daten zwischen Hadoop und DXRAM weichen.
 
-## HDFS, Hadoop und Hbase
+## HDFS, Hadoop und HBase
 
-
-hbase-1.4.0
-
-hadoop-2.8.2
-
-Die Software HDFS, Hadoop und Hbase ist jeweils in Java geschrieben und ihr
+Die Software HDFS, Hadoop (2.8.2) und HBase (1.4.0) ist jeweils in Java geschrieben und ihr
 Code ist Online verfügbar. Bei HDFS (Hadoop Distributed File System) handelt
 es sich um ein Dateisystem, welches Dateien in große Blöcke von einigen Megabyte
 aufteilt. Gegenüber normalen Dateisystem ist es für große Dateien ausgelegt und
@@ -125,7 +120,7 @@ Prozessmigration ist schneller, als eine Datenübertragung eines ganzen Blocks.
 Hadoop hat sich vom simplen MapReduce hin zu einem komplexen RessourceManager
 entwickelt (YARN), der Entwicklern eine verteilte Job/Batch Verarbeitung ermöglicht, welche
 nicht nur auf MapReduce beschränkt ist. Alle Beschreibungen zu dem Thema
-sind allerdings auf HDFS Komponenten (NameNode, DataNode) ausgelegt, obwohl jeder
+sind allerdings auf HDFS Komponenten (Namenode, Datanode) ausgelegt, obwohl jeder
 Verarbeitungsknoten mit einem NodeManager nicht zwingend auf HDFS als Speicherresource
 ausgelegt ist. Mit [Ignite](https://apacheignite-fs.readme.io/docs/map-reduce)
 und [Alloxio](http://www.alluxio.org/overview/architecture) fand ich bisher nur zwei Projekte, die ein Dateisystem im RAM
@@ -137,19 +132,19 @@ in sich hinein, anstatt wie im ursprünglichen Hadoop Ökosystem diese nur paral
 anbieten zu können. Gleich, ob ein Projekt nahe des Hadoop Ökosystems
 ein eigenes System zur Prozessverarbeitung anbietet oder nicht, das Dateisystem,
 welches die Daten trägt, muss der Prozessverwaltung Informationen liefern, die
-die Wahl des ausführenden Knotens ermöglicht. Da wir als Anwendung Hbase nutzen wollen,
-war ein Blick in Quellcode von Hbase nötig, um eine Entscheidung zu treffen, was
+die Wahl des ausführenden Knotens ermöglicht. Da wir als Anwendung HBase nutzen wollen,
+war ein Blick in Quellcode von HBase nötig, um eine Entscheidung zu treffen, was
 für Informationen hinterlegt sein müssen.
 
 
 
 *Scheme*: In Hadoop wird zur Pfadangabe ein Scheme vorangestelle, welches das
 betroffene Dateisystem -- also eine passende Implemenierung davon in Hadoop -- sowie
-einen möglichen *Namenode* (Infos über Blocklocation zu einer Datei) beinhaltet.
+einen möglichen *Namenode* (Infos über `Blocklocation` zu einer Datei) beinhaltet.
 
 
 
-Hbase ist die Opensource-Version von Google BigTable. Es ist eine No-SQL Datenbank,
+HBase ist die Opensource-Version von Google BigTable. Es ist eine No-SQL Datenbank,
 bei der das schnelle Speichern von kleinen Änderungen eines Datensatzes im Vordergrund
 steht. Das Konzept ist vergleichbar mit einem Logging von Änderungen mit einem
 Zeitstempel, die später bei einem Snapshot zusammengeführt werden. Bei Anfragen 
@@ -161,9 +156,9 @@ entpackt.
 
 
 Obwohl das Abspeichern vieler kleiner Änderungen und das Ausliefern von evtl.
-alten Daten eher einem verteilten Key-Value Store entspricht, setzt Hbase auf Hadoop
+alten Daten eher einem verteilten Key-Value-Storage entspricht, setzt HBase auf Hadoop
 und HDFS als verteilten Massenspeicher. HDFS, welches für große Dateien ausgelegt
-ist, bietet diverse Vorteile gegenüber einem reinen Key-Value Store:
+ist, bietet diverse Vorteile gegenüber einem reinen Key-Value-Storage:
 
 -   Verteilte Prozessverarbeitung 
 -   klassifizierung des Speichermediums (RAM, SSD, HD)
@@ -181,12 +176,12 @@ Begriffe *crypt* und *encryption* sowie *EncodedDataBlock*.
 
 Die Verteilung der Daten einer ,,Tabelle'' wird über deren Key-Einträge gesteuert. Die Knoten,
 welche die Daten zu verarbeiten und verwalten haben, sind für einen Bereich an Keys der Tabelle
-verantwortlich. In HBase 2.1 und Hadoop 2.7.2 wird dies als *RegionServer* bezeichnet, der
-als Anwendung (*AppMaster*) auf einem *NodeManager* läuft. Im Reference Guide von HBase 2.1 
-wird gesagt, es handle sich dabei um einen *Datanode* -- ein HDFS Knoten also. Das ist
-aber so nicht ganz korrekt, da streng genommen Hbase das *Scheme* Konzept für unterschiedliche
+verantwortlich. In HBase und Hadoop wird dies als `RegionServer` bezeichnet, der
+als Anwendung (*AppMaster*) auf einem `NodeManager` läuft. Im derzeitigen Reference Guide von HBase 2.1 
+wird gesagt, es handle sich dabei um einen `Datanode` -- ein HDFS Knoten also. Das ist
+aber so nicht ganz korrekt, da streng genommen HBase das Scheme-Konzept für unterschiedliche
 Dateisysteme übernommen hat. Schaut man sich den Code in HBase genauer an, so
-fällt die Wahl des RegionServers auf den *Host*, der zu den Angefragten Daten
+fällt die Wahl des `RegionServers` auf den *Host*, der zu den Angefragten Daten
 die meisten Blöcke besitzt. Sollte das Dateisystem hier die Methode `getFileBlockLocations()` nicht
 überschreiben, wird nur `localhost` und als HDFS Datatransfer-Port `50010` zurück gegeben.
 
@@ -233,7 +228,7 @@ Connectors eingepflegt. DXNET 0.5.0 ist also als Quellcode dort eingepflegt.
 
 
 Der DXRAM Part meines Projekts ist problemlos auf gradle migriert worden. Dies gilt
-auch für einen DXNET Client, mit dem ich zuletzt die Anfrage an die DXRAM Application
+auch für einen DXNET Client, mit dem ich zuletzt die Anfrage an die DXRAM Applikation
 testen wollte, ohne den Connector/Hadoop gehen zu müssen.
 
 
@@ -272,14 +267,14 @@ Datenstrukturen und Calls beschrieben sind, ließe sich leicht verwenden, um
 das gesammten Request-Handling von HBase durch eine eigene Implementierung
 aus zu tauschen. Wenn man keinen Wert auf Snapshots und (De)Komprimierung legt,
 ist dies auf den ersten Blick die beste Lösung, um HBase durch eine DXRAM Anwendung
-aus zu tauschen. **Für die Zukunft wäre das ein interessantes Projekt**. Ein anderes
+aus zu tauschen -- für die Zukunft wäre das ein interessantes Projekt. Ein anderes
 Projekt wäre, wenn man DXNET oder Infiniband auf der Basis des Template Konzepts
 von Thrift in Apache Thrift zur Verfügung stellt. Zur Zeit meiner Bachelorarbeit
 hatte ich nur Sockets und für Javascript-in-Browser-Clients Websockets in Thrift gesehen.
 
 
 
-Eine tiefere Recherche zum Thema Hbase zeigte, dass dessen Anwendungen vorrangig
+Eine tiefere Recherche zum Thema HBase zeigte, dass dessen Anwendungen vorrangig
 in Java geschrieben werden. Die HBase API bietet dort (ich kann das an dieser Stelle nicht
 belegen) mehr Möglichkeiten. Da HBase auf Hadoop aufbaut, drängt sich das Hadoop
 Ökosystem zur Verarbeitung von Daten in HBase als Framework auf. Da DXRAM
@@ -288,7 +283,7 @@ wäre ein komplettes HBase- und Hadoop-Replacement weniger ratsam, als eine
 Integration von DXRAM in Hadoop. Hadoop (und HBase) wirbt damit, dass es nicht
 auf HDFS als Dateisystem angewiesen ist. In Hadoop findet sich unter anderem
 eine FTP-Dateisystem Anbindung oder eine auf das lokale Dateisystem. Die Idee
-war, hier nun ein DXRAMfs zu hinterlegen, welches anstelle von HDFS unser DXRAM
+war, hier nun ein DxramFs zu hinterlegen, welches anstelle von HDFS unser DXRAM
 als Massenspeicher nutzt. DXRAM als Dateisystem in Hadoop zu implementieren,
 würde allen Hadoop und HBase Anwendungen ohne Programmieraufwand DXRAM als
 Massenspeicher zur Verfügung stellen.
@@ -316,13 +311,13 @@ Kritikpunkt von mir an DXRAM, da in der Version 0.5.0 der Peer als ID angegeben 
 wo ein Chunk abgelegt werden soll. Das Handling, ob dieser Peer online ist und ob
 dort überhaupt noch Speicher zur Verfügung steht, ist somit in die Verteilte Anwendung
 übertragen worden und nicht transparent.] Zusätzlich riet man mir von
-libfuse ab, da mir von Performance-Problemen berichtet wurde, die jeden Speedup
+`libfuse` ab, da mir von Performance-Problemen berichtet wurde, die jeden Speedup
 von DXRAM zu Nichte machen würde.
 
 
 
 Die zweite Möglichkeit DXRAM als Dateizugriff in Hadoop ein zu bauen, ist eine Implementierung
-vergleichbar mit anderen ,,Konnektoren'' wie FTP, viewfs, hdfs usw. Hierzu gibt es sowohl
+vergleichbar mit anderen Konnektoren wie FTP, viewfs, hdfs usw. Hierzu gibt es sowohl
 Beispiele und einen [Contract](https://wiki.apache.org/hadoop/HCFS/Progress), der das verteilte Verhalten 
 des neuen Dateisystems beschreibt, welches unter anderem nicht durch Unittests 
 geprüft werden kann. An dieser Stelle muss einem klar werden, das Hadoop einem
@@ -338,7 +333,7 @@ Dateiblöcke beheimatet.
 
 
 Zwischendurch kam auch die Idee, man könne doch von Ignite oder anderen Projekten, die
-mit einem Key-Value Store eine Hadoop-Anbindung ermöglichen. Nach ca. 2-3 Tagen
+mit einem Key-Value-Storage eine Hadoop-Anbindung ermöglichen. Nach ca. 2-3 Tagen
 musste ich diese Idee jedoch verwerfen. Ich hatte mich bereits in HBase, Hadoop, den
 Google Cloud Storage Connector, sowie HDFS in den Quellcode eingelesen und fand
 speziell in Ignite keinen Einstieg, wo sich der Key-Value Zugriff durch eine
@@ -347,7 +342,7 @@ Alternative auf Basis von DXRAM austauschen ließe.
 
 
 Die Wahl, wie ich DXRAM als Massenspeicher in HBase Anwendungen zur Verfügung stelle,
-fiel auf das Implementieren eines hadoop-kompatiblen Dateisystems, wie es z.B. beim
+fiel auf das Implementieren eines Hadoop-kompatiblen Dateisystems, wie es z.B. beim
 Hadoop eigenen FTP-Connector der Fall ist. Die Vorteile dieser Lösung gegenüber
 den Anderen sind:
 
@@ -355,11 +350,6 @@ den Anderen sind:
 -   keine Performance-Einbußen bei verteilter Ausführung durch den Verlust von Informationen
 -   weiterhin Nutzung des Hadoop Ökosystems bei der Prozessverteilung
 -   minimaler Aufwand bei HBase Anwendungen (Verwendung `dxram://` statt `hdfs://` in der Konfiguration)
-
-
-
-
-
 
 # Konzept und Umsetzung
 
@@ -380,7 +370,7 @@ eine Erweiterung von `DelegateToFileSystem` und trägt in einer privaten Variabl
 ein Implementierung des Dateisystems (`extends FileSystem`). Was ich später
 vom *Google Cloud Storage Connectors* übernommen habe war das Wissen, wie sich dieser
 Code in Hadoop als jar-File einbinden lässt, ohne Hadoop (bzw. Teilprojekte davon) neu
-builden zu müssen. Wichtig ist es, in der Hadoop Konfiguration `core-site.xml` diese Implementierungen
+bilden zu müssen. Wichtig ist es, in der Hadoop Konfiguration `core-site.xml` diese Implementierungen
 mit an zu geben:
 
 ~~~xml
@@ -409,12 +399,12 @@ auch vor zu sehen. Ab Hadoop v2 solle man `FileContext` implemetieren statt File
 Da es in Hadoop eine gewisse Rückwärtskompatibilität gibt, habe ich das ignoriert.
 Zumal Hadoop in ihrem eigenen FTP-Connector dies nicht mehr. Wie historisch dieser Code ist
 merk man auch an diversen Deprecated Warnungen beim Ausführen und auch Kompilieren.
-Allerdings wurde ich stutzig, als ich in Hbase eine Klasse `HFileContext` gefunden habe.
+Allerdings wurde ich stutzig, als ich in HBase eine Klasse `HFileContext` gefunden habe.
 Diese hat jedoch nichts mit der `FileContext` Klasse von Hadoop zu tun.
 
 
 
-Um ein Gefühl für die Verwendung der FileSystem Methoden bei Mapreduce oder kleinen Hbase
+Um ein Gefühl für die Verwendung der FileSystem Methoden bei Mapreduce oder kleinen HBase
 Beispielen zu bekommen, hatte ich in das Original HDFS zahlreiche Log Infos ausgegeben. Falls
 sie sich die Suche des HDFS Connectors im Hadoop Code ersparen wollen, es ist
 in `hadoop-hdfs-project/hadoop-hdfs-client/` und dort in `src/main/java/org/apache/hadoop/hdfs/`
@@ -422,7 +412,7 @@ und der Datei `DistributedFileSystem.java` zu finden.
 
 
 
-Bis 9. März 2018 lief mein Fake-Dateisystem mit Mapreduce, jedoch bekam ich Hbase Beispiel
+Bis 9. März 2018 lief mein Fake-Dateisystem mit Mapreduce, jedoch bekam ich HBase Beispiel
 damit nicht zum laufen. Ich erhielt immer wieder die Meldung ...
 
     2018-03-05 16:56:09,817 ERROR [main] zookeeper.RecoverableZooKeeper: ZooKeeper exists 
@@ -436,12 +426,12 @@ damit nicht zum laufen. Ich erhielt immer wieder die Meldung ...
 ... wenn ich die `hbase shell` aufrufen wollte. Das zookepper, was von DXRAM als zip mitgeliefert wurde, funktionierte aber.
 Auch wenn dieser Fehler nicht darauf hindeutet, waren zwei dinge bis dahin noch offen:
 
--   das Fake-Dateisystem hatte bis dahin kein `append()` implementiert, welches Hbase braucht.
--   es ist unklar, ob das Fake-Dateisystem ähnlich wie bei Hadoop in der Config und als jar-File bei Hbase hinterlegt werden muss.
+-   das Fake-Dateisystem hatte bis dahin kein `append()` implementiert, welches HBase braucht.
+-   es ist unklar, ob das Fake-Dateisystem ähnlich wie bei Hadoop in der Config und als jar-File bei HBase hinterlegt werden muss.
 
 
 Ich machte an dem Tag einen Schnitt, und entschied für mich, dass Mapreduce ja besser sei als nichts,
-auch wenn es mit Hbase nichts zu tun hat. Und so begann ich, die Operationen auf Dateien in `/tmp/myfs/` stückweise
+auch wenn es mit HBase nichts zu tun hat. Und so begann ich, die Operationen auf Dateien in `/tmp/myfs/` stückweise
 mit DXNET an eine DXRAM Application weiter zu leiten, da sich DXRAM nicht direkt in Hadoop einbauen ließ. ^[Später betrachte
 ich die Konzepte von Ignite und Alluxio, welche ein anderes, nicht RPC-ähnliches Konzept verfolgen, um einen
 Zugriff auf ihr Dateisystem aus einer konkreten verteilten Anwendung heraus ermöglichen. Dies entfernt sich jedoch von
@@ -503,7 +493,7 @@ hinterlegt. In der Klasse `DxramFsConfig` werden diese Daten beim Programmstart
 abgelegt. Auf die gleiche Weise wird ein (Hadoop) Node zu (DXNET + DXRAM) Peer
 Mapping aus den Config-Dateien gelesen und in der `NodePeerConfig` Klasse abgelegt.
 
-![DXramFs Datamanagement](fig/FileSystem.png)
+![Daten-Management von DxramFs](fig/FileSystem.png)
 
 Auf der Hadoop Code Seite, also dem `connector/`, wollte ich nur mit diesen
 drei Klassen `FsNode`, `Blockinfo` & `Block` arbeiten sowie ein paar DXNET Komponenten,
@@ -532,13 +522,13 @@ ich nicht für die beste Lösung.
 
 Die Grafik *DXramFs Sketch* stellt den eingeplanten Aufbau des Projekts dar.
 Hierbei tritt der `RegionServer` einmal als konzeptionelle Komponente in
-der *Hbase Wolke* auf, als auch als `App Master` in einem NodeManger, welcher
+der *HBase Wolke* auf, als auch als `App Master` in einem NodeManger, welcher
 Teil von YARN (Hadoop) ist. In der Grafik zeigen Nummern wichtige Ports, die ich als
 Beispiel im Projekt verwendet habe. HDFS mit Namenode und Datanode ist in
 Grün angedeutet, um das Replacement von HDFS gegenüber DxramFs zu verdeutlichen
 und ggf. Probleme mit diesem Aufbau ansprechen zu können.
 
-![DXramFs Sketch](fig/Structure.png)
+![DXramFs: Zusammenspiel von HBase, Hadoop und DXRAM](fig/Structure.png)
 
 Das Zusammenspiel der Komponenten ist leicht erklärt: HBase nutzt Hadoop und
 gibt beim Pfad der Daten ein Scheme mit an, welches Hadoop anweist, auf DxramFs
@@ -547,25 +537,25 @@ Datei gefragt wird, leitet der DxramFs (Connector) diese Anfrage an seinen
 zugewiesen (lokalen) DXNET Peer. Diese Verbindung läuft dann z.B. auf den Ports
 65220 und 65221 ab. Diese DXNET Peer ist auch ein DXRAM Peer (z.B. Port 22222)
 und nutzt nun den `LookupService` von DXRAM, um zu einer ChunkId (welche den BlockChunk repräsentiert)
-den passenden Host zu finden. Auf diese Weise kann ,,YARN'' eine Entscheidung
-treffen, welcher *RegionServer* zur Verarbeitung gewählt werden muss.
+den passenden Host zu finden. Auf diese Weise kann YARN eine Entscheidung
+treffen, welcher `RegionServer` zur Verarbeitung gewählt werden muss.
 
 Für diesen Aufbau hatte ich mir ein Node-Peer Mapping ausgedacht, mit dem
 z.B. eine gestartete DXRAM Anwendung weiß, auf welchem Port sie einen DXNET
 Peer zu starten hat. Ebenso mussten alle DXNET IDs der Peers bekannt sein.
-Da mir zu Beginn des strukturellen Aufbaufs nicht ganz klar war, welche
+Da mir zu Beginn des strukturellen Aufbaus nicht ganz klar war, welche
 Informationen (speziell: Port) bei der Blocklocation in Hadoop erwartet
 wurde, und ob/wie eine Prozessmigration statt findet, hatte ich den DXNET
 Client im Connector so ausgelegt, dass prinzipiell mit jedem Host/NodeManager/Peer
 kommunizieren kann. DXNET nur auf `localhost` zu nutzen, erschien mir
-zu eingeschränkt. **Für die Zukunft könnte man hier eine andere Lösung suchen,
+zu eingeschränkt. Für die Zukunft könnte man hier eine andere Lösung suchen,
 die via DXNET direkt mit DXRAM kommuniziert oder, da es sich um die selbe
-physische Hardware handelt, ein netzwerkfreier Weg gefunden wird, um auf
-Chunks des lokalen DXRAM Peers von einer anderen Anwendung aus zu zu greifen.**
+physische Hardware handelt, ein Netzwerk freier Weg gefunden wird, um auf
+Chunks des lokalen DXRAM Peers von einer anderen Anwendung aus zu zu greifen.
 
 Das Mapping der PeerIds, Ports und Hosts bzw. IP-Adressen ist in der
 Datei `DxramFsApp.conf` unter `dxnet_to_dxram_peers` abgelegt. In Hadoop
-kann dies in der `core-site.xml` geplegt werden. Dort sind analog
+kann dies in der `core-site.xml` gepflegt werden. Dort sind analog
 zur `DxramFsApp.conf` auch weitere Angaben zu pflegen:
 
 ~~~xml
@@ -586,8 +576,6 @@ zur `DxramFsApp.conf` auch weitere Angaben zu pflegen:
     </property>
     <property>
         <name>fs.defaultFS</name>
-        <!-- value>file:///tmp/tee/</value -->
-        <!-- value>hdfs://abook.localhost.fake:9000</value -->
         <value>dxram://localhost:9000</value>
     </property>
 
@@ -666,31 +654,54 @@ Start man z.B. so einen DXRAM Peer ...
 als DXRAM Peer auf Port 22222 auch einen DXNET Peer auf Port 65221 zu starten hat.
 
 
-# Vergleich und Aussicht auf Weiterentwicklung
 
+
+
+# Vergleich und Aussicht auf Weiterentwicklung
 
 ## Vergleich mit anderen Projekten
 
-google cloud storage, alluxio (Tachyon), ignite
 
+Alluxio (früher: Tachyon) hat einen Master-Worker-Aufbau und ist dem
+ResourceManager-NodeManager-Aufbau von YARN sehr ähnlich. Alluxio ist im Grunde ein
+Branch des Hadoop Ökosystems und daher schlecht mit dem Aufbau von DxramFs vergleichbar.
+Interessant an dem Projekt ist, wie sich das Alluxio Dateisystem im
+Hadoop Ökosystem (speziell YARN) nutzen lässt, da es einen eigenen Connector
+zur Verfügung stellt, der mit dem Connector von DxramFs vergleichbar ist. Da Alluxio
+mit dem Master-Worker-Aufbau ein eigenes Konzept für verteilte Anwendungen hat,
+wird es nicht empfohlen, Hadoop bzw. YARN zu benutzen. DxramFs fehlt bisher
+eine eigene Struktur, YARN zu umgehen. Die Idee war ja, mit Informationen aus der `Blocklocation` 
+des DxramFs Connectors YARN effektiv mit nutzen zu können.
 
-Alluxio und Yarn ist etwas suspekt und der Master-Worker aufbau ist dem
-ResourceManager-NodeManager aufbau sehr sehr ähnlich. Will man Alluxio in
-Hadoop YARN benutzen, lässt man im Grunde Hadoop 2x laufen, wobei YARN
-die Jobs verwaltet und ähnlich wie bei ignite die NodeManager und den RessourceManager
-von Hadoop umgeht.
+![Alluxio Master-Worker](fig/alluxio.png)
 
+Der Google Cloud Storage Connector hat anders als Alluxio kaum einen Eingriff ins
+Hadoop Ökosystem gemacht. Genau wie der DxramFs Connector muss YARN die Prozesse
+verwalten. Er ist im Grunde fast mit dem FTP Connector von Hadoop vergleichbar.
+Der Code dieses Connectors sowie dessen Anleitungen sind interessant, da sie eine
+gute Basis für DxramFs waren, um vom Hadoop Quellcode losgelöst ein Hadoop
+Filesystem Projekt zu erstellen.
 
+Ignite ist als weiteres Projekt zu nennen, welches wie Alluxio die Daten bzw. das Dateisystem
+im Arbeitsspeicher ablegt. Es stellt ebenfalls einen Connector für Hadoop zur Verfügung,
+arbeitet aber mit dem Task-System des Hadoop Ökosystems bevor es YARN gab. Ähnlich wie
+Alluxio stellt es ein eigenes System für Jobs zur Verfügung. Anstelle
+eines *Hadoop Client* (Job?) der mit JobTracker, Tasktracker und Namenode
+die ,,alt'' Hadoop Prozessverwaltung darstellt, gibt es einen *IgniteClient*, der
+direkt mit einem *Ignite Data Node* kommuniziert. Vergleicht man dieses Konzept
+mit DxramFs und HBase, so müsste man den App Master *RegionServer* im Code
+anpassen, und direkt eine Kommunikation mit einem DXRAM Peer machen. In dem Fall
+könne man vermutlich sowohl das Scheme-Konzept von Hadoop sowie die Idee,
+für DXRAM ein Dateisystem zu erstellen, aufgeben.
 
-![Ignite](fig/ignite.png)
+![Ignite Client und Ignite Data Node](fig/ignite.png)
 
-![Alluxio](fig/alluxio.png)
 
 
 ## Aktueller Stand
 
 Wer an dem Projekt weiter arbeiten möchte, findet alles auf [https://github.com/no-go/HadoopDxramFS](https://github.com/no-go/HadoopDxramFS),
-wo auch dieses Dokument, Notizen, Zeiten wann ich an was gerbeitet habe sowie
+wo auch dieses Dokument, Notizen, Zeiten wann ich an was gearbeitet habe sowie
 Grafiken abgelegt sind. Derzeit ist `HadoopDxramFS` nicht produktiv einsetzbar.
 Die letzten Versuche geben Mitte September 2018 dxram mit einem 2. Peer laufen zu lassen
 und eine `FsNode` Datenstruktur auf diesen zu übertragen, scheiterten.
@@ -719,67 +730,76 @@ noch ein Bug der `DxramFsApp.java` Datei.
 
 Was ebenfalls fehlt:
 
--   Den Typ `EXT` habe ich noch nicht überall umgesetzt. Es sind also nicht mehr als `ref_ids_each_fsnode` Dateiblöcke möglich oder mehr Ordnereinträge. 
--   UTF-8 Datei- bzw. Ordnernamen werden von Hadoop verlangt. Ggf. muss man dazu einfach in DXRAM `StandardCharsets.US_ASCII` in Strings anpassen und dies in `DxramFsConfig.java` angleichen.
+-   Den Typ `EXT` habe ich noch nicht überall umgesetzt. Es sind also nicht mehr als `ref_ids_each_fsnode` Dateiblöcke möglich 
+    oder mehr Ordnereinträge. 
+-   UTF-8 Datei- bzw. Ordnernamen werden von Hadoop verlangt. Ggf. muss man dazu einfach in DXRAM `StandardCharsets.US_ASCII` in 
+    Strings anpassen und dies in `DxramFsConfig.java` angleichen.
 -   Konkrete Tests mit MapReduce, einer Multinode Konfiguration, HBase Beispiele
 -   Zu klären: Muss das Scheme auch HBase bekannt gemacht werden?
 -   YARN und dessen Nutzung des `Statistics` Objekt im FileSystem: Gibt es noch andere Entscheidungen bei der Wahl des `NodeManagers` ?
--   Locks (dxram, hadoop, ...) wer übernimmt das, um inkonsistente Zustände auf Blöcke aus zu schließen?
+-   Locks (dxram, hadoop, ...) wer übernimmt das, um inkonsistente Zustände auf Blöcken aus zu schließen?
 -   Mehrere Requests an einen DXNET Peer: Mein Code in dem Punkt nicht sicher.
--   hadoop unit tests
+-   [Hadoop FS Unit Tests](https://hadoop.apache.org/docs/r2.8.2/hadoop-project-dist/hadoop-common/filesystem/testing.html)
+
+## Fazit und Aussicht
+
+Im Nachhinein wäre es wohl besser gewesen, die FTP Dateisystem Anbindung von Hadoop im ersten
+Schritt auf eine Multi-Node (hilbert?) System mit `getFileBlocklocations()` um zu bauen und damit
+konkrete Tests der verteilten Prozessverarbeitung zu machen. Bisher habe ich noch
+keine solche HDFS und Datanode frei Konfiguration testen können. Das Erstellen eines eigenen
+FileSystem Connectors für Hadoop ist nicht so schwer, wenn man bereits ein Dateisystem
+hat, an das man binden kann. Ausfälle eines verteilten Dateisystems korrekt abfangen und
+behandeln ist jedoch ein weiterhin offener Punkt. Inwiefern die Prozessverarbeitung von Hadoop
+den Wegfall von Knoten oder das Blockieren von Dateien oder Blöcken abfedern kann,
+ist eine weitere offene Frage. Man muss bedenken, dass eine Verarbeitung nur auf Daten
+stattfindet, die dem zu verarbeitenden Knoten gehören, was Blockieren von Chunks/Blöcken
+überflüssig machen sollte, denn deren Daten gehören dem Prozess exklusiv und nicht mehreren
+Prozess (anderer Verarbeitungsknoten = andere Daten).
+
+Sollte eine konkrete HBase Anwendung mit dessen Thrift API arbeiten, so ist für die Zukunft
+hier ein Entwicklung möglich. Im ersten Schritt könnte man zuerst DXRAM als reinen Key-Value-Storage
+nutzen und später Snapshots und Daten (de)kompression einbauen. In dem Fall könne man Hadoop und
+HBase komplett ersetzen und eine Implementierung eines DXRAM Connectors an Hadoop entfällt.
+
+Eine weitere Lösung wäre, bei der man um die Implementierung eines Dateisystems
+in Hadoop herum kommen könnte, wenn man im Code des RegionServers jeden Datei oder
+Block-Zugriff auf DXRAM umleiten würde. Dies setzt jedoch ein tiefes Verständnis
+des Codes von HBase und dessen Verbindung mit YARN voraus. 
 
 # Anhang
 
-zeiten + hinweise, wann ich was tat
 
++---------------+--------------------------------------------+-----------+
+| ab            | Thema                                      |   Stunden |
++:==============+:===========================================+==========:+
+| 2017-10-19    | Einarbeitung HBase & Hadoop,               |       155 |
+|               | Konzeptsuche zur Einbindung DXRAM in HBase |           |
+|               | oder Hadoop, Implemetierung eines HDFS-    |           |
+|               | kompatiblen Fake-Dateisystems mit          |           |
+|               | umfangreichen Logging                      |           |
++:--------------+:-------------------------------------------+----------:+
+| 2018-03-16    | Konzept zur Einbindung von DXRAM anstelle  |        50 |
+|               | des Fake-Dateisystems, erste Einbundung    |           |
+|               | von DXNET in Hadoop-Code, Umgang mit       |           |
+|               | Maven                                      |           |
++:--------------+:-------------------------------------------+----------:+
+| 2018-05-17    | Verbindung Hadoop DXRAMfs Connector via    |       127 |
+|               | DXNET mit DXRAM, Entwicklung eines eigenen |           |
+|               | Deployment-Skripts, DXRAMfs single Peer    |           |
+|               | kann mit Ordnern bereits exists, mkdir,    |           |
+|               | list, isdir, size, delete, rename          |           |
++:--------------+:-------------------------------------------+----------:+
+| 2018-09-07    | Anlegen leerer Dateien (create, append)    |        40 |
+|               | und Recherche bzgl. Daten in BlockLocation |           |
+|               | sowie dessen verarbeitung beim             |           |
+|               | RegionServer (HBase, YARN)                 |           |
++:--------------+:-------------------------------------------+----------:+
+| 2018-09-28    | Switch auf neues DXRAM, Debugging mit      |        57 |
+|               | 2. Peer und Problemen bei Chunk Speicherung|           |
++:--------------+:-------------------------------------------+----------:+
+| 2018-10-22    | Anfertigung Abschlussbericht               |        28 |
+| bis 31.       |                                            |           |
++:--------------+:-------------------------------------------+----------:+
+|               | **Summe**                                  |       457 |
++---------------+--------------------------------------------+-----------+
 
-Bis zum 19.10.2018 **426,75** Stunden.
-
-
-
-## Notiz 2018-10-27
-
-14:00 - 15:00   Beschreibung des und beginn, das zusammenspiel der Komponenten zu beschreiben
-
-15:00 - 16:30   überarbeitung der Einbindung der Grafiken in das Latex Dokument
-
-16:30 - 19:00   Fertigung Abschnitt Config, Struktur und "Aktueller Stand"
-
-## Notiz 2018-10-26
-
-12:45 - 16:15   Erste Beschreibung zum Einbau des Dateisystems in Hadoop und Stolperstellen
-
-## Notiz 2018-10-25
-
-14:00 -         Korrektur und Update des *Sketches*
-
-15:15 - 18:00   doku entscheidungsfindung fertig
-
-## Notiz 2018-10-24
-
-14:30 - 16:00 doku maven, gradle, zookeeper und kerberos
-
-## Notiz 2018-10-23
-
-13:30 - 16:15 doku hdfs, hadoop, anfang hbase
-
-17:00 - 19:30 hbase abschnitt auch fertig
-
-## Notiz 2018-10-22
-
-13:15 - 16:00
-
-Test und code-Umbau, so dass zumindest create() eines FsNode auf EINEM peer korrekt klappt.
-
--   später: blockinfo und block anlegen implementieren, falls noch zeit ist
--   diese Woche: Bericht über Projekt machen: Ideen, Changen, Stolpersteine
-
-Zustand des Code ist jetzt ungefähr da, wo ich angefangen habe einen 2. Peer hinzu zu nehmen.
-
--   Verwendung mit nur EINEM Peer bei nicht-Datei Operationen ist ok. Aber: *Not supporting remove operation if chunk locks are disabled*
--   problem bei RENAME, da es 2 ordner mit neuem (gleichem) Namen erzeugt!
-
-15:00 - 16:00   Finale Notizen in GITHUB und Abbruch des Programmier-Parts
-
-
-16:45 - 20:30 Anfertigen Bericht über Projekt!

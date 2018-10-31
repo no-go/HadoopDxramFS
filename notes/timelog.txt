@@ -213,12 +213,6 @@ bis hier: 372,5
 
 bis hier: 426,75
 
-+---------------+-------------------------------------------+--------------+-----------------------
-|               |                                           |              | 
-|               |                                           |              | 
------------------------------------------------------------------------------------------------
-
-
 
 ## very next milestones
 
@@ -254,6 +248,66 @@ todo: umbau des FsNodeChunks und allen beteiligten codes ist leider mislungen. H
 richten, wie fsnode und der chunk erzeugt und gefuellt wird. ausserdem auch beim anlegen des root fsnode 
 chunks sollten mehr logging infos ausgegeben werden. beim start des 2. peers schein der root korrekt 
 geholt zu werden: auch dort: mehr logging machen!
+
+
+
+
+
+## Notiz 2018-10-31
+
+13:00 - 16:00  Einpflegen der Stunden in den Anhang
+
+## Notiz 2018-10-29
+
+14:45 - 15:00   begonnen Einpflegen der Stunden in den Anhang, tastatur defekt
+
+## Notiz 2018-10-27
+
+14:00 - 15:00   Beschreibung des und beginn, das zusammenspiel der Komponenten zu beschreiben
+
+15:00 - 16:30   überarbeitung der Einbindung der Grafiken in das Latex Dokument
+
+16:30 - 19:00   Fertigung Abschnitt Config, Struktur und "Aktueller Stand"
+
+## Notiz 2018-10-26
+
+12:45 - 16:15   Erste Beschreibung zum Einbau des Dateisystems in Hadoop und Stolperstellen
+
+## Notiz 2018-10-25
+
+14:00 -         Korrektur und Update des *Sketches*
+
+15:15 - 18:00   doku entscheidungsfindung fertig
+
+## Notiz 2018-10-24
+
+14:30 - 16:00 doku maven, gradle, zookeeper und kerberos
+
+## Notiz 2018-10-23
+
+13:30 - 16:15 doku hdfs, hadoop, anfang hbase
+
+17:00 - 19:30 hbase abschnitt auch fertig
+
+## Notiz 2018-10-22
+
+13:15 -
+
+Test und code-Umbau, so dass zumindest create() eines FsNode auf EINEM peer korrekt klappt.
+
+-   später: blockinfo und block anlegen implementieren, falls noch zeit ist
+-   diese Woche: Bericht über Projekt machen: Ideen, Changen, Stolpersteine
+
+Zustand des Code ist jetzt ungefähr da, wo ich angefangen habe einen 2. Peer hinzu zu nehmen.
+
+-   Verwendung mit nur EINEM Peer bei nicht-Datei Operationen ist ok. Aber: *Not supporting remove operation if chunk locks are disabled*
+-   problem bei RENAME, da es 2 ordner mit neuem (gleichem) Namen erzeugt!
+
+15:00 - 16:00   Finale Notizen in GITHUB und Abbruch des Programmier-Parts
+
+
+16:45 - 20:30 Anfertigen Bericht über Projekt!
+
 
 
 ## notiz 2018-10-22

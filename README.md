@@ -6,6 +6,8 @@ instead of HDFS.
 
 **It is still in pre Alpha state!** and is still working in a `/tmp/myfs/` folder instead of dxram only!
 
+German: [Final Report](https://github.com/no-go/HadoopDxramFS/blob/master/doc/Readme.md) or [PDF](https://github.com/no-go/HadoopDxramFS/raw/master/doc/Projektarbeit.pdf)
+
 **since 6. Sep. 2018**: `exists`, `mkdir`, `list`, `isdir`, `size`, `delete` and `rename` works in DXRAM,
 but `mkdir`, `delete` and `rename` does not with more than `ref_ids_each_fsnode` entries.
 UTF8/16 chars or a path with more than `max_pathlength_chars` are a problem, too.
@@ -48,6 +50,7 @@ Get the final report (PDF, German) from [here](doc/Projektarbeit.pdf).
 -   [Hadoop DXRAM Code on github](https://github.com/no-go/HadoopDxramFS)
 -   [Hadoop DXRAM Website](https://no-go.github.io/HadoopDxramFS/)
 -   [DX:RAM](https://dxram.io/)
+-   German: [Final Report](https://github.com/no-go/HadoopDxramFS/blob/master/doc/Readme.md) or [PDF](https://github.com/no-go/HadoopDxramFS/raw/master/doc/Projektarbeit.pdf)
 
 ## Helpful links ...
 
