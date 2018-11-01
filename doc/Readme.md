@@ -778,35 +778,37 @@ des Codes von HBase und dessen Verbindung mit YARN voraus.
 # Anhang
 
 
-| ab            | Thema                                      |   Stunden |
-+===============+============================================+===========+
-| 19.10.2017    | Einarbeitung HBase & Hadoop,               |       155 |
++:--------------+:-------------------------------------------+----------:+
+| ab            | Thema                                      |    Stunden|
++:==============+:===========================================+==========:+
+| 19.10.2017    | Einarbeitung HBase & Hadoop,               |        155|
 |               | Konzeptsuche zur Einbindung DXRAM in HBase |           |
 |               | oder Hadoop, Implemetierung eines HDFS-    |           |
 |               | kompatiblen Fake-Dateisystems mit          |           |
 |               | umfangreichen Logging                      |           |
-+---------------+--------------------------------------------+-----------+
-| 16.3.2018     | Konzept zur Einbindung von DXRAM anstelle  |        50 |
++:--------------+:-------------------------------------------+----------:+
+| 16.3.2018     | Konzept zur Einbindung von DXRAM anstelle  |         50|
 |               | des Fake-Dateisystems, erste Einbundung    |           |
 |               | von DXNET in Hadoop-Code, Umgang mit       |           |
 |               | Maven                                      |           |
-+---------------+--------------------------------------------+-----------+
-| 17.5.2018     | Verbindung Hadoop DXRAMfs Connector via    |       127 |
++:--------------+:-------------------------------------------+----------:+
+| 17.5.2018     | Verbindung Hadoop DXRAMfs Connector via    |        127|
 |               | DXNET mit DXRAM, Entwicklung eines eigenen |           |
 |               | Deployment-Skripts, DXRAMfs single Peer    |           |
 |               | kann mit Ordnern bereits exists, mkdir,    |           |
 |               | list, isdir, size, delete, rename          |           |
-+---------------+--------------------------------------------+-----------+
-|  7.9.2018     | Anlegen leerer Dateien (create, append)    |        40 |
++:--------------+:-------------------------------------------+----------:+
+| 7.9.2018      | Anlegen leerer Dateien (create, append)    |         40|
 |               | und Recherche bzgl. Daten in BlockLocation |           |
 |               | sowie dessen verarbeitung beim             |           |
 |               | RegionServer (HBase, YARN)                 |           |
-+---------------+--------------------------------------------+-----------+
-| 28.9.2018     | Switch auf neues DXRAM, Debugging mit      |        57 |
++:--------------+:-------------------------------------------+----------:+
+| 28.9.2018     | Switch auf neues DXRAM, Debugging mit      |         57|
 |               | 2. Peer und Problemen bei Chunk Speicherung|           |
-+---------------+--------------------------------------------+-----------+
-| 22.10.2018    | Anfertigung Abschlussbericht,              |        30 |
++:--------------+:-------------------------------------------+----------:+
+| 22.10.2018    | Anfertigung Abschlussbericht,              |         30|
 | bis 31.       | Korrekturlesen                             |           |
++:--------------+:-------------------------------------------+----------:+
+|               | **Summe**                                  |        459|
 +---------------+--------------------------------------------+-----------+
-|               | **Summe**                                  |       459 |
 
