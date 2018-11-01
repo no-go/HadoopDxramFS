@@ -778,7 +778,6 @@ des Codes von HBase und dessen Verbindung mit YARN voraus.
 # Anhang
 
 
-+---------------+--------------------------------------------+-----------+
 | ab            | Thema                                      |   Stunden |
 +===============+============================================+===========+
 | 19.10.2017    | Einarbeitung HBase & Hadoop,               |       155 |
@@ -810,5 +809,4 @@ des Codes von HBase und dessen Verbindung mit YARN voraus.
 | bis 31.       | Korrekturlesen                             |           |
 +---------------+--------------------------------------------+-----------+
 |               | **Summe**                                  |       459 |
-+---------------+--------------------------------------------+-----------+
 
