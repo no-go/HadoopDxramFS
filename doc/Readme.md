@@ -755,7 +755,7 @@ Was ebenfalls fehlt:
 Im Nachhinein wäre es wohl besser gewesen, die FTP Dateisystem Anbindung von Hadoop im ersten
 Schritt auf eine Multi-Node (hilbert?) System mit `getFileBlocklocations()` um zu bauen und damit
 konkrete Tests der verteilten Prozessverarbeitung zu machen. Bisher habe ich noch
-keine solche HDFS und Datanode frei Konfiguration testen können. Das Erstellen eines eigenen
+keine solche HDFS und Datanode freie Konfiguration testen können. Das Erstellen eines eigenen
 FileSystem Connectors für Hadoop ist nicht so schwer, wenn man bereits ein Dateisystem
 hat, an das man binden kann. Ausfälle eines verteilten Dateisystems korrekt abfangen und
 behandeln ist jedoch ein weiterhin offener Punkt. Inwiefern die Prozessverarbeitung von Hadoop
@@ -788,19 +788,19 @@ des Codes von HBase und dessen Verbindung mit YARN voraus.
 |               | umfangreichen Logging                      |           |
 +:--------------+:-------------------------------------------+----------:+
 | 16.3.2018     | Konzept zur Einbindung von DXRAM anstelle  |         50|
-|               | des Fake-Dateisystems, erste Einbundung    |           |
+|               | des Fake-Dateisystems, erste Einbindung    |           |
 |               | von DXNET in Hadoop-Code, Umgang mit       |           |
 |               | Maven                                      |           |
 +:--------------+:-------------------------------------------+----------:+
-| 17.5.2018     | Verbindung Hadoop DXRAMfs Connector via    |        127|
+| 17.5.2018     | Verbindung Hadoop DxramFs Connector via    |        127|
 |               | DXNET mit DXRAM, Entwicklung eines eigenen |           |
-|               | Deployment-Skripts, DXRAMfs single Peer    |           |
-|               | kann mit Ordnern bereits exists, mkdir,    |           |
+|               | Deployment-Skripts; DxramFs single Peer    |           |
+|               | kann mit Ordnern bereits: exists, mkdir,   |           |
 |               | list, isdir, size, delete, rename          |           |
 +:--------------+:-------------------------------------------+----------:+
 | 7.9.2018      | Anlegen leerer Dateien (create, append)    |         40|
 |               | und Recherche bzgl. Daten in BlockLocation |           |
-|               | sowie dessen verarbeitung beim             |           |
+|               | sowie dessen Verarbeitung beim             |           |
 |               | RegionServer (HBase, YARN)                 |           |
 +:--------------+:-------------------------------------------+----------:+
 | 28.9.2018     | Switch auf neues DXRAM, Debugging mit      |         57|
