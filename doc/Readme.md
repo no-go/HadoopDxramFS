@@ -28,8 +28,8 @@ Notizen oder `@todo` bestückt und eignete sich nicht für `javadoc`.
 
 # Beteiligte Software
 
-In diesem Kapitel wird grob auf die genutzte Software beschreiben, ohne den kompletten
-Funktionsumfang dar zu legen. Die kommenden Unterkapitel beschreiben
+In diesem Kapitel wird grob die genutzte Software beschrieben, ohne den kompletten
+Funktionsumfang darzulegen. Die kommenden Unterkapitel beschreiben
 auch Probleme, die bei der Nutzung oder Dokumentation dieser Software auftraten.
 Bei wichtigen Komponenten, die in der Projektarbeit interessant waren, werden auch Details
 näher beschrieben.
@@ -70,10 +70,10 @@ Wie auch in anderen Software-Projekten gab es in DXRAM drei Arten von Beispielen
 -   konkrete Anwendung, aber inzwischen veraltet
 
 Eine konkrete Anwendung wie DXGraph wurde in Übungsblättern als Referenz genannt. Diese
-Wahl war zu diesem Zeitpunkt der Enwicklung jedoch nicht mehr gut gewählt da speziell DxGraph 
+Wahl war zu diesem Zeitpunkt der Entwicklung jedoch nicht mehr empfehlenswert, da speziell DxGraph 
 in einem alten Repository und Codezustand war. In dem Code gab es sehr praktische beispielhafte Chunks, 
 die eine Speicherung von Objekten, welche nur aus Attributen unterschiedlichen Datentypens bestehen,
-beschrieben. Dort gab es diverse Methoden, um Strings und Arrays in Chunks ab zu legen. Diese
+beschrieben. Dort gab es auch diverse Methoden, um Strings und Arrays in Chunks ab zu legen. Diese
 Methoden existieren auch weiterhin in DXRAM. Sie verleiten jedoch dazu, sich über die
 initiale Chunk-Größe im Speicher keine Gedanken zu machen und beim Ändern der Daten
 oder der Initialisierung den Aspekt der tatsächlichen Größe zu vergessen. Dies hat
@@ -224,13 +224,13 @@ Dies galt auch für den [Google Cloud Storage Connector](https://github.com/Goog
 der ab 8. Februar 2018 eine gute Orientierungshilfe war. Davor wurden
 Code-Anpassungen und Erweiterungen in Hadoop via IDE gemacht und gebildet. Trotz Maven war es ein 
 erheblicher Zeitaufwand, alle Bibliotheken von DXNET und Hadoop in den passenden Versionen aufeinander
-ab zu stimmen, so dass der erstellte DXRAM Connector als jar-File inkl. weiterer
+ab zu stimmen, bis der erstellte DxramFs Connector als jar-File inkl. weiterer
 Bibliotheken in Hadoop problemlos lief. Bei der Umstellung von Maven auf Gradle
 im August 2018 bei allen DXRAM Projekten konnte diese Umstellung nicht mehr adäquat
 in den Connector einpflegt werden (es bleib bei Maven). Da die Bibliotheken nun
 in die DXRAM Projekte eingebunden wurden, gab es nun eher weniger Probleme bei der
 Abstimmung mit Hadoop. Um in der IDE leichter arbeiten zu können und wegen
-kleinerer Änderungen an DXNET ist dieser Code händisch in den Code des
+kleinerer Änderungen an DXNET ist dessen Code händisch in den Code des
 Connectors eingepflegt. DXNET 0.5.0 ist also als Quellcode in den Connector eingepflegt.
 
 
@@ -296,23 +296,6 @@ als Massenspeicher nutzt. DXRAM als Dateisystem in Hadoop zu implementieren,
 würde allen Hadoop und HBase Anwendungen ohne Programmieraufwand DXRAM als
 Massenspeicher zur Verfügung stellen.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Für die Idee *DXRAM als Dateisystem in Hadoop* gab es zwei Möglichkeiten, die
 man in Betracht ziehen konnte:
 
@@ -350,7 +333,7 @@ nicht das verteilte Sperren auf Dateien abnimmt, sondern dass man dies selbst im
 Würde das Interface von Hadoop einem dies automatisch abnehmen, müsste
 in dem *Contract* kein Hinweis bzgl. atomarer Operationen stehen. Diese Form der
 Einbindung von DXRAM in Hadoop (als ,,Connector'') kann genutzt werden, um weitere Information über
-den Speicherort der Daten zu hinterlegen. Dafür Verantwortlich ist die Methode `getFileBlockLocations()` , welche
+den Speicherort der Daten zu hinterlegen. Dafür Verantwortlich ist die Methode `getFileBlockLocations()`, welche
 im gesamten Projektzeitraum nur beim *RegionServer* von HBase verwendet wurde,
 wo es um die Wahl des Hosts geht, welcher zu den angefragten Dateien die meisten
 Dateiblöcke beheimatet. Im Code des RegionServers könnte man evtl. in Zukunft auch zwischen
@@ -381,14 +364,14 @@ den Anderen sind:
 -   Gewinnung von Interesse an DXRAM in der HBase- und Hadoop-Community (weil kein Replacement)
 -   keine Performance-Einbußen bei verteilter Ausführung durch den Verlust von Informationen bzgl. des Speicherorts
 -   weiterhin Nutzung des Hadoop Ökosystems bei der Prozessverteilung
--   minimaler Anpassungs-Aufwand bei HBase Anwendungen (Verwendung `dxram://` statt `hdfs://` in der Konfiguration)
+-   minimaler Anpassungsaufwand bei HBase Anwendungen (Verwendung `dxram://` statt `hdfs://` in der Konfiguration)
 
 # Konzept und Umsetzung
 
 Die Grundidee war sehr einfach: Kopiere z.B. den `fs/ftp/` Ordner mit dem FTP-Connector im Hadoop
 Quellcode, nenne alles, was FTP heißt um auf DXRAM, entferne den FTP-spezifischen Code, und tausche
 alles bei `connect()`, `disconnect()` sowie den grundlegenden Dateioperationen, wo `@Override` darüber stand,
-durch eigenen Code aus. Hinterher kompiliere Hadoop in der Console, und schon kann man mit
+durch eigenen Code aus. Hinterher kompiliert man Hadoop in der Console, und schon kann man mit
 folgenden Befehlen die Methoden testen:
 
     bin/hadoop fs -mkdir -p dxram://dummy:9999/test/abc
@@ -462,11 +445,11 @@ Auch wenn dieser Fehler nicht darauf hindeutet, waren zwei Dinge bis dahin noch 
 -   es ist unklar, ob das Fake-Dateisystem ähnlich wie bei Hadoop in der Config und als jar-File bei HBase hinterlegt werden muss.
 
 
-An dieser Stelle wurde im Projekt ein Schnitt gemacht und sich nur noch auf Mapreduce als Mindest-Applikation konzentriert
+An dieser Stelle wurde im Projekt ein Schnitt gemacht und sich nur noch auf Mapreduce als Mindest-Applikation konzentriert.
 Es lag die Vermutung nahe, dass mit HBase etwas nicht stimme und nicht zwingend am Fake-Dateisystem. So wurde nun
 begonnen, die Operationen des Fake-Dateisystems stückweise mit DXNET an eine DXRAM Applikation weiter zu leiten, da sich 
 DXRAM nicht direkt in Hadoop einbauen ließ. ^[Die Konzepte von Ignite und Alluxio, welche ein anderes, nicht RPC-ähnliches Konzept verfolgen, um einen
-Zugriff auf ihr Dateisystem aus einer konkreten verteilten Anwendung heraus ermöglichen, werden erst später in diesem Bericht betrachtet. Diese Konzepte entfernen
+Zugriff auf ihr Dateisystem aus einer konkreten verteilten Anwendung heraus zu ermöglichen, werden erst später in diesem Bericht betrachtet. Diese Konzepte entfernen
 sich jedoch von der Idee, dass nur mit einem File-System Connector in Hadoop und Infos zum Speicherort eine verteilte Prozessverwaltung
 allein durch Hadoop ermöglicht wird.]
 
@@ -702,7 +685,7 @@ Hadoop Ökosystem (speziell YARN) nutzen lässt, da es einen eigenen Connector
 zur Verfügung stellt, der mit dem Connector von DxramFs vergleichbar ist. Da Alluxio
 mit dem Master-Worker-Aufbau ein eigenes Konzept für verteilte Anwendungen hat,
 wird es nicht empfohlen, YARN von Hadoop zu benutzen. DxramFs fehlt bisher
-eine eigene Struktur, um YARN in vergleichbarer weise zu umgehen. Die Projektentscheidung war ja, nur mit 
+eine eigene Struktur, um YARN in vergleichbarer Weise zu umgehen. Die Projektentscheidung war ja, nur mit 
 Informationen aus der `BlockLocation` des DxramFs-Connectors die Hadoop Prozessverwaltung YARN effektiv mit nutzen
 zu können und keine eigene Prozessverwaltung zu erstellen.
 
@@ -782,7 +765,7 @@ Schritt auf eine Multi-Node (hilbert?) System mit `getFileBlocklocations()` um z
 konkrete Tests der verteilten Prozessverarbeitung zu machen. Bisher konnte noch
 keine solche HDFS und Datanode freie Konfiguration getestet werden. Das Erstellen eines eigenen
 FileSystem Connectors für Hadoop ist nicht so schwer, wenn man bereits ein Dateisystem
-hat, an das man es zu binden kann. Ausfälle eines verteilten Dateisystems korrekt abfangen und
+hat, an das man es binden kann. Ausfälle eines verteilten Dateisystems korrekt abfangen und
 behandeln ist jedoch ein weiterhin offener Punkt. Inwiefern die Prozessverarbeitung von Hadoop
 den Wegfall von Knoten oder das Blockieren von Dateien oder Blöcken abfedern kann,
 ist eine weitere offene Frage. Man muss bedenken, dass eine Verarbeitung nur auf Daten
@@ -836,8 +819,8 @@ des Codes von HBase und dessen Verbindung mit YARN voraus.
 | 22.10.2018    | Anfertigung Abschlussbericht,              |         30|
 | bis 31.       | Korrekturlesen                             |           |
 +:--------------+:-------------------------------------------+----------:+
-| 20.11.2018    | Korrekturen im Abschlussbericht            |          5|
+| 20.11.2018    | Korrekturen im Abschlussbericht            |          6|
 +:--------------+:-------------------------------------------+----------:+
-|               | **Summe**                                  |        464|
+|               | **Summe**                                  |        465|
 +---------------+--------------------------------------------+-----------+
 
