@@ -1,0 +1,135 @@
+\usepackage[T1]{fontenc} % utf8
+\usepackage[utf8]{inputenc} % utf8
+\usepackage[german]{babel} % deutsche silbentrennung
+\usepackage{graphicx}
+\usepackage{color,xcolor,colortbl}
+\usepackage{picture}
+
+\usepackage{longtable}
+\usepackage{booktabs}
+
+\usepackage{bookman} % cool font !!!!!
+
+% Ich glaub das ist fuers syntax highlighting
+\definecolor{pblue}{rgb}{0.13,0.13,1}
+\definecolor{pgreen}{rgb}{0,0.5,0}
+\definecolor{pred}{rgb}{0.9,0,0}
+\definecolor{pgrey}{rgb}{0.46,0.45,0.48}
+
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{url}
+
+% code einbinden / hightlight
+\usepackage{minted}
+
+% macht aus \begin{minted}{cpp} -> \begin{cppcode}  bzw \end ?!?!?!
+\newminted{cpp}{
+ baselinestretch=1.2,
+ fontsize=\footnotesize,
+ linenos}
+\newminted{bash}{
+ baselinestretch=1.2,
+ fontsize=\footnotesize,
+ linenos}
+\newminted{java}{
+% frame=lines,
+% framesep=2mm,
+ baselinestretch=1.2,
+ fontsize=\footnotesize,
+ linenos}
+
+\usepackage{svg}
+%\usepackage{datetime}
+
+% farben des DXRAM Designs
+\definecolor{dxramG1}{rgb}{0.25, 0.25, 0.25}
+\definecolor{dxramG2}{rgb}{0.50, 0.50, 0.50}
+\definecolor{dxramB0}{rgb}{0.80, 0.90, 0.95}
+\definecolor{dxramB1}{rgb}{0.20, 0.65, 0.95}
+\definecolor{dxramB2}{rgb}{0.00, 0.50, 0.75}
+
+% farben im inhaltsverzeichnis
+\setbeamercolor{section in toc}{fg=dxramB2}
+\setbeamercolor{subsection in toc}{fg=dxramB1}
+
+% Navigations icons entfernen
+\beamertemplatenavigationsymbolsempty
+
+% Anpassung Boadilla theme auf DXRAM design
+\mode<presentation>
+{
+	\usetheme{Boadilla}
+	\setbeamercolor{frametitle}{fg=dxramB2,bg=white}
+	\setbeamercolor{title}{bg=white,fg=dxramB2}
+	\setbeamercolor{institute}{fg=dxramG1}
+	\setbeamercolor{subtitle}{bg=white,fg=dxramB1}
+	\setbeamertemplate{title page}[default][colsep=-4bp,rounded=true]
+	\setbeamercolor{title in head/foot}{fg=white,bg=dxramG1}
+	\setbeamercolor{page in head/foot}{fg=white,bg=dxramB2}
+	\setbeamercolor{section in head/foot}{fg=dxramB1,bg=white}
+
+	\setbeamertemplate{sections/subsections in toc}[square]
+	\setbeamercolor{section number projected}{bg=dxramB2,fg=dxramB2}
+	\setbeamercolor{subsection number projected}{bg=dxramB1,fg=dxramB1}
+	\setbeamerfont{section number projected}{series=\bfseries}
+	
+	\setbeamertemplate{itemize items}[square]
+	\setbeamercolor{itemize item}{bg=white,fg=dxramB1}
+	
+	\setbeamercolor{description item}{bg=white,fg=dxramB1}
+}
+
+% Anpassung Boadilla theme Fussleiste auf DXRAM design
+\setbeamertemplate{footline}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.81\paperwidth,ht=4.0ex,dp=1ex,left]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\hspace*{12ex}%
+    \footnotesize{\insertsection}%
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.14\paperwidth,ht=4.0ex,dp=1ex,center]{section in head/foot}%
+    \usebeamerfont{section in head/foot}%
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.05\paperwidth,ht=4.0ex,dp=1ex,center]{page in head/foot}%
+    \usebeamerfont{page in head/foot}%
+    \insertframenumber{}%
+  \end{beamercolorbox}
+  }%
+  \vskip0pt%
+}
+
+% Anpassung Boadilla theme - Kopfleiste unterstreichen
+\setbeamertemplate{frametitle}%
+{%
+	\begin{beamercolorbox}[wd=\paperwidth,ht=0.1645\paperheight]{frametitle}%
+		\hspace*{5ex} \insertframetitle \\
+		\makebox[\linewidth]{\textcolor{dxramG2}{\rule{\paperwidth}{0.8pt}}}
+	\end{beamercolorbox}
+}%
+
+% Die Framebreite anpassen, so dass text nicht unterm rechten blauen Rand umbricht
+\textwidth=145mm
+
+% definition von \maxwidth, um z.B. Bilder auf max. Breite zu skalieren
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth
+\else\Gin@nat@width\fi}
+
+\usepackage{german}
+\usepackage{amsmath}
+
+\def\tightlist{}
+\usepackage{eso-pic}
+
+% definition von \crule, um einen hellblauen Balken zu machen
+\newcommand\crule[3][dxramB0]{\textcolor{#1}{\rule{#2}{#3}}}
+
+% platzierung der logos und blauen Blacken auf jeder Seite
+\AddToShipoutPictureFG{
+  \put(\LenToUnit{0.950\paperwidth},\LenToUnit{0.064\paperheight}){\crule{8mm}{70mm}}%
+  \put(\LenToUnit{0.00\paperwidth},\LenToUnit{0.0\paperheight}){\includegraphics[height=2.7ex,keepaspectratio]{fig/logo3.eps}}%
+  \put(\LenToUnit{0.829\paperwidth},\LenToUnit{0.007\paperheight}){\includegraphics[height=4.3mm,keepaspectratio]{fig/logo2.eps}}%
+  \put(\LenToUnit{0.950\paperwidth},\LenToUnit{0.832\paperheight}){\includegraphics[height=16mm,keepaspectratio]{fig/logo1.eps}}%
+}%

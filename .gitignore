@@ -1,6 +1,9 @@
 doc/_minted-temp_template
 doc/temp*
 
+slides/_minted-temp_*
+slides/temp*
+
 connector/.idea/**/*
 connector/target/**/*
 connector/out/**/*
