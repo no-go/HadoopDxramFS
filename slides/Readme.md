@@ -1,92 +1,171 @@
-# Motivation
+# HBase auf DXRAM
 
-## Motivation
+## DXRAM benutzen
 
-- DXRAM: ein konkreter Anwendungsfall
-- noSQL: schnelle Änderungen im RAM, HDFS nicht dafür ausgelegt
-- HBase: HDFS als Persistenzschicht
+- Einbindung in andere Software ausprobieren
+- zeigen, dass es echte Alternative sein kann
+- Popularität erhöhen
 
-# Hadoop Ökosystem und Hbase RegionServer
+## Beispiel: HBase
 
-## Hadoop Ökosystem
+- noSQL mit BASE statt ACID
+- RegionServer als Memory Cache
+- HDFS als langsame Persistenz-Schicht
+- Balance und Config wichtig (read, write, RAM, flush, compression)
 
-- Prozessverwaltung
-- HDFS, Scheme und Connector Konzept 
-- viele, speziell auf Blöcke in HDFS ausgelegte Methoden
+Warum nicht gleich DXRAM als verteilten Speicher nutzen?
 
-## Hbase RegionServer
+## Vergleich mit Ignite
 
-- RegionServer für Key-Region zuständig
-- RegionServer sind Apps, verwaltet durch RessourceManager von Hadoop/YARN
-- RessourceManager verwaltet Nodemanager auf Hosts
-- Apps (App/Master) laufen auf Nodemangern
-- Host eines Dateiblocks bestimmt Wahl des zuständigen RegionServers
+- Ignite wie DXRAM verteilter Speicher
+- Ignite SQL: ACID und nicht BASE
+- Ignite nutzt auch HDFS als Persistenz-Schicht
+- Ignite und Hbase: Ignite FS Connector zu Hadoop
 
-# So machen es andere
-## So machen es andere
 
-Nur als Speicherpunkt und unverteilte Verarbeitung:
+# Lösungswege
 
-- ftp connector: Namenode hat auch direkt die Daten
-- Google Cloud Storage Connector
+## Idee 1
 
-Im Arbeitsspeicher:
+Idee 1: DXRAM auch als verteiltes Dateisystem anbieten und
+Connector für Hadoop machen.
 
-- Alluxio (Hadoop Kopie; Mounten eines Connectors in Ordner)
-- Ignite (App-Master und Nodemanager Replacement)
+## Idee 1: DxramFs Connector
 
-# Replacement, Integration oder Improvisation
-## Replacement, Integration oder Improvisation
+**Pro**
 
-1.  HBase Thrift Interface: Wenn Client nur das nutzt, kann man diese
-    Objekte, Methoden, ... auch ohne HBase und Hadoop implementieren.
-2.  Connetor: DXRAM ist kein verteiltes Dateisystem. Dies müsste man erst noch bauen.
-3.  Improvisieren: Hadoop lokaler Dateizugriff nutzen und DXRAM dort mountfähig machen
+- Anwender muss auf HBase und Hadoop Seite nichts umprogrammieren
+- alle Hadoop Anwendungen können es nutzen
+- Host basierte Prozesssplittung durch Hadoop ist möglich
 
-## Replacement, Integration oder Improvisation
+## Idee 1: DxramFs Connector
 
-zu 1: HBase nachbauen?
+**Contra**
 
-zu 2: HDFS nachbauen
+Mal eben HDFS nach programmieren :o/
 
-zu 3: ... performance von libfuse :-(
 
-# DXRAM hat eigene App
+## Idee 2
 
-## DXRAM hat eigene App
+Idee 2: DXRAM zu einem mountfähigen Medium machen mit `libfuse`.
 
-Mir war nicht klar, wie ich mit DXNET direkt auf einen Peer von DXRAM zugreifen
-kann. Auch das Kombinieren des DXRAM Codes in einen Hadoop FileSystem Connectors
-war mir schleierhaft. Es gab nur DXRAM Anwendungen als Beispiel, welche
-als Anwendung auf einem Peer liefen.
+## Idee 2: mount DxramFs
 
-# DXNET für FS CRUD
+**Pro**
 
-## DXNET für FS CRUD
+- Anwender muss nicht umprogrammieren 
+- nicht nur Hadoop könnte das nutzen
 
-- CRUD: Create, Read, Update, Delete
-- HBase: append!!!
-- DXNET als Austausch zwischen Hadoop FS Connector und DXRAM App
-- hinterher wäre DXNET transfer nur auf localhost!?
-- Falls RegionServer alleine den FS zugriff in HBase macht: Warum diesen nicht anpassen anstatt Connector zu bauen?
+## Idee 2: mount DxramFs
 
-# Stolpersteine
+**Contra**
 
-## Stolpersteine: Bessere Vorgehensweisen
+- Verteilung der Daten unklar
+- Hadoop weiss echten Speicherort nicht mehr
+- Performance Probleme bei libfuse
+- auch hier muss ein Verteiltes Dateisystem Programmiert werden
 
-- FTP Connector Umbau auf Multinode, dann DXRAM Rest API ähnlich webdav
-- Messung Multinode FTP: wo führt Hadoop Code aus
-- HBase Replacement (Thrift API) in 3 Stufen: erst DXRAM Datenbank, dann Snapshot, dann Kompression
-- Ignite: YARN gar nicht nutzen, RegionServer zu DXRAM App umschreiben?
-- DXNET und DXRAM: IDL für Objekte, die sich nur aus elementaren Datentypen und Arrays (max. Länge) zusammensetzen
 
-Nichts ist nerviger, als 3 Wrapper für 3 Systeme in beide Richtungen zu machen für jedes Objekt.
+## Idee 3
 
-## Stolpersteine: Prozess auf Block?
+Idee 3: HBase Replacement auf der Basis der Thrift Schnittstelle für einen Client.
 
-Ein `getBlock()` oder `setBlock()` ist in HDFS nicht zu finden! Arbeitet Hadoop
-primär mit mehreren Dateien, wo es mit `append()` im letzten Dateiblock arbeiten
-und macht dann ein kompliziertes `concat()` ?
+
+## Idee 3: DXRAM.Base
+
+**Pro**
+
+- kein Umweg über Implementierung eines Dateisystem oder Hadoop
+- vermutlich die effizienteste Art
+- Prozesssplittung von Hadoop losgelöst
+
+## Idee 3: DXRAM.Base
+
+**Contra**
+
+- unklar, wie HBase und Hadoop Community darauf reagiert
+- vermutlich wird man auf Hadoop nicht verzichten wollen
+
+Ist es einfacher HDFS oder HBase nachzuprogrammieren?
+
+## Idee 4
+
+Idee 4: Wie Ignite oder Alluxio eine Prozessverarbeitung vorbei an Hadoop
+konstruieren. Konkret: RegionServer ist eine DXRAM App.
+
+
+## Idee 4: DXRAM RegionServer
+
+**Pro**
+
+- Lösung auf HBase zugeschnitten
+- weniger Konflikte als bei einem HBase Replacement zu erwarten
+- kein Dateisystem, was zu implementieren wäre
+- evtl. nur eine minimale Anpassung nötig
+
+## Idee 4: DXRAM RegionServer
+
+**Contra**
+
+- tiefes Verständnis von HBase Quellcode nötig
+- HBase Updates muss man evtl. aufwändig einpflegen
+- kein Vorteil für andere Hadoop Projekte
+- unklar, ob RegionServer ganz von Hadoop trennbar ist
+
+
+## Wahl
+
+Die Wahl fiel auf die Lösung, wo HBase und Hadoop unberührt bleiben, und
+NUR eine HDFS kompatibler Connector beigefügt wird (Idee 1).
+
+
+# Umsetzung
+
+## Umsetzung
+
+- Connector in Hadoop nutzt DXNET um FS Operationen durchzuführen (CRUD)
+- DXRAM ist nicht in Hadoop
+- DxramFs App bietet Connector FS API an
+
+Projekt scheiterte primär an Debugging der Serialisierung reiner Attribut-Klassen. 
+
+
+## Umsetzung: Fail
+
+Grafik
+
+## Umsetzung: Serialisierung
+
+- Initialisierung, ändernde Größen bei Updates
+- gut wäre IDL wie bei Apache Thrift
+
+## Umsetzung: Schlauer sein
+
+Hinterher ist man schlauer: Anstatt multi-Peer und DXRAM Entwicklung
+auf zu schieben, wäre z.B. als erster Ansatz ein Multi-FTP Connector (aus dem bestehenden)
+gut gewesen. So hätte man Fragen des Prozesshandlings von HBase auf
+Basis von Hostnamen bereits ausprobieren können.
+
+## Umsetzung: Schlauer sein
+
+Unelegant: DXNET eigentlich nur zum Transfer auf dem selben Host genutzt,
+um zwischen Hadoop und DXRAM Infos austauschen zu lassen.
+
+## Umsetzung: Aktuell
+
+**Fertig:** FS Aufbau, Ordner Operationen
+
+## Umsetzung: Aktuell
+
+**Offen**
+
+- Fehler bei Chunk-Speicherung klären
+- Begonnen: create, open, flush, In- und OutStream 
+- kleiner Bugs (siehe Webseite)
+- Handling von Mehrfachanfragen
+- Chunk sperren, Hadoop Unittests
+- Tests mit MapReduce, Hadoop Multinode, HBase
+- Performance Tests
 
 # Fazit
 
