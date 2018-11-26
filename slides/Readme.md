@@ -1,4 +1,8 @@
-# HBase auf DXRAM
+# Motivation
+
+## Motivation
+
+**Motivation**
 
 ## DXRAM benutzen
 
@@ -6,24 +10,116 @@
 - zeigen, dass es echte Alternative sein kann
 - Popularität erhöhen
 
-## Beispiel: HBase
+## DXRAM benutzen
 
-- noSQL mit BASE statt ACID
-- RegionServer als Memory Cache
-- HDFS als langsame Persistenz-Schicht
-- Balance und Config wichtig (read, write, RAM, flush, compression)
+Idee: Einbindung in populäre verteilte Projekte
+
+- Hadoop
+- HBase
+
+(HBase nutzt Hadoop)
+
+
+## Exkurs Hadoop
+
+**Hadoop**
+
+## Exkurs Hadoop
+
+- begann mit HDFS 
+- optimal für große Dateien, gesplittet in große Blöcke
+- Blöcke verteilt über Datanodes
+- Replikate und Infrastruktur Infos (Namenode)
+- Prozessverwaltung (YARN) optimiert auf Blockverteilung
+
+## Exkurs Hadoop - Grafik
+
+
+
+
+
+## Exkurs HBase
+
+**Hbase**
+
+## Exkurs HBase
+
+- noSQL mit BASE statt ACID (SQL)
+- MemStore je Datanode
+- HDFS zur Persistenz
+- Balance und Config wichtig (read, write, RAM, flush, Kompression)
+- RegionServer: App in Hadoop
+
+## Exkurs HBase - Grafik
+
+
+
+
+
+
+## HBase und DXRAM
+
+
+**HBase und DXRAM ?**
+
+## HBase und DXRAM
+
+- HBase nutzt MemStore & BlockCache (RAM)
+- viel Aufwand für Persistenz und Compaction
+- NoSQL: warten auf Festplatte bedeutet Tod für Anwendung
 
 Warum nicht gleich DXRAM als verteilten Speicher nutzen?
 
-## Vergleich mit Ignite
+## HBase und DXRAM - Grafik
 
-- Ignite wie DXRAM verteilter Speicher
-- Ignite SQL: ACID und nicht BASE
-- Ignite nutzt auch HDFS als Persistenz-Schicht
-- Ignite und Hbase: Ignite FS Connector zu Hadoop
+
+
+
+
+# Wie machen es Andere?
+
+## Wie machen es Andere?
+
+Verteilter Speicher und Hadoop + HBase: **Wie machen es andere Projekte?**
+
+## Wie machen es Andere?
+
+Ignite:
+
+- verteilter Speicher (key-value)
+- hat SQL Erweiterung
+- eher Konkurrenz zu HBase
+- Hadoop FS Connector
+- HDFS zur Persistenz (SQL)
+
+## Ignite - Grafik
+
+
+
+
+
+## Wie machen es Andere?
+
+Alluxio:
+
+- Hadoop ,,Branch''
+- statt Scheme: mounten anderer FS in Alluxio
+- wie ein verteilter FS Cache
+- Hadoop FS Connector
+- etwas Schräg: HBase nutzen bedeutet quasi 2 Hadoops
+- eigener RegionServer für Alluxio(?)
+
+
+## Alluxio - Grafik
+
+
 
 
 # Lösungswege
+
+## Lösungswege
+
+**Lösungswege DXRAM in Hadoop und HBase zu nutzen**
 
 ## Idee 1
 
@@ -119,6 +215,10 @@ Die Wahl fiel auf die Lösung, wo HBase und Hadoop unberührt bleiben, und
 NUR eine HDFS kompatibler Connector beigefügt wird (Idee 1).
 
 
+
+
+
+
 # Umsetzung
 
 ## Umsetzung
@@ -133,6 +233,10 @@ Projekt scheiterte primär an Debugging der Serialisierung reiner Attribut-Klass
 ## Umsetzung: Fail
 
 Grafik
+
+
+
+
 
 ## Umsetzung: Serialisierung
 
@@ -167,20 +271,34 @@ um zwischen Hadoop und DXRAM Infos austauschen zu lassen.
 - Tests mit MapReduce, Hadoop Multinode, HBase
 - Performance Tests
 
+
+
+
+
+
 # Fazit
 
 ## Fazit
 
-Hadoops Prozess- bzw. Ressourcen-Management ist zu stark an HDFS und dessen
-Blockverteilung gekoppelt! Ignite und Alluxio konstruierten daher auch
-ein Replacement! Außerdem: Ist es nicht leichter HBase mit DXRAM nachzubauen, anstatt 
-DXRAM zu einem verteilten Dateisystem zu machen?
+**Fazit**
+
+## Fazit
+
+- YARN zu stark an HDFS und Blockverteilung gekoppelt! 
+- Ignite & Alluxio: YARN Replacement
+- Key-Value Store: HDFS nachbauen schwerer, als Datenbank nachbauen?
+
+## Fazit
+
+- YARN zu stark an HDFS und Blockverteilung gekoppelt! 
+- Ignite & Alluxio: YARN Replacement
+- Key-Value Store: HDFS nachbauen schwerer, als Datenbank nachbauen?
 
 Vermutlich Ja. **-> Apache Thrift**
 
 ## Fazit
 
-Aber: Alle von mir gefundenen Projekte werben mit einer EINBINDUNG in Hadoop,
-nicht aber mit einem ERSATZ. Ein art **DXRAM.Base** wäre aber sogar ein HBase Ersatz!
-Konkrete Anwendungsfälle, wo auf Hadoop bei Verwendung von HBase verzichtet
-werden kann, sollten in Zukunft gesucht werden.
+Aber: Jeder wirbt auch mit *EINBINDUNG* in Hadoop, nicht mit *ERSATZ*. 
+
+To Do: Anwendungsfälle finden, wo auf Hadoop & HBase Replacement sinnvoll ist.
+
