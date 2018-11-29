@@ -442,7 +442,7 @@ damit nicht laufen. Man erhielt immer wieder die Meldung ...
 Auch wenn dieser Fehler nicht darauf hindeutet, waren zwei Dinge bis dahin noch offen:
 
 -   das Fake-Dateisystem hatte bis dahin kein `append()` implementiert, welches HBase braucht.
--   es ist unklar, ob das Fake-Dateisystem ähnlich wie bei Hadoop in der Config und als jar-File bei HBase hinterlegt werden muss.
+-   es ist unklar, ob das Fake-Dateisystem ähnlich wie bei Hadoop in der Config und als jar-File bei HBase hinterlegt werden muss.^[29.11.2018: Ja, muss es wohl. In der Dokumentation von Alluxio findet sich ein entsprechender Eintrag in `hbase-site.xml`, wo der Alluxio FS Connector eingebunden wird.]
 
 
 An dieser Stelle wurde im Projekt ein Schnitt gemacht und sich nur noch auf Mapreduce als Mindest-Applikation konzentriert.

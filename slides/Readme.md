@@ -65,6 +65,7 @@ Idee: Einbindung in populäre verteilte Projekte
 ## HBase und DXRAM
 
 - HBase nutzt MemStore & BlockCache (RAM)
+- WAL: put landet zuerst in HDFS (append), dann im RAM
 - viel Aufwand für Persistenz und Compaction
 - NoSQL: warten auf Festplatte bedeutet Tod für Anwendung
 
