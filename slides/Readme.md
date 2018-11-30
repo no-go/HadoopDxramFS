@@ -38,6 +38,12 @@ Idee: Einbindung in populäre verteilte Projekte
 
 
 
+
+
+
+
+
+
 ## Exkurs HBase
 
 **Hbase**
@@ -51,6 +57,12 @@ Idee: Einbindung in populäre verteilte Projekte
 - RegionServer: App in Hadoop
 
 ## Exkurs HBase - Grafik
+
+
+
+
+
+
 
 
 
@@ -72,6 +84,14 @@ Idee: Einbindung in populäre verteilte Projekte
 Warum nicht gleich DXRAM als verteilten Speicher nutzen?
 
 ## HBase und DXRAM - Grafik
+
+
+
+
+
+
+
+
 
 
 
@@ -99,6 +119,13 @@ Ignite:
 
 
 
+
+
+
+
+
+
+
 ## Wie machen es Andere?
 
 Alluxio:
@@ -112,6 +139,14 @@ Alluxio:
 
 
 ## Alluxio - Grafik
+
+
+
+
+
+
+
+
 
 
 
@@ -220,38 +255,54 @@ NUR eine HDFS kompatibler Connector beigefügt wird (Idee 1).
 
 
 
+
+
+
+
+
+
+
+
+
+
 # Umsetzung
 
 ## Umsetzung
 
-- Connector in Hadoop nutzt DXNET um FS Operationen durchzuführen (CRUD)
-- DXRAM ist nicht in Hadoop
-- DxramFs App bietet Connector FS API an
+- DxramFs App: stellt Chunks als Blöcke in einem FS dar
+- DXNET: für RPC und Datentransport
+- DxramFs Connector in Hadoop: nutzt DXNET
+- DXRAM bleibt losgelößt von Hadoop
 
 Projekt scheiterte primär an Debugging der Serialisierung reiner Attribut-Klassen. 
 
 
-## Umsetzung: Fail
+## Umsetzung: Fail 1
 
-Grafik
-
-
-
-
+![Ohne Wrapper oder Generierung](fig/structUgly.png)
 
 ## Umsetzung: Serialisierung
 
 - Initialisierung, ändernde Größen bei Updates
 - gut wäre IDL wie bei Apache Thrift
 
-## Umsetzung: Schlauer sein
+## Umsetzung: Wunsch
 
-Hinterher ist man schlauer: Anstatt multi-Peer und DXRAM Entwicklung
-auf zu schieben, wäre z.B. als erster Ansatz ein Multi-FTP Connector (aus dem bestehenden)
+![Mit Generierung](fig/structAPI.png)
+
+
+## Umsetzung: Fail 2
+
+Fehler Nr. 2: Aufschieben von Multipeer-Umgebung
+
+## Umsetzung: Multipeer
+
+Anstatt Multipeer und DXRAM Entwicklung
+auf zu schieben, wäre z.B. als erster Ansatz ein **Multi-FTP Connector** (aus dem bestehenden)
 gut gewesen. So hätte man Fragen des Prozesshandlings von HBase auf
 Basis von Hostnamen bereits ausprobieren können.
 
-## Umsetzung: Schlauer sein
+## Umsetzung: DXNET Transport
 
 Unelegant: DXNET eigentlich nur zum Transfer auf dem selben Host genutzt,
 um zwischen Hadoop und DXRAM Infos austauschen zu lassen.
@@ -271,11 +322,6 @@ um zwischen Hadoop und DXRAM Infos austauschen zu lassen.
 - Chunk sperren, Hadoop Unittests
 - Tests mit MapReduce, Hadoop Multinode, HBase
 - Performance Tests
-
-
-
-
-
 
 # Fazit
 
