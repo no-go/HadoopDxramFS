@@ -331,3 +331,14 @@ Aber: Jeder wirbt auch mit *EINBINDUNG* in Hadoop, nicht mit *ERSATZ*.
 
 To Do: Anwendungsfälle finden, wo auf Hadoop & HBase Replacement sinnvoll ist.
 
+## Fragen
+
+Fragen?
+
+## Fragen
+
+Danke :o)
+
+## Quellen
+
+Im Grunde ist alles auf [no-go.github.io/HadoopDxramFS](https://no-go.github.io/HadoopDxramFS).
