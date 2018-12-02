@@ -36,7 +36,7 @@ Idee: Einbindung in populäre verteilte Projekte
 
 
 
-
+![Hadoop Skizze](fig/hadoop.png)
 
 
 
