@@ -2,8 +2,6 @@
 
 ## Motivation
 
-**Motivation**
-
 ## DXRAM benutzen
 
 - Einbindung in andere Software ausprobieren
@@ -34,14 +32,7 @@ Idee: Einbindung in populäre verteilte Projekte
 
 ## Exkurs Hadoop - Grafik
 
-
-
 ![Hadoop Skizze](fig/hadoop.png)
-
-
-
-
-
 
 
 ## Exkurs HBase
@@ -51,20 +42,14 @@ Idee: Einbindung in populäre verteilte Projekte
 ## Exkurs HBase
 
 - noSQL mit BASE statt ACID (SQL)
-- MemStore je Datanode
+- RAM und WAL je Node
 - HDFS zur Persistenz
 - Balance und Config wichtig (read, write, RAM, flush, Kompression)
 - RegionServer: App in Hadoop
 
 ## Exkurs HBase - Grafik
 
-
-
-
-
-
-
-
+![HBase Skizze](fig/hbase.png)
 
 
 
@@ -77,21 +62,11 @@ Idee: Einbindung in populäre verteilte Projekte
 ## HBase und DXRAM
 
 - HBase nutzt MemStore & BlockCache (RAM)
-- WAL: put landet zuerst in HDFS (append), dann im RAM
+- WAL: ACK erst, nachdem in HDFS geschrieben
 - viel Aufwand für Persistenz und Compaction
 - NoSQL: warten auf Festplatte bedeutet Tod für Anwendung
 
 Warum nicht gleich DXRAM als verteilten Speicher nutzen?
-
-## HBase und DXRAM - Grafik
-
-
-
-
-
-
-
-
 
 
 
@@ -101,7 +76,9 @@ Warum nicht gleich DXRAM als verteilten Speicher nutzen?
 
 ## Wie machen es Andere?
 
-Verteilter Speicher und Hadoop + HBase: **Wie machen es andere Projekte?**
+Verteilter Speicher und Hadoop + HBase:
+
+**Wie machen es andere Projekte?**
 
 ## Wie machen es Andere?
 
@@ -111,7 +88,7 @@ Ignite:
 - hat SQL Erweiterung
 - eher Konkurrenz zu HBase
 - Hadoop FS Connector
-- HDFS zur Persistenz (SQL)
+- WAL: HDFS zur Persistenz (SQL) optional
 
 ## Ignite - Grafik
 
@@ -135,8 +112,8 @@ Alluxio:
 - wie ein verteilter FS Cache
 - Hadoop FS Connector
 - etwas Schräg: HBase nutzen bedeutet quasi 2 Hadoops
-- eigener RegionServer für Alluxio(?)
-
+- Under Storage: lokale Hard Disk
+- Persistenz optional im FS
 
 ## Alluxio - Grafik
 
@@ -157,29 +134,38 @@ Alluxio:
 
 **Lösungswege DXRAM in Hadoop und HBase zu nutzen**
 
+
 ## Idee 1
 
-Idee 1: DXRAM auch als verteiltes Dateisystem anbieten und
-Connector für Hadoop machen.
+Wie Ignite oder Alluxio eine Prozessverarbeitung vorbei an Hadoop
+konstruieren. Konkret: RegionServer ist eine DXRAM App.
 
-## Idee 1: DxramFs Connector
+![](fig/idea1.png)
+
+## Idee 1: DXRAM RegionServer
 
 **Pro**
 
-- Anwender muss auf HBase und Hadoop Seite nichts umprogrammieren
-- alle Hadoop Anwendungen können es nutzen
-- Host basierte Prozesssplittung durch Hadoop ist möglich
+- Lösung auf HBase zugeschnitten
+- weniger Konflikte als bei einem HBase Replacement zu erwarten
+- kein Dateisystem, was zu implementieren wäre
+- evtl. nur eine minimale Anpassung nötig
 
-## Idee 1: DxramFs Connector
+## Idee 1: DXRAM RegionServer
 
 **Contra**
 
-Mal eben HDFS nach programmieren :o/
-
+- tiefes Verständnis von HBase Quellcode nötig
+- HBase Updates muss man evtl. aufwändig einpflegen
+- kein Vorteil für andere Hadoop Projekte
+- unklar, ob RegionServer ganz von Hadoop trennbar ist
 
 ## Idee 2
 
-Idee 2: DXRAM zu einem mountfähigen Medium machen mit `libfuse`.
+DXRAM zu einem mountfähigen Medium machen mit `libfuse`.
+
+![](fig/idea2.png)
+
 
 ## Idee 2: mount DxramFs
 
@@ -195,12 +181,14 @@ Idee 2: DXRAM zu einem mountfähigen Medium machen mit `libfuse`.
 - Verteilung der Daten unklar
 - Hadoop weiss echten Speicherort nicht mehr
 - Performance Probleme bei libfuse
-- auch hier muss ein Verteiltes Dateisystem Programmiert werden
+- auch hier muss ein verteiltes Dateisystem programmiert werden
 
 
 ## Idee 3
 
-Idee 3: HBase Replacement auf der Basis der Thrift Schnittstelle für einen Client.
+HBase Replacement auf der Basis der Thrift Schnittstelle für einen Client.
+
+![](fig/idea3.png)
 
 
 ## Idee 3: DXRAM.Base
@@ -218,49 +206,35 @@ Idee 3: HBase Replacement auf der Basis der Thrift Schnittstelle für einen Clie
 - unklar, wie HBase und Hadoop Community darauf reagiert
 - vermutlich wird man auf Hadoop nicht verzichten wollen
 
-Ist es einfacher HDFS oder HBase nachzuprogrammieren?
+Ist es einfacher HDFS oder HBase nach zuprogrammieren?
+
+
 
 ## Idee 4
 
-Idee 4: Wie Ignite oder Alluxio eine Prozessverarbeitung vorbei an Hadoop
-konstruieren. Konkret: RegionServer ist eine DXRAM App.
+DXRAM auch als verteiltes Dateisystem anbieten und
+Connector für Hadoop machen.
 
+![](fig/idea4.png)
 
-## Idee 4: DXRAM RegionServer
+## Idee 4: DxramFs Connector
 
 **Pro**
 
-- Lösung auf HBase zugeschnitten
-- weniger Konflikte als bei einem HBase Replacement zu erwarten
-- kein Dateisystem, was zu implementieren wäre
-- evtl. nur eine minimale Anpassung nötig
+- Anwender muss auf HBase und Hadoop Seite nichts umprogrammieren
+- alle Hadoop Anwendungen können es nutzen
+- Host basierte Prozesssplittung durch Hadoop ist möglich
 
-## Idee 4: DXRAM RegionServer
+## Idee 4: DxramFs Connector
 
 **Contra**
 
-- tiefes Verständnis von HBase Quellcode nötig
-- HBase Updates muss man evtl. aufwändig einpflegen
-- kein Vorteil für andere Hadoop Projekte
-- unklar, ob RegionServer ganz von Hadoop trennbar ist
-
+Mal eben HDFS nach programmieren :o/
 
 ## Wahl
 
 Die Wahl fiel auf die Lösung, wo HBase und Hadoop unberührt bleiben, und
-NUR eine HDFS kompatibler Connector beigefügt wird (Idee 1).
-
-
-
-
-
-
-
-
-
-
-
-
+NUR eine HDFS kompatibler Connector beigefügt wird (Idee 4).
 
 
 
@@ -273,6 +247,18 @@ NUR eine HDFS kompatibler Connector beigefügt wird (Idee 1).
 - DXNET: für RPC und Datentransport
 - DxramFs Connector in Hadoop: nutzt DXNET
 - DXRAM bleibt losgelößt von Hadoop
+
+
+
+## Umsetzung - Grafik
+
+
+![](fig/done.png)
+
+
+
+## Umsetzung :-(
+
 
 Projekt scheiterte primär an Debugging der Serialisierung reiner Attribut-Klassen. 
 
@@ -324,10 +310,6 @@ um zwischen Hadoop und DXRAM Infos austauschen zu lassen.
 - Performance Tests
 
 # Fazit
-
-## Fazit
-
-**Fazit**
 
 ## Fazit
 
