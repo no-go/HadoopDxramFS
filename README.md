@@ -162,6 +162,8 @@ not working:
 
 ### core-site.xml
 
+**Note 2018-12-03**: `hbase-site.xml` and the hbase libs needs a jar file and similar `fs.dxram.impl` configs, too!
+
 File `hadoop-2.8.2-src/hadoop-dist/target/hadoop-2.8.2/etc/hadoop/core-site.xml`
 
 ```xml

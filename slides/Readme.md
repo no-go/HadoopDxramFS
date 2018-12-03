@@ -289,7 +289,7 @@ um zwischen Hadoop und DXRAM Infos austauschen zu lassen.
 
 - Fehler bei Chunk-Speicherung klären
 - Begonnen: create, open, flush, In- und OutStream 
-- kleiner Bugs (siehe Webseite)
+- kleinere Bugs (siehe Webseite)
 - Handling von Mehrfachanfragen
 - Chunk sperren, Hadoop Unittests
 - Tests mit MapReduce, Hadoop Multinode, HBase
