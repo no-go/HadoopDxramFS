@@ -96,8 +96,6 @@ Ignite:
 
 
 
-
-
 ## Wie machen es Andere?
 
 Alluxio:
@@ -112,14 +110,7 @@ Alluxio:
 
 ## Alluxio - Grafik
 
-
-
-
-
-
-
-
-
+![](fig/alluxio.png)
 
 
 

@@ -1,8 +1,9 @@
 # NOW := $(shell date +"%c" | tr ' :' '__')
 #NOW := $(shell date +"%Y%m%d-%H%M")
-OUTFILE_TITLE = HBase auf DXRAM 
+OUTFILE_TITLE = Projektarbeit\: HBase auf DXRAM 
 OUTFILE_SUBTITLE = Einstiegspunkte für DXRAM in Hadoop \\\& HBase
-OUTFILE_AUTHOR = in Bearbeitung\!
+OUTFILE_AUTHOR = Jochen Peters
+#OUTFILE_AUTHOR = in Bearbeitung\!
 OUTFILE_INSTITUTE = Department of Computer Science \\\\ Heinrich-Heine-University Düsseldorf, Germany
 #OUTFILE = ./Slides.$(AUTHOR).$(NOW).pdf
 OUTFILE = Slides.pdf
