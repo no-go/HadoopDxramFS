@@ -92,12 +92,7 @@ Ignite:
 
 ## Ignite - Grafik
 
-
-
-
-
-
-
+![](fig/ignite.png)
 
 
 
