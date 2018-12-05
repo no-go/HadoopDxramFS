@@ -148,7 +148,7 @@ konstruieren. Konkret: RegionServer ist eine DXRAM App.
 
 ## Idee 2
 
-DXRAM zu einem mountfähigen Medium machen mit `libfuse`.
+DXRAM zu einem mountfähigen Medium machen mit `libfuse` (vergleichbar mit HDFS auf RAM-Drive)
 
 ![](fig/idea2.png)
 
@@ -157,7 +157,7 @@ DXRAM zu einem mountfähigen Medium machen mit `libfuse`.
 
 **Pro**
 
-- Anwender muss nicht umprogrammieren 
+- Anwender muss nichts umprogrammieren 
 - nicht nur Hadoop könnte das nutzen
 
 ## Idee 2: mount DxramFs
