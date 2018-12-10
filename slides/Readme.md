@@ -120,64 +120,14 @@ Alluxio:
 
 **Lösungswege DXRAM in Hadoop und HBase zu nutzen**
 
-
 ## Idee 1
-
-Wie Ignite oder Alluxio eine Prozessverarbeitung vorbei an Hadoop
-konstruieren. Konkret: RegionServer ist eine DXRAM App.
-
-![](fig/idea1.png)
-
-## Idee 1: DXRAM RegionServer
-
-**Pro**
-
-- Lösung auf HBase zugeschnitten
-- weniger Konflikte als bei einem HBase Replacement zu erwarten
-- kein Dateisystem, was zu implementieren wäre
-- evtl. nur eine minimale Anpassung nötig
-
-## Idee 1: DXRAM RegionServer
-
-**Contra**
-
-- tiefes Verständnis von HBase Quellcode nötig
-- HBase Updates muss man evtl. aufwändig einpflegen
-- kein Vorteil für andere Hadoop Projekte
-- unklar, ob RegionServer ganz von Hadoop trennbar ist
-
-## Idee 2
-
-DXRAM zu einem mountfähigen Medium machen mit `libfuse` (vergleichbar mit HDFS auf RAM-Drive)
-
-![](fig/idea2.png)
-
-
-## Idee 2: mount DxramFs
-
-**Pro**
-
-- Anwender muss nichts umprogrammieren 
-- nicht nur Hadoop könnte das nutzen
-
-## Idee 2: mount DxramFs
-
-**Contra**
-
-- Verteilung der Daten unklar
-- Hadoop weiss echten Speicherort nicht mehr
-- Performance Probleme bei libfuse
-- auch hier muss ein verteiltes Dateisystem programmiert werden
-
-
-## Idee 3
 
 HBase Replacement auf der Basis der Thrift Schnittstelle für einen Client.
 
 ![](fig/idea3.png)
 
 
-## Idee 3: DXRAM.Base
+## Idee 1: DXRAM.Base
 
 **Pro**
 
@@ -185,16 +135,57 @@ HBase Replacement auf der Basis der Thrift Schnittstelle für einen Client.
 - vermutlich die effizienteste Art
 - Prozesssplittung von Hadoop losgelöst
 
-## Idee 3: DXRAM.Base
+## Idee 1: DXRAM.Base
 
 **Contra**
 
 - unklar, wie HBase und Hadoop Community darauf reagiert
 - vermutlich wird man auf Hadoop nicht verzichten wollen
 
-Ist es einfacher HDFS oder HBase nach zuprogrammieren?
+
+## Idee 2
+
+RegionServer RAM zugriff durch DXRAM ersetzen.
+
+![](fig/idea1.png)
+
+## Idee 2: DXRAM RegionServer
+
+**Pro**
+
+- Lösung auf HBase zugeschnitten
+- kein Dateisystem, was zu implementieren wäre
+- HBase Anwendungen brauchen nicht umprogrammiert werden
+
+## Idee 2: DXRAM RegionServer
+
+**Contra**
+
+- tiefes Verständnis von HBase Quellcode nötig
+- HBase Updates muss man evtl. aufwändig einpflegen
+- kein Vorteil für allgemeine Hadoop Projekte
+
+## Idee 3
+
+DXRAM zu einem mountfähigen Medium machen mit `libfuse` (vergleichbar mit HDFS auf RAM-Drive)
+
+![](fig/idea2.png)
 
 
+## Idee 3: mount DxramFs
+
+**Pro**
+
+- Anwender muss nichts umprogrammieren 
+- nicht nur Hadoop könnte das nutzen
+
+## Idee 3: mount DxramFs
+
+**Contra**
+
+- Prozessverteilung: YARN weiss echten Speicherort nicht mehr
+- Performance Probleme bei libfuse
+- hier muss ein komplettes verteiltes Dateisystem programmiert werden
 
 ## Idee 4
 
