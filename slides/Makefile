@@ -1,7 +1,7 @@
 # NOW := $(shell date +"%c" | tr ' :' '__')
 #NOW := $(shell date +"%Y%m%d-%H%M")
 OUTFILE_TITLE = Project report\: Entry Points for DXRAM in Hadoop \\\& HBase
-OUTFILE_SUBTITLE = To get or to become a part of the Hadoop tart
+OUTFILE_SUBTITLE = To Get or To Become a Part of the Hadoop Tart
 OUTFILE_AUTHOR = Jochen Peters
 #OUTFILE_AUTHOR = in Bearbeitung\!
 OUTFILE_INSTITUTE = Department of Computer Science \\\\ Heinrich-Heine-University Düsseldorf, Germany

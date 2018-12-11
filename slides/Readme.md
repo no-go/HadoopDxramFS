@@ -1,6 +1,6 @@
 # Motivation
 
-## Motivation
+## To Get or To Become a Part of the Hadoop Tart
 
 ![](fig/introtart.png)
 
@@ -17,7 +17,7 @@ Idea: become a part of a popular project
 - Hadoop
 - HBase
 
-Vision: remove HDFS access in HBase by DXRAM
+Big Vision: remove HDFS access in HBase by DXRAM
 
 
 ## Excursion Hadoop
@@ -27,10 +27,10 @@ Vision: remove HDFS access in HBase by DXRAM
 ## Excursion Hadoop
 
 - starts with HDFS: split big files into big blocks
-- block maybe replicated
+- a block maybe replicated
 - Namenode: stores Blocklocations and infrastructure info
-- MapReduce: split Job into Tasks on blocks
-- becomes more and more a Processhandling "ecosystem"
+- MapReduce: split *Job* into *Tasks* on blocks
+- becomes more and more a process handling "ecosystem" (YARN)
 
 Run Task where data block is stored. 
 
@@ -45,11 +45,11 @@ Run Task where data block is stored.
 
 ## Excursion HBase
 
-- noSQL mit BASE statt ACID (SQL)
-- RAM und WAL je Node
-- HDFS zur Persistenz
-- Balance und Config wichtig (read, write, RAM, flush, Kompression)
-- RegionServer: App in Hadoop
+- noSQL with BASE and not ACID (SQL)
+- store in RAM, but a WAL for persistance 
+- HDFS for WAL and flushes
+- hard to balance (optimal for read OR write)
+- each node has some RegionServer (handle key region for each column family)
 
 ## Exkurs HBase - Sketch
 
@@ -58,41 +58,42 @@ Run Task where data block is stored.
 
 
 
-## HBase und DXRAM
+## HBase and DXRAM
 
 
-**HBase und DXRAM ?**
+**HBase and DXRAM ?**
 
-## HBase und DXRAM
+## HBase and DXRAM
 
-- HBase nutzt MemStore & BlockCache (RAM)
-- WAL: ACK erst, nachdem in HDFS geschrieben
-- viel Aufwand für Persistenz und Compaction
-- NoSQL: warten auf Festplatte bedeutet Tod für Anwendung
+- HBase uses MemStore & BlockCache (RAM)
+- WAL: does an ACK after writing change to HDFS 
+- big focus on persistence and data compaction
+- NoSQL: waiting for hard disk on writing? any benefit to normal SQL?
 
-Warum nicht gleich DXRAM als verteilten Speicher nutzen?
-
-
+Why not using DXRAM as distributed RAM instead of harddisk, WAL and compaction processes?
 
 
 
-# Wie machen es Andere?
 
-## Wie machen es Andere?
 
-Verteilter Speicher und Hadoop + HBase:
+# Other Hadoop friendly RAM stores
 
-**Wie machen es andere Projekte?**
+## Other Hadoop friendly RAM stores
 
-## Wie machen es Andere?
+Distributed Memory and Hadoop + HBase:
+
+**How does other projects handle this?**
+
+## Other Hadoop friendly RAM stores
 
 Ignite:
 
-- verteilter Speicher (key-value)
-- hat SQL Erweiterung
-- eher Konkurrenz zu HBase
-- Hadoop FS Connector
-- WAL: HDFS zur Persistenz (SQL) optional
+- distributed key-value storage
+- has an optional SQL engine
+- sees itself as a competition to HBase
+- optional WAL for recovery: local FS
+- has a Hadoop FS Connector `igfs://`
+- optional `igfs` persistence: `hdfs://`
 
 ## Ignite - Grafik
 
@@ -100,17 +101,17 @@ Ignite:
 
 
 
-## Wie machen es Andere?
+## Other Hadoop friendly RAM stores
 
 Alluxio:
 
-- Hadoop ,,Branch''
-- statt Scheme: mounten anderer FS in Alluxio
-- wie ein verteilter FS Cache
-- Hadoop FS Connector
-- etwas Schräg: HBase nutzen bedeutet quasi 2 Hadoops
-- Under Storage: lokale Hard Disk
-- Persistenz optional im FS
+ -  Code looks like a Hadoop ,,Branch''
+ -  instead of Hadoop Scheme: mount into `alluxio://tree`
+ -  can work as a distributed FS cache
+ -  persistence is an optional FS feature
+     -  Under Storage: local FS
+ -  has a Hadoop FS Connector
+ -  FS Connector usable in HBase, too
 
 ## Alluxio - Grafik
 
@@ -118,207 +119,207 @@ Alluxio:
 
 
 
-# Lösungswege
+# Approaches
 
-## Lösungswege
+## Approaches
 
-**Lösungswege DXRAM in Hadoop und HBase zu nutzen**
+**Solutions to use DXRAM in Hadoop and HBase**
 
-## Idee 1
+## I: DXRAM.Base
 
-HBase Replacement auf der Basis der Thrift Schnittstelle für einen Client.
+HBase Replacement based on the Thrift IDL for HBase Clients
 
-![](fig/idea3.png)
-
-
-## Idee 1: DXRAM.Base
-
-**Pro**
-
-- kein Umweg über Implementierung eines Dateisystem oder Hadoop
-- vermutlich die effizienteste Art
-- Prozesssplittung von Hadoop losgelöst
-
-## Idee 1: DXRAM.Base
-
-**Contra**
-
-- unklar, wie HBase und Hadoop Community darauf reagiert
-- vermutlich wird man auf Hadoop nicht verzichten wollen
+![](fig/replacement.png)
 
 
-## Idee 2
-
-RegionServer RAM zugriff durch DXRAM ersetzen.
-
-![](fig/idea1.png)
-
-## Idee 2: DXRAM RegionServer
+## I: DXRAM.Base
 
 **Pro**
 
-- Lösung auf HBase zugeschnitten
-- kein Dateisystem, was zu implementieren wäre
-- HBase Anwendungen brauchen nicht umprogrammiert werden
+- maximal freedom to implement this
+- maybe the most efficient way
+- Hadoop independent
 
-## Idee 2: DXRAM RegionServer
+## I: DXRAM.Base
 
 **Contra**
 
-- tiefes Verständnis von HBase Quellcode nötig
-- HBase Updates muss man evtl. aufwändig einpflegen
-- kein Vorteil für allgemeine Hadoop Projekte
-
-## Idee 3
-
-DXRAM zu einem mountfähigen Medium machen mit `libfuse` (vergleichbar mit HDFS auf RAM-Drive)
-
-![](fig/idea2.png)
+- unclear how HBase and the Hadoop community react to it
+- the community may not want renounce Hadoop
+- other Hadoop projects have low benefit from it
 
 
-## Idee 3: mount DxramFs
+## II: RegionServer Mod
+
+RegionServer RAM access modified with DXRAM stuff.
+
+![](fig/regionserverMod.png)
+
+## II: RegionServer Mod
 
 **Pro**
 
-- Anwender muss nichts umprogrammieren 
-- nicht nur Hadoop könnte das nutzen
+- optimized for HBase
+- Hadoop independent
+- maybe better compatibility than a complete HBase replacement
 
-## Idee 3: mount DxramFs
+## II: RegionServer Mod
 
 **Contra**
 
-- Prozessverteilung: YARN weiss echten Speicherort nicht mehr
-- Performance Probleme bei libfuse
-- hier muss ein komplettes verteiltes Dateisystem programmiert werden
+- deep know-how about code and HBase procedures necessary
+- HBase Updates got in trouble
+- other Hadoop projects have low benefit from it
 
-## Idee 4
+## III: Mounting DXRAM
 
-DXRAM auch als verteiltes Dateisystem anbieten und
-Connector für Hadoop machen.
+Mount DXRAM as RAM-Drive with `libfuse`
 
-![](fig/idea4.png)
+![](fig/mountable.png)
 
-## Idee 4: DxramFs Connector
+
+## III: Mounting DXRAM
 
 **Pro**
 
-- Anwender muss auf HBase und Hadoop Seite nichts umprogrammieren
-- alle Hadoop Anwendungen können es nutzen
-- Host basierte Prozesssplittung durch Hadoop ist möglich
+- No HBase or Hadoop code have to been changed or added
+- effect on all projects, using local FS for persistance and recovery
 
-## Idee 4: DxramFs Connector
+## III: Mounting DXRAM
 
 **Contra**
 
-Mal eben HDFS nach programmieren :o/
+- Hadoop loses information about block locations. Host based Task splitting inpossible
+- Performance leaks with `libfuse`
+- a bit complicated: build a NFS like filesystem with distributed block location
 
-## Wahl
+## IV: DXRAM FS Connector
 
-Die Wahl fiel auf die Lösung, wo HBase und Hadoop unberührt bleiben, und
-NUR eine HDFS kompatibler Connector beigefügt wird (Idee 4).
+Like Ignite and Alluxio: build a DXRAM FS Connector.
+
+![](fig/dxramconnector.png)
+
+## IV: DXRAM FS Connector
+
+**Pro**
+
+- Modular addable to HBase and Hadoop
+- benefit for all Hadoop projects without modifications
+- Hadoops Host based Task splitting is possible
+
+## IV: DXRAM FS Connector
+
+**Contra**
+
+Big Milestones:
+
+- build a FS based on DXRAM
+- make FS similar to the block based HDFS
+- transport data from DXRAM Application to an alien like Hadoop
+
+## Election
+
+The choice fell on the DXRAM FS Connector, because it offers the widest range of uses.
+
+# Implementation
+
+## Implementation
+
+- DxramFs App: Chunks are similar to blocks
+- DXNET: RPC and data transport
+- DxramFs Connector: Hadoop uses DXNET
+- DXRAM not part of HBase or Hadoop
 
 
 
-
-# Umsetzung
-
-## Umsetzung
-
-- DxramFs App: stellt Chunks als Blöcke in einem FS dar
-- DXNET: für RPC und Datentransport
-- DxramFs Connector in Hadoop: nutzt DXNET
-- DXRAM bleibt losgelößt von Hadoop
-
-
-
-## Umsetzung - Grafik
+## Implementation - Sketch
 
 
 ![](fig/done.png)
 
 
 
-## Umsetzung :-(
+## Implementation :-(
 
 
-Projekt scheiterte primär an Debugging der Serialisierung reiner Attribut-Klassen. 
+Project failed primarily because of debugging effort in serializing pure attribute classes. 
 
 
-## Umsetzung: Fail 1
+## Implementation: Fail 1
 
 ![wihout wrapper or preprocessing](fig/structUgly.png)
 
-## Umsetzung: Serialisierung
+## Implementation: Fail 1
 
-- Initialisierung, ändernde Größen bei Updates
-- gut wäre IDL wie bei Apache Thrift
+- inital values, different size with new data
+- a IDL like Apache Thrift would be nice
 
-## Umsetzung: Wunsch
+## DXRAM feature request
 ![with preprocessing](fig/structAPI.png)
 
 
-## Umsetzung: Fail 2
+## Implementation: Fail 2
 
-Fehler Nr. 2: Aufschieben von Multipeer-Umgebung
+The next mistake: slicing up the multipeer use-case
 
-## Umsetzung: Multipeer
+## Implementation: Fail 2
 
-Anstatt Multipeer und DXRAM Entwicklung
-auf zu schieben, wäre z.B. als erster Ansatz ein **Multi-FTP Connector** (aus dem bestehenden)
-gut gewesen. So hätte man Fragen des Prozesshandlings von HBase auf
-Basis von Hostnamen bereits ausprobieren können.
+Single peer on localhost is a bad testing scene:
 
-## Umsetzung: DXNET Transport
+- Questions about an Alien Node to DXRAM Node mapping answered to late
+- Hadoop Task splitting still not tested
+- errors caused by wrong stored Chunks occours next to project end
 
-Unelegant: DXNET eigentlich nur zum Transfer auf dem selben Host genutzt,
-um zwischen Hadoop und DXRAM Infos austauschen zu lassen.
+Instead of building a local FS connector as a first test, I should have better
+converted the Hadoop FTP connector to Multipeer szenario.
 
-## Umsetzung: Aktuell
+## Implementation: DXNET Transport
 
-**Fertig:** FS Aufbau, Ordner Operationen
+Is it optimal? Hadoop transfer jobs to local data, thus DXNET doing
+network traffic just on localhost.
 
-## Umsetzung: Aktuell
+## Implementation: Now
 
-**Offen**
+**Finished:** FS structure, operations on direcorties
 
-- Fehler bei Chunk-Speicherung klären
-- Begonnen: create, open, flush, In- und OutStream 
-- kleinere Bugs (siehe Webseite)
-- Handling von Mehrfachanfragen
-- Chunk sperren, Hadoop Unittests
-- Tests mit MapReduce, Hadoop Multinode, HBase
-- Performance Tests
+## Implementation: Now
 
-# Fazit
+**still open**
 
-## Fazit
+- bugs on storing and sharing chunks between peers
+- starting with: `create`, `open`, `flush`, `In-` and `OutStream`
+- small bugs in copy and rename (see website)
+- big FS contents, really big file handling
+- handling multiple DXNET RPCalls
 
-- YARN zu stark an HDFS und Blockverteilung gekoppelt! 
-- Ignite & Alluxio: YARN Replacement
-- Key-Value Store: HDFS nachbauen schwerer, als Datenbank nachbauen?
+## Implementation: Now
 
-## Fazit
+**far away**
 
-- YARN zu stark an HDFS und Blockverteilung gekoppelt! 
-- Ignite & Alluxio: YARN Replacement
-- Key-Value Store: HDFS nachbauen schwerer, als Datenbank nachbauen?
+- ATOMar FS access, Hadoop unit tests
+- test with MapReduce and HBase code examples
+- performance tests
 
-Vermutlich Ja. **-> Apache Thrift**
+# Conclusion
 
-## Fazit
+## Conclusion
 
-Aber: Jeder wirbt auch mit *EINBINDUNG* in Hadoop, nicht mit *ERSATZ*. 
+- Ignite & Alluxio: Doing a YARN replacement
+- Hadoop ecosystem is too close to HDFS block handling
+- Is it easier to build a distributed noSQL Database than a distributed FS with an key-value store?!
 
-To Do: Anwendungsfälle finden, wo auf Hadoop & HBase Replacement sinnvoll ist.
+## Conclusion
 
-## Fragen
+BUT: **nobody** advertises to **replace** HBase or Hadoop, but to be able to **cooperate** with them.
 
-Fragen?
+## Questions
 
-## Fragen
+Questions?
 
-Danke :o)
+## Questions
 
-## Quellen
+Thank you for your attention.
 
-Im Grunde ist alles auf [no-go.github.io/HadoopDxramFS](https://no-go.github.io/HadoopDxramFS).
+## References
+
+You got everything on [no-go.github.io/HadoopDxramFS](https://no-go.github.io/HadoopDxramFS).
