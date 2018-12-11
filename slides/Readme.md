@@ -2,44 +2,48 @@
 
 ## Motivation
 
-## DXRAM benutzen
+![](fig/introtart.png)
 
-- Einbindung in andere Software ausprobieren
-- zeigen, dass es echte Alternative sein kann
-- Popularität erhöhen
+## DXRAM usage
 
-## DXRAM benutzen
+- join to other popular Distrubuted Systems
+- DXRAM as alternative storage system
+- enlarge DXRAM popularity
 
-Idee: Einbindung in populäre verteilte Projekte
+## DXRAM usage
+
+Idea: become a part of a popular project
 
 - Hadoop
 - HBase
 
-(HBase nutzt Hadoop)
+Vision: remove HDFS access in HBase by DXRAM
 
 
-## Exkurs Hadoop
+## Excursion Hadoop
 
 **Hadoop**
 
-## Exkurs Hadoop
+## Excursion Hadoop
 
-- begann mit HDFS 
-- optimal für große Dateien, gesplittet in große Blöcke
-- Blöcke verteilt über Datanodes
-- Replikate und Infrastruktur Infos (Namenode)
-- Prozessverwaltung (YARN) optimiert auf Blockverteilung
+- starts with HDFS: split big files into big blocks
+- block maybe replicated
+- Namenode: stores Blocklocations and infrastructure info
+- MapReduce: split Job into Tasks on blocks
+- becomes more and more a Processhandling "ecosystem"
 
-## Exkurs Hadoop - Grafik
+Run Task where data block is stored. 
 
-![Hadoop Skizze](fig/hadoop.png)
+## Excursion Hadoop - Sketch
+
+![](fig/hadoop.png)
 
 
-## Exkurs HBase
+## Excursion HBase
 
 **Hbase**
 
-## Exkurs HBase
+## Excursion HBase
 
 - noSQL mit BASE statt ACID (SQL)
 - RAM und WAL je Node
@@ -47,9 +51,9 @@ Idee: Einbindung in populäre verteilte Projekte
 - Balance und Config wichtig (read, write, RAM, flush, Kompression)
 - RegionServer: App in Hadoop
 
-## Exkurs HBase - Grafik
+## Exkurs HBase - Sketch
 
-![HBase Skizze](fig/hbase.png)
+![](fig/hbase.png)
 
 
 
@@ -242,7 +246,7 @@ Projekt scheiterte primär an Debugging der Serialisierung reiner Attribut-Klass
 
 ## Umsetzung: Fail 1
 
-![Ohne Wrapper oder Generierung](fig/structUgly.png)
+![wihout wrapper or preprocessing](fig/structUgly.png)
 
 ## Umsetzung: Serialisierung
 
@@ -250,8 +254,7 @@ Projekt scheiterte primär an Debugging der Serialisierung reiner Attribut-Klass
 - gut wäre IDL wie bei Apache Thrift
 
 ## Umsetzung: Wunsch
-
-![Mit Generierung](fig/structAPI.png)
+![with preprocessing](fig/structAPI.png)
 
 
 ## Umsetzung: Fail 2
