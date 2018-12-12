@@ -280,7 +280,7 @@ network traffic just on localhost.
 
 ## Implementation: Now
 
-**Finished:** FS structure, operations on direcorties
+**Finished:** FS structure, operations on directories
 
 ## Implementation: Now
 
